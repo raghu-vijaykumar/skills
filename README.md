@@ -6,7 +6,7 @@ it needs.
 
 | Skill | Purpose |
 | --- | --- |
-| [youtube-channel-backup](youtube-channel-backup/SKILL.md) | Incremental YouTube channel backup into per-video folders, mirrored to Google Drive with rclone |
+| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: incremental backup of public/private/scheduled uploads to Google Drive, local drafts kept in sync, intro prepend, local pruning that never touches Drive, and retention/analytics reports |
 
 ## Install
 

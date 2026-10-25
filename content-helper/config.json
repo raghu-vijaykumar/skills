@@ -1,5 +1,5 @@
 {
-  "localRoot": "~/yt-backups",
+  "workspace": "C:\\workspace\\content",
   "remoteRoot": "gdrive:YouTubeBackups",
   "browser": "brave",
   "browserDebugPort": 9223,
@@ -11,7 +11,12 @@
       "name": "Out of Office Mode",
       "channelId": "UC-jjjJYPl8rlR029Aag5ZKw",
       "driveFolder": "gdrive:YouTubeBackups/out-of-office",
-      "includePrivate": true
+      "includePrivate": true,
+      "intro": "assets/intro.mp4",
+      "analytics": {
+        "provider": "api",
+        "credentials": "~/.config/content-helper/client_secret.json"
+      }
     }
   }
 }
