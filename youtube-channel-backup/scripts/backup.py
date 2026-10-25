@@ -14,7 +14,9 @@ import tempfile
 import time
 from pathlib import Path
 
-DEFAULT_CONFIG = Path.home() / ".config" / "youtube-channel-backup" / "config.json"
+SKILL_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CONFIG = SKILL_ROOT / "config.json"
+LOCAL_OVERRIDE = SKILL_ROOT / "config.local.json"
 ILLEGAL = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 SUFFIX_KIND = {
     "jpg": "thumbnail",
@@ -75,6 +77,19 @@ def config_template() -> dict:
     }
 
 
+def merge_config(base: dict, override: dict) -> dict:
+    for key, value in override.items():
+        if key == "channels" and isinstance(value, dict) and isinstance(base.get(key), dict):
+            for slug, channel in value.items():
+                if isinstance(channel, dict) and isinstance(base[key].get(slug), dict):
+                    base[key][slug].update(channel)
+                else:
+                    base[key][slug] = channel
+        else:
+            base[key] = value
+    return base
+
+
 def load_config(path: Path) -> dict:
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -82,6 +97,9 @@ def load_config(path: Path) -> dict:
         raise SystemExit(f"Created a config template at {path}\nEdit it, then run again.")
     with path.open(encoding="utf-8-sig") as fh:
         cfg = json.load(fh)
+    if path.resolve() == DEFAULT_CONFIG.resolve() and LOCAL_OVERRIDE.exists():
+        with LOCAL_OVERRIDE.open(encoding="utf-8-sig") as fh:
+            cfg = merge_config(cfg, json.load(fh))
     defaults = {"localRoot": str(Path.home() / "yt-backups"), "quality": "best",
                 "transfers": 2, "browser": "brave", "browserDebugPort": 9223,
                 "remoteRoot": cfg.get("remote", "gdrive:YouTubeBackups"),

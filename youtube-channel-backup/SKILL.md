@@ -39,17 +39,16 @@ challenge solver is needed (private and scheduled videos always need it).
 
 ## One-time setup
 
-1. Create the config and edit it:
+1. The config ships with the skill as `<skill>/config.json`, so the backup settings are
+   versioned next to the code. Check what is configured:
 
    ```powershell
    python scripts/backup.py --list
    ```
 
-   That writes `~/.config/youtube-channel-backup/config.json` on first run:
-
    ```json
    {
-     "localRoot": "C:\\Users\\raghu\\yt-backups",
+     "localRoot": "~/yt-backups",
      "remoteRoot": "gdrive:YouTubeBackups",
      "browser": "brave",
      "browserDebugPort": 9223,
@@ -84,6 +83,21 @@ challenge solver is needed (private and scheduled videos always need it).
 
    `driveFolder` is what decides where a channel lands on Drive, so any channel can map
    to an existing Drive folder without changing the script.
+
+   Machine-specific overrides go in `<skill>/config.local.json` (gitignored). It is
+   merged over `config.json` field by field, so a different laptop can change
+   `localRoot`, add a channel, or point a channel at another Drive folder without
+   dirtying the versioned file:
+
+   ```json
+   {
+     "localRoot": "D:/backups",
+     "channels": { "out-of-office": { "quality": "1080" } }
+   }
+   ```
+
+   Add channels directly in `config.json`; use `--config PATH` to run against a
+   completely different file.
 
 2. Create the rclone remote once (browser opens, approve access):
 

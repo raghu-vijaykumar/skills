@@ -1,0 +1,17 @@
+{
+  "localRoot": "~/yt-backups",
+  "remoteRoot": "gdrive:YouTubeBackups",
+  "browser": "brave",
+  "browserDebugPort": 9223,
+  "quality": "best",
+  "transfers": 2,
+  "includePrivate": true,
+  "channels": {
+    "out-of-office": {
+      "name": "Out of Office Mode",
+      "channelId": "UC-jjjJYPl8rlR029Aag5ZKw",
+      "driveFolder": "gdrive:YouTubeBackups/out-of-office",
+      "includePrivate": true
+    }
+  }
+}
