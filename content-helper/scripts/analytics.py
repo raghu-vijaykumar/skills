@@ -187,8 +187,11 @@ class ApiClient:
                 log(f"{vid}: retention unavailable ({exc})")
             collected[vid] = {"metrics": metrics, "retention": retention,
                               "source": "api"}
-            log(f"{vid}: {len(retention)} retention points, "
-                f"{metrics.get('views', '?')} views")
+            if metrics or retention:
+                log(f"{vid}: {len(retention)} retention points, "
+                    f"{metrics.get('views', '?')} views")
+            else:
+                log(f"{vid}: no analytics data yet (private, or uploaded under 72h ago)")
         return collected
 
 
