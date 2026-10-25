@@ -130,7 +130,8 @@ def run_stream(cmd: list[str], log: Log, echo: tuple[str, ...] = ()) -> int:
             log(line)
         elif any(token in line for token in echo):
             log(line)
-    return proc.wait()
+    code = proc.wait()
+    return code if code >= 0 else 1
 
 
 def yt_targets(targets: list[str], staging: Path, archive: Path, quality, log: Log,
@@ -283,7 +284,8 @@ def sync_to_drive(local: Path, remote: str, slug: str, transfers: int, log: Log)
     return run_stream(["rclone", "copy", str(local), f"{remote}/{slug}",
                        "--ignore-existing", "--transfers", str(transfers),
                        "--checkers", "8", "--drive-chunk-size", "64M",
-                       "--stats", "30s", "--stats-one-line"], log)
+                       "--stats", "30s", "--stats-one-line",
+                       "--exclude", "*.log", "--exclude", ".staging/**"], log)
 
 
 def scheduled_pass(slug: str, channel: dict, cfg: dict, args, root: Path, staging: Path,
@@ -401,4 +403,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
