@@ -50,22 +50,40 @@ challenge solver is needed (private and scheduled videos always need it).
    ```json
    {
      "localRoot": "C:\\Users\\raghu\\yt-backups",
-     "remote": "gdrive:YouTubeBackups",
+     "remoteRoot": "gdrive:YouTubeBackups",
      "browser": "brave",
      "browserDebugPort": 9223,
      "quality": "best",
      "transfers": 2,
+     "includePrivate": true,
      "channels": {
        "out-of-office": {
          "name": "Out of Office Mode",
          "channelId": "UC-jjjJYPl8rlR029Aag5ZKw",
-         "includeScheduled": true
+         "driveFolder": "gdrive:YouTubeBackups/out-of-office",
+         "includePrivate": true
+       },
+       "second-channel": {
+         "name": "My Other Channel",
+         "url": "https://www.youtube.com/@some-handle",
+         "driveFolder": "gdrive:SomeFolder/Second Channel",
+         "quality": "1080"
        }
      }
    }
    ```
 
-   `quality` accepts `best`, or a height cap such as `1080`.
+   Per-channel fields:
+
+   | Field | Meaning |
+   | --- | --- |
+   | `url` / `channelId` | where the channel lives; a `/channel/UC…`, `/@handle` or `UC…` id all work |
+   | `driveFolder` | exact rclone destination, e.g. `gdrive:SomeFolder/Second Channel`; defaults to `<remoteRoot>/<slug>` |
+   | `quality` | `best` or a height cap such as `1080`; falls back to the top-level value |
+   | `includePrivate` | include private, scheduled and unlisted uploads (`includeScheduled` is accepted as an alias) |
+
+   `driveFolder` is what decides where a channel lands on Drive, so any channel can map
+   to an existing Drive folder without changing the script.
 
 2. Create the rclone remote once (browser opens, approve access):
 
@@ -73,8 +91,6 @@ challenge solver is needed (private and scheduled videos always need it).
    rclone config create gdrive drive scope=drive
    rclone lsd gdrive:
    ```
-
-   The Drive folder is `remote` + channel slug, so `gdrive:YouTubeBackups/out-of-office`.
 
 ## Run
 
@@ -86,23 +102,28 @@ python scripts/backup.py --channel out-of-office
 | --- | --- |
 | `--channel SLUG` | one channel (default: every channel in the config) |
 | `--no-upload` | download and file locally only |
-| `--no-scheduled` | skip the Studio pass for scheduled/private uploads |
+| `--no-scheduled` | skip the Studio pass for private/scheduled/unlisted uploads |
 | `--cookies PATH` | use an existing cookies.txt instead of driving a browser |
 | `--keep-cookies` | keep the exported cookies file for debugging |
-| `--list` | show configured channels |
+| `--list` | show configured channels and their Drive folders |
+| `--resolve` | print the resolved `UC…` id for each channel |
 
-Adding a channel: append another entry under `channels` with a slug, display `name`,
-and the `UC…` id (channel page → About → Share channel → Copy channel ID).
+Adding a channel: append an entry under `channels` with a slug, `name`, a `url`
+(`https://www.youtube.com/@handle` is enough), and the `driveFolder` it should land in.
+`--resolve` confirms the id before the first run.
 
 ## How incrementality works
 
 - `archive.txt` (yt-dlp `--download-archive`) records every id that was downloaded.
   Re-runs skip those ids even if the API listing changes.
+- The Studio pass re-reads private/scheduled/unlisted rows on every run and downloads
+  only ids that are absent from `archive.txt`, so a video that was scheduled last week
+  and got published - or is still scheduled - is backed up exactly once.
 - `rclone copy --ignore-existing` uploads only files whose names are absent on Drive.
   Nothing is ever deleted on Drive, so a bad local state cannot destroy the backup.
 - `promote()` is idempotent: an existing per-video folder is reused, so partial runs
   converge instead of duplicating.
-- `keepLocal` is informational only; nothing prunes the local copy automatically.
+- Nothing prunes the local copy automatically; set `--no-upload` to run fully offline.
 
 ## Scheduled and private uploads
 
@@ -115,8 +136,8 @@ reads the truth from YouTube Studio instead:
 2. `scripts/studio_ids.py` opens the Studio *Videos* and *Shorts* tabs in that session,
    collects every row with its visibility, and exports the session cookies over the
    DevTools protocol (the browser decrypts them itself, so no DPAPI error).
-3. Missing `Scheduled`/`Private` ids are downloaded with those cookies, filed, and
-   uploaded.
+3. Ids missing from `archive.txt` that are `Scheduled`, `Private` or `Unlisted` are
+   downloaded with those cookies, filed, and uploaded.
 4. The browser is closed again and the temporary cookies file is removed.
 
 The browser is briefly closed during this pass; that is expected.

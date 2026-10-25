@@ -58,16 +58,18 @@ def sanitize(text: str, max_len: int = 90) -> str:
 def config_template() -> dict:
     return {
         "localRoot": str(Path.home() / "yt-backups"),
-        "remote": "gdrive:YouTubeBackups",
+        "remoteRoot": "gdrive:YouTubeBackups",
         "browser": "brave",
         "browserDebugPort": 9223,
         "quality": "best",
         "transfers": 2,
+        "includePrivate": True,
         "channels": {
-            "out-of-office": {
-                "name": "Out of Office Mode",
-                "channelId": "UC-jjjJYPl8rlR029Aag5ZKw",
-                "includeScheduled": True,
+            "example-channel": {
+                "name": "My Channel",
+                "url": "https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx",
+                "driveFolder": "gdrive:YouTubeBackups/My Channel",
+                "includePrivate": True,
             }
         },
     }
@@ -78,13 +80,50 @@ def load_config(path: Path) -> dict:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(config_template(), indent=2) + "\n", encoding="utf-8")
         raise SystemExit(f"Created a config template at {path}\nEdit it, then run again.")
-    with path.open(encoding="utf-8") as fh:
+    with path.open(encoding="utf-8-sig") as fh:
         cfg = json.load(fh)
     defaults = {"localRoot": str(Path.home() / "yt-backups"), "quality": "best",
-                "transfers": 2, "browser": "brave", "browserDebugPort": 9223, "channels": {}}
+                "transfers": 2, "browser": "brave", "browserDebugPort": 9223,
+                "remoteRoot": cfg.get("remote", "gdrive:YouTubeBackups"),
+                "includePrivate": True, "channels": {}}
     for key, value in defaults.items():
         cfg.setdefault(key, value)
     return cfg
+
+
+def channel_settings(cfg: dict, slug: str, channel: dict) -> dict:
+    source = channel.get("url") or channel.get("channelId") or channel.get("handle")
+    if not source:
+        raise SystemExit(f"channel '{slug}' needs a url, handle or channelId")
+    names = {"out-of-office": "Out of Office Mode"}
+    remote_root = str(cfg.get("remoteRoot") or "").rstrip("/")
+    return {
+        "source": source,
+        "channel_id": channel.get("channelId", ""),
+        "name": channel.get("name") or names.get(slug) or slug,
+        "quality": channel.get("quality", cfg.get("quality")),
+        "include_private": bool(channel.get("includePrivate",
+                                            channel.get("includeScheduled",
+                                                        cfg.get("includePrivate", True)))),
+        "drive_folder": (channel.get("driveFolder")
+                         or (f"{remote_root}/{slug}" if remote_root else "")),
+    }
+
+
+def resolve_channel_id(settings: dict, log: Log) -> str:
+    if settings["channel_id"]:
+        return settings["channel_id"]
+    result = subprocess.run(
+        [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--playlist-items", "1",
+         "--print", "playlist:channel_id", settings["source"]],
+        capture_output=True, text=True, encoding="utf-8", errors="replace")
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line.startswith("UC") and len(line) == 24:
+            settings["channel_id"] = line
+            log(f"resolved {settings['source']} -> {line}")
+            return line
+    raise SystemExit(f"could not resolve a channel id for {settings['source']}")
 
 
 def format_selector(quality) -> str:
@@ -276,48 +315,51 @@ def browser_helper(browser: str, port: int | None, log: Log) -> bool:
     return run_stream(cmd, log) == 0
 
 
-def sync_to_drive(local: Path, remote: str, slug: str, transfers: int, log: Log) -> int:
-    if not remote:
-        log("no rclone remote configured; local only")
+def sync_to_drive(local: Path, target: str, transfers: int, log: Log) -> int:
+    if not target:
+        log("no Drive folder configured; local only")
         return 0
-    log(f"rclone copy {local} -> {remote}/{slug}")
-    return run_stream(["rclone", "copy", str(local), f"{remote}/{slug}",
+    log(f"rclone copy {local} -> {target}")
+    return run_stream(["rclone", "copy", str(local), target,
                        "--ignore-existing", "--transfers", str(transfers),
                        "--checkers", "8", "--drive-chunk-size", "64M",
                        "--stats", "30s", "--stats-one-line",
                        "--exclude", "*.log", "--exclude", ".staging/**"], log)
 
 
-def scheduled_pass(slug: str, channel: dict, cfg: dict, args, root: Path, staging: Path,
-                   archive: Path, quality, log: Log, summary: dict) -> None:
-    channel_id = channel["channelId"]
+def scheduled_pass(settings: dict, cfg: dict, args, root: Path, staging: Path,
+                   archive: Path, log: Log, summary: dict) -> None:
+    channel_id = settings["channel_id"]
+    if not channel_id:
+        log("no channel id, so the Studio pass cannot run")
+        return
     port = int(cfg.get("browserDebugPort", 9223))
-    browser = channel.get("browser") or cfg.get("browser", "brave")
+    browser = settings.get("browser") or cfg.get("browser", "brave")
     launched = False
     cookies = Path(args.cookies).expanduser() if args.cookies else None
 
     if not cookies:
         launched = browser_helper(browser, port, log)
         if not launched:
-            log("could not open a debuggable browser session; scheduled pass skipped")
+            log("could not open a debuggable browser session; private pass skipped")
             return
         cookies = export_cookies(port, log)
 
     rows = studio_rows(channel_id, port, log) if launched else []
-    if cookies and not rows:
-        log("no Studio listing, so private/scheduled videos cannot be enumerated")
+    if not rows and launched:
+        log("no Studio rows read; nothing to compare")
 
     have = archive_ids(archive)
     pending = [row for row in rows
                if row.get("id") and row["id"] not in have
-               and row.get("visibility") in ("Scheduled", "Private", "Draft")]
+               and row.get("visibility") in ("Scheduled", "Private", "Unlisted")]
     for row in pending:
         log(f"{row['visibility']}: {row['id']} {str(row.get('title', ''))[:60]}")
 
     if pending and cookies:
         before = len(archive_ids(archive))
         rc = yt_targets([f"https://www.youtube.com/watch?v={row['id']}" for row in pending],
-                        staging / "scheduled", archive, quality, log, cookies)
+                        staging / "scheduled", archive, settings["quality"], log, cookies)
         summary["downloads"] += max(0, len(archive_ids(archive)) - before)
         summary["rc"] += rc
         summary["filed"] += promote(staging / "scheduled", root, log)
@@ -329,31 +371,35 @@ def scheduled_pass(slug: str, channel: dict, cfg: dict, args, root: Path, stagin
 
 
 def backup_channel(slug: str, channel: dict, cfg: dict, args, log: Log) -> dict:
-    if not channel.get("channelId"):
-        raise SystemExit(f"channel '{slug}' has no channelId")
+    settings = channel_settings(cfg, slug, channel)
+    settings["browser"] = channel.get("browser") or cfg.get("browser", "brave")
     root = Path(cfg["localRoot"]).expanduser() / slug
     staging = root / ".staging"
     archive = root / "archive.txt"
     for kind in ("long", "shorts"):
         (root / kind).mkdir(parents=True, exist_ok=True)
 
-    quality = channel.get("quality", cfg["quality"])
-    base = f"https://www.youtube.com/channel/{channel['channelId']}"
-    summary = {"channel": slug, "started": now(), "downloads": 0, "filed": 0, "rc": 0}
+    resolve_channel_id(settings, log)
+    channel_id = settings["channel_id"]
+    base = f"https://www.youtube.com/channel/{channel_id}"
+    summary = {"channel": slug, "name": settings["name"], "channelId": channel_id,
+               "driveFolder": settings["drive_folder"], "started": now(),
+               "downloads": 0, "filed": 0, "rc": 0}
+    log(f"backup {slug} ({settings['name']}) -> {settings['drive_folder'] or 'local only'}")
 
     before = len(archive_ids(archive))
     summary["rc"] += yt_targets([f"{base}/videos", f"{base}/shorts"],
-                                staging / "public", archive, quality, log)
+                                staging / "public", archive, settings["quality"], log)
     summary["downloads"] += max(0, len(archive_ids(archive)) - before)
     summary["filed"] += promote(staging / "public", root, log)
 
-    if channel.get("includeScheduled", False) and not args.no_scheduled:
-        scheduled_pass(slug, channel, cfg, args, root, staging, archive, quality, log, summary)
+    if settings["include_private"] and not args.no_scheduled:
+        scheduled_pass(settings, cfg, args, root, staging, archive, log, summary)
 
     if args.no_upload:
         log("upload skipped (--no-upload)")
     else:
-        summary["rc"] += sync_to_drive(root, cfg.get("remote", ""), slug,
+        summary["rc"] += sync_to_drive(root, settings["drive_folder"],
                                        int(cfg.get("transfers", 2)), log)
 
     for kind in ("long", "shorts"):
@@ -370,6 +416,8 @@ def main() -> int:
     parser.add_argument("--channel", help="channel slug from the config (default: every channel)")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--list", action="store_true", help="list configured channels")
+    parser.add_argument("--resolve", action="store_true",
+                        help="resolve and print channel ids for every configured channel")
     parser.add_argument("--no-upload", action="store_true", help="skip the rclone copy")
     parser.add_argument("--no-scheduled", action="store_true", help="skip the Studio/private pass")
     parser.add_argument("--cookies", help="cookies.txt to use instead of a browser session")
@@ -381,7 +429,9 @@ def main() -> int:
 
     if args.list:
         for slug, chan in cfg["channels"].items():
-            print(f"{slug:24} {chan.get('channelId', ''):26} {chan.get('name', '')}")
+            settings = channel_settings(cfg, slug, chan)
+            print(f"{slug:24} {settings['channel_id'] or '(resolves at run time)':26} "
+                  f"{settings['name']:24} {settings['drive_folder'] or 'local only'}")
         return 0
 
     selected = cfg["channels"]
@@ -393,7 +443,15 @@ def main() -> int:
         raise SystemExit("no channels configured")
 
     log = Log(Path(cfg["localRoot"]).expanduser() / "backup.log")
-    check_tools(log, need_rclone=not args.no_upload and bool(cfg.get("remote")))
+
+    if args.resolve:
+        for slug, chan in selected.items():
+            settings = channel_settings(cfg, slug, chan)
+            print(f"{slug}: {resolve_channel_id(settings, log)}")
+        return 0
+
+    check_tools(log, need_rclone=not args.no_upload
+                and any(channel_settings(cfg, s, c)["drive_folder"] for s, c in selected.items()))
 
     worst = 0
     for slug, channel in selected.items():
@@ -403,5 +461,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
 
