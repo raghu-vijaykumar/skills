@@ -107,7 +107,8 @@ def promote(staging: Path, target: Path, log: Log) -> int:
         date = f"{upload[:4]}-{upload[4:6]}-{upload[6:8]}" if len(upload) == 8 else "unknown-date"
         from common import sanitize
 
-        folder = target / sanitize(f"{date} - {info.get('title') or vid} [{vid}]")
+        stem = sanitize(f"{date} - {info.get('title') or vid}", 80)
+        folder = target / f"{stem} [{vid}]"
         folder.mkdir(parents=True, exist_ok=True)
         names = {"video": "video" + files["video"].suffix.lower(),
                  "thumbnail": "thumbnail.jpg", "metadata": "metadata.json"}
@@ -117,6 +118,9 @@ def promote(staging: Path, target: Path, log: Log) -> int:
             (folder / "description.txt").write_text(description_text(info), encoding="utf-8")
         filed += 1
         log(f"filed {folder.name}")
+    for leftover in staging.iterdir():
+        if leftover.is_file() and leftover.name.startswith("NA__"):
+            leftover.unlink(missing_ok=True)
     return filed
 
 

@@ -13,6 +13,7 @@ content.py sync       push drafts/assets up, or pull drafts down
 content.py draft      scaffold or list a draft folder
 content.py intro      prepend the channel intro to a draft video
 content.py prune      delete old published videos locally (Drive untouched)
+content.py code       git-track the sources, snapshot to Drive, restore, prune
 content.py analytics retention curves and improvement pointers
 content.py list       channels, local roots, draft counts
 content.py doctor     check yt-dlp, ffmpeg, node, rclone, remotes
@@ -21,7 +22,8 @@ content.py doctor     check yt-dlp, ffmpeg, node, rclone, remotes
 ## Workspace layout
 
 Everything for a channel lives under `<workspace>/<slug>` (default
-`C:\workspace\content\out-of-office`) and that directory is the rclone source:
+`C:\workspace\content\<slug>`) and that directory is the rclone source. Several
+channels share one workspace, each with its own slug, Drive folder and git repo:
 
 ```
 out-of-office/
@@ -33,10 +35,12 @@ out-of-office/
         thumbnail.png
         title.txt  description.txt
         original-videos/     clips + video-before-intro.mp4
+        src/                 optional code for a generated video
         draft.json           manifest
   assets/intro.mp4                        the intro clip used by `intro`
   archive.txt                             yt-dlp ledger, so pruned videos never re-download
   analytics/<videoId>/                    metrics.json, retention.csv, retention.svg
+  .snapshots/*.bundle                     git snapshots already uploaded to Drive
   backup-report.json                      last run summary (never uploaded)
 ```
 
@@ -134,7 +138,39 @@ per video.
 
 The report turns the curves into next-video pointers: hook loss in the first 10%,
 the largest single drop with its timestamp, retention at the halfway mark, comparison
-with the channel median, and CTR when impressions are available.
+with the same-format median (long vs shorts), loop behaviour above 100% on shorts, and
+CTR when impressions are available. The API does not expose a retention curve for
+Shorts, so those rows carry views, average view duration and average percentage only.
+
+## Git-tracked sources
+
+Code-generated channels keep their sources in git at the channel root, next to the media
+the repo deliberately ignores:
+
+```powershell
+python scripts/content.py code init --channel revise-labs
+git -C C:\workspace\content\revise-labs add -A
+git -C C:\workspace\content\revise-labs commit -m "first cut"
+
+python scripts/content.py code status   --channel revise-labs
+python scripts/content.py code snapshot --channel revise-labs --message "before render"
+python scripts/content.py code restore  --channel revise-labs --dest C:\workspace\content\revise-labs-restored
+python scripts/content.py code prune    --channel revise-labs --keep 5
+```
+
+- `init` writes a `.gitignore` that excludes `long/`, `shorts/`, `assets/`, `analytics/`
+  and media extensions, so drafts, scripts, titles and descriptions are tracked while
+  videos and thumbnails stay out of git. Per-video code belongs in `drafts/<name>/src`.
+- `snapshot` refuses to run with uncommitted changes (`--allow-dirty` overrides with a
+  warning), creates a `git bundle` of every ref, uploads it to
+  `<driveFolder>/code/snapshots/<utc>-<sha>.bundle`, and mirrors the tracked tree to
+  `<driveFolder>/code/tree`. A bundle is a complete clone source: `git clone file.bundle`.
+- `restore` picks the newest bundle (or `--name`) from Drive and clones it into `--dest`.
+- `prune` deletes only local bundles beyond `--keep`, and only after confirming the same
+  bundle exists on Drive with an identical size. Drive is never touched.
+
+This is the same principle as `prune` for videos: local is a working subset, Drive is
+the durable copy, and nothing is deleted locally before the Drive copy is verified.
 
 ## Backup, private and scheduled uploads
 

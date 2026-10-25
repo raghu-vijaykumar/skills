@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 import drive
+import gitrepo
 import intro as intro_mod
 import studio
 import ytdlp
@@ -49,10 +50,12 @@ def backup(cfg: dict, args, log: Log) -> int:
         log(f"backup {slug} ({settings['name']})")
 
         before = len(archive_ids(archive))
-        rc |= ytdlp.download([f"{base}/videos", f"{base}/shorts"],
-                             staging / "public", archive, settings["quality"], log)
+        filed = 0
+        for kind, tab in (("long", "videos"), ("shorts", "shorts")):
+            rc |= ytdlp.download([f"{base}/{tab}"], staging / "public" / kind,
+                                 archive, settings["quality"], log)
+            filed += ytdlp.promote(staging / "public" / kind, root / kind, log)
         fetched = max(0, len(archive_ids(archive)) - before)
-        filed = ytdlp.promote(staging / "public", root, log)
 
         if settings["include_private"] and not args.no_scheduled:
             priv_rc, priv_fetched, priv_filed = private_pass(settings, cfg, args, root,
@@ -254,6 +257,25 @@ def prune(cfg: dict, args, log: Log) -> int:
     return 0
 
 
+def source(cfg: dict, args, log: Log) -> int:
+    slug, raw = select_channels(cfg, args.channel)[0]
+    settings = channel_settings(cfg, slug, raw)
+    root = prepare(cfg, slug)
+    remote = settings["drive_folder"]
+    if args.action == "init":
+        return gitrepo.init(root, log)
+    if args.action == "status":
+        return gitrepo.status(root, log)
+    if args.action == "snapshot":
+        return gitrepo.snapshot(root, remote, log, args.message or "", args.allow_dirty)
+    if args.action == "restore":
+        dest = Path(args.dest).expanduser() if args.dest else root / "code-restored"
+        return gitrepo.restore(remote, dest, log, args.name)
+    if args.action == "prune":
+        return gitrepo.prune(root, remote, args.keep, log, args.dry_run)
+    return 1
+
+
 def listing(cfg: dict, log: Log) -> int:
     for slug, raw in cfg.get("channels", {}).items():
         settings = channel_settings(cfg, slug, raw)
@@ -331,6 +353,16 @@ def main() -> int:
     p.add_argument("--video")
     p.add_argument("--out")
 
+    p = sub.add_parser("code", parents=[shared],
+                       help="git-track the sources and snapshot them to Drive")
+    p.add_argument("action", choices=["init", "status", "snapshot", "restore", "prune"])
+    p.add_argument("--message")
+    p.add_argument("--allow-dirty", action="store_true")
+    p.add_argument("--name", help="snapshot bundle to restore")
+    p.add_argument("--dest", help="clone target for restore")
+    p.add_argument("--keep", type=int, default=5)
+    p.add_argument("--dry-run", action="store_true")
+
     args = parser.parse_args()
     cfg = load_config(Path(args.config))
     log = Log(Path(cfg["workspace"]).expanduser() / "content-helper.log")
@@ -353,6 +385,8 @@ def main() -> int:
         import analytics
 
         return analytics.run(cfg, args, log)
+    if args.command == "code":
+        return source(cfg, args, log)
     return 1
 
 

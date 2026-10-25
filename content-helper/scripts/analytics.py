@@ -361,14 +361,18 @@ def insights(video: dict, retention: list[dict], metrics: dict, median_pct: floa
                 f"{round(half * 100)}% still watching at halfway - this structure works; "
                 f"reuse its pacing and length.")
     pct = metrics.get("averageViewPercentage")
-    if isinstance(pct, (int, float)) and median_pct:
+    if isinstance(pct, (int, float)) and pct > 100 and video["kind"] == "shorts":
+        notes.append(
+            f"Average view percentage {round(pct, 1)}% is above 100%: shorts are being "
+            f"re-watched, so length is not the constraint - the loop and the first frame are.")
+    elif isinstance(pct, (int, float)) and median_pct:
         delta = pct - median_pct
         if delta <= -5:
             notes.append(f"Average view percentage {round(pct, 1)}% is {round(-delta, 1)} points "
-                         f"below the channel median ({round(median_pct, 1)}%).")
+                         f"below the {video['kind']} median ({round(median_pct, 1)}%).")
         elif delta >= 5:
-            notes.append(f"Average view percentage {round(pct, 1)}% beats the channel median "
-                         f"by {round(delta, 1)} points.")
+            notes.append(f"Average view percentage {round(pct, 1)}% beats the {video['kind']} "
+                         f"median by {round(delta, 1)} points.")
     ctr = metrics.get("impressionsClickThroughRate")
     if isinstance(ctr, (int, float)) and ctr < 3:
         notes.append(f"Click-through rate {round(ctr, 2)}% is low - the thumbnail/title pair "
@@ -382,14 +386,21 @@ def insights(video: dict, retention: list[dict], metrics: dict, median_pct: floa
 def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
                  out: Path, log: Log) -> None:
     out.mkdir(parents=True, exist_ok=True)
-    pcts = [d["metrics"].get("averageViewPercentage") for d in data.values()]
-    pcts = [float(p) for p in pcts if isinstance(p, (int, float))]
-    median_pct = sorted(pcts)[len(pcts) // 2] if pcts else 0.0
+
+    def median(kind: str) -> float:
+        values = [float(d["metrics"]["averageViewPercentage"])
+                  for v in videos if v["kind"] == kind
+                  for d in [data.get(v["id"])] if d
+                  and isinstance(d["metrics"].get("averageViewPercentage"), (int, float))]
+        return sorted(values)[len(values) // 2] if values else 0.0
+
+    medians = {kind: median(kind) for kind in ("long", "shorts")}
 
     lines = [f"# Retention report - {settings['name']}", "",
-             f"Generated {now()} from {'YouTube Analytics API' if any(v['source'] == 'api' for v in data.values()) else 'YouTube Studio'}.", "",
-             "| video | views | avg view | avg % | @25% | @50% | @75% | biggest drop |",
-             "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+             f"Generated {now()} from "
+             f"{'YouTube Analytics API' if any(v['source'] == 'api' for v in data.values()) else 'YouTube Studio'}.",
+             "", "| video | kind | views | avg view | avg % | @25% | @50% | @75% | biggest drop |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     pointers: list[str] = []
 
     for video in videos:
@@ -406,7 +417,7 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
         drop = biggest_drop(retention)
         drop_txt = f"{drop[0]:.0%} ({drop[1]:.0%})" if drop else "-"
         title = video["title"][:60].replace("|", "/")
-        lines.append(f"| [{title}](https://youtu.be/{video['id']}) | "
+        lines.append(f"| [{title}](https://youtu.be/{video['id']}) | {video['kind']} | "
                      f"{metrics.get('views', '-')} | {avg_txt} | {pct_txt} | "
                      f"{' | '.join(cells)} | {drop_txt} |")
 
@@ -422,10 +433,13 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
                 writer.writeheader()
                 writer.writerows(retention)
             svg_chart(retention, video["title"][:70], folder / "retention.svg")
-        for note in insights(video, retention, metrics, median_pct):
+        for note in insights(video, retention, metrics, medians[video["kind"]]):
             pointers.append(f"- **{video['title'][:50]}** - {note}")
 
-    lines += ["", "## Pointers for the next video", ""]
+    lines += ["", f"Medians: long {medians['long']:.1f}%, shorts {medians['shorts']:.1f}%.",
+              "Shorts do not expose a retention curve through the API, so they are judged on "
+              "views, average view duration and average percentage.", "",
+              "## Pointers for the next video", ""]
     lines += pointers or ["- Not enough data yet; publish a few more videos or widen --last."]
     (out / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"wrote {out / 'report.md'} ({len(videos)} videos)")
