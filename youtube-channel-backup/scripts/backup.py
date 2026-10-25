@@ -342,7 +342,8 @@ def sync_to_drive(local: Path, target: str, transfers: int, log: Log) -> int:
                        "--ignore-existing", "--transfers", str(transfers),
                        "--checkers", "8", "--drive-chunk-size", "64M",
                        "--stats", "30s", "--stats-one-line",
-                       "--exclude", "*.log", "--exclude", ".staging/**"], log)
+                       "--exclude", "*.log", "--exclude", "backup-report.json",
+                       "--exclude", ".staging/**"], log)
 
 
 def scheduled_pass(settings: dict, cfg: dict, args, root: Path, staging: Path,
@@ -479,6 +480,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
 
 
