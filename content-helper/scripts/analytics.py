@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import secrets
 import threading
 import time
@@ -26,6 +27,10 @@ TOKEN_DIR = Path.home() / ".config" / "content-helper"
 
 
 class OAuthError(SystemExit):
+    pass
+
+
+class ApiDisabled(RuntimeError):
     pass
 
 
@@ -98,7 +103,8 @@ class ApiClient:
             time.sleep(0.5)
         server.shutdown()
         if "code" not in result:
-            raise OAuthError("authorisation was not completed")
+            detail = result.get("error_description") or result.get("error") or "no response"
+            raise OAuthError(f"authorisation was not completed: {detail}")
         token = self._post({"code": result["code"], "client_id": block["client_id"],
                             "client_secret": block["client_secret"],
                             "redirect_uri": redirect, "grant_type": "authorization_code"})
@@ -132,11 +138,19 @@ class ApiClient:
             with urllib.request.urlopen(request, timeout=60) as resp:
                 return json.load(resp)
         except urllib.error.HTTPError as exc:
-            body = exc.read().decode("utf-8", "replace")[:300]
+            body = exc.read().decode("utf-8", "replace")
             if exc.code == 401:
                 self.token = self._refresh(self.token)
                 return self.report(**params)
-            raise SystemExit(f"YouTube Analytics API {exc.code}: {body}")
+            if exc.code == 403 and ("has not been used in project" in body
+                                    or "it is disabled" in body):
+                link = re.search(r"https://console\.developers\.google\.com/\S+", body)
+                raise ApiDisabled(
+                    "the YouTube Analytics API is disabled for this OAuth client's project.\n"
+                    "Enable it once, then re-run:\n  "
+                    + (link.group(0) if link else
+                       "https://console.cloud.google.com/apis/library/youtubeanalytics.googleapis.com"))
+            raise SystemExit(f"YouTube Analytics API {exc.code}: {body[:300]}")
 
     def collect(self, channel_id: str, videos: list[dict], log: Log) -> dict:
         collected = {}
@@ -430,7 +444,11 @@ def run(cfg: dict, args, log: Log) -> int:
     if provider == "api":
         channel_id = settings["channel_id"] or yt_channel_id(settings, log)
         client = ApiClient(settings, log)
-        data = client.collect(channel_id, videos, log)
+        try:
+            data = client.collect(channel_id, videos, log)
+        except ApiDisabled as exc:
+            log(str(exc))
+            return 1
     else:
         data = studio_collect(cfg, settings, videos, log)
     build_report(root, settings, videos, data, out, log)
