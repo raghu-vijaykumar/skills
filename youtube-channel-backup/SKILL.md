@@ -139,3 +139,8 @@ as `MISSING`, `ERROR`, or `WARNING`.
   closes it for you.
 - Drive runs out of space or is quota-limited → raise the Drive plan or set `"remote": ""`
   to keep the run local.
+- `This remote uses rclone's shared Google Drive client_id, which is being retired` → the
+  backup still works today; create your own OAuth client when convenient and update
+  `client_id`/`client_secret` in the rclone remote.
+- The first upload of a large channel is limited by the uplink, not by the script
+  (roughly 2 hours per 14 GB at 1.7 MB/s). Later runs only send new videos.
