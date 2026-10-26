@@ -1,5 +1,3 @@
-__pycache__/
-*.pyc
-*.log
-.DS_Store
-youtube-channel-backup/config.local.json
+node_modules/
+videogen/dist/
+videogen-test-*/

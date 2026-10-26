@@ -1,0 +1,27 @@
+{
+  "name": "new-video-project",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/entry.tsx",
+    "narration": "videogen narration",
+    "check": "videogen check",
+    "render": "videogen render",
+    "content:check": "videogen content-check",
+    "content:render": "videogen content-render",
+    "skill:sync": "videogen sync-skill"
+  },
+  "dependencies": {
+    "@raghu-vijaykumar/videogen": "git+https://github.com/raghu-vijaykumar/skills.git#videogen-v0.1.0",
+    "@remotion/cli": "4.0.518",
+    "@remotion/fonts": "4.0.518",
+    "@remotion/media-utils": "4.0.518",
+    "@remotion/three": "4.0.518",
+    "@react-three/fiber": "^9.7.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.518",
+    "three": "^0.186.0"
+  },
+  "engines": {"node": ">=22.18.0"}
+}
