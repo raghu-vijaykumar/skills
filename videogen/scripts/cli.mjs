@@ -74,7 +74,7 @@ function checks(config, videoId, kind = 'video', phase = 'validate', comp = null
   }
 }
 function builtin(name, ...argv) {
-  run(process.execPath, [path.join(toolkit, 'scripts', 'validation', `check-${name}.mts`), ...argv], name);
+  run(process.execPath, [path.join(toolkit, 'dist', 'gates', `check-${name}.mjs`), ...argv], name);
 }
 function copyTree(from, to) {
   if (fs.existsSync(to)) die(`Target already exists: ${to}`);

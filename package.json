@@ -1,6 +1,6 @@
 {
   "name": "@raghu-vijaykumar/videogen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "engines": {"node": ">=22.18.0"},
   "type": "module",
@@ -11,14 +11,14 @@
     ".": {"types": "./videogen/dist/project.d.ts", "default": "./videogen/dist/project.js"},
     "./cli": "./videogen/scripts/cli.mjs",
     "./content-package": "./videogen/scripts/content-package.mjs",
-    "./gate/*": "./videogen/scripts/validation/check-*.mts",
+    "./gate/*": "./videogen/dist/gates/check-*.mjs",
     "./runtime/design/contentStyles": {"types": "./videogen/dist/design/contentStyles.d.mts", "default": "./videogen/dist/design/contentStyles.mjs"},
     "./runtime/*": {"types": "./videogen/dist/*.d.ts", "default": "./videogen/dist/*.js"},
     "./skill": "./videogen/SKILL.md"
   },
   "scripts": {
-    "build": "tsc -p videogen/tsconfig.json && node videogen/scripts/copy-static.mjs",
-    "test": "npm run build && node --test videogen/tests/*.test.mjs",
+    "build": "tsc -p videogen/tsconfig.json && node videogen/scripts/copy-static.mjs && node videogen/scripts/transpile-gates.mjs",
+    "test": "npm run build && node videogen/dist/gates/check-animation-core.mjs && node --test videogen/tests/*.test.mjs",
     "prepare": "npm run build"
   },
   "dependencies": {
@@ -40,6 +40,7 @@
   "devDependencies": {
     "@types/react": "^19.2.18",
     "@types/three": "^0.186.0",
+    "esbuild": "0.28.1",
     "typescript": "^7.0.2"
   }
 }
