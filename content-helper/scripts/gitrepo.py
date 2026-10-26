@@ -13,38 +13,37 @@ from pathlib import Path
 from common import Log, human_size, read_json, run_stream, write_json
 
 GITIGNORE = """\
-# media lives in the archive/drafts, not in git
-long/
-shorts/
-assets/
+# Track video source, public title/description, and thumbnail beside each backup.
+node_modules/
 analytics/
 .staging/
 .snapshots/
+analysis/
+tmp/
 archive.txt
 backup-report.json
 *.part
-*.mp4
-*.mov
-*.mkv
-*.m4v
-*.webm
-*.wav
-*.mp3
-*.m4a
-*.aac
-*.png
-*.jpg
-*.jpeg
-*.webp
+/shorts/*/video.*
+/long/*/video.*
+/drafts/*/video.*
+/shorts/*/metadata.json
+/long/*/metadata.json
+**/assets/generated/
+**/assets/sources/**/images/
+**/assets/sources/**/videos/
+**/assets/sources/**/screenshots/
+/drafts/*/original-videos/
 """
 
 TREE_EXCLUDES = ["--exclude", ".git/**", "--exclude", ".snapshots/**",
-                 "--exclude", "long/**", "--exclude", "shorts/**",
-                 "--exclude", "assets/**", "--exclude", "analytics/**",
-                 "--exclude", ".staging/**", "--exclude", "*.mp4",
-                 "--exclude", "*.png", "--exclude", "*.jpg", "--exclude", "*.mp3",
-                 "--exclude", "*.wav", "--exclude", "archive.txt",
-                 "--exclude", "backup-report.json"]
+                 "--exclude", "node_modules/**", "--exclude", "analytics/**",
+                 "--exclude", ".staging/**", "--exclude", "tmp/**",
+                 "--exclude", "**/assets/generated/**", "--exclude", "**/assets/sources/**/images/**",
+                 "--exclude", "**/assets/sources/**/videos/**",
+                 "--exclude", "shorts/*/video.*", "--exclude", "long/*/video.*",
+                 "--exclude", "drafts/*/video.*", "--exclude", "drafts/*/original-videos/**",
+                 "--exclude", "shorts/*/metadata.json", "--exclude", "long/*/metadata.json",
+                 "--exclude", "archive.txt", "--exclude", "backup-report.json"]
 
 
 def git(root: Path, *args: str) -> subprocess.CompletedProcess:
@@ -55,6 +54,47 @@ def git(root: Path, *args: str) -> subprocess.CompletedProcess:
 def repo_root(path: Path) -> Path | None:
     result = git(path, "rev-parse", "--show-toplevel")
     return Path(result.stdout.strip()) if result.returncode == 0 else None
+
+
+def has_remote(root: Path) -> bool:
+    return git(root, "remote", "get-url", "origin").returncode == 0
+
+
+def commit_paths(root: Path, paths: list[Path], log: Log, message: str) -> int:
+    """Commit only this backup's paths, then verify its configured Git remote."""
+    repo = repo_root(root)
+    if repo is None or repo.resolve() != root.resolve() or not has_remote(root):
+        log("backup source not pushed: channel Git remote is unavailable")
+        return 1
+    if git(root, "diff", "--cached", "--name-only").stdout.strip():
+        log("backup source not pushed: unrelated staged changes are present")
+        return 1
+    unique = sorted({str(path.resolve().relative_to(root.resolve())) for path in paths})
+    staged = git(root, "add", "-A", "--", *unique)
+    if staged.returncode != 0:
+        log(f"git add failed: {staged.stderr.strip()[:200]}")
+        return 1
+    if git(root, "diff", "--cached", "--check").returncode != 0:
+        log("backup source not pushed: staged whitespace check failed")
+        return 1
+    if not git(root, "diff", "--cached", "--name-only").stdout.strip():
+        return 0
+    committed = git(root, "commit", "-m", message)
+    if committed.returncode != 0:
+        log(f"git commit failed: {committed.stderr.strip()[:200]}")
+        return 1
+    branch = git(root, "branch", "--show-current").stdout.strip()
+    pushed = git(root, "push", "origin", f"HEAD:{branch}")
+    if pushed.returncode != 0:
+        log(f"local backup commit retained; git push failed: {pushed.stderr.strip()[:200]}")
+        return 1
+    head = git(root, "rev-parse", "HEAD").stdout.strip()
+    remote = git(root, "ls-remote", "origin", f"refs/heads/{branch}").stdout.split("\t")[0]
+    if head != remote:
+        log("Git push returned but remote HEAD did not match")
+        return 1
+    log(f"Git backup verified at {head[:12]}")
+    return 0
 
 
 def bundle_dir(root: Path) -> Path:
@@ -76,7 +116,7 @@ def init(root: Path, log: Log) -> int:
     ignore = root / ".gitignore"
     if not ignore.exists():
         ignore.write_text(GITIGNORE, encoding="utf-8")
-        log("wrote .gitignore (media stays out of git, drafts and scripts are tracked)")
+        log("wrote .gitignore (source and thumbnails tracked; generated media stays out of Git)")
     else:
         log(".gitignore already present; not touched")
     log("next: git add -A && git commit -m 'initial'")

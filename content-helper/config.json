@@ -22,11 +22,11 @@
       "name": "Revise Labs",
       "channelId": "UCL95sJOpZ9HCESEfk2vWNmg",
       "driveFolder": "gdrive:YouTubeBackups/revise-labs",
-      "includePrivate": true,
+      "includePrivate": false,
       "intro": "assets/intro.mp4",
       "analytics": {
         "provider": "api",
-        "credentials": "C:\\\\workspace\\\\revise-labs\\\\secrets\\\\youtube-client.json"
+        "credentials": "C:\\workspace\\content\\revise-labs\\secrets\\youtube-client.json"
       }
     }
   }

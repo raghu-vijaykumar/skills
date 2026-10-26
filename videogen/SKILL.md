@@ -1,9 +1,11 @@
 ---
 name: videogen
-description: Build, validate, review, and export code-driven Remotion videos and related carousel or post editions in a project configured with videogen.config.ts.
+description: Build, validate, review, render, and publish code-driven Remotion videos and related carousel or post editions in a project configured with videogen.config.ts.
 ---
 
 # Videogen
+
+For one draft at a time, use `npx videogen studio <id>` when the project supplies a per-video entry point.
 
 Read `videogen.config.ts`, the target content, and the project's own creative rules before editing. The package owns the generic render and validation commands; the project owns its scenes, media, and channel identity. Use `npx videogen init <directory>` for a fresh project and `npx videogen sync-skill` after installing a pinned package version.
 
@@ -12,3 +14,5 @@ For narrated videos, generate cues with `npx videogen narration <id>` and time v
 For carousel or post work, use `npx videogen content-check <id>` and `npx videogen content-render <id> --format carousel|post|all`, then inspect every exported card at delivery size. Keep source attribution and evidence manifests with project content.
 
 Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. A passing automated gate does not replace rendered-frame review.
+
+For YouTube publication, read [publishing](references/publishing.md). `npx videogen publish <id>` is a dry run; `--confirm` uploads only after the project checks and rendered review pass. A returned YouTube ID is saved before thumbnail setup, so `--resume` completes a partial setup without another video upload. Keep scheduled and private uploads in drafts until a public backup is verified by the channel's content-helper workflow.

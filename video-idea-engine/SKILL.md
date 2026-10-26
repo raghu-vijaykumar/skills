@@ -131,7 +131,7 @@ Then fill the draft:
 - `brief.md` - promise, beats, hero shots, values, runtime, source links
 - `research.md` - the sweep and scorecard
 - `packaging.md` - titles, thumbnail concepts, chosen pair
-- `src/` (code-generated channels) or `original-videos/` (edited) for the raw material
+- `entry.tsx`, `video.tsx`, `content/` and referenced assets for a code-generated video, or `original-videos/` for an edited one
 - `video.mp4`, `thumbnail.png`, `title.txt`, `description.txt` when produced
 - `intro` applies the channel intro when the channel uses one
 
@@ -146,7 +146,7 @@ sentence. Fix anything that does not read at a glance before publishing.
 
 ## Step 6 - publish, then close the loop
 
-Publish through the channel's normal path, then:
+For a code-generated video, finish it with the globally installed `videogen` skill, publish through `videogen publish <id> --confirm`, and run `content-helper backup` once public. Then:
 
 1. After 48 hours run `insights` again with VTR collection and compare this video against
    the dataset medians.

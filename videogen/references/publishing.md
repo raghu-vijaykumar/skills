@@ -1,0 +1,11 @@
+# YouTube publishing
+
+Use this path only when the user asks to publish or schedule a specific finished video. The project supplies `videogen.config.ts`, a draft under `videosDir`, and YouTube metadata in `content/video.yaml`.
+
+1. Finish the project's rendered-frame and creative review. Run `videogen check <id>`. A full delivery render is warranted for publication; use `videogen render <id> --delivery` and inspect the encoded result.
+2. Put `thumbnail.png` or `thumbnail.jpg` (at most 2 MB), `title.txt`, and `description.txt` beside the draft's `video.tsx`. The text files must exactly match `publishing.youtube.title` and `publishing.youtube.description` in `content/video.yaml`. Commit and push the authored draft files before upload; generated media stays out of Git.
+3. Run `videogen publish <id>` to review the selected full MP4, title, thumbnail, and optional scheduled time. `videogen publish <id> --confirm` performs the upload. Use `--at <future ISO timestamp>` to schedule a private upload. `--confirm` runs the validation gates again. Credentials come from `secrets/youtube-client.json` and `secrets/youtube-token.json` in the project, or `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, and `YT_REFRESH_TOKEN`. Keep them ignored from Git.
+4. The returned YouTube ID is recorded in the draft's `draft.json` immediately. If later thumbnail or playlist setup fails, fix that issue and run `videogen publish <id> --confirm --resume`; never retry a full upload when an ID is recorded. Commit the updated draft manifest.
+5. Leave the source in drafts while YouTube shows it as scheduled or private. Once public, use the channel's `content-helper backup` workflow. It joins the YouTube backup to the draft by ID, copies the authored source beside the downloaded video, saves the public title, description, and thumbnail, verifies Drive, then selectively commits and pushes the Git files.
+
+The publisher uses the original draft `video.mp4` when present; otherwise it selects a full-length generated MP4 and prefers a 1440-pixel short side. Time-range renders are never publish candidates. A project may set `publish.youtube.clientFile`, `tokenFile`, and `categoryId`. `VIDEOGEN_BROWSER_EXECUTABLE` can select a local Chromium browser for render and composition discovery.

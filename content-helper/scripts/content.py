@@ -14,6 +14,7 @@ from pathlib import Path
 
 import drive
 import gitrepo
+import lifecycle
 import intro as intro_mod
 import studio
 import ytdlp
@@ -64,11 +65,41 @@ def backup(cfg: dict, args, log: Log) -> int:
             fetched += priv_fetched
             filed += priv_filed
 
+        changed, handoffs = lifecycle.reconcile(root, log)
         if not args.no_upload:
             rc |= drive.copy(root / "long", drive.join(settings["drive_folder"], "long"),
                              log, cfg["transfers"], immutable=True)
             rc |= drive.copy(root / "shorts", drive.join(settings["drive_folder"], "shorts"),
                              log, cfg["transfers"], immutable=True)
+            for kind in ("long", "shorts"):
+                rc |= drive.copy_public_text(root / kind,
+                                             drive.join(settings["drive_folder"], kind),
+                                             log, cfg["transfers"])
+            rc |= drive.copy(root / "drafts", drive.join(settings["drive_folder"], "drafts"),
+                             log, cfg["transfers"], immutable=False)
+            rc |= drive.copy(root / "assets", drive.join(settings["drive_folder"], "assets"),
+                             log, cfg["transfers"], immutable=False)
+            source_cache = root / "tmp" / "source-assets"
+            if source_cache.exists():
+                rc |= drive.copy(source_cache,
+                                 drive.join(settings["drive_folder"], "assets", "source-cache"),
+                                 log, cfg["transfers"], immutable=False)
+            if rc == 0:
+                for draft_path, archive_path in handoffs:
+                    remote = drive.join(settings["drive_folder"], archive_path.parent.name,
+                                        archive_path.name)
+                    if not gitrepo.has_remote(root):
+                        log(f"kept {draft_path.name}: Git remote is not configured")
+                        rc = 1
+                    elif drive.folder_present(remote, archive_path, log):
+                        lifecycle.remove_verified_draft(root, draft_path)
+                        changed.append(draft_path)
+                    else:
+                        log(f"kept {draft_path.name}: archive is not verified on Drive")
+                        rc = 1
+            if changed and rc == 0 and gitrepo.repo_root(root):
+                rc |= gitrepo.commit_paths(root, changed, log,
+                                           "Back up published YouTube video source and metadata")
 
         report = {"channel": slug, "name": settings["name"],
                   "channelId": settings["channel_id"],
@@ -145,21 +176,40 @@ def sync(cfg: dict, args, log: Log) -> int:
         if args.pull:
             rc |= drive.pull(drive.join(remote, "drafts"), root / "drafts", log, cfg["transfers"])
             rc |= drive.pull(drive.join(remote, "assets"), root / "assets", log, cfg["transfers"])
+            rc |= drive.pull(drive.join(remote, "assets", "source-cache"),
+                             root / "tmp" / "source-assets", log, cfg["transfers"])
             continue
         rc |= drive.copy(root / "long", drive.join(remote, "long"), log,
                          cfg["transfers"], immutable=True)
         rc |= drive.copy(root / "shorts", drive.join(remote, "shorts"), log,
                          cfg["transfers"], immutable=True)
+        for kind in ("long", "shorts"):
+            rc |= drive.copy_public_text(root / kind, drive.join(remote, kind),
+                                         log, cfg["transfers"])
         rc |= drive.copy(root / "drafts", drive.join(remote, "drafts"), log,
                          cfg["transfers"], immutable=False)
         rc |= drive.copy(root / "assets", drive.join(remote, "assets"), log,
                          cfg["transfers"], immutable=False)
+        source_cache = root / "tmp" / "source-assets"
+        if source_cache.exists():
+            rc |= drive.copy(source_cache, drive.join(remote, "assets", "source-cache"),
+                             log, cfg["transfers"], immutable=False)
         archive = root / "archive.txt"
         if archive.exists():
             rc |= drive.copy_file(archive, drive.join(remote, "archive.txt"), log)
         log(f"sync {slug} done rc={rc}; Drive holds "
             f"{drive.total_size(drive.join(remote, 'long'))} long + "
             f"{drive.total_size(drive.join(remote, 'shorts'))} shorts")
+    return rc
+
+
+def reconcile(cfg: dict, args, log: Log) -> int:
+    """Backfill exact public metadata from already downloaded YouTube archives."""
+    rc = 0
+    for slug, _ in select_channels(cfg, args.channel):
+        root = prepare(cfg, slug)
+        changed, _ = lifecycle.reconcile(root, log, attach_drafts=False)
+        log(f"reconciled {slug}: {len(changed)} archive folders changed")
     return rc
 
 
@@ -328,6 +378,9 @@ def main() -> int:
     p.add_argument("--no-scheduled", action="store_true")
     p.add_argument("--cookies")
 
+    sub.add_parser("reconcile", parents=[shared],
+                   help="backfill exact title and description from local YouTube metadata")
+
     p = sub.add_parser("sync", parents=[shared],
                        help="push drafts/assets and archive to Drive, or pull drafts")
     p.add_argument("--pull", action="store_true", help="copy Drive drafts/assets down")
@@ -398,6 +451,8 @@ def main() -> int:
         return doctor(cfg, log)
     if args.command == "backup":
         return backup(cfg, args, log)
+    if args.command == "reconcile":
+        return reconcile(cfg, args, log)
     if args.command == "sync":
         return sync(cfg, args, log)
     if args.command == "draft":

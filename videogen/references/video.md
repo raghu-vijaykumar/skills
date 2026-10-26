@@ -1,6 +1,6 @@
 # Video workflow
 
-The project `videogen.config.ts` names the Remotion entry point and video directory. Each `videos/<id>/content/video.yaml` declares `video.compositionId`; music-only work also declares `video.durationSeconds`. Remotion is authoritative for width, height, frame rate, and duration.
+The project `videogen.config.ts` names the Remotion entry point and video directory. It may provide `entryPointForVideo(id)` so each draft bundles alone. Each `<videosDir>/<id>/content/video.yaml` declares `video.compositionId`; music-only work also declares `video.durationSeconds`. Remotion is authoritative for width, height, frame rate, and duration.
 
 For narrated work, keep narration YAML as authored text and generated cue audio as timing. Show the actual mechanism and label illustrative values. Start with a small pilot or hero shot, inspect it alone, then inspect it in the narrated edit. Prefer semantic state changes and camera detail shots over generic boxes and arrows. Build a storyboard with teaching point, protagonist, causal visual event, primary motion, framing, transition, and payoff. The content repository owns that storyboard and its review record.
 

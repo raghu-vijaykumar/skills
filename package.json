@@ -1,19 +1,34 @@
 {
   "name": "@raghu-vijaykumar/videogen",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "private": true,
-  "engines": {"node": ">=22.18.0"},
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "type": "module",
   "description": "Reusable Remotion video and content rendering skill",
-  "files": ["videogen/"],
-  "bin": {"videogen": "./videogen/scripts/cli.mjs"},
+  "files": [
+    "videogen/"
+  ],
+  "bin": {
+    "videogen": "./videogen/scripts/cli.mjs"
+  },
   "exports": {
-    ".": {"types": "./videogen/dist/project.d.ts", "default": "./videogen/dist/project.js"},
+    ".": {
+      "types": "./videogen/dist/project.d.ts",
+      "default": "./videogen/dist/project.js"
+    },
     "./cli": "./videogen/scripts/cli.mjs",
     "./content-package": "./videogen/scripts/content-package.mjs",
     "./gate/*": "./videogen/dist/gates/check-*.mjs",
-    "./runtime/design/contentStyles": {"types": "./videogen/dist/design/contentStyles.d.mts", "default": "./videogen/dist/design/contentStyles.mjs"},
-    "./runtime/*": {"types": "./videogen/dist/*.d.ts", "default": "./videogen/dist/*.js"},
+    "./runtime/design/contentStyles": {
+      "types": "./videogen/dist/design/contentStyles.d.mts",
+      "default": "./videogen/dist/design/contentStyles.mjs"
+    },
+    "./runtime/*": {
+      "types": "./videogen/dist/*.d.ts",
+      "default": "./videogen/dist/*.js"
+    },
     "./skill": "./videogen/SKILL.md"
   },
   "scripts": {

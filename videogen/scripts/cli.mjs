@@ -4,10 +4,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
-import {spawnSync} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 import {parse} from 'yaml';
 import {bundle} from '@remotion/bundler';
 import {getCompositions} from '@remotion/renderer';
+import {publishYoutube} from './publish-youtube.mjs';
 
 const toolkit = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cwd = process.cwd();
@@ -35,14 +36,26 @@ function safeId(value) {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(value ?? '')) die('An ID must contain only letters, digits, and hyphens');
   return value;
 }
-async function project() {
+async function project(videoId = null) {
   const configPath = path.join(cwd, 'videogen.config.ts');
   if (!fs.existsSync(configPath)) die(`Missing ${configPath}`);
   // Node 22's type stripping loads the project-authored TypeScript contract.
   const loaded = await import(pathToFileURL(configPath).href);
   const config = loaded.default ?? loaded.project;
   if (!config?.entryPoint || !config?.videosDir || !config?.contentDir || !config?.theme || !Array.isArray(config.styles)) die('Invalid videogen.config.ts');
-  return {...config, entryPoint: path.resolve(cwd, config.entryPoint), videosDir: path.resolve(cwd, config.videosDir), contentDir: path.resolve(cwd, config.contentDir)};
+  // A draft can have its own Remotion entry without bundling every archived film.
+  const entryPoint = videoId && config.entryPointForVideo ? config.entryPointForVideo(safeId(videoId)) : config.entryPoint;
+  if (typeof entryPoint !== 'string' || !entryPoint) die('Invalid video entry point');
+  return {...config, entryPoint: path.resolve(cwd, entryPoint), videosDir: path.resolve(cwd, config.videosDir), contentDir: path.resolve(cwd, config.contentDir)};
+}
+function browserExecutable(config) {
+  const explicit = process.env.VIDEOGEN_BROWSER_EXECUTABLE ?? config.browserExecutable;
+  if (explicit) return explicit;
+  if (process.platform === 'win32') {
+    for (const candidate of ['C:/Program Files/Google/Chrome/Application/chrome.exe',
+      'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe']) if (fs.existsSync(candidate)) return candidate;
+  }
+  return undefined;
 }
 function metadata(config, videoId) {
   const file = path.join(config.videosDir, safeId(videoId), 'content', 'video.yaml');
@@ -54,7 +67,7 @@ function metadata(config, videoId) {
 }
 async function compositions(config) {
   const serveUrl = await bundle({entryPoint: config.entryPoint, onProgress: () => undefined});
-  return getCompositions(serveUrl, {logLevel: 'error'});
+  return getCompositions(serveUrl, {logLevel: 'error', browserExecutable: browserExecutable(config)});
 }
 async function composition(config, compositionId) {
   const list = await compositions(config);
@@ -116,8 +129,21 @@ async function main() {
     console.log(`Installed version-matched skill at ${target}`);
     return;
   }
-  const config = await project();
+  const config = await project(['check', 'render', 'publish', 'studio'].includes(command) ? id : null);
   process.env.VIDEOGEN_VIDEOS_DIR = config.videosDir;
+  if (command === 'studio') {
+    metadata(config, id);
+    if (!fs.existsSync(config.entryPoint)) die(`Missing draft entry: ${config.entryPoint}`);
+    const remotion = path.resolve(cwd, 'node_modules', '@remotion', 'cli', 'remotion-cli.js');
+    // Studio is intentionally interactive; forward the URL and shutdown signal.
+    const browser = browserExecutable(config);
+    const child = spawn(process.execPath, [remotion, 'studio', config.entryPoint, ...(browser ? ['--browser-executable', browser] : []), ...args], {cwd, stdio: 'inherit'});
+    await new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('exit', (code) => code === 0 ? resolve() : reject(new Error(`Studio exited ${code}`)));
+    });
+    return;
+  }
   process.env.VIDEOGEN_CONTENT_DIR = config.contentDir;
   process.env.VIDEOGEN_EVIDENCE_STYLES = JSON.stringify(config.styles.filter((style) => style.requiresFirsthandEvidence).map((style) => style.id));
   if (command === 'styles') {
@@ -150,6 +176,14 @@ async function main() {
     const item = metadata(config, id);
     if (!fs.existsSync(path.join(item.dir, 'content', 'narration.yaml'))) die(`${id} has no narration.yaml`);
     run(process.execPath, [path.join(toolkit, 'scripts', 'narration.mjs'), item.dir], 'Narration');
+    return;
+  }
+  if (command === 'publish') {
+    const item = metadata(config, id);
+    const confirm = hasFlag('confirm');
+    if (confirm) run(process.execPath, [fileURLToPath(import.meta.url), 'check', id], 'Prepublish validation');
+    const result = await publishYoutube(item, config, {confirm, resume: hasFlag('resume'), at: flag('at')});
+    console.log(JSON.stringify(result, null, 2));
     return;
   }
   if (command === 'check' || command === 'render') {
@@ -224,7 +258,9 @@ async function main() {
     }
     const frames = range ? ['--frames', `${Math.floor(range.start * comp.fps)}-${Math.min(comp.durationInFrames - 1, Math.ceil(range.end * comp.fps) - 1)}`] : endFrame < comp.durationInFrames - 1 ? ['--frames', `0-${endFrame}`] : [];
     const name = `${id}${isTrailer ? '-trailer' : ''}-${effWidth}x${effHeight}-${comp.fps}${range ? `-${range.start}-${range.end}` : ''}${hasFlag('follow-us') ? '-follow' : ''}.mp4`;
-    run(process.execPath, [remotion, 'render', config.entryPoint, comp.id, path.join(outputDir, name), ...resolution, ...frames, '--log=error'], 'Remotion render');
+    const browser = browserExecutable(config);
+    run(process.execPath, [remotion, 'render', config.entryPoint, comp.id, path.join(outputDir, name), ...resolution, ...frames,
+      ...(browser ? ['--browser-executable', browser] : []), '--log=error'], 'Remotion render');
     console.log(path.join(outputDir, name));
     return;
   }
@@ -237,7 +273,7 @@ async function main() {
     run(process.execPath, [path.join(toolkit, 'scripts', command === 'content-check' ? 'content-check.mjs' : 'content-render.mjs'), id, ...args], command);
     return;
   }
-  die('Usage: videogen <init|sync-skill|narration|gate|check|render|content-check|content-render> [id]');
+  die('Usage: videogen <init|sync-skill|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
 }
 
 main().catch((error) => {console.error(`videogen: ${error.message}`); process.exitCode = 1;});

@@ -38,6 +38,7 @@ export type ProjectCheck = {
 
 export type VideogenProject = {
   entryPoint: string;
+  entryPointForVideo?: (videoId: string) => string;
   videosDir: string;
   contentDir: string;
   contentEntryPoint?: string;
@@ -45,6 +46,14 @@ export type VideogenProject = {
   styles: readonly ContentStyle[];
   checks?: readonly ProjectCheck[];
   renderShortSide?: number;
+  browserExecutable?: string;
+  publish?: {
+    youtube?: {
+      clientFile?: string;
+      tokenFile?: string;
+      categoryId?: string;
+    };
+  };
 };
 
 export function defineTheme<const T extends Theme>(theme: T): T {

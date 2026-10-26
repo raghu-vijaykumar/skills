@@ -46,6 +46,17 @@ def copy_file(local_file: Path, target: str, log: Log) -> int:
     return run_stream(['rclone', 'copyto', str(local_file), target], log)
 
 
+def copy_public_text(local: Path, target: str, log: Log, transfers: int = 2) -> int:
+    """Refresh public metadata while leaving the downloaded video immutable."""
+    if not target:
+        return 0
+    log(f"rclone public text {local.name} -> {target}")
+    return run_stream(["rclone", "copy", str(local), target,
+                       "--include", "*/title.txt", "--include", "*/description.txt",
+                       "--include", "*/thumbnail.*", "--transfers", str(transfers),
+                       "--stats", "60s", "--stats-one-line"], log)
+
+
 def pull(target: str, local: Path, log: Log, transfers: int = 2) -> int:
     """Copy target -> local without deleting anything locally."""
     if not target:

@@ -1,6 +1,6 @@
 ---
 name: content-helper
-description: Manage a YouTube channel end to end from one workspace: back up public, private and scheduled uploads to Google Drive, keep a local drafts folder in sync, prepend a channel intro, prune old local copies without touching Drive, collect retention/analytics into a dataset a model can reason over, and extract audio/frames/clips for segment review. Use when asked to back up or archive a channel, sync drafts, apply an intro, free local disk space, build a channel analytics dataset, or pull frames/audio from a video segment.
+description: "\"Manage a YouTube channel workspace: keep one editable folder per draft, back up public uploads and their exact title, description, thumbnail and source to Git and Drive, sync media through rclone, and collect analytics for new video ideas. Also supports private backups, intro prepending, local pruning and segment extraction when configured.\""
 ---
 
 # content-helper
@@ -8,7 +8,8 @@ description: Manage a YouTube channel end to end from one workspace: back up pub
 One workspace per channel, one command family:
 
 ```
-content.py backup     download public + private + scheduled uploads, mirror to Drive
+content.py backup     download uploads, reconcile source, verify Drive and push Git
+content.py reconcile backfill exact metadata from local YouTube backups
 content.py sync       push drafts/assets up, or pull drafts down
 content.py draft      scaffold or list a draft folder
 content.py intro      prepend the channel intro to a draft video
@@ -30,14 +31,15 @@ channels share one workspace, each with its own slug, Drive folder and git repo:
 ```
 out-of-office/
   long/2026-10-24 - Title [VIDEOID]/      published long-form
-        video.mp4  thumbnail.jpg  description.txt  metadata.json
+        video.mp4  thumbnail.jpg  title.txt  description.txt  metadata.json
+        content/video.yaml  video.tsx  source-provenance.json  ... authored source
   shorts/2026-02-17 - Title [VIDEOID]/    published shorts
   drafts/Ahara mela/                      work in progress
         video.mp4            edited cut (after intro)
         thumbnail.png
         title.txt  description.txt
         original-videos/     clips + video-before-intro.mp4
-        src/                 optional code for a generated video
+        entry.tsx  video.tsx  content/ ...  code-generated video source
         draft.json           manifest
   assets/intro.mp4                        the intro clip used by `intro`
   archive.txt                             yt-dlp ledger, so pruned videos never re-download
@@ -90,8 +92,8 @@ is merged over it for machine-specific values.
 
 Drive is the durable copy; the local folder is a working subset.
 
-- `sync` pushes `drafts` and `assets` normally (edited files are updated) and pushes
-  `long`/`shorts` immutably (already-present files are skipped).
+- `sync` pushes `drafts`, `assets`, and external source media normally, and pushes
+  `long`/`shorts` immutably. Backup verifies each completed folder on Drive.
 - `sync --pull` copies `drafts` and `assets` **down** without deleting anything locally.
 - No command ever deletes or truncates anything on Drive.
 
@@ -205,37 +207,42 @@ That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` a
 `measurement.md`, pre-filled with the channel's medians, strongest lane and best duration
 band.
 
-## Git-tracked sources
+## Published source handoff
 
-Code-generated channels keep their sources in git at the channel root, next to the media
-the repo deliberately ignores:
+Use one channel repository at `C:\workspace\content\<slug>`. The channel's Git
+remote holds source files, `title.txt`, `description.txt`, and the downloaded
+`thumbnail.jpg`. Binary video, generated media, and raw YouTube `metadata.json`
+are ignored by Git and copied to the channel's configured Drive folder.
+
+For a generated video, edit and commit `drafts/<id>/` with its `entry.tsx`,
+`video.tsx`, content metadata, research, and authored thumbnail. Publish with the
+`videogen` skill; it records the returned YouTube ID in `draft.json` before
+attempting the thumbnail. Scheduled or private uploads stay in drafts.
+
+Once YouTube shows the upload publicly, run:
 
 ```powershell
-python scripts/content.py code init --channel revise-labs
-git -C C:\workspace\content\revise-labs add -A
-git -C C:\workspace\content\revise-labs commit -m "first cut"
-
-python scripts/content.py code status   --channel revise-labs
-python scripts/content.py code snapshot --channel revise-labs --message "before render"
-python scripts/content.py code restore  --channel revise-labs --dest C:\workspace\content\revise-labs-restored
-python scripts/content.py code prune    --channel revise-labs --keep 5
+python scripts/content.py backup --channel revise-labs
 ```
 
-- `init` writes a `.gitignore` that excludes `long/`, `shorts/`, `assets/`, `analytics/`
-  and media extensions, so drafts, scripts, titles and descriptions are tracked while
-  videos and thumbnails stay out of git. Per-video code belongs in `drafts/<name>/src`.
-- `snapshot` refuses to run with uncommitted changes (`--allow-dirty` overrides with a
-  warning), creates a `git bundle` of every ref, uploads it to
-  `<driveFolder>/code/snapshots/<utc>-<sha>.bundle`, and mirrors the tracked tree to
-  `<driveFolder>/code/tree`. A bundle is a complete clone source: `git clone file.bundle`.
-- `restore` picks the newest bundle (or `--name`) from Drive and clones it into `--dest`.
-- `prune` deletes only local bundles beyond `--keep`, and only after confirming the same
-  bundle exists on Drive with an identical size. Drive is never touched.
+The command downloads the public YouTube copy, writes its exact title and
+description beside the downloaded thumbnail, joins the draft by **YouTube ID**,
+copies its source without replacing the downloaded MP4, copies all assets to
+Drive with rclone, verifies the public folder on Drive, then removes the draft.
+It selectively commits and pushes that video's Git files. A failed Drive check
+or missing Git remote keeps the draft; a failed Git push retains the local
+commit and the verified archive, and must be reported.
 
-This is the same principle as `prune` for videos: local is a working subset, Drive is
-the durable copy, and nothing is deleted locally before the Drive copy is verified.
+For older already-downloaded uploads, `content.py reconcile --channel revise-labs`
+backfills exact public text without fetching or closing drafts. Historical
+source copied from another repository must carry provenance that says whether
+its exact uploaded revision was verified. Never fill a missing-source folder
+with guessed code. `content.py code snapshot` separately sends a Git bundle to
+Drive for full repository recovery.
 
 ## Backup, private and scheduled uploads
+
+For Revise Labs, set `includePrivate: false`: an upload is closed out of drafts only after the public YouTube backup exists. Other channels may opt into private/scheduled backup, but that never counts as a public draft handoff.
 
 Public channel tabs never list scheduled or private videos, and Chromium cookie
 databases cannot be read by yt-dlp (`Failed to decrypt with DPAPI`). The backup runs a

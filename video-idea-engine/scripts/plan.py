@@ -79,6 +79,7 @@ def main() -> int:
                        check=False)
     if not draft.exists():
         raise SystemExit(f"could not create {draft}")
+    # Keep the brief in the same per-video folder that videogen will edit.
 
     numbers = ctx["numbers"]
     lane = ctx["strongest_lane"]

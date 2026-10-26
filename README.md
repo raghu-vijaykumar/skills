@@ -6,9 +6,9 @@ it needs.
 
 | Skill | Purpose |
 | --- | --- |
-| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: incremental backup of public/private/scheduled uploads to Google Drive, local drafts kept in sync, intro prepend, local pruning that never touches Drive, analytics dataset collection, and audio/frame/clip extraction |
+| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: public YouTube backups with exact metadata and source in Git, video and asset storage on Drive, editable drafts, intro prepending, analytics, and media extraction |
 | [video-idea-engine](video-idea-engine/SKILL.md) | Turns that analytics dataset into a researched, packaged video idea and a production brief: research sweep, scored selection, packaging before production, then a measurement loop |
-| [videogen](videogen/SKILL.md) | Reusable Remotion rendering, validation, themes, and video/post exports |
+| [videogen](videogen/SKILL.md) | Reusable Remotion rendering, validation, themes, video/post exports, and YouTube publishing |
 
 ## Install
 
