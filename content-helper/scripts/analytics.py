@@ -280,6 +280,9 @@ def studio_collect(cfg: dict, settings: dict, videos: list[dict], log: Log) -> d
     browser = settings["browser"]
     if not studio.launch(browser, port, log):
         raise SystemExit("could not open a debuggable browser for Studio analytics")
+    if not studio.channel_accessible(port, settings["channel_id"], log):
+        studio.stop(browser, log)
+        raise SystemExit("switch to this channel in the browser, then re-run")
     collected = {}
     try:
         for video in videos:
@@ -350,71 +353,6 @@ def biggest_drop(points: list[dict]) -> tuple[float, float] | None:
     return best
 
 
-def insights(video: dict, retention: list[dict], metrics: dict, median_pct: float) -> list[str]:
-    notes = []
-    if retention:
-        hook = at(retention, 0.02)
-        early = at(retention, 0.10)
-        half = at(retention, 0.5)
-        if hook is not None and early is not None and hook - early > 0.15:
-            notes.append(
-                f"Hook loses {round((hook - early) * 100)} points by 10% of the runtime "
-                f"- the opening promise is not landing; tighten the first 15-30s.")
-        drop = biggest_drop(retention)
-        if drop and drop[1] > 0.06:
-            seconds = drop[0] * video["duration"] if video["duration"] else None
-            where = f" (~{int(seconds // 60)}:{int(seconds % 60):02d})" if seconds else ""
-            notes.append(
-                f"Largest single drop of {round(drop[1] * 100)} points at {round(drop[0] * 100)}%"
-                f"{where}: check what happens there for a cut, tangent or repeated beat.")
-        if half is not None and half < 0.35:
-            notes.append(
-                f"Only {round(half * 100)}% remain at the halfway mark - the middle needs "
-                f"a new hook, a payoff, or should be shorter.")
-        if half is not None and half > 0.55:
-            notes.append(
-                f"{round(half * 100)}% still watching at halfway - this structure works; "
-                f"reuse its pacing and length.")
-    pct = metrics.get("averageViewPercentage")
-    vtr = metrics.get("shortsFeedImpressionsVtr")
-    if video["kind"] == "shorts" and isinstance(vtr, (int, float)):
-        views = metrics.get("views") or 0
-        if vtr < 45:
-            notes.append(
-                f"Only {vtr:.1f}% of Shorts-feed impressions were watched (VTR): most viewers "
-                f"swiped at the first frame. Reach is capped by the opening, not the retention "
-                f"curve - change frame one and the first spoken line.")
-        elif vtr >= 55 and views < 500:
-            notes.append(
-                f"VTR {vtr:.1f}% is strong, yet only {views} views: the entry converts, so reach "
-                f"is limited by topic demand and audience size, not by the edit. More uploads on "
-                f"the same proven topic will compound further than polishing this one.")
-        if isinstance(pct, (int, float)) and pct > 100 and vtr < 50:
-            notes.append(
-                f"Average view percentage {pct:.0f}% comes from re-watching, but VTR is only "
-                f"{vtr:.1f}%: the loop serves existing viewers, it is not winning new ones.")
-    if isinstance(pct, (int, float)) and pct > 100 and video["kind"] == "shorts":
-        notes.append(
-            f"Average view percentage {round(pct, 1)}% is above 100%: shorts are being "
-            f"re-watched, so length is not the constraint - the loop and the first frame are.")
-    elif isinstance(pct, (int, float)) and median_pct:
-        delta = pct - median_pct
-        if delta <= -5:
-            notes.append(f"Average view percentage {round(pct, 1)}% is {round(-delta, 1)} points "
-                         f"below the {video['kind']} median ({round(median_pct, 1)}%).")
-        elif delta >= 5:
-            notes.append(f"Average view percentage {round(pct, 1)}% beats the {video['kind']} "
-                         f"median by {round(delta, 1)} points.")
-    ctr = metrics.get("impressionsClickThroughRate")
-    if isinstance(ctr, (int, float)) and ctr < 3:
-        notes.append(f"Click-through rate {round(ctr, 2)}% is low - the thumbnail/title pair "
-                     f"is the first thing to change, not the video.")
-    if video["kind"] == "long" and video["duration"] > 900 and pct and pct < 35:
-        notes.append("Long-form over 15 minutes with weak average percentage: cut the runtime "
-                     "or split the topic.")
-    return notes
-
-
 def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
                  out: Path, log: Log) -> None:
     out.mkdir(parents=True, exist_ok=True)
@@ -433,7 +371,6 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
              f"{'YouTube Analytics API' if any(v['source'] == 'api' for v in data.values()) else 'YouTube Studio'}.",
              "", "| video | kind | views | avg view | avg % | VTR | @25% | @50% | @75% | biggest drop |",
              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
-    pointers: list[str] = []
 
     for video in videos:
         entry = data.get(video["id"])
@@ -467,14 +404,11 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
                 writer.writeheader()
                 writer.writerows(retention)
             svg_chart(retention, video["title"][:70], folder / "retention.svg")
-        for note in insights(video, retention, metrics, medians[video["kind"]]):
-            pointers.append(f"- **{video['title'][:50]}** - {note}")
 
     lines += ["", f"Medians: long {medians['long']:.1f}%, shorts {medians['shorts']:.1f}%.",
-              "Shorts do not expose a retention curve through the API, so they are judged on "
-              "views, average view duration and average percentage.", "",
-              "## Pointers for the next video", ""]
-    lines += pointers or ["- Not enough data yet; publish a few more videos or widen --last."]
+              "Shorts do not expose a retention curve through the API, so their rows carry views, "
+              "average view duration, average percentage and VTR only.", "",
+              "Numbers only; read `insights.json` or `dataset.csv` for the machine-readable set."]
     (out / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"wrote {out / 'report.md'} ({len(videos)} videos)")
     if not any(d["retention"] for d in data.values()):

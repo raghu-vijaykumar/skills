@@ -101,6 +101,11 @@ def private_pass(settings: dict, cfg: dict, args, root: Path, staging: Path,
             if launched:
                 studio.stop(browser, log)
             return 0, 0, 0
+        if not studio.channel_accessible(port, settings["channel_id"], log):
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            if launched:
+                studio.stop(browser, log)
+            return 0, 0, 0
 
     rows = studio.rows(settings["channel_id"], port, log) if launched else []
     have = archive_ids(archive)
@@ -353,6 +358,26 @@ def main() -> int:
     p.add_argument("--video")
     p.add_argument("--out")
 
+    p = sub.add_parser("insights", parents=[shared],
+                       help="channel dataset, analysis, suggestions and next-video ideas")
+    p.add_argument("--refresh", action="store_true", help="ignore cached metrics")
+    p.add_argument("--vtr-count", type=int, default=12,
+                   help="how many shorts to read VTR for (0 disables the browser pass)")
+    p.add_argument("--out")
+
+    p = sub.add_parser("media", parents=[shared],
+                       help="extract audio, frames or a clip from a video or draft")
+    p.add_argument("action", choices=["audio", "frames", "clip", "segment"])
+    p.add_argument("--video", help="published video id")
+    p.add_argument("--draft", help="draft folder name")
+    p.add_argument("--path", help="explicit media file")
+    p.add_argument("--start", help="start time: SS, MM:SS or HH:MM:SS")
+    p.add_argument("--end", help="end time")
+    p.add_argument("--at", help="comma separated frame timestamps")
+    p.add_argument("--count", type=int, default=6, help="frames to sample in the range")
+    p.add_argument("--copy", action="store_true", help="stream-copy the clip instead of re-encoding")
+    p.add_argument("--out")
+
     p = sub.add_parser("code", parents=[shared],
                        help="git-track the sources and snapshot them to Drive")
     p.add_argument("action", choices=["init", "status", "snapshot", "restore", "prune"])
@@ -385,6 +410,14 @@ def main() -> int:
         import analytics
 
         return analytics.run(cfg, args, log)
+    if args.command == "insights":
+        import insights
+
+        return insights.run(cfg, args, log)
+    if args.command == "media":
+        import media
+
+        return media.run(cfg, args, log)
     if args.command == "code":
         return source(cfg, args, log)
     return 1

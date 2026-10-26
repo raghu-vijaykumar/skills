@@ -134,6 +134,25 @@ def cookies_to_temp(port: int) -> tuple[Path | None, Path | None]:
     return (path, temp) if export_cookies(port, path) == 0 and path.exists() else (None, temp)
 
 
+def channel_accessible(port: int, channel_id: str, log: Log) -> bool:
+    """Studio can only read the channel the browser session currently has selected."""
+    target = new_tab(port, f"https://studio.youtube.com/channel/{channel_id}/videos/upload")
+    session = Session(target["webSocketDebuggerUrl"])
+    session.call("Runtime.enable")
+    deadline = time.time() + 40
+    while time.time() < deadline and session.eval("document.readyState") != "complete":
+        time.sleep(1)
+    time.sleep(3)
+    title = session.eval("document.title") or ""
+    body = session.eval("(document.body.innerText||'').slice(0,200)") or ""
+    session.close()
+    if "Oops" in title or "don't have permission" in body:
+        log(f"Studio session has no access to {channel_id}; switch the channel in the "
+            f"browser (or sign in with an account that manages it) and re-run")
+        return False
+    return True
+
+
 def rows(channel_id: str, port: int, log: Log) -> list[dict]:
     collected: dict[str, dict] = {}
     for tab in ("videos/upload", "videos/short"):
