@@ -1,0 +1,46 @@
+{
+  "name": "@raghu-vijaykumar/videogen",
+  "version": "0.1.1",
+  "private": true,
+  "engines": {"node": ">=22.18.0"},
+  "type": "module",
+  "description": "Reusable Remotion video and content rendering skill",
+  "files": ["videogen/"],
+  "bin": {"videogen": "./videogen/scripts/cli.mjs"},
+  "exports": {
+    ".": {"types": "./videogen/dist/project.d.ts", "default": "./videogen/dist/project.js"},
+    "./cli": "./videogen/scripts/cli.mjs",
+    "./content-package": "./videogen/scripts/content-package.mjs",
+    "./gate/*": "./videogen/dist/gates/check-*.mjs",
+    "./runtime/design/contentStyles": {"types": "./videogen/dist/design/contentStyles.d.mts", "default": "./videogen/dist/design/contentStyles.mjs"},
+    "./runtime/*": {"types": "./videogen/dist/*.d.ts", "default": "./videogen/dist/*.js"},
+    "./skill": "./videogen/SKILL.md"
+  },
+  "scripts": {
+    "build": "tsc -p videogen/tsconfig.json && node videogen/scripts/copy-static.mjs && node videogen/scripts/transpile-gates.mjs",
+    "test": "npm run build && node videogen/dist/gates/check-animation-core.mjs && node --test videogen/tests/*.test.mjs",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.518",
+    "@remotion/renderer": "4.0.518",
+    "yaml": "2.8.1"
+  },
+  "peerDependencies": {
+    "@react-three/fiber": "^9.7.0",
+    "@remotion/cli": "4.0.518",
+    "@remotion/fonts": "4.0.518",
+    "@remotion/media-utils": "4.0.518",
+    "@remotion/three": "4.0.518",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.518",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/three": "^0.186.0",
+    "esbuild": "0.28.1",
+    "typescript": "^7.0.2"
+  }
+}
