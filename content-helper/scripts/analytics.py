@@ -238,21 +238,30 @@ def collect_videos(root: Path, args) -> list[dict]:
     return videos
 
 
-def extract_points(payloads: list) -> list[dict]:
-    points: dict[float, dict] = {}
+def extract_points(payloads: list) -> tuple[list[dict], dict]:
+    """Studio returns {videoId, retentionValues[], metricTotals{}} per card."""
+    points: list[dict] = []
+    metrics: dict = {}
 
     def walk(node):
+        nonlocal points, metrics
         if isinstance(node, dict):
-            if "elapsedVideoTimeRatio" in node and (
-                    "audienceWatchRatio" in node or "audienceRetention" in node):
-                try:
-                    pos = float(node["elapsedVideoTimeRatio"])
-                    value = node.get("audienceWatchRatio", node.get("audienceRetention"))
-                    points[pos] = {"position": pos, "watch_ratio": float(value),
-                                   "relative": node.get("relativeRetentionPerformance")}
-                    return
-                except (TypeError, ValueError):
-                    return
+            if isinstance(node.get("metricTotals"), dict):
+                totals = node["metricTotals"]
+                values = node.get("retentionValues") or []
+                if len(values) > 1:
+                    last = len(values) - 1
+                    points = [{"position": index / last,
+                               "watch_ratio": float(value) / 100.0,
+                               "relative": None}
+                              for index, value in enumerate(values)]
+                metrics = {
+                    "views": totals.get("views"),
+                    "averageViewDuration": (totals.get("avgViewDurationMillis") or 0) / 1000,
+                    "averageViewPercentage": (totals.get("avgPercentageWatched") or 0) * 100,
+                    "shortsFeedImpressionsVtr": totals.get("shortsFeedImpressionsVtr"),
+                }
+                return
             for value in node.values():
                 walk(value)
         elif isinstance(node, list):
@@ -261,7 +270,9 @@ def extract_points(payloads: list) -> list[dict]:
 
     for payload in payloads:
         walk(payload)
-    return [points[key] for key in sorted(points)]
+        if points:
+            break
+    return points, {k: v for k, v in metrics.items() if v is not None}
 
 
 def studio_collect(cfg: dict, settings: dict, videos: list[dict], log: Log) -> dict:
@@ -274,12 +285,16 @@ def studio_collect(cfg: dict, settings: dict, videos: list[dict], log: Log) -> d
         for video in videos:
             url = (f"https://studio.youtube.com/video/{video['id']}"
                    "/analytics/tab-content/period-default")
-            payloads = studio.harvest_json(
-                port, url, ("elapsedVideoTimeRatio", "audienceWatchRatio"), log)
-            points = extract_points(payloads)
-            collected[video["id"]] = {"metrics": {}, "retention": points,
+            payloads = studio.harvest_json(port, url, ("metricTotals",), log)
+            points, metrics = extract_points(payloads)
+            if not points:
+                payloads = studio.harvest_json(port, url, ("metricTotals",), log, wait=25)
+                points, metrics = extract_points(payloads)
+            collected[video["id"]] = {"metrics": metrics, "retention": points,
                                       "source": "studio"}
-            log(f"{video['id']}: {len(points)} retention points from Studio")
+            vtr = metrics.get("shortsFeedImpressionsVtr")
+            log(f"{video['id']}: {len(points)} points, {metrics.get('views', '?')} views"
+                + (f", VTR {vtr:.1f}%" if isinstance(vtr, (int, float)) else ""))
     finally:
         studio.stop(browser, log)
     return collected
@@ -361,6 +376,23 @@ def insights(video: dict, retention: list[dict], metrics: dict, median_pct: floa
                 f"{round(half * 100)}% still watching at halfway - this structure works; "
                 f"reuse its pacing and length.")
     pct = metrics.get("averageViewPercentage")
+    vtr = metrics.get("shortsFeedImpressionsVtr")
+    if video["kind"] == "shorts" and isinstance(vtr, (int, float)):
+        views = metrics.get("views") or 0
+        if vtr < 45:
+            notes.append(
+                f"Only {vtr:.1f}% of Shorts-feed impressions were watched (VTR): most viewers "
+                f"swiped at the first frame. Reach is capped by the opening, not the retention "
+                f"curve - change frame one and the first spoken line.")
+        elif vtr >= 55 and views < 500:
+            notes.append(
+                f"VTR {vtr:.1f}% is strong, yet only {views} views: the entry converts, so reach "
+                f"is limited by topic demand and audience size, not by the edit. More uploads on "
+                f"the same proven topic will compound further than polishing this one.")
+        if isinstance(pct, (int, float)) and pct > 100 and vtr < 50:
+            notes.append(
+                f"Average view percentage {pct:.0f}% comes from re-watching, but VTR is only "
+                f"{vtr:.1f}%: the loop serves existing viewers, it is not winning new ones.")
     if isinstance(pct, (int, float)) and pct > 100 and video["kind"] == "shorts":
         notes.append(
             f"Average view percentage {round(pct, 1)}% is above 100%: shorts are being "
@@ -399,8 +431,8 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
     lines = [f"# Retention report - {settings['name']}", "",
              f"Generated {now()} from "
              f"{'YouTube Analytics API' if any(v['source'] == 'api' for v in data.values()) else 'YouTube Studio'}.",
-             "", "| video | kind | views | avg view | avg % | @25% | @50% | @75% | biggest drop |",
-             "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+             "", "| video | kind | views | avg view | avg % | VTR | @25% | @50% | @75% | biggest drop |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     pointers: list[str] = []
 
     for video in videos:
@@ -412,13 +444,15 @@ def build_report(root: Path, settings: dict, videos: list[dict], data: dict,
         avg_txt = f"{int(avg // 60)}:{int(avg % 60):02d}" if isinstance(avg, (int, float)) else "-"
         pct = metrics.get("averageViewPercentage")
         pct_txt = f"{pct:.1f}%" if isinstance(pct, (int, float)) else "-"
+        vtr = metrics.get("shortsFeedImpressionsVtr")
+        vtr_txt = f"{vtr:.1f}%" if isinstance(vtr, (int, float)) else "-"
         cells = [f"{v:.0%}" if (v := at(retention, p)) is not None else "-"
                  for p in (0.25, 0.5, 0.75)]
         drop = biggest_drop(retention)
         drop_txt = f"{drop[0]:.0%} ({drop[1]:.0%})" if drop else "-"
         title = video["title"][:60].replace("|", "/")
         lines.append(f"| [{title}](https://youtu.be/{video['id']}) | {video['kind']} | "
-                     f"{metrics.get('views', '-')} | {avg_txt} | {pct_txt} | "
+                     f"{metrics.get('views', '-')} | {avg_txt} | {pct_txt} | {vtr_txt} | "
                      f"{' | '.join(cells)} | {drop_txt} |")
 
         folder = out / video["id"]
