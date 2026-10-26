@@ -191,6 +191,20 @@ python scripts/content.py media clip    --channel revise-labs --video VIDEOID --
   (re-encoded for frame accuracy; `--copy` stream-copies instead)
 - output defaults to `<channel>/analysis/<target>/`, override with `--out`
 
+## From dataset to the next video
+
+`insights.json` is the input for [video-idea-engine](../video-idea-engine/SKILL.md): research
+sweep, scored idea selection, packaging before production, and a measurement loop that feeds
+the next run.
+
+```powershell
+python ../video-idea-engine/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
+```
+
+That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` and
+`measurement.md`, pre-filled with the channel's medians, strongest lane and best duration
+band.
+
 ## Git-tracked sources
 
 Code-generated channels keep their sources in git at the channel root, next to the media

@@ -18,6 +18,10 @@ is are was were can could will would actually really explained explain works wor
 from at as by be been being its it's there here about when where which who whom whose than then
 them they these those one two not no yes all any more most some such only own same so too very
 just also still even ever never make makes made get gets got use used using new best top vs
+many one ones two three four five six seven eight nine ten lots lot much little few several
+each every most more less entire whole thing things stuff kind sort type way ways
+big small large long short high low good bad great huge tiny simple easy hard complex
+true false real actually literally basically pretty quite very really
 """.split())
 
 PATTERNS = [("how", r"\bhow\b"), ("why", r"\bwhy\b"), ("what", r"\bwhat\b"),
@@ -233,8 +237,8 @@ def cluster_stats(rows: list[dict]) -> list[dict]:
         pcts = [m["avg_pct"] for m in members if m["avg_pct"] is not None]
         vtrs = [m["vtr"] for m in members if m["vtr"] is not None]
         clusters.append({"token": token, "n": len(members),
-                         "views": median(views), "avg_pct": median(pcts),
-                         "vtr": median(vtrs),
+                         "views": median(views), "avg_pct": median(pcts) if pcts else None,
+                         "vtr": median(vtrs) if vtrs else None,
                          "best": max(members, key=lambda m: m["views"] or 0)["title"]})
     clusters.sort(key=lambda c: (c["views"] or 0), reverse=True)
     return clusters
@@ -250,7 +254,7 @@ def duration_bands(rows: list[dict]) -> list[dict]:
         result.append({"band": name, "n": len(members),
                        "views": median([m["views"] for m in members if m["views"]]),
                        "avg_pct": median([m["avg_pct"] for m in members
-                                          if m["avg_pct"] is not None]),
+                                          if m["avg_pct"] is not None]) or None,
                        "vtr": median([m["vtr"] for m in members if m["vtr"] is not None])})
     return result
 
@@ -336,8 +340,9 @@ def render(rows: list[dict], analysis: dict, settings: dict, out: Path, log: Log
                   "| --- | --- | --- | --- | --- |"]
         for band in analysis["bands"]:
             vtr_txt = f"{band['vtr']:.0f}%" if band["vtr"] else "-"
+            avg_txt = f"{band['avg_pct']:.0f}%" if band["avg_pct"] is not None else "-"
             lines.append(f"| {band['band']} | {band['n']} | {band['views']:.0f} | "
-                         f"{band['avg_pct']:.0f}% | {vtr_txt} |")
+                         f"{avg_txt} | {vtr_txt} |")
 
     if analysis["weekdays"]:
         lines += ["", "## Upload day", "", "| day | n | median views |", "| --- | --- | --- |"]
@@ -350,9 +355,9 @@ def render(rows: list[dict], analysis: dict, settings: dict, out: Path, log: Log
                   "| --- | --- | --- | --- | --- | --- |"]
         for cluster in analysis["clusters"][:12]:
             vtr_txt = f"{cluster['vtr']:.0f}%" if cluster["vtr"] else "-"
+            avg_txt = f"{cluster['avg_pct']:.0f}%" if cluster["avg_pct"] is not None else "-"
             lines.append(f"| {cluster['token']} | {cluster['n']} | {cluster['views']:.0f} | "
-                         f"{cluster['avg_pct']:.0f}% | {vtr_txt} | "
-                         f"{cluster['best'][:40]} |")
+                         f"{avg_txt} | {vtr_txt} | {cluster['best'][:40]} |")
 
     lines += ["", "## Channel numbers", "", "| metric | value |", "| --- | --- |"]
     lines += [f"| {name} | {value} |" for name, value in facts(analysis)]

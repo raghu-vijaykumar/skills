@@ -6,7 +6,8 @@ it needs.
 
 | Skill | Purpose |
 | --- | --- |
-| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: incremental backup of public/private/scheduled uploads to Google Drive, local drafts kept in sync, intro prepend, local pruning that never touches Drive, and retention/analytics reports |
+| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: incremental backup of public/private/scheduled uploads to Google Drive, local drafts kept in sync, intro prepend, local pruning that never touches Drive, analytics dataset collection, and audio/frame/clip extraction |
+| [video-idea-engine](video-idea-engine/SKILL.md) | Turns that analytics dataset into a researched, packaged video idea and a production brief: research sweep, scored selection, packaging before production, then a measurement loop |
 
 ## Install
 
