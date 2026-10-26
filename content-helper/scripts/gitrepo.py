@@ -23,9 +23,18 @@ tmp/
 archive.txt
 backup-report.json
 *.part
-/shorts/*/video.*
-/long/*/video.*
-/drafts/*/video.*
+/shorts/*/video.mp4
+/shorts/*/video.mov
+/shorts/*/video.mkv
+/shorts/*/video.webm
+/long/*/video.mp4
+/long/*/video.mov
+/long/*/video.mkv
+/long/*/video.webm
+/drafts/*/video.mp4
+/drafts/*/video.mov
+/drafts/*/video.mkv
+/drafts/*/video.webm
 /shorts/*/metadata.json
 /long/*/metadata.json
 **/assets/generated/
@@ -40,8 +49,8 @@ TREE_EXCLUDES = ["--exclude", ".git/**", "--exclude", ".snapshots/**",
                  "--exclude", ".staging/**", "--exclude", "tmp/**",
                  "--exclude", "**/assets/generated/**", "--exclude", "**/assets/sources/**/images/**",
                  "--exclude", "**/assets/sources/**/videos/**",
-                 "--exclude", "shorts/*/video.*", "--exclude", "long/*/video.*",
-                 "--exclude", "drafts/*/video.*", "--exclude", "drafts/*/original-videos/**",
+                 "--exclude", "shorts/*/video.mp4", "shorts/*/video.mov", "shorts/*/video.mkv", "shorts/*/video.webm", "--exclude", "long/*/video.mp4", "long/*/video.mov", "long/*/video.mkv", "long/*/video.webm",
+                 "--exclude", "drafts/*/video.mp4", "drafts/*/video.mov", "drafts/*/video.mkv", "drafts/*/video.webm", "--exclude", "drafts/*/original-videos/**",
                  "--exclude", "shorts/*/metadata.json", "--exclude", "long/*/metadata.json",
                  "--exclude", "archive.txt", "--exclude", "backup-report.json"]
 
