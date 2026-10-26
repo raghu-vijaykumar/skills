@@ -12,7 +12,7 @@
     "skill:sync": "videogen sync-skill"
   },
   "dependencies": {
-    "@raghu-vijaykumar/videogen": "git+https://github.com/raghu-vijaykumar/skills.git#videogen-v0.1.1",
+    "@raghu-vijaykumar/videogen": "git+https://github.com/raghu-vijaykumar/skills.git#videogen-v0.1.2",
     "@remotion/cli": "4.0.518",
     "@remotion/fonts": "4.0.518",
     "@remotion/media-utils": "4.0.518",
