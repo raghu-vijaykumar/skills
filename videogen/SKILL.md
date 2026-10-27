@@ -13,6 +13,8 @@ For narrated videos, generate cues with `npx videogen narration <id>` and time v
 
 For carousel or post work, use `npx videogen content-check <id>` and `npx videogen content-render <id> --format carousel|post|all`, then inspect every exported card at delivery size. Keep source attribution and evidence manifests with project content.
 
+Use `npx videogen source fetch <url> --slug <name>` to cache external article media under the configured `sourceCacheDir`. Use `npx videogen probe <render.mp4> <seconds> --design 1080x1920` for objective frame measurements, then inspect the actual frame visually. These tools take their paths and palette from the project config.
+
 Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. A passing automated gate does not replace rendered-frame review.
 
 For YouTube publication, read [publishing](references/publishing.md). `npx videogen publish <id>` is a dry run; `--confirm` uploads only after the project checks and rendered review pass. A returned YouTube ID is saved before thumbnail setup, so `--resume` completes a partial setup without another video upload. Keep scheduled and private uploads in drafts until a public backup is verified by the channel's content-helper workflow.

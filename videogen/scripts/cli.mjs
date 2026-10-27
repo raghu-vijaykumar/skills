@@ -49,7 +49,7 @@ async function project(videoId = null) {
   const entryPoint = videoId && config.entryPointForVideo ? config.entryPointForVideo(safeId(videoId)) :
     perVideo && fs.existsSync(perVideo) ? perVideo : config.entryPoint;
   if (typeof entryPoint !== 'string' || !entryPoint) die('Invalid video entry point');
-  return {...config, entryPoint: path.resolve(cwd, entryPoint), videosDir: path.resolve(cwd, config.videosDir), contentDir: path.resolve(cwd, config.contentDir)};
+  return {...config, entryPoint: path.resolve(cwd, entryPoint), videosDir: path.resolve(cwd, config.videosDir), contentDir: path.resolve(cwd, config.contentDir), publicDir: path.resolve(cwd, config.publicDir ?? "public"), workDir: path.resolve(cwd, config.workDir ?? "tmp"), sourceCacheDir: path.resolve(cwd, config.sourceCacheDir ?? "tmp/source-assets")};
 }
 function browserExecutable(config) {
   const explicit = process.env.VIDEOGEN_BROWSER_EXECUTABLE ?? config.browserExecutable;
@@ -69,7 +69,8 @@ function metadata(config, videoId) {
   return {file, value, compositionId, dir: path.join(config.videosDir, videoId)};
 }
 async function compositions(config) {
-  const serveUrl = await bundle({entryPoint: config.entryPoint, onProgress: () => undefined});
+  // Programmatic bundles do not read remotion.config.ts; pass the same static root.
+  const serveUrl = await bundle({entryPoint: config.entryPoint, publicDir: config.publicDir, onProgress: () => undefined});
   return getCompositions(serveUrl, {logLevel: 'error', browserExecutable: browserExecutable(config)});
 }
 async function composition(config, compositionId) {
@@ -138,6 +139,16 @@ async function main() {
     console.log(`Scaffolded ${result.folder} as ${result.compositionId}`);
     return;
   }
+  if (command === 'source' || command === 'probe') {
+    const config = await project();
+    // A fresh project supplies cache and palette settings; the tools stay channel neutral.
+    process.env.VIDEOGEN_SOURCE_CACHE_DIR = config.sourceCacheDir;
+    process.env.VIDEOGEN_PROBE_THEME = JSON.stringify(config.theme.colors);
+    const script = path.join(toolkit, 'scripts', 'tools', command === 'source' ? 'article-assets.mjs' : 'frame-probe.mjs');
+    const result = spawnSync(process.execPath, [script, id, ...args], {cwd, stdio: 'inherit'});
+    if (result.error || result.status !== 0) die(`${command} failed: ${result.error?.message ?? `exit ${result.status}`}`);
+    return;
+  }
   const config = await project(['check', 'render', 'publish', 'studio'].includes(command) ? id : null);
   process.env.VIDEOGEN_VIDEOS_DIR = config.videosDir;
   if (command === 'studio') {
@@ -154,6 +165,7 @@ async function main() {
     return;
   }
   process.env.VIDEOGEN_CONTENT_DIR = config.contentDir;
+  process.env.VIDEOGEN_SOURCE_CACHE_DIR = config.sourceCacheDir;
   process.env.VIDEOGEN_EVIDENCE_STYLES = JSON.stringify(config.styles.filter((style) => style.requiresFirsthandEvidence).map((style) => style.id));
   if (command === 'styles') {
     for (const style of config.styles) console.log(`${style.id}: ${style.name} (${style.formats.join(', ')})`);
@@ -277,14 +289,14 @@ async function main() {
   }
   if (command === 'content-check' || command === 'content-render') {
     safeId(id);
-    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: config.contentDir, videosDir: config.videosDir, publishedDirs: config.publishedDirs?.map((dir) => path.resolve(cwd, dir)), styles: config.styles, theme: config.theme, entryPoint: config.entryPoint, contentEntryPoint: config.contentEntryPoint ? path.resolve(cwd, config.contentEntryPoint) : undefined});
+    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: config.contentDir, videosDir: config.videosDir, publishedDirs: config.publishedDirs?.map((dir) => path.resolve(cwd, dir)), styles: config.styles, theme: config.theme, entryPoint: config.entryPoint, contentEntryPoint: config.contentEntryPoint ? path.resolve(cwd, config.contentEntryPoint) : undefined, publicDir: config.publicDir, workDir: config.workDir, sourceCacheDir: config.sourceCacheDir});
     const contentFile = path.join(config.contentDir, id, 'content.yaml');
     if (fs.existsSync(contentFile) && JSON.parse(process.env.VIDEOGEN_EVIDENCE_STYLES).includes(parse(fs.readFileSync(contentFile, 'utf8'))?.style)) builtin('evidence', id);
     checks(config, id, 'content');
     run(process.execPath, [path.join(toolkit, 'scripts', command === 'content-check' ? 'content-check.mjs' : 'content-render.mjs'), id, ...args], command);
     return;
   }
-  die('Usage: videogen <init|scaffold|sync-skill|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
+  die('Usage: videogen <init|scaffold|sync-skill|source|probe|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
 }
 
 main().catch((error) => {console.error(`videogen: ${error.message}`); process.exitCode = 1;});

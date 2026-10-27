@@ -45,9 +45,9 @@ export function loadContentPackage(id) {
   const manifestPath = relative ? path.resolve(dir, relative) : null;
   if (!manifestPath || !manifestPath.startsWith(`${root}${path.sep}`) || !fs.existsSync(manifestPath)) throw new Error(`${configPath}: source.assetManifest must resolve to an existing repository manifest`);
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const cacheDir = path.resolve(manifest.cacheDir ?? path.join('tmp', 'source-assets', id));
-  const cacheRoot = path.resolve('tmp', 'source-assets');
-  if (!cacheDir.startsWith(`${cacheRoot}${path.sep}`)) throw new Error(`${manifestPath}: cacheDir must stay inside tmp/source-assets`);
+  const cacheRoot = path.resolve(project.sourceCacheDir ?? 'tmp/source-assets');
+  const cacheDir = path.resolve(manifest.cacheDir ?? path.join(cacheRoot, id));
+  if (!cacheDir.startsWith(`${cacheRoot}${path.sep}`)) throw new Error(`${manifestPath}: cacheDir must stay inside ${cacheRoot}`);
   const assets = new Map();
   for (const asset of manifest.assets ?? []) {
     if (!/^[a-z0-9][a-z0-9-]*$/.test(asset.id ?? '') || assets.has(asset.id)) throw new Error(`${manifestPath}: asset IDs must be unique slugs`);

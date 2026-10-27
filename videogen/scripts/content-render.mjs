@@ -31,9 +31,9 @@ try {
   run(process.execPath, [fileURLToPath(new URL('./content-check.mjs', import.meta.url)), id], 'Content validation');
   const formats = requested === 'all' ? ['carousel', 'post'].filter((format) => loaded.config.editions[format]) : [requested];
   if (formats.some((format) => !loaded.config.editions[format])) throw new Error(`${requested} edition is not defined`);
-  const stageDir = path.resolve('public', 'content-assets', id);
-  const propsDir = path.resolve('tmp', 'content-render', id);
-  const outputRoot = path.resolve('out', 'content', id);
+  const stageDir = path.resolve(project.publicDir ?? 'public', 'content-assets', id);
+  const propsDir = path.resolve(project.workDir ?? 'tmp', 'content-render', id);
+  const outputRoot = path.resolve(project.workDir ?? 'out', 'content', id);
   fs.mkdirSync(stageDir, {recursive: true});
   fs.mkdirSync(propsDir, {recursive: true});
   fs.mkdirSync(outputRoot, {recursive: true});

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import analytics
 import studio
-from common import Log, channel_root, channel_settings, human_size, now, read_json, write_json
+from common import Log, channel_path, channel_root, channel_settings, human_size, now, read_json, write_json
 
 STOP = set("""how what why does do the a an of to in on for with and or that this your you it
 is are was were can could will would actually really explained explain works work working into
@@ -70,11 +70,11 @@ def pearson(pairs: list[tuple[float, float]]) -> float:
 
 
 def cache_paths(root: Path, vid: str) -> tuple[Path, Path]:
-    return root / "analytics" / vid / "metrics.json", root / "analytics" / "vtr" / f"{vid}.json"
+    return channel_path(root, "analytics") / vid / "metrics.json", channel_path(root, "analytics") / "vtr" / f"{vid}.json"
 
 
 def cached_metrics(root: Path, vid: str, max_age_hours: float = 12) -> dict:
-    path = root / "analytics" / vid / "metrics.json"
+    path = channel_path(root, "analytics") / vid / "metrics.json"
     if not path.exists():
         return {}
     if (time.time() - path.stat().st_mtime) / 3600 > max_age_hours:
@@ -103,13 +103,13 @@ def fetch_api(cfg: dict, settings: dict, root: Path, videos: list[dict], refresh
         except SystemExit as exc:
             log(f"{video['id']}: metrics skipped ({exc})")
         if metrics:
-            keep = read_json(root / "analytics" / video["id"] / "metrics.json")
+            keep = read_json(channel_path(root, "analytics") / video["id"] / "metrics.json")
             keep.setdefault("video", {"id": video["id"], "title": video["title"],
                                       "kind": video["kind"], "duration": video["duration"],
                                       "upload_date": video["upload_date"]})
             keep["metrics"] = metrics
             keep.setdefault("source", "api")
-            write_json(root / "analytics" / video["id"] / "metrics.json", keep)
+            write_json(channel_path(root, "analytics") / video["id"] / "metrics.json", keep)
         out[video["id"]] = metrics
         log(f"{video['id']}: {metrics.get('views', 'no data')} views")
     return out
@@ -376,7 +376,7 @@ def run(cfg: dict, args, log: Log) -> int:
     slug, raw = select_pair(cfg, args.channel)
     settings = channel_settings(cfg, slug, raw)
     root = channel_root(cfg, slug)
-    out = Path(args.out).expanduser() if args.out else root / "analytics"
+    out = Path(args.out).expanduser() if args.out else channel_path(root, "analytics")
     videos = analytics.collect_videos(root, type("A", (), {"video": None, "last": 10**6})())
     if not videos:
         log(f"no local metadata under {root}; run backup first")

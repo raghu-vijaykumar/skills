@@ -48,6 +48,11 @@ out-of-office/
   backup-report.json                      last run summary (never uploaded)
 ```
 
+For a compact channel workspace, create `analysis/` first. Analytics,
+source cache, staging, and Git bundle snapshots then live beneath it; existing
+channels without `analysis/` keep the layout above. Channel-authored code and
+shared assets can remain in `code/` and `assets/`.
+
 ## Config
 
 `<skill>/config.json` is versioned with the skill. `config.local.json` (gitignored)

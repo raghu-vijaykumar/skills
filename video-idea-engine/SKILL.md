@@ -7,7 +7,7 @@ description: Turn a channel analytics dataset into a researched, packaged video 
 
 A repeatable path from *measured channel data* to *one researched idea* to *a brief you can
 produce*. It works with the [content-helper](../content-helper/SKILL.md) workspace and its
-`analytics/insights.json` dataset.
+`analysis/analytics/insights.json` dataset in a compact workspace (or `analytics/insights.json` in a legacy workspace).
 
 No step may be skipped, and no step may invent numbers. If a source is not fetched in this
 session, it does not exist for the purposes of the brief.
@@ -34,7 +34,7 @@ the dataset each run: when the channel moves, the targets move.
 python scripts/content.py insights --channel <slug>
 ```
 
-Read `content/<slug>/analytics/insights.json` and `dataset.csv`. Extract and write down:
+Read `content/<slug>/analysis/analytics/insights.json` and `dataset.csv` (or the legacy `analytics/` path). Extract and write down:
 
 - `numbers`: median views, median average %, median VTR, subscribers per 1k views
 - `correlations`: which gate currently tracks views

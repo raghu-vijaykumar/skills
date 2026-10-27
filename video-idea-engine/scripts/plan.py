@@ -17,7 +17,7 @@ TEMPLATES = SKILL / "templates"
 CONTENT_HELPER = SKILL.parent / "content-helper" / "scripts"
 sys.path.insert(0, str(CONTENT_HELPER))
 
-from common import (DEFAULT_CONFIG, Log, channel_root, channel_settings, load_config,  # noqa: E402
+from common import (DEFAULT_CONFIG, Log, channel_path, channel_root, channel_settings, load_config,  # noqa: E402
                     select_channels)
 
 
@@ -30,7 +30,7 @@ def fmt(value, suffix: str = "") -> str:
 
 
 def context(root: Path, settings: dict) -> dict:
-    path = root / "analytics" / "insights.json"
+    path = channel_path(root, "analytics") / "insights.json"
     if not path.exists():
         raise SystemExit(f"missing {path}\nRun: python scripts/content.py insights --channel "
                          f"{settings['slug']} --vtr-count 12")

@@ -14,6 +14,14 @@ DEFAULT_CONFIG = SKILL_ROOT / "config.json"
 LOCAL_OVERRIDE = SKILL_ROOT / "config.local.json"
 DEFAULT_WORKSPACE = Path.home() / "content"
 
+
+def channel_path(root: Path, name: str) -> Path:
+    """Keep older channels' paths while compact workspaces use analysis/."""
+    compact = {"analytics": "analytics", ".staging": ".staging",
+               ".snapshots": ".snapshots", "tmp/source-assets": "source-assets"}
+    analysis = root / "analysis"
+    return analysis / compact[name] if analysis.is_dir() else root / name
+
 ILLEGAL = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 if hasattr(sys.stdout, "reconfigure"):

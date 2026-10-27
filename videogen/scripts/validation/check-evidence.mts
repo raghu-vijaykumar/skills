@@ -47,8 +47,9 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {cacheDir?
 if (!manifest.researchQuestion?.trim()) issues.push('researchQuestion is required');
 if (!Array.isArray(manifest.assets) || !manifest.assets.length) issues.push('at least one captured asset is required');
 const cacheDir = path.resolve(manifest.cacheDir ?? '');
-const expectedCacheDir = path.resolve('tmp', 'source-assets', contentId);
-if (cacheDir !== expectedCacheDir) issues.push(`cacheDir must be tmp/source-assets/${contentId}`);
+const sourceCacheRoot = path.resolve(process.env.VIDEOGEN_SOURCE_CACHE_DIR ?? 'tmp/source-assets');
+const expectedCacheDir = path.join(sourceCacheRoot, contentId);
+if (cacheDir !== expectedCacheDir) issues.push(`cacheDir must be ${expectedCacheDir}`);
 const seen = new Set<string>();
 let firsthand = 0;
 for (const asset of manifest.assets ?? []) {

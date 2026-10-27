@@ -19,7 +19,7 @@ import lifecycle
 import intro as intro_mod
 import studio
 import ytdlp
-from common import (DEFAULT_CONFIG, Log, archive_ids, channel_root, channel_settings,
+from common import (DEFAULT_CONFIG, Log, archive_ids, channel_path, channel_root, channel_settings,
                     human_size, load_config, now, resolve_path, select_channels,
                     which_tool, write_json)
 
@@ -45,7 +45,7 @@ def backup(cfg: dict, args, log: Log) -> int:
     for slug, raw in select_channels(cfg, args.channel):
         settings = channel_settings(cfg, slug, raw)
         root = prepare(cfg, slug)
-        staging = root / ".staging"
+        staging = channel_path(root, ".staging")
         archive = root / "archive.txt"
         ytdlp.resolve_channel_id(settings, log)
         base = f"https://www.youtube.com/channel/{settings['channel_id']}"
@@ -80,7 +80,7 @@ def backup(cfg: dict, args, log: Log) -> int:
                              log, cfg["transfers"], immutable=False)
             rc |= drive.copy(root / "assets", drive.join(settings["drive_folder"], "assets"),
                              log, cfg["transfers"], immutable=False)
-            source_cache = root / "tmp" / "source-assets"
+            source_cache = channel_path(root, "tmp/source-assets")
             if source_cache.exists():
                 rc |= drive.copy(source_cache,
                                  drive.join(settings["drive_folder"], "assets", "source-cache"),
@@ -178,7 +178,7 @@ def sync(cfg: dict, args, log: Log) -> int:
             rc |= drive.pull(drive.join(remote, "drafts"), root / "drafts", log, cfg["transfers"])
             rc |= drive.pull(drive.join(remote, "assets"), root / "assets", log, cfg["transfers"])
             rc |= drive.pull(drive.join(remote, "assets", "source-cache"),
-                             root / "tmp" / "source-assets", log, cfg["transfers"])
+                             channel_path(root, "tmp/source-assets"), log, cfg["transfers"])
             continue
         rc |= drive.copy(root / "long", drive.join(remote, "long"), log,
                          cfg["transfers"], immutable=True)
@@ -191,7 +191,7 @@ def sync(cfg: dict, args, log: Log) -> int:
                          cfg["transfers"], immutable=False)
         rc |= drive.copy(root / "assets", drive.join(remote, "assets"), log,
                          cfg["transfers"], immutable=False)
-        source_cache = root / "tmp" / "source-assets"
+        source_cache = channel_path(root, "tmp/source-assets")
         if source_cache.exists():
             rc |= drive.copy(source_cache, drive.join(remote, "assets", "source-cache"),
                              log, cfg["transfers"], immutable=False)

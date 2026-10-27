@@ -42,6 +42,10 @@ export type VideogenProject = {
   videosDir: string;
   publishedDirs?: string[];
   contentDir: string;
+  // A content repo may keep generated work under analysis/ and static media under assets/.
+  publicDir?: string;
+  workDir?: string;
+  sourceCacheDir?: string;
   contentEntryPoint?: string;
   theme: Theme;
   styles: readonly ContentStyle[];

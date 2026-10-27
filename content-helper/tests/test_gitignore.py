@@ -6,9 +6,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import gitrepo
+from common import channel_path
 
 
 class GitIgnoreTest(unittest.TestCase):
+    def test_compact_analysis_paths_do_not_change_legacy_channels(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            self.assertEqual(channel_path(root, "analytics"), root / "analytics")
+            (root / "analysis").mkdir()
+            self.assertEqual(channel_path(root, "analytics"), root / "analysis" / "analytics")
+            self.assertEqual(channel_path(root, "tmp/source-assets"), root / "analysis" / "source-assets")
+            self.assertEqual(gitrepo.bundle_dir(root), root / "analysis" / ".snapshots")
+
     def test_scene_code_is_tracked_but_uploaded_media_is_ignored(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

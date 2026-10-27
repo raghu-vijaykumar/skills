@@ -14,8 +14,10 @@ test('custom style is accepted and unregistered style is rejected', () => {
     fs.writeFileSync(path.join(dir, 'manifest.json'), '{"assets":[]}');
     const content = (style) => `id: ${id}\nstyle: ${style}\ntitle: A custom story\nsource:\n  assetManifest: manifest.json\neditions:\n  post:\n    kind: text\n    heading: A result\n    body: A visible claim\n    caption: A caption\n`;
     fs.writeFileSync(path.join(dir, 'content.yaml'), content('custom-style'));
-    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: root, videosDir: path.join(root, 'videos'), styles: [{id: 'custom-style', name: 'Custom Style', formats: ['post']} ]});
+    const sourceCacheDir = path.join(root, 'analysis', 'source-assets');
+    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: root, videosDir: path.join(root, 'videos'), sourceCacheDir, styles: [{id: 'custom-style', name: 'Custom Style', formats: ['post']} ]});
     assert.equal(loadContentPackage(id).style.id, 'custom-style');
+    assert.equal(loadContentPackage(id).cacheDir, path.join(sourceCacheDir, id));
     fs.writeFileSync(path.join(dir, 'content.yaml'), content('not-registered'));
     assert.throws(() => loadContentPackage(id), /unknown content style/);
   } finally {

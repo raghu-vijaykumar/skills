@@ -10,7 +10,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from common import Log, human_size, read_json, run_stream, write_json
+from common import Log, channel_path, human_size, read_json, run_stream, write_json
 
 GITIGNORE = """\
 # Track video source, public title/description, and thumbnail beside each backup.
@@ -107,7 +107,7 @@ def commit_paths(root: Path, paths: list[Path], log: Log, message: str) -> int:
 
 
 def bundle_dir(root: Path) -> Path:
-    return root / ".snapshots"
+    return channel_path(root, ".snapshots")
 
 
 def ledger_path(root: Path) -> Path:

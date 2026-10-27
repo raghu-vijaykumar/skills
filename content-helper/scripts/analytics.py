@@ -15,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import studio
-from common import (Log, channel_root, channel_settings, human_size, now, read_json,
+from common import (Log, channel_path, channel_root, channel_settings, human_size, now, read_json,
                     select_channels, write_json)
 
 SCOPES = ["https://www.googleapis.com/auth/yt-analytics.readonly",
@@ -423,7 +423,7 @@ def run(cfg: dict, args, log: Log) -> int:
     if not videos:
         log(f"no local metadata under {root}; run backup first")
         return 1
-    out = Path(args.out).expanduser() if args.out else root / "analytics"
+    out = Path(args.out).expanduser() if args.out else channel_path(root, "analytics")
     provider = args.provider or settings["analytics"].get("provider", "api")
     log(f"analytics {slug}: {len(videos)} videos via {provider}")
     if provider == "api":

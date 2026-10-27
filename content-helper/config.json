@@ -26,7 +26,7 @@
       "intro": "assets/intro.mp4",
       "analytics": {
         "provider": "api",
-        "credentials": "C:\\workspace\\content\\revise-labs\\secrets\\youtube-client.json"
+        "credentials": "C:\\workspace\\content\\revise-labs\\code\\secrets\\youtube-client.json"
       }
     }
   }
