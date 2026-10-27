@@ -11,7 +11,7 @@ One workspace per channel, one command family:
 content.py backup     download uploads, reconcile source, verify Drive and push Git
 content.py reconcile backfill exact metadata from local YouTube backups
 content.py sync       push drafts/assets up, or pull drafts down
-content.py draft      scaffold or list a draft folder
+content.py draft      scaffold or list a draft folder; --id separates code ID from title
 content.py intro      prepend the channel intro to a draft video
 content.py prune      delete old published videos locally (Drive untouched)
 content.py insights   build the analytics dataset that a model turns into ideas

@@ -5,7 +5,7 @@ description: Build, validate, review, render, and publish code-driven Remotion v
 
 # Videogen
 
-For one draft at a time, use `npx videogen studio <id>` when the project supplies a per-video entry point.
+For one draft at a time, use `npx videogen scaffold <id> --title "Working title"` to add a new video to an existing project, then `npx videogen studio <id>`. Scaffolding preserves an existing idea brief and refuses to replace authored scenes.
 
 Read `videogen.config.ts`, the target content, and the project's own creative rules before editing. The package owns the generic render and validation commands; the project owns its scenes, media, and channel identity. Use `npx videogen init <directory>` for a fresh project and `npx videogen sync-skill` after installing a pinned package version.
 

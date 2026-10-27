@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
+import unicodedata
 import sys
 from pathlib import Path
 
@@ -56,10 +58,35 @@ def render(template: str, values: dict) -> str:
     return text
 
 
+def draft_id(root: Path, channel: str, title: str) -> str:
+    """Allocate one safe per-video folder; preserve the channel's numeric sequence."""
+    ascii_title = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^a-z0-9]+", "-", ascii_title.lower()).strip("-") or "idea"
+    if channel != "revise-labs":
+        return slug
+    numbers = []
+    for folder in (root / "drafts").iterdir() if (root / "drafts").exists() else []:
+        match = re.match(r"^(\d{5})-", folder.name)
+        if match:
+            numbers.append(int(match.group(1)))
+    for bucket in ("shorts", "long"):
+        for folder in (root / bucket).iterdir() if (root / bucket).exists() else []:
+            provenance = folder / "source-provenance.json"
+            if not provenance.is_file():
+                continue
+            source_id = json.loads(provenance.read_text(encoding="utf-8")).get("sourceId", "")
+            match = re.match(r"^(\d{5})-", source_id)
+            if match:
+                numbers.append(int(match.group(1)))
+    return f"{max(numbers, default=0) + 1:05d}-{slug}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--channel", required=True)
     parser.add_argument("--name", required=True)
+    parser.add_argument("--id", help="optional explicit safe video ID")
+    parser.add_argument("--force", action="store_true", help="refresh an existing brief")
     parser.add_argument("--kind", choices=["short", "long"], default="short")
     parser.add_argument("--promise", default="")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -72,11 +99,16 @@ def main() -> int:
     root = channel_root(cfg, slug)
     ctx = context(root, settings)
 
-    draft = root / "drafts" / args.name
+    folder_id = args.id or draft_id(root, slug, args.name)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", folder_id):
+        raise SystemExit("video ID must contain only letters, digits, and hyphens")
+    draft = root / "drafts" / folder_id
+    if draft.exists() and (draft / "brief.md").exists() and not args.force:
+        raise SystemExit(f"draft brief exists: {draft}; use --force to refresh")
     if not draft.exists():
         subprocess.run([sys.executable, str(CONTENT_HELPER / "content.py"), "draft", "new",
-                        "--channel", slug, "--name", args.name, "--config", args.config],
-                       check=False)
+                        "--channel", slug, "--name", args.name, "--id", folder_id,
+                        "--config", args.config], check=True)
     if not draft.exists():
         raise SystemExit(f"could not create {draft}")
     # Keep the brief in the same per-video folder that videogen will edit.
@@ -123,6 +155,12 @@ def main() -> int:
     (draft / "packaging.md").write_text(packaging, encoding="utf-8")
     (draft / "measurement.md").write_text(measurement, encoding="utf-8")
 
+    if (root / "videogen.config.ts").is_file() and not (draft / "video.tsx").exists():
+        binary = root / "node_modules" / ".bin" / ("videogen.cmd" if sys.platform == "win32" else "videogen")
+        if not binary.exists():
+            raise SystemExit(f"install the pinned videogen package in {root}, then run videogen scaffold {folder_id}")
+        subprocess.run([str(binary), "scaffold", folder_id, "--title", args.name],
+                       cwd=root, check=True)
     log(f"scaffolded {draft}")
     log(f"prior: median {numbers.get('views median')} views, "
         f"{numbers.get('average % median')}% avg, {numbers.get('VTR median')}% VTR; "

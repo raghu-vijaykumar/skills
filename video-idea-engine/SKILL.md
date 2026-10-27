@@ -123,10 +123,10 @@ gate, so it is decided before any production work.
 Use the workspace, do not invent a second one:
 
 ```powershell
-python scripts/content.py draft new --channel <slug> --name "<idea>"
+python ../video-idea-engine/scripts/plan.py --channel <slug> --name "<idea>" --kind short
 ```
 
-Then fill the draft:
+For Revise Labs, the command allocates the next numeric ID, writes the brief and a runnable videogen starter in that same folder. Edit the starter when production begins. Then fill the draft:
 
 - `brief.md` - promise, beats, hero shots, values, runtime, source links
 - `research.md` - the sweep and scorecard
@@ -138,7 +138,7 @@ Then fill the draft:
 Verification is not optional:
 
 ```powershell
-python scripts/content.py media segment --channel <slug> --draft "<idea>" --start 0:00 --end 0:12 --count 6
+python scripts/content.py media segment --channel <slug> --draft <id> --start 0:00 --end 0:12 --count 6
 ```
 
 Inspect the frames for the hook and each hero shot, and read the audio for the first

@@ -9,6 +9,7 @@ import {parse} from 'yaml';
 import {bundle} from '@remotion/bundler';
 import {getCompositions} from '@remotion/renderer';
 import {publishYoutube} from './publish-youtube.mjs';
+import {scaffoldDraft} from './scaffold.mjs';
 
 const toolkit = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cwd = process.cwd();
@@ -44,7 +45,9 @@ async function project(videoId = null) {
   const config = loaded.default ?? loaded.project;
   if (!config?.entryPoint || !config?.videosDir || !config?.contentDir || !config?.theme || !Array.isArray(config.styles)) die('Invalid videogen.config.ts');
   // A draft can have its own Remotion entry without bundling every archived film.
-  const entryPoint = videoId && config.entryPointForVideo ? config.entryPointForVideo(safeId(videoId)) : config.entryPoint;
+  const perVideo = videoId ? path.join(cwd, config.videosDir, safeId(videoId), "entry.tsx") : null;
+  const entryPoint = videoId && config.entryPointForVideo ? config.entryPointForVideo(safeId(videoId)) :
+    perVideo && fs.existsSync(perVideo) ? perVideo : config.entryPoint;
   if (typeof entryPoint !== 'string' || !entryPoint) die('Invalid video entry point');
   return {...config, entryPoint: path.resolve(cwd, entryPoint), videosDir: path.resolve(cwd, config.videosDir), contentDir: path.resolve(cwd, config.contentDir)};
 }
@@ -129,6 +132,12 @@ async function main() {
     console.log(`Installed version-matched skill at ${target}`);
     return;
   }
+  if (command === 'scaffold') {
+    const config = await project();
+    const result = scaffoldDraft(config, safeId(id), {title: flag('title') ?? id, durationSeconds: Number(flag('duration') ?? 5)});
+    console.log(`Scaffolded ${result.folder} as ${result.compositionId}`);
+    return;
+  }
   const config = await project(['check', 'render', 'publish', 'studio'].includes(command) ? id : null);
   process.env.VIDEOGEN_VIDEOS_DIR = config.videosDir;
   if (command === 'studio') {
@@ -151,12 +160,14 @@ async function main() {
     return;
   }
   if (command === 'catalog') {
-    const list = await compositions(config);
-    const byId = new Map(list.map((item) => [item.id, item]));
     const videos = fs.readdirSync(config.videosDir, {withFileTypes: true}).filter((entry) => entry.isDirectory() && fs.existsSync(path.join(config.videosDir, entry.name, 'video.tsx'))).map((entry) => entry.name).sort();
+    const sharedCompositions = config.entryPointForVideo ? null : await compositions(config);
     for (const videoId of videos) {
       const item = metadata(config, videoId);
-      const comp = byId.get(item.compositionId);
+      const localEntry = path.join(config.videosDir, videoId, 'entry.tsx');
+      const videoConfig = config.entryPointForVideo || fs.existsSync(localEntry) ? await project(videoId) : config;
+      const list = videoConfig === config ? sharedCompositions : await compositions(videoConfig);
+      const comp = list.find((composition) => composition.id === item.compositionId);
       if (!comp) die(`${videoId}: missing composition ${item.compositionId}`);
       const declaredWidth = Number(item.value.video?.width);
       const declaredHeight = Number(item.value.video?.height);
@@ -273,7 +284,7 @@ async function main() {
     run(process.execPath, [path.join(toolkit, 'scripts', command === 'content-check' ? 'content-check.mjs' : 'content-render.mjs'), id, ...args], command);
     return;
   }
-  die('Usage: videogen <init|sync-skill|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
+  die('Usage: videogen <init|scaffold|sync-skill|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
 }
 
 main().catch((error) => {console.error(`videogen: ${error.message}`); process.exitCode = 1;});

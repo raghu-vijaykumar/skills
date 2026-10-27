@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -230,7 +231,11 @@ def draft(cfg: dict, args, log: Log) -> int:
     name = (args.name or "").strip()
     if not name:
         raise SystemExit("--name is required for 'draft new'")
-    folder = drafts / name
+    # A code-generated draft may use a stable ID distinct from its display title.
+    folder_id = (args.id or name).strip()
+    if args.id and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", folder_id):
+        raise SystemExit("--id must contain only letters, digits, and hyphens")
+    folder = drafts / folder_id
     if folder.exists() and not args.force:
         raise SystemExit(f"draft already exists: {folder}")
     (folder / "original-videos").mkdir(parents=True, exist_ok=True)
@@ -238,7 +243,7 @@ def draft(cfg: dict, args, log: Log) -> int:
     if not (folder / "description.txt").exists():
         (folder / "description.txt").write_text(
             f"# {settings['name']}\n\nWrite the description here.\n\n#tags\n", encoding="utf-8")
-    write_json(folder / "draft.json", {"name": name, "channel": slug, "created": now(),
+    write_json(folder / "draft.json", {"name": name, "sourceId": folder_id, "channel": slug, "created": now(),
                                        "status": "draft"})
     log(f"created {folder}")
     return 0
@@ -388,6 +393,7 @@ def main() -> int:
     p = sub.add_parser("draft", parents=[shared], help="scaffold or list drafts")
     p.add_argument("action", choices=["new", "list"])
     p.add_argument("--name")
+    p.add_argument("--id", help="safe folder ID, separate from the display title")
     p.add_argument("--force", action="store_true")
 
     p = sub.add_parser("intro", parents=[shared],
