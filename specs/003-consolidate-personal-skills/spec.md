@@ -1,7 +1,7 @@
 # Feature Specification: consolidate personal skills
 
 **Created:** 2026-10-27
-**Status:** In progress
+**Status:** Complete
 
 ## User scenarios
 
