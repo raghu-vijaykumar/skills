@@ -8,6 +8,27 @@ import {parse} from 'yaml';
 const MEDIA_KINDS = new Set(['image', 'gif', 'video']);
 const KINDS = new Set(['text', ...MEDIA_KINDS]);
 
+function resolveVideoYaml(project, videoId) {
+  const draft = path.resolve(project.videosDir ?? 'videos', videoId, 'content', 'video.yaml');
+  if (fs.existsSync(draft)) return draft;
+  for (const dir of project.publishedDirs ?? []) {
+    const base = path.resolve(dir);
+    if (!fs.existsSync(base)) continue;
+    for (const name of fs.readdirSync(base)) {
+      const folder = path.join(base, name);
+      const provenance = path.join(folder, 'source-provenance.json');
+      const candidate = path.join(folder, 'content', 'video.yaml');
+      if (!fs.existsSync(provenance) || !fs.existsSync(candidate)) continue;
+      try {
+        if (JSON.parse(fs.readFileSync(provenance, 'utf8')).sourceId === videoId) return candidate;
+      } catch {
+        continue;
+      }
+    }
+  }
+  return draft;
+}
+
 export function loadContentPackage(id) {
   const project = JSON.parse(process.env.VIDEOGEN_PROJECT ?? '{}');
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(id ?? '')) throw new Error('Content ID must be a slug');
@@ -38,7 +59,7 @@ export function loadContentPackage(id) {
     if (!style.formats.includes('video')) throw new Error(`${style.name} does not support video`);
     const videoId = editions.video.videoId;
     if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(videoId ?? '')) throw new Error('Video edition needs a valid videoId');
-    const videoYamlPath = path.resolve(project.videosDir ?? 'videos', videoId, 'content', 'video.yaml');
+    const videoYamlPath = resolveVideoYaml(project, videoId);
     if (!fs.existsSync(videoYamlPath)) throw new Error(`Video edition missing ${videoYamlPath}`);
     const videoYaml = parse(fs.readFileSync(videoYamlPath, 'utf8'));
     if (videoYaml.video?.style !== config.style) throw new Error(`Video edition ${videoId} must use style ${config.style}`);

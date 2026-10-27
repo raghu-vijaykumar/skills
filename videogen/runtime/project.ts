@@ -40,6 +40,7 @@ export type VideogenProject = {
   entryPoint: string;
   entryPointForVideo?: (videoId: string) => string;
   videosDir: string;
+  publishedDirs?: string[];
   contentDir: string;
   contentEntryPoint?: string;
   theme: Theme;

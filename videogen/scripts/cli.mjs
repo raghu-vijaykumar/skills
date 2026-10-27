@@ -277,7 +277,7 @@ async function main() {
   }
   if (command === 'content-check' || command === 'content-render') {
     safeId(id);
-    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: config.contentDir, videosDir: config.videosDir, styles: config.styles, theme: config.theme, entryPoint: config.entryPoint, contentEntryPoint: config.contentEntryPoint ? path.resolve(cwd, config.contentEntryPoint) : undefined});
+    process.env.VIDEOGEN_PROJECT = JSON.stringify({contentDir: config.contentDir, videosDir: config.videosDir, publishedDirs: config.publishedDirs?.map((dir) => path.resolve(cwd, dir)), styles: config.styles, theme: config.theme, entryPoint: config.entryPoint, contentEntryPoint: config.contentEntryPoint ? path.resolve(cwd, config.contentEntryPoint) : undefined});
     const contentFile = path.join(config.contentDir, id, 'content.yaml');
     if (fs.existsSync(contentFile) && JSON.parse(process.env.VIDEOGEN_EVIDENCE_STYLES).includes(parse(fs.readFileSync(contentFile, 'utf8'))?.style)) builtin('evidence', id);
     checks(config, id, 'content');
