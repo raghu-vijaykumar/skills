@@ -1,7 +1,7 @@
 # Feature Specification: simple video publishing
 
 **Created:** 2026-11-01
-**Status:** In progress
+**Status:** Complete
 
 ## User scenarios
 
