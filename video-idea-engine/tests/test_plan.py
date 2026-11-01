@@ -29,5 +29,25 @@ class DraftIdTest(unittest.TestCase):
             self.assertEqual(plan.draft_id(root, "out-of-office", "A New Trip!"), "a-new-trip")
 
 
+class DigestLeadTest(unittest.TestCase):
+    def test_snapshot_leads_are_labeled_unverified(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            path = Path(scratch) / "digest.json"
+            path.write_text(json.dumps({"schemaVersion": 1, "generatedAt": "2026-11-01T12:00:00Z",
+                "items": [{"title": "A new cache design", "url": "https://example.test/cache",
+                           "source": "Engineering Blog", "topic": "systems", "publishedAt": None}]}), encoding="utf-8")
+            result = plan.digest_appendix(path)
+            self.assertIn("Digest leads (unverified)", result)
+            self.assertIn("undated; verify", result)
+            self.assertIn("https://example.test/cache", result)
+
+    def test_rejects_unknown_digest_schema(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            path = Path(scratch) / "digest.json"
+            path.write_text('{"schemaVersion": 2, "items": []}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "unsupported digest snapshot"):
+                plan.digest_appendix(path)
+
+
 if __name__ == "__main__":
     unittest.main()

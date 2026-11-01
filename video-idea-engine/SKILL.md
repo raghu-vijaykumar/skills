@@ -1,6 +1,6 @@
 ---
 name: video-idea-engine
-description: Turn a channel analytics dataset into a researched, packaged video idea and a production brief for a short or long video. Use when asked to come up with a new video idea, find a fresh topic from recent papers/blogs/news, plan a video that reaches more people, or turn channel insights into the next upload.
+description: Turn channel analytics and a curated source digest into a researched, packaged video idea and production brief for a short or long video. Use for fresh topics from papers, engineering blogs, news, and channel insights.
 ---
 
 # video-idea-engine
@@ -50,6 +50,13 @@ say so in the brief.
 
 ## Step 1 - research sweep
 
+Run the bundled [idea digest](references/digest.md) first for a dated pool of leads:
+
+```powershell
+node <video-idea-engine-skill>/digest/index.mjs --workspace <channel-root> --days 7 --limit 8
+```
+
+Read `<channel-root>/analysis/digest/latest.json` and note any failed sources. Digest headlines and scores are discovery signals, not evidence; open primary sources and verify dates, mechanisms, and claims before scoring candidates. The default command only writes local JSON. Never send its optional Telegram edition without an explicit request.
 Goal: 8-12 candidate mechanisms, all sourced within this session, with dates.
 
 Sources, in priority order:
@@ -123,10 +130,10 @@ gate, so it is decided before any production work.
 Use the workspace, do not invent a second one:
 
 ```powershell
-python ../video-idea-engine/scripts/plan.py --channel <slug> --name "<idea>" --kind short
+python <video-idea-engine-skill>/scripts/plan.py --channel <slug> --name "<idea>" --kind short --digest-json <channel-root>/analysis/digest/latest.json
 ```
 
-For Revise Labs, the command allocates the next numeric ID, writes the brief and a runnable videogen starter in that same folder. Edit the starter when production begins. Then fill the draft:
+For Revise Labs, the command allocates the next numeric ID, writes the brief and a runnable videogen starter in that same folder. Edit the starter when production begins. The planner adds a clearly unverified lead list from that snapshot. Then fill the draft:
 
 - `brief.md` - promise, beats, hero shots, values, runtime, source links
 - `research.md` - the sweep and scorecard

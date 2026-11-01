@@ -81,6 +81,37 @@ def draft_id(root: Path, channel: str, title: str) -> str:
     return f"{max(numbers, default=0) + 1:05d}-{slug}"
 
 
+def digest_appendix(snapshot_path: Path) -> str:
+    """Carry source leads into a brief without promoting headlines into evidence."""
+    data = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    if data.get("schemaVersion") != 1 or not isinstance(data.get("items"), list):
+        raise ValueError(f"unsupported digest snapshot: {snapshot_path}")
+    buckets: dict[str, list[dict]] = {}
+    for item in data["items"]:
+        if item.get("title") and item.get("url"):
+            buckets.setdefault(str(item.get("topic") or "other"), []).append(item)
+    selected = []
+    while buckets and len(selected) < 12:
+        for topic in list(buckets):
+            if buckets[topic]:
+                selected.append(buckets[topic].pop(0))
+            if not buckets[topic]:
+                del buckets[topic]
+            if len(selected) == 12:
+                break
+    lines = ["\n## Digest leads (unverified)", "",
+             f"Snapshot: {snapshot_path} (generated {data.get('generatedAt', 'unknown')})",
+             "These are discovery leads only. Open the linked primary source, verify its date and technical claims, and record a mechanism before scoring a candidate.", ""]
+    for item in selected:
+        title = re.sub(r"\s+", " ", str(item["title"])).strip()
+        source = re.sub(r"\s+", " ", str(item.get("source") or item.get("topic") or "source")).strip()
+        date = item.get("publishedAt") or "undated; verify"
+        lines.append(f"- {title} | {source} | {date} | {item['url']}")
+    if not selected:
+        lines.append("- No leads in this snapshot; research primary sources directly.")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--channel", required=True)
@@ -89,6 +120,7 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="refresh an existing brief")
     parser.add_argument("--kind", choices=["short", "long"], default="short")
     parser.add_argument("--promise", default="")
+    parser.add_argument("--digest-json", type=Path, help="explicit idea-digest snapshot of unverified leads")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     args = parser.parse_args()
 
@@ -147,6 +179,8 @@ def main() -> int:
         "lane": lane.get("token", "?"),
         "weak_gate": "VTR (entry)" if vtr_median and vtr_median < 50 else "retention",
     })
+    if args.digest_json:
+        research += digest_appendix(args.digest_json)
     packaging = render("packaging.md", common)
     measurement = render("postmortem.md", common)
 

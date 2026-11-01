@@ -1,0 +1,20 @@
+{
+  "name": "@raghu-vijaykumar/video-idea-digest",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Structured source discovery for the video-idea-engine skill with optional Telegram delivery",
+  "bin": {
+    "digest": "./index.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/digest.test.mjs"
+  },
+  "dependencies": {
+    "rss-parser": "^3.13.0",
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}
