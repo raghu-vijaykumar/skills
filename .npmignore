@@ -1,0 +1,8 @@
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/config.local.json
+**/.env
+**/.env.*
+**/tmp/
+**/*.log

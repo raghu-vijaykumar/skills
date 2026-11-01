@@ -1,30 +1,20 @@
-# Skills
+# Content Studio skills
 
-Agent skills used by [opencode](https://opencode.ai). Each skill is a folder with a
-`SKILL.md` (frontmatter `name` + `description`, then the instructions) plus any scripts
-it needs.
+This repository is the editable source of the `content-studio` video lifecycle bundle. The npm package remains `@raghu-vijaykumar/videogen` so existing Remotion imports and the `videogen` CLI keep working. Its canonical source is under [content-studio](content-studio/).
 
-| Skill | Purpose |
+| Skill | Use |
 | --- | --- |
-| [hairline-create](hairline-create/SKILL.md) | Create one self-contained interactive isometric line figure with the bundled Hairline engine |
-| [learning-engineer](learning-engineer/SKILL.md) | Build and review concepts in the separate local Study knowledge base |
-| [content-helper](content-helper/SKILL.md) | One workspace per YouTube channel: public YouTube backups with exact metadata and source in Git, video and asset storage on Drive, editable drafts, intro prepending, analytics, and media extraction |
-| [video-idea-engine](video-idea-engine/SKILL.md) | Turns that analytics dataset into a researched, packaged video idea and a production brief: curated news/paper/GitHub digest, primary-source research sweep, scored selection, packaging, then a measurement loop |
-| [videogen](videogen/SKILL.md) | Reusable Remotion rendering, validation, themes, video/post exports, and YouTube/Instagram publishing |
-
-`skills-lock.json` records the upstream source of the Hairline skill.
+| [content-studio](content-studio/skills/content-studio/SKILL.md) | Route one draft through the lifecycle |
+| [content-studio-ideas](content-studio/skills/content-studio-ideas/SKILL.md) | Owned analytics, public comparisons, digest, idea brief |
+| [content-studio-animate](content-studio/skills/content-studio-animate/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
+| [content-studio-vlog](content-studio/skills/content-studio-vlog/SKILL.md) | Camera preprocessing, manual edit handoff, local transcription, thumbnail proposal |
+| [content-studio-publish](content-studio/skills/content-studio-publish/SKILL.md) | Reviewed package approval, YouTube now/schedule, Instagram now |
+| [content-studio-archive](content-studio/skills/content-studio-archive/SKILL.md) | Independent public backup, Drive verification, monthly reconciliation |
 
 ## Install
 
-Clone next to your projects and register the path in your opencode config:
+Clone this repository, then run `node content-studio/scripts/cli.mjs install-skills --global`. The installer stores one versioned bundle at `~/.agents/content-studio/v<version>` and links its six skill folders directly under `~/.agents/skills`. [Codex](https://learn.chatgpt.com/docs/build-skills) and [OpenCode](https://opencode.ai/docs/skills) both discover that global path. It verifies the six matching skill entrypoints, refuses to replace unmanaged folders, then removes the obsolete global names `videogen`, `content-helper`, `video-idea-engine`, `hairline-create`, and `learning-engineer`.
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "skills": { "paths": ["C:/workspace/skills"] }
-}
-```
+A video project can pin a tested Git tag of this private repository in `package.json`, run `npm install`, and use `npx videogen sync-skill` to install the matching animation skill locally. `npx videogen init <directory>` starts a project and `npx videogen scaffold <id> --title "Working title"` creates a draft. The root npm package includes only `content-studio/`.
 
-Or copy a single skill folder into `~/.config/opencode/skills/`.
-
-`videogen` also ships as the npm package at this repository root. Pin a tested Git tag in a content project's `package.json`, run `npm install`, then `npx videogen sync-skill` to install the matching skill in `.agents/skills/videogen` for Codex and OpenCode. New projects can start with `npx videogen init <directory>`; add a draft with `npx videogen scaffold <id> --title "Working title"`.
+The digest and channel helper are internal tools in the bundle, not separately discoverable skills. The Hairline style adapts the MIT licensed [Hairline](https://github.com/lucasmarkes/hairline) visual rules; the source attribution is retained in `content-studio/styles/hairline-source/LICENSE`. Channel media, drafts, secrets, and analytics stay in each content workspace.

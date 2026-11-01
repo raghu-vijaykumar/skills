@@ -1,39 +1,45 @@
 {
   "name": "@raghu-vijaykumar/videogen",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "engines": {
     "node": ">=22.18.0"
   },
   "type": "module",
-  "description": "Reusable Remotion video and content rendering skill",
+  "description": "Content Studio video lifecycle skills and reusable Remotion runtime",
   "files": [
-    "videogen/"
+    "content-studio/"
   ],
   "bin": {
-    "videogen": "./videogen/scripts/cli.mjs"
+    "videogen": "./content-studio/toolkit/videogen/scripts/cli.mjs",
+    "content-studio": "./content-studio/scripts/cli.mjs"
   },
   "exports": {
     ".": {
-      "types": "./videogen/dist/project.d.ts",
-      "default": "./videogen/dist/project.js"
+      "types": "./content-studio/toolkit/videogen/dist/project.d.ts",
+      "default": "./content-studio/toolkit/videogen/dist/project.js"
     },
-    "./cli": "./videogen/scripts/cli.mjs",
-    "./content-package": "./videogen/scripts/content-package.mjs",
-    "./gate/*": "./videogen/dist/gates/check-*.mjs",
+    "./cli": "./content-studio/toolkit/videogen/scripts/cli.mjs",
+    "./content-package": "./content-studio/toolkit/videogen/scripts/content-package.mjs",
+    "./gate/*": "./content-studio/toolkit/videogen/dist/gates/check-*.mjs",
     "./runtime/design/contentStyles": {
-      "types": "./videogen/dist/design/contentStyles.d.mts",
-      "default": "./videogen/dist/design/contentStyles.mjs"
+      "types": "./content-studio/toolkit/videogen/dist/design/contentStyles.d.mts",
+      "default": "./content-studio/toolkit/videogen/dist/design/contentStyles.mjs"
     },
     "./runtime/*": {
-      "types": "./videogen/dist/*.d.ts",
-      "default": "./videogen/dist/*.js"
+      "types": "./content-studio/toolkit/videogen/dist/*.d.ts",
+      "default": "./content-studio/toolkit/videogen/dist/*.js"
     },
-    "./skill": "./videogen/SKILL.md"
+    "./skill": "./content-studio/skills/content-studio-animate/SKILL.md",
+    "./runtime/hairline": {
+      "types": "./content-studio/toolkit/videogen/dist/hairline.d.ts",
+      "default": "./content-studio/toolkit/videogen/dist/hairline.js"
+    }
   },
   "scripts": {
-    "build": "tsc -p videogen/tsconfig.json && node videogen/scripts/copy-static.mjs && node videogen/scripts/transpile-gates.mjs",
-    "test": "npm run build && node videogen/dist/gates/check-animation-core.mjs && node --test videogen/tests/*.test.mjs",
+    "build": "tsc -p content-studio/toolkit/videogen/tsconfig.json && node content-studio/toolkit/videogen/scripts/copy-static.mjs && node content-studio/toolkit/videogen/scripts/transpile-gates.mjs",
+    "check:docs": "node content-studio/scripts/check-docs.mjs",
+    "test": "npm run build && node content-studio/toolkit/videogen/dist/gates/check-animation-core.mjs && node --test content-studio/toolkit/videogen/tests/*.test.mjs content-studio/tests/*.test.mjs",
     "prepare": "npm run build"
   },
   "dependencies": {

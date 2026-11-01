@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "skills": {
-    "hairline-create": {
+  "sources": {
+    "hairline-style": {
       "source": "lucasmarkes/hairline",
       "sourceType": "github",
-      "skillPath": "skills/hairline-create/SKILL.md",
-      "computedHash": "7668399290652b2382d3ded47757704e836a37ff4fd3afc4c73f19be2aae2db2"
+      "sourcePath": "content-studio/styles/hairline-source/UPSTREAM-SKILL.md",
+      "licensePath": "content-studio/styles/hairline-source/LICENSE",
+      "upstreamHash": "7668399290652b2382d3ded47757704e836a37ff4fd3afc4c73f19be2aae2db2"
     }
   }
 }
