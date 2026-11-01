@@ -437,6 +437,22 @@ def main() -> int:
     p.add_argument("--copy", action="store_true", help="stream-copy the clip instead of re-encoding")
     p.add_argument("--out")
 
+    p = sub.add_parser("preprocess", parents=[shared],
+                       help="clean vlog voice, stabilize clips, and prepare blur review")
+    p.add_argument("--draft", help="draft folder with camera clips at its root")
+    p.add_argument("--path", help="process one explicit camera clip")
+    p.add_argument("--clip", help="process one camera filename in the draft")
+    p.add_argument("--out", help="output folder (default: processed-clips beside source)")
+    p.add_argument("--apply-review", action="store_true",
+                   help="apply rows marked remove=yes in each review.csv")
+    p.add_argument("--dv-approved", action="store_true",
+                   help="you verified the prior Dolby Vision proof on your playback device")
+    p.add_argument("--dv-proof", action="store_true",
+                   help="create or refresh a short Dolby Vision stabilization proof")
+    p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
+    p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
+                   help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
+
     p = sub.add_parser("code", parents=[shared],
                        help="git-track the sources and snapshot them to Drive")
     p.add_argument("action", choices=["init", "status", "snapshot", "restore", "prune"])
@@ -479,6 +495,10 @@ def main() -> int:
         import media
 
         return media.run(cfg, args, log)
+    if args.command == "preprocess":
+        import preprocess
+
+        return preprocess.run(cfg, args, log)
     if args.command == "code":
         return source(cfg, args, log)
     return 1

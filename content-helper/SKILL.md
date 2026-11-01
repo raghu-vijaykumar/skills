@@ -16,6 +16,7 @@ content.py intro      prepend the channel intro to a draft video
 content.py prune      delete old published videos locally (Drive untouched)
 content.py insights   build the analytics dataset that a model turns into ideas
 content.py media      extract audio, frames or a clip for segment review
+content.py preprocess clean vlog voice, stabilize camera clips, and review blur candidates
 content.py code       git-track the sources, snapshot to Drive, restore, prune
 content.py analytics  retention and performance numbers
 content.py list       channels, local roots, draft counts
@@ -197,6 +198,49 @@ python scripts/content.py media clip    --channel revise-labs --video VIDEOID --
   `frame-*.png` (evenly spaced, or the exact `--at` timestamps) and `clip-*.mp4`
   (re-encoded for frame accuracy; `--copy` stream-copies instead)
 - output defaults to `<channel>/analysis/<target>/`, override with `--out`
+
+## Vlog clip preprocessing
+
+Run this on camera clips before assembling an Out of Office vlog:
+
+```powershell
+python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --clip IMG_1514.MP4
+python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --apply-review
+```
+
+The first command leaves originals untouched and writes one folder per camera filename under
+`drafts/<draft>/processed-clips/`. It selects the regular mono/stereo audio track (not
+Apple's APAC spatial track), denoises it, detects speech, lowers quiet sections by 13 dB,
+and adjusts speech toward a consistent level with no more than 13 dB boost. Short gain
+ramps and a -1 dBFS limiter prevent abrupt level jumps and clipping. `--denoise auto`
+uses DeepFilterNet when its `deep-filter.exe` (standalone Windows release) or
+`deepFilter` (Python package) executable is on PATH; otherwise it uses
+FFmpeg's `afftdn` filter and records that choice in `report.json`. Install the
+speech detector with `python -m pip install silero-vad numpy`. The Python
+DeepFilterNet 0.5.6 package needs a supported environment such as Python 3.11;
+its standalone Windows executable avoids that requirement. Download
+`deep-filter-0.5.6-x86_64-pc-windows-msvc.exe` from the
+[official release](https://github.com/Rikorose/DeepFilterNet/releases/tag/v0.5.6),
+name it `deep-filter.exe`, and put its folder on PATH. `--denoise deepfilter` requires
+one of these executables explicitly.
+
+The command stabilizes non-Dolby-Vision clips with two-pass `vidstab`, retains their
+source dimensions and SDR/HDR color tags, and flags a crop greater than 10% in the
+report. `review.html` shows suspected blurry spans; edit the accompanying `review.csv`
+and set `remove=yes` only for spans you want cut. `--apply-review` creates a separate
+`cut.mp4` or `cut.mov` and never edits the camera clip or the first processed export.
+Use `--force` to rebuild analysis, or `--path FILE --out DIR` for a standalone clip.
+
+Dolby Vision requires [dovi_tool](https://github.com/quietvoid/dovi_tool/releases)
+on PATH for an RPU proof. The command first keeps the original Dolby Vision video
+and exports `enhanced-voice.wav`; it only keeps a
+voice-only remux if its Dolby Vision RPU survives probing. When `dovi_tool` is
+available, a three-second `dv-proof.mov` is attempted and checked for frame count,
+RPU, and HLG color tags. Run `--dv-proof` after installing the tool to retry without
+reprocessing audio. Only after that proof passes **and** you check playback on your
+usual device, run `--dv-approved --clip FILE` for the full clip or add
+`--dv-approved` to `--apply-review` for approved cuts. A failed check leaves the
+original and cleaned WAV in place; never treat an HLG-only result as Dolby Vision.
 
 ## From dataset to the next video
 
