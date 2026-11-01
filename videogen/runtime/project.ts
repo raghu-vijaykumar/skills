@@ -58,6 +58,10 @@ export type VideogenProject = {
       tokenFile?: string;
       categoryId?: string;
     };
+    instagram?: {
+      tokenFile?: string;
+      apiVersion?: string;
+    };
   };
 };
 

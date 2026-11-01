@@ -9,6 +9,7 @@ import {parse} from 'yaml';
 import {bundle} from '@remotion/bundler';
 import {getCompositions} from '@remotion/renderer';
 import {publishYoutube} from './publish-youtube.mjs';
+import {publishInstagram} from './publish-instagram.mjs';
 import {scaffoldDraft} from './scaffold.mjs';
 
 const toolkit = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -203,9 +204,12 @@ async function main() {
   }
   if (command === 'publish') {
     const item = metadata(config, id);
-    const confirm = hasFlag('confirm');
-    if (confirm) run(process.execPath, [fileURLToPath(import.meta.url), 'check', id], 'Prepublish validation');
-    const result = await publishYoutube(item, config, {confirm, resume: hasFlag('resume'), at: flag('at')});
+    const platform = flag('platform') ?? 'youtube';
+    if (!['youtube', 'instagram'].includes(platform)) die('Use --platform youtube or --platform instagram');
+    const options = {confirm: hasFlag('confirm'), resume: hasFlag('resume'), at: flag('at')};
+    if (platform === 'instagram' && options.at) die('Instagram cannot be scheduled natively; --at is for YouTube');
+    if (options.confirm) run(process.execPath, [fileURLToPath(import.meta.url), 'check', id], 'Prepublish validation');
+    const result = platform === 'instagram' ? await publishInstagram(item, config, options) : await publishYoutube(item, config, options);
     console.log(JSON.stringify(result, null, 2));
     return;
   }

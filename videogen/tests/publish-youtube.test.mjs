@@ -81,3 +81,12 @@ test('partial thumbnail failure records YouTube ID and resume never uploads agai
     cleanup(root);
   }
 });
+
+test('YouTube native scheduling needs a future timestamp with timezone', () => {
+  const {root, item} = fixture();
+  try {
+    assert.throws(() => publicationPlan(item, {}, {at: '2030-12-01T18:00:00'}), /with timezone/);
+    assert.throws(() => publicationPlan(item, {}, {at: '2020-01-01T18:00:00Z'}), /future ISO/);
+    assert.equal(publicationPlan(item, {}, {at: '2030-12-01T18:00:00+05:30'}).publishAt, '2030-12-01T12:30:00.000Z');
+  } finally { cleanup(root); }
+});

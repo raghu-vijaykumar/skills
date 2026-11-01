@@ -3,3 +3,4 @@ out/
 tmp/
 videos/*/assets/generated/
 public/content-assets/
+secrets/

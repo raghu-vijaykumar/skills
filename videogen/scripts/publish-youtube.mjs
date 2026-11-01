@@ -47,8 +47,10 @@ export function publicationPlan(item, config, options = {}) {
       !fs.existsSync(authoredDescription) || fs.readFileSync(authoredDescription, 'utf8').trimEnd() !== description) {
     throw new Error('Draft title.txt and description.txt must match publishing.youtube metadata exactly');
   }
+  // Native scheduling must be timezone-aware so the requested hour is unambiguous.
+  if (options.at && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(options.at)) throw new Error('--at needs a future ISO timestamp with timezone');
   const publishAt = options.at ? new Date(options.at) : null;
-  if (publishAt && (!Number.isFinite(publishAt.getTime()) || publishAt.getTime() <= Date.now())) throw new Error('--at needs a future ISO timestamp');
+  if (publishAt && (!Number.isFinite(publishAt.getTime()) || publishAt.getTime() <= Date.now())) throw new Error('--at needs a future ISO timestamp with timezone');
   return {title, description, tags: youtube.tags ?? [], playlist: youtube.playlist ?? null,
     render, thumbnail, publishAt: publishAt?.toISOString() ?? null,
     categoryId: String(config.publish?.youtube?.categoryId ?? '28')};
