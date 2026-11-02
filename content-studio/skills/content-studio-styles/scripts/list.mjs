@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Read the shipped registries so a new built-in appears without editing this skill.
-import {builtInStyles} from '../../../toolkit/videogen/dist/styles.js';
-import {CONTENT_STYLES} from '../../../toolkit/videogen/dist/design/contentStyles.mjs';
-import {neutralTheme, reviseLabsTheme} from '../../../toolkit/videogen/dist/themes.js';
+import {builtInStyles} from '../../content-studio-videogen/dist/styles.js';
+import {CONTENT_STYLES} from '../../content-studio-videogen/dist/design/contentStyles.mjs';
+import {neutralTheme, reviseLabsTheme} from '../../content-studio-videogen/dist/themes.js';
 
 const flags=new Set(process.argv.slice(2));
 if ([...flags].some((flag)=>!['--json','--themes'].includes(flag))) {

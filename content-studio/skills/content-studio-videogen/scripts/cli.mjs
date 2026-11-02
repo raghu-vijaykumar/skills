@@ -121,7 +121,7 @@ async function main() {
     return;
   }
   if (command === 'sync-skill') {
-    const source = path.resolve(toolkit, '..', '..', 'skills', 'content-studio-videogen');
+    const source = toolkit;
     const target = path.join(cwd, '.agents', 'skills', 'content-studio-videogen');
     const legacy = path.join(cwd, '.agents', 'skills', 'videogen');
     const previous = path.join(cwd, '.agents', 'skills', 'content-studio-animate');

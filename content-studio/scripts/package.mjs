@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {parse} from 'yaml';
-import {selectMaster} from '../toolkit/videogen/scripts/publish-youtube.mjs';
+import {selectMaster} from '../skills/content-studio-videogen/scripts/publish-youtube.mjs';
 
 export function readJson(file) { return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {}; }
 export function sha256(file) {

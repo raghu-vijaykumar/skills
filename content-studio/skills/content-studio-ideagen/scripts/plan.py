@@ -14,7 +14,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SKILL = HERE.parent
 TEMPLATES = SKILL / "templates"
-CONTENT_HELPER = SKILL.parent.parent / "toolkit" / "content-helper" / "scripts"
+CONTENT_HELPER = SKILL.parent / "content-studio-videoedit" / "scripts"
 sys.path.insert(0, str(CONTENT_HELPER))
 
 from common import (DEFAULT_CONFIG, Log, channel_path, channel_root, channel_settings, load_config,  # noqa: E402

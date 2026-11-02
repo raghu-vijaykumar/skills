@@ -7,8 +7,7 @@ const bundle=path.join(root,'content-studio');
 const skillRoot=path.join(bundle,'skills');
 const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-publish','content-studio-archive'];
-const files=[path.join(root,'README.md'),path.join(bundle,'README.md'),
-  path.join(bundle,'toolkit','content-helper','GUIDE.md')];
+const files=[path.join(root,'README.md'),path.join(bundle,'README.md')];
 for(const name of names) {
   const folder=path.join(skillRoot,name);
   const entry=path.join(folder,'SKILL.md');

@@ -9,7 +9,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {approvePackage, sha256, verifyPackage, validateSrt} from '../scripts/package.mjs';
 import {transcriptionSegments, toSrt, transcribeDraft} from '../scripts/transcribe.mjs';
 import {sourceRevision} from '../scripts/source-revision.mjs';
-import {HairlineStage, HairlineCacheFigure} from '../toolkit/videogen/dist/hairline.js';
+import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-videogen/dist/hairline.js';
 
 const root = path.join(os.tmpdir(), 'content-studio-tests');
 fs.mkdirSync(root, {recursive:true});

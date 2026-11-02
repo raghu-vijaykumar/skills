@@ -1,9 +1,14 @@
----
-name: content-helper
-description: "\"Manage a YouTube channel workspace: keep one editable folder per draft, back up public uploads and their exact title, description, thumbnail and source to Git and Drive, sync media through rclone, and collect analytics for new video ideas. Also supports private backups, intro prepending, local pruning and segment extraction when configured.\""
----
+# Channel helper
 
-# content-helper
+Manage a YouTube channel workspace: keep one editable folder per draft, back up
+public uploads and their exact title, description, thumbnail and source to Git
+and Drive, sync media through rclone, and collect analytics for new video ideas.
+Also supports private backups, intro prepending, local pruning and segment
+extraction when configured.
+
+The commands below use `scripts/content.py`. Run them from the
+`content-studio-videoedit` skill folder, or prefix the script with that skill's
+absolute path from another lifecycle skill.
 
 One workspace per channel, one command family:
 
@@ -278,12 +283,12 @@ as a final edit.
 
 ## From dataset to the next video
 
-`insights.json` is the input for [content-studio-ideagen](../../skills/content-studio-ideagen/SKILL.md): research
+`insights.json` is the input for [content-studio-ideagen](../../content-studio-ideagen/SKILL.md): research
 sweep, scored idea selection, packaging before production, and a measurement loop that feeds
 the next run.
 
 ```powershell
-python ../../skills/content-studio-ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
+python ../../content-studio-ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
 ```
 
 That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` and

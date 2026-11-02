@@ -5,6 +5,6 @@ __pycache__/
 */config.local.json
 content.local.json
 node_modules/
-content-studio/toolkit/videogen/dist/
+content-studio/skills/content-studio-videogen/dist/
 videogen-test-*/
 tmp/

@@ -4,8 +4,8 @@
     "hairline-style": {
       "source": "lucasmarkes/hairline",
       "sourceType": "github",
-      "sourcePath": "content-studio/styles/hairline-source/UPSTREAM-SKILL.md",
-      "licensePath": "content-studio/styles/hairline-source/LICENSE",
+      "sourcePath": "content-studio/skills/content-studio-styles/hairline-source/UPSTREAM-SKILL.md",
+      "licensePath": "content-studio/skills/content-studio-styles/hairline-source/LICENSE",
       "upstreamHash": "7668399290652b2382d3ded47757704e836a37ff4fd3afc4c73f19be2aae2db2"
     }
   }

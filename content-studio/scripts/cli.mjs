@@ -6,8 +6,8 @@ import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {approvePackage, itemFromDraft, verifyPackage} from './package.mjs';
 import {transcribeDraft, probeMaster} from './transcribe.mjs';
-import {publishYoutube} from '../toolkit/videogen/scripts/publish-youtube.mjs';
-import {publishInstagram} from '../toolkit/videogen/scripts/publish-instagram.mjs';
+import {publishYoutube} from '../skills/content-studio-videogen/scripts/publish-youtube.mjs';
+import {publishInstagram} from '../skills/content-studio-videogen/scripts/publish-instagram.mjs';
 import {installSkills} from './install-skills.mjs';
 
 const bundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,7 +29,7 @@ function merge(base, override) {
 function channel() {
   const slug = option('channel');
   if (!slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('--channel needs a configured slug');
-  const configFile = option('config') ?? path.join(bundle, 'toolkit', 'content-helper', 'config.json');
+  const configFile = option('config') ?? path.join(bundle, 'skills', 'content-studio-videoedit', 'config.json');
   const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
   const override = path.join(path.dirname(configFile), 'config.local.json');
   if (fs.existsSync(override)) merge(config, JSON.parse(fs.readFileSync(override, 'utf8')));
@@ -51,7 +51,7 @@ function publishingConfig(root, entry) {
 function remotionCheck(root, id) {
   const project = path.join(root, 'videogen.config.ts');
   if (!fs.existsSync(project)) throw new Error('Remotion draft needs videogen.config.ts');
-  const cli = path.join(bundle, 'toolkit', 'videogen', 'scripts', 'cli.mjs');
+  const cli = path.join(bundle, 'skills', 'content-studio-videogen', 'scripts', 'cli.mjs');
   const result = spawnSync(process.execPath, [cli, 'check', id], {cwd: root, encoding: 'utf8'});
   if (result.status !== 0) throw new Error(`Remotion check failed: ${(result.stderr || result.stdout).trim().split(/\r?\n/).slice(-8).join('\n')}`);
 }

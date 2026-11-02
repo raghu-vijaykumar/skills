@@ -21,7 +21,7 @@ Filled after upload. Numbers only; interpretation goes in the last section.
 | average % | | | |
 | subscribers | | | |
 
-Source: `python <bundle>/toolkit/content-helper/scripts/content.py insights --channel <slug> --refresh --vtr-count 20`
+Source: `python <bundle>/skills/content-studio-videoedit/scripts/content.py insights --channel <slug> --refresh --vtr-count 20`
 
 ## Which gate decided it
 
