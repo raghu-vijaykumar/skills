@@ -454,10 +454,11 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true", help="preview renames and timeline changes")
 
     p = sub.add_parser("preprocess", parents=[shared],
-                       help="clean vlog voice, stabilize clips, and prepare blur review")
+                       help="quarantine duplicates, clean voice, and prepare clip review")
     p.add_argument("--draft", help="draft folder with camera clips at its root")
+    p.add_argument("--folder", help="any folder of camera clips; deduplicate, order, and process it in place")
     p.add_argument("--path", help="process one explicit camera clip")
-    p.add_argument("--clip", help="process one camera filename in the draft")
+    p.add_argument("--clip", help="camera filename in the draft; quarantined duplicates resolve to the kept clip")
     p.add_argument("--utc-offset", help="camera location offset if ordering cannot infer it")
     p.add_argument("--out", help="output folder (default: processed-clips beside source)")
     p.add_argument("--apply-review", action="store_true",
@@ -466,6 +467,8 @@ def main() -> int:
                    help="you verified the prior Dolby Vision proof on your playback device")
     p.add_argument("--dv-proof", action="store_true",
                    help="create or refresh a short Dolby Vision stabilization proof")
+    p.add_argument("--final", action="store_true",
+                   help="render final.mp4 (16:9 SDR) with enhanced voice and detected blur spans removed")
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
     p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
@@ -494,8 +497,14 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true")
 
     args = parser.parse_args()
-    cfg = load_config(Path(args.config))
-    log = Log(Path(cfg["workspace"]).expanduser() / "content-helper.log")
+    if args.command == "preprocess" and getattr(args, "folder", None):
+        # An arbitrary folder is self-contained; no channel workspace is needed.
+        folder = Path(args.folder).expanduser().resolve()
+        cfg = {"workspace": str(folder.parent), "channels": {}}
+        log = Log()
+    else:
+        cfg = load_config(Path(args.config))
+        log = Log(Path(cfg["workspace"]).expanduser() / "content-helper.log")
 
     if args.command == "list":
         return listing(cfg, log)

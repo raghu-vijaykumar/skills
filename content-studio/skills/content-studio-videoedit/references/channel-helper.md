@@ -214,7 +214,14 @@ Preview the capture order, then preprocess camera clips:
 python scripts/content.py order --channel out-of-office --draft dubai-abudhai-day-4 --dry-run
 python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --clip IMG_1514.MP4
 python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --apply-review
+python scripts/content.py preprocess --folder "C:\path\to\clips" --utc-offset +00:00
 ```
+
+`--folder` treats any directory as a draft root: it deduplicates, orders and
+renumbers the clips in place, writes `_timeline.csv` and `analysis/duplicates/`, and
+defaults output to `<folder>/processed-clips`. It does not require a channel config.
+Use `--clip FILE` to process one clip from that folder. `--folder`, `--draft`, and
+`--path` are mutually exclusive.
 
 `order` writes an eight-column `_timeline.csv` and prefixes draft-root camera names
 with capture-order numbers. It keeps old timeline timestamps, including estimated ones,
@@ -223,6 +230,15 @@ draft joining. The `--dry-run` flag previews renames without changing files. If 
 camera timezone cannot be inferred from prior timeline rows or metadata, pass
 `--utc-offset +04:00` (or the location's actual offset) to `order`, `preprocess`,
 or `edit join`. Only draft-root camera filenames change; video bytes are not edited.
+
+Preprocessing detects duplicates by content before numbering. SHA-256 matches are moved
+to `drafts/<draft>/analysis/duplicates/`; the earliest timeline entry (or filename) is
+kept, and the extras are recorded in `analysis/duplicates/report.json`. Near-duplicate
+shots with comparable duration and aspect and similar sampled 16x16 grayscale frames are
+listed in `analysis/duplicates/review.csv`. Set `remove=yes` for a row and rerun
+preprocess to quarantine it. Duplicate files are moved, never deleted, and `--clip`
+accepts a quarantined name and resolves it to the kept clip. Repeat scans reuse
+`analysis/duplicates/cache.json` keyed by file size and modification time.
 
 Preprocessing leaves video bytes untouched and writes one folder per original camera
 basename under `drafts/<draft>/processed-clips/`. It selects the regular mono/stereo audio track (not
@@ -246,6 +262,21 @@ report. `review.html` shows suspected blurry spans; edit the accompanying `revie
 and set `remove=yes` only for spans you want cut. `--apply-review` creates a separate
 `cut.mp4` or `cut.mov` and never edits the camera clip or the first processed export.
 Use `--force` to rebuild analysis, or `--path FILE --out DIR` for a standalone clip.
+
+Add `--final` when you want a publishable video instead of review artifacts:
+
+```powershell
+python scripts/content.py preprocess --folder "C:\path\to\clips" --final --utc-offset +00:00
+```
+
+Final mode reuses the existing `enhanced-voice.wav` when the source size is unchanged,
+automatically treats every detected blur span as a cut, and writes `final.mp4` in each
+clip folder. Folder and draft runs then concatenate those exports into
+`<folder>/final-video.mp4` (or `draft/final-video.mp4`). Every clip is fitted to
+1920x1080 16:9 BT.709 SDR at 30 fps with stereo AAC; the whole frame is kept and padded
+where the aspect differs. Dolby Vision RPU is deliberately dropped in this path, so use
+the `--dv-proof` / `--dv-approved` flow when DV must be preserved. `--final` cannot be
+combined with `--apply-review`, `--dv-proof`, or `--dv-approved`.
 
 Dolby Vision requires [dovi_tool](https://github.com/quietvoid/dovi_tool/releases)
 on PATH for an RPU proof. The command first keeps the original Dolby Vision video

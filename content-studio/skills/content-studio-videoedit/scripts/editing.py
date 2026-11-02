@@ -180,7 +180,8 @@ def draft_sources(draft: Path, log, utc_offset: str | None = None) -> list[tuple
     return result
 
 
-def normalized_segment(source: Path, sidecar: Path | None, target: Path) -> None:
+def normalized_segment(source: Path, sidecar: Path | None, target: Path,
+                       ranges: list[tuple[float, float]] | None = None) -> None:
     duration, video, has_audio = probe(source)
     hdr = video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
     if is_dolby(video) and not hdr:
@@ -194,6 +195,11 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path) -> None
     video_filter = (tone_map(video) if hdr else sdr_convert) + (
         "scale=1920:1080:force_original_aspect_ratio=decrease,"
         "pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p")
+    kept = ranges or [(0.0, duration)]
+    if not kept or any(end <= start or start < 0 or end > duration + 0.05
+                       for start, end in kept):
+        raise EditError(f"invalid kept ranges for {source.name}")
+    expected = sum(min(end, duration) - start for start, end in kept)
     cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
            "-i", str(source)]
     if sidecar:
@@ -201,15 +207,34 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path) -> None
     elif not has_audio:
         cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
     audio_index = 1 if sidecar or not has_audio else 0
-    cmd += ["-map", "0:v:0", "-map", f"{audio_index}:a:0", "-vf", video_filter,
-            "-t", f"{duration:.6f}", "-c:v", "libx264", "-preset", "medium",
+    full_clip = len(kept) == 1 and kept[0][0] <= 0 and kept[0][1] >= duration - 1e-6
+    if full_clip:
+        cmd += ["-map", "0:v:0", "-map", f"{audio_index}:a:0", "-vf", video_filter,
+                "-t", f"{duration:.6f}"]
+    else:
+        graph = []
+        for index, (start, end) in enumerate(kept):
+            graph.append(f"[0:v:0]trim=start={start:.6f}:end={end:.6f},"
+                         f"setpts=PTS-STARTPTS[v{index}]")
+            graph.append(f"[{audio_index}:a:0]atrim=start={start:.6f}:end={end:.6f},"
+                         f"asetpts=PTS-STARTPTS[a{index}]")
+        if len(kept) > 1:
+            graph.append("".join(f"[v{index}][a{index}]" for index in range(len(kept)))
+                         + f"concat=n={len(kept)}:v=1:a=1[vc][ac]")
+            video_label, audio_label = "[vc]", "[ac]"
+        else:
+            video_label, audio_label = "[v0]", "[a0]"
+        graph.append(f"{video_label}{video_filter}[v]")
+        cmd += ["-filter_complex", ";".join(graph), "-map", "[v]", "-map", audio_label,
+                "-t", f"{expected:.6f}"]
+    cmd += ["-c:v", "libx264", "-preset", "medium",
             "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
             "-color_primaries", "bt709", "-color_trc", "bt709",
             "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k",
             "-ar", "48000", "-ac", "2", "-movflags", "+faststart", str(target)]
     command(cmd)
     actual, _, audio = probe(target)
-    if not audio or abs(actual - duration) > max(0.25, duration * 0.005):
+    if not audio or abs(actual - expected) > max(0.25, expected * 0.005):
         raise EditError(f"normalized clip failed duration/audio validation: {source.name}")
 
 
@@ -242,6 +267,35 @@ def join(sources: list[tuple[Path, Path | None]], target: Path, log) -> None:
         actual, video, audio = probe(output)
         if not audio or video.get("width") != 1920 or video.get("height") != 1080 \
                 or abs(actual - expected) > max(0.5, len(segments) * 0.08):
+            raise EditError(f"joined export failed validation: {actual:.3f}s vs {expected:.3f}s")
+        os.replace(output, target)
+
+
+def join_normalized(sources: list[Path], target: Path) -> None:
+    """Concatenate already-normalized 1920x1080 SDR clips without re-encoding."""
+    if not sources:
+        raise EditError("no clips to join")
+    if target.suffix.lower() != ".mp4":
+        raise EditError("joined output must use an .mp4 filename")
+    for source in sources:
+        _, video, audio = probe(source)
+        if not audio or video.get("width") != 1920 or video.get("height") != 1080:
+            raise EditError(f"clip is not a normalized 1920x1080 export: {source.name}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=target.parent) as scratch:
+        work = Path(scratch)
+        manifest = work / "concat.txt"
+        manifest.write_text("".join(
+            "file '" + str(p.resolve()).replace("\\", "/").replace("'", "'\\''") + "'\n"
+            for p in sources), encoding="utf-8")
+        output = work / "joined.mp4"
+        command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-f", "concat", "-safe", "0", "-i", str(manifest), "-c", "copy",
+                 "-movflags", "+faststart", str(output)])
+        expected = sum(probe(p)[0] for p in sources)
+        actual, video, audio = probe(output)
+        if not audio or video.get("width") != 1920 or video.get("height") != 1080 \
+                or abs(actual - expected) > max(0.5, len(sources) * 0.08):
             raise EditError(f"joined export failed validation: {actual:.3f}s vs {expected:.3f}s")
         os.replace(output, target)
 

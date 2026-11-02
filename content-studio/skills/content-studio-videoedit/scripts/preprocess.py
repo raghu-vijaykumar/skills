@@ -20,6 +20,8 @@ from fractions import Fraction
 from pathlib import Path
 
 from common import channel_root, select_channels
+import dedupe
+import editing
 import ordering
 
 
@@ -68,23 +70,34 @@ def dolby_info(video: dict) -> dict | None:
                  if item.get("side_data_type") == "DOVI configuration record"), None)
 
 
-def source_files(args) -> tuple[list[Path], Path]:
-    slug, _ = select_channels(args.cfg, args.channel)[0]
-    channel = channel_root(args.cfg, slug)
+def source_files(args, duplicates: dict | None = None, log=None,
+                 draft: Path | None = None) -> tuple[list[Path], Path]:
     if args.path:
         source = Path(args.path).expanduser().resolve()
         if not source.is_file() or source.suffix.lower() not in VIDEO_EXTENSIONS:
             raise ProcessingError("--path must name a camera video file")
         return [source], Path(args.out).expanduser().resolve() if args.out else source.parent / "processed-clips"
-    if not args.draft or Path(args.draft).name != args.draft:
-        raise ProcessingError("pass a draft folder name with --draft, or use --path")
-    draft = channel / "drafts" / args.draft
+    if draft is None:
+        slug, _ = select_channels(args.cfg, args.channel)[0]
+        channel = channel_root(args.cfg, slug)
+        if not args.draft or Path(args.draft).name != args.draft:
+            raise ProcessingError("pass a draft folder name with --draft, "
+                                  "an arbitrary folder with --folder, or use --path")
+        draft = channel / "drafts" / args.draft
     if not draft.is_dir():
         raise ProcessingError(f"draft not found: {draft}")
     sources = ordering.camera_files(draft)
     if args.clip:
-        sources = [p for p in sources if p.name.lower() == args.clip.lower()
+        matched = [p for p in sources if p.name.lower() == args.clip.lower()
                    or ordering.original_name(p.name).lower() == args.clip.lower()]
+        if not matched and duplicates:
+            alias = (duplicates.get("aliases") or {}).get(args.clip.casefold())
+            if alias:
+                matched = [p for p in sources
+                           if ordering.original_name(p.name).casefold() == alias.casefold()]
+                if matched and log:
+                    log(f"{args.clip}: quarantined duplicate; using {matched[0].name}")
+        sources = matched
     if not sources:
         raise ProcessingError("no matching camera clips in the draft root")
     return sources, Path(args.out).expanduser().resolve() if args.out else draft / "processed-clips"
@@ -299,10 +312,14 @@ def blur_candidates(times: list[float], scores: list[float], duration: float) ->
     return candidates
 
 
-def write_review(source: Path, video: dict, duration: float, folder: Path, report: dict) -> None:
+def write_review(source: Path, video: dict, duration: float, folder: Path, report: dict,
+                 auto_remove: bool = False, images: bool = True) -> None:
     times = frame_times(source)
     scores = sharpness_scores(source, video)
     candidates = blur_candidates(times, scores, duration)
+    if auto_remove:
+        for item in candidates:
+            item["remove"] = "yes"
     report["blur"] = {"frames_scanned": len(scores), "candidates": len(candidates),
                       "review_csv": "review.csv", "review_html": "review.html"}
     with (folder / "review.csv").open("w", newline="", encoding="utf-8") as fh:
@@ -311,21 +328,38 @@ def write_review(source: Path, video: dict, duration: float, folder: Path, repor
         writer.writerows(candidates)
     rows = []
     for item in candidates:
-        name = f"blur-{item['id']:03d}.jpg"
-        command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-                 "-ss", str((item["start"] + item["end"]) / 2), "-i", str(source),
-                 "-map", f"0:{video['index']}", "-frames:v", "1", "-vf", "scale=480:-2",
-                 str(folder / name)])
-        rows.append(f"<tr><td><img src='{name}' width='480'></td><td>{item['start']:.3f}–{item['end']:.3f}s"
+        cells = ""
+        if images:
+            name = f"blur-{item['id']:03d}.jpg"
+            command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                     "-ss", str((item["start"] + item["end"]) / 2), "-i", str(source),
+                     "-map", f"0:{video['index']}", "-frames:v", "1", "-vf", "scale=480:-2",
+                     str(folder / name)])
+            cells += f"<td><img src='{name}' width='480'></td>"
+        rows.append(f"<tr>{cells}<td>{item['start']:.3f}–{item['end']:.3f}s"
                     f"</td><td>{item['score']:.1f}</td></tr>")
+    intro = ("All listed spans were detected as blur and removed automatically in final mode."
+             if auto_remove else
+             "These are candidates, not automatic cuts. Set <code>remove</code> to <code>yes</code> "
+             "for approved rows in review.csv, then run preprocess with --apply-review.")
     page = ("<!doctype html><meta charset='utf-8'><title>Blur review</title>"
             "<style>body{font:16px sans-serif;max-width:900px;margin:2rem auto}td{padding:1rem;border-bottom:1px solid #aaa}"
             "img{max-width:100%}</style>"
             f"<h1>{html.escape(source.name)} — blur review</h1>"
-            "<p>These are candidates, not automatic cuts. Set <code>remove</code> to <code>yes</code> "
-            "for approved rows in review.csv, then run preprocess with --apply-review.</p>"
+            f"<p>{intro}</p>"
             "<table><tr><th>Frame</th><th>Time</th><th>Sharpness</th></tr>" + "".join(rows) + "</table>")
     (folder / "review.html").write_text(page, encoding="utf-8")
+
+
+def review_spans(csv_path: Path) -> list[tuple[float, float]]:
+    with csv_path.open(newline="", encoding="utf-8-sig") as fh:
+        rows = list(csv.DictReader(fh))
+    spans = []
+    for row in rows:
+        start, end = float(row["start"]), float(row["end"])
+        if end > start and start >= 0:
+            spans.append((start, end))
+    return sorted(spans)
 
 
 def approved_cuts(csv_path: Path) -> list[tuple[float, float]]:
@@ -587,6 +621,89 @@ def write_report(folder: Path, report: dict) -> None:
     (folder / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
+def final_clip(source: Path, output_root: Path, args, log) -> Path:
+    """Render one publish-ready 16:9 SDR clip with voice enhancement and blur cuts."""
+    folder = ordering.analysis_folder(output_root, source.name)
+    folder.mkdir(parents=True, exist_ok=True)
+    report_path = folder / "report.json"
+    previous = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else None
+    info = probe(source)
+    video, audio = streams(info)
+    duration = float(info["format"]["duration"])
+    dv = dolby_info(video)
+    same_source = bool(previous) and previous.get("source_bytes") == source.stat().st_size
+    if same_source:
+        report = previous
+    else:
+        report = {"source": str(source), "source_bytes": source.stat().st_size,
+                  "duration_seconds": duration, "video": {
+                      "width": video.get("width"), "height": video.get("height"),
+                      "pixel_format": video.get("pix_fmt"),
+                      "color_transfer": video.get("color_transfer"),
+                      "dolby_vision_profile": dv.get("dv_profile") if dv else None},
+                  "status": "processing"}
+
+    requested = getattr(args, "denoise", "auto")
+    voice = folder / "enhanced-voice.wav"
+    reusable = (same_source and voice.is_file()
+                and not getattr(args, "force", False)
+                and (requested == "auto" or requested == report.get("denoise_engine")))
+    if not reusable:
+        with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:
+            work = Path(scratch)
+            if audio:
+                generated = enhance_audio(source, audio, work, report, requested)
+            else:
+                generated = silent_audio(duration, work / "silent.wav")
+                report["audio"] = {"status": "no source audio; silent stereo track added"}
+            shutil.copyfile(generated, voice)
+
+    # Final mode treats every detected blur span as a cut. An earlier review.csv
+    # from the same source is reused; otherwise the blur scan runs now.
+    review = folder / "review.csv"
+    if same_source and review.is_file():
+        cuts = review_spans(review)
+    else:
+        write_review(source, video, duration, folder, report,
+                     auto_remove=True, images=False)
+        cuts = review_spans(review)
+
+    kept = keep_ranges(duration, cuts) if cuts else None
+    target = folder / "final.mp4"
+    stored_cuts = [[round(start, 3), round(end, 3)] for start, end in cuts]
+    if (not getattr(args, "force", False) and same_source and target.is_file()
+            and report.get("final_cuts") == stored_cuts):
+        existing_actual, existing_video, existing_audio = editing.probe(target)
+        if (existing_audio and existing_video.get("width") == 1920
+                and existing_video.get("height") == 1080):
+            log(f"{source.name}: final video already current -> {target.name}")
+            return target
+    with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:
+        temp = Path(scratch) / "final.mp4"
+        # normalized_segment ignores the Dolby Vision RPU and exports BT.709 SDR,
+        # so the final file plays everywhere without a DV proof step.
+        editing.normalized_segment(source, voice, temp, ranges=kept)
+        actual, rendered, out_audio = editing.probe(temp)
+        if not out_audio or rendered.get("width") != 1920 or rendered.get("height") != 1080:
+            raise ProcessingError(f"final export failed validation: {source.name}")
+        os.replace(temp, target)
+
+    kept_seconds = sum(end - start for start, end in (kept or [(0.0, duration)]))
+    report.update({
+        "source": str(source), "source_bytes": source.stat().st_size,
+        "status": "final_ready",
+        "final_output": target.name,
+        "final_format": "1920x1080 16:9 BT.709 SDR 30 fps",
+        "final_duration_seconds": round(actual, 3),
+        "final_removed_seconds": round(max(0.0, duration - kept_seconds), 3),
+        "final_cuts": stored_cuts,
+    })
+    write_report(folder, report)
+    log(f"{source.name}: final video -> {target.name} "
+        f"({len(cuts)} blur span{'s' if len(cuts) != 1 else ''} removed)")
+    return target
+
+
 def process_clip(source: Path, output_root: Path, args, log) -> None:
     # Keep the extension in the folder name: IMG_123.MOV and IMG_123.MP4 can
     # legitimately coexist in one camera dump.
@@ -733,28 +850,61 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
 
 def run(cfg: dict, args, log) -> int:
     args.cfg = cfg
+    folder = getattr(args, "folder", None)
+    final = getattr(args, "final", False)
     try:
-        if args.draft and not args.path:
-            if Path(args.draft).name != args.draft:
-                raise ProcessingError("pass a draft folder name with --draft")
-            slug, _ = select_channels(cfg, args.channel)[0]
-            draft = channel_root(cfg, slug) / "drafts" / args.draft
-            if not draft.is_dir():
-                raise ProcessingError(f"draft not found: {draft}")
+        if final and (getattr(args, "apply_review", False) or getattr(args, "dv_proof", False)
+                      or getattr(args, "dv_approved", False)):
+            raise ProcessingError("--final cannot be combined with --apply-review, "
+                                  "--dv-proof, or --dv-approved")
+        if sum(bool(value) for value in (args.path, args.draft, folder)) > 1:
+            raise ProcessingError("use only one of --path, --draft, or --folder")
+        draft = None
+        duplicates = None
+        if not args.path:
+            if folder:
+                draft = Path(folder).expanduser().resolve()
+                if not draft.is_dir():
+                    raise ProcessingError(f"folder not found: {draft}")
+            else:
+                if not args.draft or Path(args.draft).name != args.draft:
+                    raise ProcessingError("pass a draft folder name with --draft, "
+                                          "an arbitrary folder with --folder, or use --path")
+                slug, _ = select_channels(cfg, args.channel)[0]
+                draft = channel_root(cfg, slug) / "drafts" / args.draft
+                if not draft.is_dir():
+                    raise ProcessingError(f"draft not found: {draft}")
+            # Quarantine content duplicates first so numbering and analysis
+            # exclude files that should never reach the edit.
+            duplicates = dedupe.scan(draft, log)
             # Detect inserted footage before choosing a clip or launching an
             # expensive batch, so numbered filenames always reflect capture time.
             ordering.ensure_current(draft, log, utc_offset=args.utc_offset)
-        sources, output_root = source_files(args)
-    except (ProcessingError, ordering.OrderError, OSError, ValueError) as exc:
+        sources, output_root = source_files(args, duplicates, log, draft)
+    except (ProcessingError, dedupe.DedupeError, ordering.OrderError,
+            OSError, ValueError) as exc:
         log(f"preprocess: {exc}")
         return 1
     output_root.mkdir(parents=True, exist_ok=True)
     failed = 0
+    finals = []
     for source in sources:
         try:
-            process_clip(source, output_root, args, log)
+            if final:
+                finals.append(final_clip(source, output_root, args, log))
+            else:
+                process_clip(source, output_root, args, log)
         except (ProcessingError, ordering.OrderError, OSError, ValueError) as exc:
             failed += 1
             log(f"{source.name}: {exc}")
+    if final and draft is not None and not args.clip and not failed and finals:
+        target = draft / "final-video.mp4"
+        try:
+            target.unlink(missing_ok=True)
+            editing.join_normalized(finals, target)
+            log(f"preprocess: joined final video -> {target}")
+        except (editing.EditError, OSError, ValueError) as exc:
+            failed += 1
+            log(f"preprocess: joined final video failed: {exc}")
     log(f"preprocess: {len(sources) - failed} ready, {failed} failed; output {output_root}")
     return 1 if failed else 0
