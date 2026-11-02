@@ -20,6 +20,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from common import channel_root, select_channels
+import ordering
 
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".mkv"}
@@ -80,10 +81,10 @@ def source_files(args) -> tuple[list[Path], Path]:
     draft = channel / "drafts" / args.draft
     if not draft.is_dir():
         raise ProcessingError(f"draft not found: {draft}")
-    sources = sorted(p for p in draft.iterdir() if p.is_file()
-                     and p.suffix.lower() in VIDEO_EXTENSIONS and p.name.lower() != "video.mp4")
+    sources = ordering.camera_files(draft)
     if args.clip:
-        sources = [p for p in sources if p.name.lower() == args.clip.lower()]
+        sources = [p for p in sources if p.name.lower() == args.clip.lower()
+                   or ordering.original_name(p.name).lower() == args.clip.lower()]
     if not sources:
         raise ProcessingError("no matching camera clips in the draft root")
     return sources, Path(args.out).expanduser().resolve() if args.out else draft / "processed-clips"
@@ -589,12 +590,20 @@ def write_report(folder: Path, report: dict) -> None:
 def process_clip(source: Path, output_root: Path, args, log) -> None:
     # Keep the extension in the folder name: IMG_123.MOV and IMG_123.MP4 can
     # legitimately coexist in one camera dump.
-    folder = output_root / source.name
+    # Camera numbers change when a new clip is inserted; the original camera
+    # basename gives each analysis folder a stable identity across reorderings.
+    folder = ordering.analysis_folder(output_root, source.name)
     folder.mkdir(parents=True, exist_ok=True)
     report_path = folder / "report.json"
     if report_path.exists() and not args.force and not args.apply_review and not args.dv_approved and not args.dv_proof:
-        log(f"{source.name}: already processed (use --force to rebuild)")
-        return
+        previous = json.loads(report_path.read_text(encoding="utf-8"))
+        if previous.get("source_bytes") == source.stat().st_size:
+            # Keep the report's source pointer in sync with timeline renames.
+            if previous.get("source") != str(source):
+                previous["source"] = str(source)
+                write_report(folder, previous)
+            log(f"{source.name}: already processed (use --force to rebuild)")
+            return
     info = probe(source)
     video, audio = streams(info)
     duration = float(info["format"]["duration"])
@@ -725,8 +734,18 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
 def run(cfg: dict, args, log) -> int:
     args.cfg = cfg
     try:
+        if args.draft and not args.path:
+            if Path(args.draft).name != args.draft:
+                raise ProcessingError("pass a draft folder name with --draft")
+            slug, _ = select_channels(cfg, args.channel)[0]
+            draft = channel_root(cfg, slug) / "drafts" / args.draft
+            if not draft.is_dir():
+                raise ProcessingError(f"draft not found: {draft}")
+            # Detect inserted footage before choosing a clip or launching an
+            # expensive batch, so numbered filenames always reflect capture time.
+            ordering.ensure_current(draft, log, utc_offset=args.utc_offset)
         sources, output_root = source_files(args)
-    except ProcessingError as exc:
+    except (ProcessingError, ordering.OrderError, OSError, ValueError) as exc:
         log(f"preprocess: {exc}")
         return 1
     output_root.mkdir(parents=True, exist_ok=True)
@@ -734,7 +753,7 @@ def run(cfg: dict, args, log) -> int:
     for source in sources:
         try:
             process_clip(source, output_root, args, log)
-        except (ProcessingError, OSError, ValueError) as exc:
+        except (ProcessingError, ordering.OrderError, OSError, ValueError) as exc:
             failed += 1
             log(f"{source.name}: {exc}")
     log(f"preprocess: {len(sources) - failed} ready, {failed} failed; output {output_root}")

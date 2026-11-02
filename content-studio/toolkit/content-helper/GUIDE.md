@@ -16,7 +16,9 @@ content.py intro      prepend the channel intro to a draft video
 content.py prune      delete old published videos locally (Drive untouched)
 content.py insights   build the analytics dataset that a model turns into ideas
 content.py media      extract audio, frames or a clip for segment review
+content.py order      refresh mixed-device capture order and _timeline.csv
 content.py preprocess clean vlog voice, stabilize camera clips, and review blur candidates
+content.py edit       trim, cut, or join vlog clips
 content.py code       git-track the sources, snapshot to Drive, restore, prune
 content.py analytics  retention and performance numbers
 content.py list       channels, local roots, draft counts
@@ -201,15 +203,24 @@ python scripts/content.py media clip    --channel revise-labs --video VIDEOID --
 
 ## Vlog clip preprocessing
 
-Run this on camera clips before assembling an Out of Office vlog:
+Preview the capture order, then preprocess camera clips:
 
 ```powershell
+python scripts/content.py order --channel out-of-office --draft dubai-abudhai-day-4 --dry-run
 python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --clip IMG_1514.MP4
 python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --apply-review
 ```
 
-The first command leaves originals untouched and writes one folder per camera filename under
-`drafts/<draft>/processed-clips/`. It selects the regular mono/stereo audio track (not
+`order` writes an eight-column `_timeline.csv` and prefixes draft-root camera names
+with capture-order numbers. It keeps old timeline timestamps, including estimated ones,
+when a new clip appears; newly added files trigger a renumber before preprocessing or
+draft joining. The `--dry-run` flag previews renames without changing files. If the
+camera timezone cannot be inferred from prior timeline rows or metadata, pass
+`--utc-offset +04:00` (or the location's actual offset) to `order`, `preprocess`,
+or `edit join`. Only draft-root camera filenames change; video bytes are not edited.
+
+Preprocessing leaves video bytes untouched and writes one folder per original camera
+basename under `drafts/<draft>/processed-clips/`. It selects the regular mono/stereo audio track (not
 Apple's APAC spatial track), denoises it, detects speech, lowers quiet sections by 13 dB,
 and adjusts speech toward a consistent level with no more than 13 dB boost. Short gain
 ramps and a -1 dBFS limiter prevent abrupt level jumps and clipping. `--denoise auto`
@@ -241,6 +252,29 @@ reprocessing audio. Only after that proof passes **and** you check playback on y
 usual device, run `--dv-approved --clip FILE` for the full clip or add
 `--dv-approved` to `--apply-review` for approved cuts. A failed check leaves the
 original and cleaned WAV in place; never treat an HLG-only result as Dolby Vision.
+
+## Vlog edits and assembly
+
+```powershell
+python scripts/content.py edit trim --input clip.mp4 --start 00:12 --end 00:30 --out clip-trim.mp4
+python scripts/content.py edit cut --input clip.mp4 --remove 00:12-00:14 --remove 01:02-01:05 --out clip-cut.mp4
+python scripts/content.py edit join --channel out-of-office --draft dubai-abudhai-day-4
+python scripts/content.py edit join --input clip-trim.mp4 --input clip-cut.mp4 --out video.mp4
+```
+
+Trim keeps the given range; cut removes the listed ranges. Both re-encode video and
+audio for frame accuracy, validate duration, and require a new output filename. SDR
+clips keep their camera color tags; HLG clips remain 10-bit HLG. Dolby Vision cuts
+require `--sdr`, which explicitly tone maps the HLG/PQ base layer to BT.709 SDR.
+
+Draft join uses `_timeline.csv` order and prefers approved `cut.*`, then `processed.*`,
+then voice-only video or original footage with the enhanced voice sidecar when available.
+It creates `draft/video.mp4` unless `--out` is given, and refuses an existing output.
+Each clip is normalized to 1920x1080 BT.709 SDR at 30 fps with stereo AAC before
+joining. The full frame is kept with padding where needed; HDR is tone mapped.
+The explicit repeated `--input` form joins only the files named, in that order.
+Review the result, especially clip transitions, audio sync, and color, before using it
+as a final edit.
 
 ## From dataset to the next video
 

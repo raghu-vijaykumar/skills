@@ -446,11 +446,19 @@ def main() -> int:
     p.add_argument("--copy", action="store_true", help="stream-copy the clip instead of re-encoding")
     p.add_argument("--out")
 
+    p = sub.add_parser("order", parents=[shared],
+                       help="number mixed-device camera clips by capture time")
+    p.add_argument("--draft", required=True, help="draft folder name")
+    p.add_argument("--utc-offset", help="camera location offset, e.g. +04:00")
+    p.add_argument("--refresh", action="store_true", help="re-read metadata for every clip")
+    p.add_argument("--dry-run", action="store_true", help="preview renames and timeline changes")
+
     p = sub.add_parser("preprocess", parents=[shared],
                        help="clean vlog voice, stabilize clips, and prepare blur review")
     p.add_argument("--draft", help="draft folder with camera clips at its root")
     p.add_argument("--path", help="process one explicit camera clip")
     p.add_argument("--clip", help="process one camera filename in the draft")
+    p.add_argument("--utc-offset", help="camera location offset if ordering cannot infer it")
     p.add_argument("--out", help="output folder (default: processed-clips beside source)")
     p.add_argument("--apply-review", action="store_true",
                    help="apply rows marked remove=yes in each review.csv")
@@ -461,6 +469,19 @@ def main() -> int:
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
     p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
+
+    p = sub.add_parser("edit", parents=[shared],
+                       help="frame-accurate trim/cut or join ordered clips")
+    p.add_argument("action", choices=["trim", "cut", "join"])
+    p.add_argument("--input", action="append", help="input video; repeat in sequence for join")
+    p.add_argument("--draft", help="ordered draft folder for join")
+    p.add_argument("--utc-offset", help="camera location offset if ordering cannot infer it")
+    p.add_argument("--start", help="trim start: SS, MM:SS or HH:MM:SS")
+    p.add_argument("--end", help="trim end")
+    p.add_argument("--remove", action="append", help="cut range START-END; repeatable")
+    p.add_argument("--sdr", action="store_true",
+                   help="convert HDR/Dolby Vision trim or cut to labeled SDR")
+    p.add_argument("--out", help="output file (join defaults to draft/video.mp4)")
 
     p = sub.add_parser("code", parents=[shared],
                        help="git-track the sources and snapshot them to Drive")
@@ -508,10 +529,18 @@ def main() -> int:
         import media
 
         return media.run(cfg, args, log)
+    if args.command == "order":
+        import ordering
+
+        return ordering.run(cfg, args, log)
     if args.command == "preprocess":
         import preprocess
 
         return preprocess.run(cfg, args, log)
+    if args.command == "edit":
+        import editing
+
+        return editing.run(cfg, args, log)
     if args.command == "code":
         return source(cfg, args, log)
     return 1
