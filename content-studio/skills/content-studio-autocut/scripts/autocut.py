@@ -104,6 +104,44 @@ def score_quality(clips, folder):
         clip["reason"]+="; exposure/sharpness heuristic"
     return clips
 
+def generate_review_assets(out, selected, folder):
+    """Produce real, inspectable assets from the selected source ranges."""
+    review=out/"review"
+    frames=review/"frames"
+    audio=review/"audio"
+    frames.mkdir(parents=True,exist_ok=True)
+    audio.mkdir(parents=True,exist_ok=True)
+    assets=[]
+    for i,clip in enumerate(selected):
+        source=folder/clip["source"]
+        middle=(clip["start"]+clip["end"])/2
+        frame=frames/f"shot-{i:04d}.jpg"
+        run(["ffmpeg","-y","-v","error","-ss",str(middle),"-i",str(source),
+             "-frames:v","1","-vf","scale=640:-2",str(frame)])
+        sample=audio/f"shot-{i:04d}.mp3"
+        if has_audio(source):
+            run(["ffmpeg","-y","-v","error","-ss",str(clip["start"]),"-i",str(source),
+                 "-t",str(min(12,clip["end"]-clip["start"])),"-vn","-c:a","libmp3lame",
+                 "-b:a","128k",str(sample)])
+        assets.append({"frame":frame.relative_to(out).as_posix(),
+                       "audio":sample.relative_to(out).as_posix() if sample.exists() else None})
+    contact=review/"contact-sheet.html"
+    cards=[]
+    for i,(clip,asset) in enumerate(zip(selected,assets)):
+        audio_tag=("<audio controls preload='none' src='../"+html.escape(asset["audio"],quote=True)+"'></audio>"
+                   if asset["audio"] else "<p>No source audio</p>")
+        cards.append("<article><img loading='lazy' width='320' src='../"+
+            html.escape(asset["frame"],quote=True)+"'><p><b>"+html.escape(clip["source"])+
+            "</b> "+str(round(clip["start"],2))+"–"+str(round(clip["end"],2))+
+            "s</p><p>"+html.escape(clip["reason"])+"</p>"+audio_tag+"</article>")
+    contact.write_text("<!doctype html><meta charset='utf-8'><title>Shot review</title>"+
+        "<style>body{font:16px system-ui;background:#171923;color:#f8fafc}"+
+        "main{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}"+
+        "article{padding:12px;border:1px solid #475569;border-radius:10px}"+
+        "img{max-width:100%}</style><h1>Shot and audio review</h1><main>"+
+        "".join(cards)+"</main>",encoding="utf-8")
+    return assets
+
 def build(args):
     folder=args.folder.resolve(); out=args.output.resolve()
     if not folder.is_dir(): raise ValueError("Input folder does not exist")
@@ -179,7 +217,13 @@ def build(args):
     concat.write_text("".join("file '"+p.name+"'\n" for p in parts),encoding="utf-8")
     run(["ffmpeg","-y","-hide_banner","-loglevel","error","-f","concat","-safe","0",
          "-i",str(concat),"-c","copy",str(out/"rough-cut.mp4")])
-    print(json.dumps({"output":str(out/"rough-cut.mp4"),"segments":len(selected),"seconds":used},indent=2))
+    assets=generate_review_assets(out,selected,folder)
+    decisions["review_assets"]=assets
+    (out/"edit-decisions.json").write_text(json.dumps(decisions,indent=2),encoding="utf-8")
+    (out/"review-state.json").write_text(json.dumps({"status":"pending_review",
+        "approved":False,"feedback":[],"revision":0},indent=2),encoding="utf-8")
+    print(json.dumps({"output":str(out/"rough-cut.mp4"),"review":str(out/"review/contact-sheet.html"),
+        "segments":len(selected),"seconds":used},indent=2))
 
 def main():
     p=argparse.ArgumentParser()
