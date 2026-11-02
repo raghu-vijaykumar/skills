@@ -46,7 +46,7 @@ def analyze_scenes(sources, folder):
     candidates = []
     for name, duration in sources.items():
         p = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(folder/name),
-            "-vf", "fps=2,select='gt(scene,0.35)',showinfo", "-an", "-f", "null", "-"],
+            "-vf", "fps=2,select=gt(scene\\,0.35),showinfo", "-an", "-f", "null", "-"],
             text=True, capture_output=True)
         boundaries = [0.0]
         for match in re.finditer(r"pts_time:([0-9.]+)", p.stderr):
@@ -79,10 +79,35 @@ def has_audio(path):
     streams = json.loads(run(["ffprobe","-v","error","-show_streams","-of","json",str(path)]))["streams"]
     return any(s.get("codec_type")=="audio" for s in streams)
 
+def score_quality(clips, folder):
+    """Cheap image-quality heuristic; down-ranks underexposed, overexposed and soft frames."""
+    try:
+        import numpy as np
+    except ImportError as exc:
+        raise RuntimeError("Install numpy for --quality-score") from exc
+    for clip in clips:
+        mid=(clip["start"]+clip["end"])/2
+        p=subprocess.run(["ffmpeg","-v","error","-ss",str(mid),
+            "-i",str(folder/clip["source"]),"-frames:v","1",
+            "-vf","scale=160:90,format=gray","-f","rawvideo","-"],
+            capture_output=True)
+        if p.returncode or len(p.stdout)!=160*90: continue
+        frame=np.frombuffer(p.stdout,dtype=np.uint8).reshape(90,160).astype(np.float32)
+        luminance=float(frame.mean())
+        lap=frame[1:-1,2:]+frame[1:-1,:-2]+frame[2:,1:-1]+frame[:-2,1:-1]-4*frame[1:-1,1:-1]
+        sharpness=float(np.abs(lap).mean())
+        exposure=max(0.2,min(1.0,luminance/55,(245-luminance)/35))
+        focus=max(0.2,min(1.0,sharpness/9))
+        quality=round(exposure*focus,3)
+        clip["quality"]=quality
+        clip["score"]=round(clip["score"]*(0.65+0.35*quality),4)
+        clip["reason"]+="; exposure/sharpness heuristic"
+    return clips
+
 def build(args):
     folder=args.folder.resolve(); out=args.output.resolve()
     if not folder.is_dir(): raise ValueError("Input folder does not exist")
-    if folder==out or folder in out.parents and out==folder: raise ValueError("Output must differ from input")
+    if folder==out: raise ValueError("Output must differ from input")
     if out.exists() and any(out.iterdir()) and not args.force: raise ValueError("Output folder not empty; use --force")
     sources={p.name:duration(p) for p in sorted(folder.iterdir()) if p.is_file() and p.suffix.lower() in EXTS}
     if not sources: raise ValueError("No supported videos")
@@ -96,6 +121,7 @@ def build(args):
             clips += read_segments(vision_file,sources,True)
     if args.auto_transcribe: clips += analyze_speech(sources,folder,args.whisper_model)
     if args.detect_scenes: clips += analyze_scenes(sources,folder)
+    if args.quality_score: clips = score_quality(clips,folder)
     if not clips:
         for name,d in sources.items():
             for start in range(0,int(d),20):
@@ -167,6 +193,7 @@ def main():
     p.add_argument("--auto-transcribe",action="store_true")
     p.add_argument("--whisper-model",default="small")
     p.add_argument("--detect-scenes",action="store_true")
+    p.add_argument("--quality-score",action="store_true")
     p.add_argument("--auto-vision",action="store_true")
     p.add_argument("--vision-model",default="llava")
     p.add_argument("--ollama-endpoint",default="http://127.0.0.1:11434")
