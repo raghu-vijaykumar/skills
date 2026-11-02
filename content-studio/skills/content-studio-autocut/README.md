@@ -38,4 +38,20 @@ python scripts/timeline.py --output ./rough-cut --edits edits.json --render
 python scripts/timeline.py --output ./rough-cut --rollback 1 --render
 ```
 
-The video track is supported by the renderer, including embedded source audio and per-clip gain. Music and captions tracks are present as empty extensibility slots; **the renderer does not yet mix music, burn captions, or implement transitions**. Edits currently require structured JSON operations; translating natural-language feedback into these operations is a separate pending agent step. A revision render does not yet regenerate the review contact sheet or reset approval state; treat any prior approval as invalid after an edit. Keep human approval before publishing.
+The video track is supported by the renderer, including embedded source audio and per-clip gain. Music and captions tracks are present as empty extensibility slots; **the renderer does not yet mix music, burn captions, or implement transitions**. Edits currently require structured JSON operations; translating natural-language feedback into these operations is a separate pending agent step. A revision render regenerates the contact sheet and audio samples and resets approval state after edits. Keep human approval before publishing.
+
+## Agentic revisions from human feedback (experimental)
+
+Run a local Ollama model (`ollama pull llama3.1`). The assistant proposes only validated remove/trim/move/gain operations, then writes `proposed-edits.json` for inspection:
+
+```bash
+python scripts/agent_edit.py --output ./rough-cut --feedback "Move the arrival shot to the beginning"
+```
+
+To explicitly apply the proposal, create a new timeline revision, rerender, and regenerate review assets:
+
+```bash
+python scripts/agent_edit.py --output ./rough-cut --feedback "Move the arrival shot to the beginning" --apply
+```
+
+The agent cannot yet create new B-roll clips, mix music, render captions, or interpret every natural-language request. Unsupported feedback produces an empty proposal. The `--apply` flag is an editing authorization, **not publishing approval**; a human must review the new media and approve separately.
