@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import math
+import tempfile
 from pathlib import Path
 
 EXTS={".mp4",".mov",".mkv",".m4v",".webm",".avi"}
@@ -86,6 +87,13 @@ def build(args):
     sources={p.name:duration(p) for p in sorted(folder.iterdir()) if p.is_file() and p.suffix.lower() in EXTS}
     if not sources: raise ValueError("No supported videos")
     clips=read_segments(args.transcripts,sources,False)+read_segments(args.annotations,sources,True)
+    if args.auto_vision:
+        with tempfile.TemporaryDirectory() as tmp:
+            vision_file=Path(tmp)/"vision.json"
+            run([sys.executable,str(Path(__file__).with_name("vision.py")),"--folder",str(folder),
+                 "--output",str(vision_file),"--model",args.vision_model,
+                 "--endpoint",args.ollama_endpoint])
+            clips += read_segments(vision_file,sources,True)
     if args.auto_transcribe: clips += analyze_speech(sources,folder,args.whisper_model)
     if args.detect_scenes: clips += analyze_scenes(sources,folder)
     if not clips:
@@ -109,7 +117,7 @@ def build(args):
     if not selected: raise ValueError("No eligible segments")
     out.mkdir(parents=True,exist_ok=True)
     decisions={"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
-               "semantic_analysis":"external annotations only" if args.annotations else "not performed",
+               "semantic_analysis":"local Ollama vision" if args.auto_vision else ("external annotations" if args.annotations else "not performed"),
                "transcription_enabled":args.auto_transcribe,"scene_detection_enabled":args.detect_scenes,
                "segments":selected}
     (out/"edit-decisions.json").write_text(json.dumps(decisions,indent=2),encoding="utf-8")
@@ -159,6 +167,9 @@ def main():
     p.add_argument("--auto-transcribe",action="store_true")
     p.add_argument("--whisper-model",default="small")
     p.add_argument("--detect-scenes",action="store_true")
+    p.add_argument("--auto-vision",action="store_true")
+    p.add_argument("--vision-model",default="llava")
+    p.add_argument("--ollama-endpoint",default="http://127.0.0.1:11434")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):
         if not shutil.which(binary): p.error(binary+" missing from PATH")
