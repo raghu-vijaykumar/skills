@@ -1,5 +1,5 @@
 ---
-name: content-studio-animate
+name: content-studio-videogen
 description: Create and review code-driven Remotion videos, including the Hairline animation style, in a videogen project. Use for scene authoring, narration timing, render checks, and visual review.
 ---
 

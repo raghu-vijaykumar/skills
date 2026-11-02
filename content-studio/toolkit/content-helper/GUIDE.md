@@ -278,12 +278,12 @@ as a final edit.
 
 ## From dataset to the next video
 
-`insights.json` is the input for [content-studio-ideas](../../skills/content-studio-ideas/SKILL.md): research
+`insights.json` is the input for [content-studio-ideagen](../../skills/content-studio-ideagen/SKILL.md): research
 sweep, scored idea selection, packaging before production, and a measurement loop that feeds
 the next run.
 
 ```powershell
-python ../../skills/content-studio-ideas/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
+python ../../skills/content-studio-ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
 ```
 
 That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` and

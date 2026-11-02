@@ -1,4 +1,4 @@
-// Install a version-matched bundle once, then expose its six skills as direct children.
+// Install a version-matched bundle once, then expose its seven skills as direct children.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,8 +9,8 @@ const sourceBundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
-const names = ['content-studio','content-studio-ideas','content-studio-animate',
-  'content-studio-vlog','content-studio-publish','content-studio-archive'];
+const names = ['content-studio','content-studio-ideagen','content-studio-videogen',
+  'content-studio-videopreprocess','content-studio-videoedit','content-studio-publish','content-studio-archive'];
 function run(executable, args) {
   const result = spawnSync(executable, args, {encoding:'utf8', maxBuffer:16*1024*1024});
   if (result.error || result.status !== 0)
@@ -36,7 +36,7 @@ export function installSkills({global = false, target = null, dependencies = tru
       // npm excludes package-lock.json from packed dependencies; use pinned package.json there.
       npmRun([hasLock ? 'ci' : 'install','--prefix',release,'--ignore-scripts']);
       npmRun(['run','build','--prefix',release]);
-      npmRun(['ci','--prefix',path.join(release,'content-studio','skills','content-studio-ideas','digest')]);
+      npmRun(['ci','--prefix',path.join(release,'content-studio','skills','content-studio-ideagen','digest')]);
     }
     fs.writeFileSync(marker, `${version}\n`);
   } else if (fs.readFileSync(marker,'utf8').trim() !== version) {
@@ -69,7 +69,8 @@ export function installSkills({global = false, target = null, dependencies = tru
   }
   const removed = [];
   if (global) {
-    const legacy = ['videogen','content-helper','video-idea-engine','hairline-create','learning-engineer'];
+    const legacy = ['videogen','content-helper','video-idea-engine','hairline-create','learning-engineer',
+      'content-studio-ideas','content-studio-animate','content-studio-vlog'];
     for (const base of [skills, path.join(os.homedir(), '.codex', 'skills'),
       path.join(os.homedir(), '.config', 'opencode', 'skills')]) {
       for (const name of legacy) {
@@ -79,6 +80,10 @@ export function installSkills({global = false, target = null, dependencies = tru
         if (!absolute.toLowerCase().startsWith(path.resolve(base).toLowerCase() + path.sep))
           throw new Error(`Unsafe legacy skill path: ${absolute}`);
         const info = fs.lstatSync(absolute);
+        // Superseded bundle names may be removed only when they still link to a managed release.
+        if (name.startsWith('content-studio-') && (!info.isSymbolicLink() ||
+          !fs.realpathSync(absolute).toLowerCase().startsWith(path.join(parent,'content-studio').toLowerCase()+path.sep)))
+          throw new Error(`Refusing to remove unmanaged skill: ${absolute}`);
         if (info.isSymbolicLink()) fs.unlinkSync(absolute);
         else if (info.isDirectory() && fs.existsSync(path.join(absolute, 'SKILL.md')))
           fs.rmSync(absolute, {recursive: true, force: true});

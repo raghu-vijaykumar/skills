@@ -1,6 +1,6 @@
 {
   "name": "@raghu-vijaykumar/videogen",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "engines": {
     "node": ">=22.18.0"
@@ -30,7 +30,7 @@
       "types": "./content-studio/toolkit/videogen/dist/*.d.ts",
       "default": "./content-studio/toolkit/videogen/dist/*.js"
     },
-    "./skill": "./content-studio/skills/content-studio-animate/SKILL.md",
+    "./skill": "./content-studio/skills/content-studio-videogen/SKILL.md",
     "./runtime/hairline": {
       "types": "./content-studio/toolkit/videogen/dist/hairline.d.ts",
       "default": "./content-studio/toolkit/videogen/dist/hairline.js"
