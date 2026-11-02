@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "source": "YouTube Audio Library",
+  "updated": "2026-11-02",
+  "local_root": "local",
+  "categories": [
+    {
+      "slug": "ambient",
+      "label": "Ambient"
+    },
+    {
+      "slug": "alternative-punk",
+      "label": "Alternative & Punk"
+    },
+    {
+      "slug": "childrens",
+      "label": "Children's"
+    },
+    {
+      "slug": "cinematic",
+      "label": "Cinematic"
+    },
+    {
+      "slug": "classical",
+      "label": "Classical"
+    },
+    {
+      "slug": "country-folk",
+      "label": "Country & Folk"
+    },
+    {
+      "slug": "dance-electronic",
+      "label": "Dance & Electronic"
+    },
+    {
+      "slug": "hip-hop-rap",
+      "label": "Hip-Hop & Rap"
+    },
+    {
+      "slug": "holiday",
+      "label": "Holiday"
+    },
+    {
+      "slug": "jazz-blues",
+      "label": "Jazz & Blues"
+    },
+    {
+      "slug": "pop",
+      "label": "Pop"
+    },
+    {
+      "slug": "rnb-soul",
+      "label": "R&B & Soul"
+    },
+    {
+      "slug": "reggae",
+      "label": "Reggae"
+    },
+    {
+      "slug": "rock",
+      "label": "Rock"
+    },
+    {
+      "slug": "soundtrack",
+      "label": "Soundtrack"
+    },
+    {
+      "slug": "world",
+      "label": "World"
+    },
+    {
+      "slug": "uncategorized",
+      "label": "Uncategorized"
+    }
+  ],
+  "tracks": []
+}

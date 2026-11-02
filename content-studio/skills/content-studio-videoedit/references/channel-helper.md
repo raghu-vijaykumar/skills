@@ -312,6 +312,24 @@ The explicit repeated `--input` form joins only the files named, in that order.
 Review the result, especially clip transitions, audio sync, and color, before using it
 as a final edit.
 
+## Music library
+
+YouTube Audio Library tracks are cataloged locally under
+[assets/music](../../../assets/music/README.md). The MP3s stay in the gitignored
+`local/` folder because the library license does not allow redistribution in this
+public repository. The manifest and credits are committed.
+
+```powershell
+node content-studio/scripts/music-library.mjs init
+node content-studio/scripts/music-library.mjs open
+node content-studio/scripts/music-library.mjs add "C:\path\track.mp3" --category cinematic --title "Track" --artist "Artist"
+node content-studio/scripts/music-library.mjs list
+```
+
+Download manually from the Audio Library, then use `add` or `scan`. Use
+`--license youtube-audio-library-cc-by --attribution "..."` when the track
+requires credit. The script does not scrape or download from YouTube.
+
 ## From dataset to the next video
 
 `insights.json` is the input for [content-studio-ideagen](../../content-studio-ideagen/SKILL.md): research

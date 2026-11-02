@@ -6,3 +6,11 @@
 **/.env.*
 **/tmp/
 **/*.log
+content-studio/assets/music/local/
+content-studio/assets/music/local/**
+**/*.mp3
+**/*.wav
+**/*.flac
+**/*.m4a
+**/*.aac
+**/*.ogg
