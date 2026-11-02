@@ -122,6 +122,24 @@ def render(timeline, output):
              "-c","copy",str(output/"rough-cut.mp4")])
     return output/"rough-cut.mp4"
 
+def refresh_review(timeline, output):
+    """Rebuild human-review media for the CURRENT timeline revision."""
+    from autocut import generate_review_assets
+    root=Path(timeline["source_root"]).resolve()
+    clips=validate(timeline,root)
+    selected=[{"source":c["source"],"start":c["source_in"],"end":c["source_out"],
+               "reason":c.get("reason","timeline edit"),"text":""} for c in clips]
+    assets=generate_review_assets(output,selected,root)
+    (output/"review-manifest.json").write_text(json.dumps({
+        "revision":timeline["revision"],"assets":assets,
+        "video":"rough-cut.mp4"},indent=2),encoding="utf-8")
+    review=output/"review.html"
+    review.write_text("<!doctype html><meta charset='utf-8'><title>Review revision</title>"+
+        "<h1>Timeline revision "+str(timeline["revision"])+"</h1>"+
+        "<video controls width='800' src='rough-cut.mp4'></video>"+
+        "<p><a href='review/contact-sheet.html'>Review frames and audio</a></p>",encoding="utf-8")
+    return assets
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--output",type=Path,required=True)
@@ -154,7 +172,10 @@ def main():
             state=json.loads(state_path.read_text(encoding="utf-8"))
             state.update(status="pending_review",approved=False,revision=timeline["revision"])
             state_path.write_text(json.dumps(state,indent=2),encoding="utf-8")
-    if a.render: print(render(timeline,out))
+    if a.render:
+        result=render(timeline,out)
+        refresh_review(timeline,out)
+        print(result)
     else: print(json.dumps({"revision":timeline["revision"],"timeline":str(current)}))
 
 if __name__=="__main__": main()
