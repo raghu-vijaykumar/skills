@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','..');
 const bundle=path.join(root,'content-studio');
 const skillRoot=path.join(bundle,'skills');
-const names=['content-studio','content-studio-ideagen','content-studio-videogen',
+const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-publish','content-studio-archive'];
 const files=[path.join(root,'README.md'),path.join(bundle,'README.md'),
   path.join(bundle,'toolkit','content-helper','GUIDE.md')];
@@ -29,7 +29,7 @@ function walk(folder) {
   }
 }
 walk(bundle);
-if(discovered.length!==names.length) throw new Error(`Expected seven discoverable skills, found ${discovered.length}`);
+if(discovered.length!==names.length) throw new Error(`Expected eight discoverable skills, found ${discovered.length}`);
 let links=0;
 for(const file of files) {
   const text=fs.readFileSync(file,'utf8');
@@ -41,4 +41,4 @@ for(const file of files) {
     links++;
   }
 }
-console.log(`Docs: ${files.length} maintained files, ${links} local links, seven unique skills`);
+console.log(`Docs: ${files.length} maintained files, ${links} local links, eight unique skills`);

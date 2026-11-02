@@ -15,7 +15,7 @@ For carousel or post work, use `npx videogen content-check <id>` and `npx videog
 
 Use `npx videogen source fetch <url> --slug <name>` to cache external article media under the configured `sourceCacheDir`. Use `npx videogen probe <render.mp4> <seconds> --design 1080x1920` for objective frame measurements, then inspect the actual frame visually. These tools take their paths and palette from the project config.
 
-Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. A passing automated gate does not replace rendered-frame review.
+Use `content-studio-styles` to list built-in and project-enabled treatments. Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. A passing automated gate does not replace rendered-frame review.
 
 For publication, switch to the `content-studio-publish` skill and read [publishing](references/publishing.md). `npx videogen publish <id>` previews YouTube now; add `--platform instagram` to preview a Reel or `--at <future ISO>` to preview native YouTube scheduling. `--confirm` performs the requested action after checks and rendered review. Use `--resume` only for a recorded incomplete setup; never repeat an uncertain upload. Keep scheduled and private YouTube uploads in drafts until a public backup is verified by the channel's content-helper workflow.
 
