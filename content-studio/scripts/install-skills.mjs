@@ -1,4 +1,4 @@
-// Install a version-matched bundle once, then expose its eight skills as direct children.
+// Install a version-matched bundle once, then expose its nine skills as direct children.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -10,7 +10,8 @@ const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
 const names = ['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
-  'content-studio-videopreprocess','content-studio-videoedit','content-studio-publish','content-studio-archive'];
+  'content-studio-videopreprocess','content-studio-videoedit','content-studio-music',
+  'content-studio-publish','content-studio-archive'];
 function run(executable, args) {
   const result = spawnSync(executable, args, {encoding:'utf8', maxBuffer:16*1024*1024});
   if (result.error || result.status !== 0)
@@ -27,7 +28,13 @@ export function installSkills({global = false, target = null, dependencies = tru
   if (!fs.existsSync(release)) {
     fs.mkdirSync(release, {recursive:true});
     fs.cpSync(sourceBundle, path.join(release, 'content-studio'), {recursive:true,
-      filter: (item) => !path.relative(sourceBundle, item).split(path.sep).some((part) => part === 'node_modules' || part === '.local' || part === 'tmp')});
+      filter: (item) => {
+        const parts = path.relative(sourceBundle, item).split(path.sep);
+        if (parts.some((part) => part === 'node_modules' || part === '.local' || part === 'tmp'))
+          return false;
+        // The local music catalog is private and must not be copied into a release.
+        return !(parts.includes('assets') && parts.includes('music') && parts.includes('local'));
+      }});
     fs.copyFileSync(path.join(packageRoot, 'package.json'), path.join(release, 'package.json'));
     const lock = path.join(packageRoot, 'package-lock.json');
     const hasLock = fs.existsSync(lock);

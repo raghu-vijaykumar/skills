@@ -45,6 +45,8 @@ const DEFAULT_CATEGORIES = [
 const LICENSE_LABELS = {
   "youtube-audio-library": "YouTube Audio Library",
   "youtube-audio-library-cc-by": "YouTube Audio Library (CC BY 4.0)",
+  "pixabay": "Pixabay Content License",
+  "pixabay-cc0": "Pixabay (CC0)",
   "cc-by-4.0": "Creative Commons Attribution 4.0",
   "cc0": "CC0 / public domain",
 };
@@ -93,7 +95,7 @@ function musicPaths(root) {
 function defaultManifest() {
   return {
     version: 1,
-    source: "YouTube Audio Library",
+    source: "YouTube Audio Library and Pixabay Music",
     updated: new Date().toISOString().slice(0, 10),
     local_root: LOCAL,
     categories: DEFAULT_CATEGORIES,
@@ -277,7 +279,7 @@ function writeCredits(root, manifest) {
   const lines = [
     "# Music credits",
     "",
-    "Source: YouTube Audio Library. Audio files are kept locally under `local/`",
+    "Source: YouTube Audio Library and Pixabay Music. Audio files are kept locally under `local/`",
     "and are not committed or redistributed.",
     "",
   ];
@@ -327,8 +329,11 @@ function init(root) {
   console.log("next: open the YouTube Audio Library, download MP3s, then run \"add\" or \"scan\"");
 }
 
-function openLibrary() {
-  const url = "https://www.youtube.com/audiolibrary";
+function openLibrary(source = "youtube") {
+  const name = String(source).toLowerCase();
+  const url = name.startsWith("pixabay")
+    ? "https://pixabay.com/music/"
+    : "https://www.youtube.com/audiolibrary";
   if (process.platform === "win32") {
     execFileSync("cmd", ["/c", "start", "", url], { stdio: "ignore" });
   } else if (process.platform === "darwin") {
@@ -337,7 +342,11 @@ function openLibrary() {
     execFileSync("xdg-open", [url], { stdio: "ignore" });
   }
   console.log(`opened ${url}`);
-  console.log("sign in, filter by category, and use each track's DOWNLOAD button");
+  if (name.startsWith("pixabay")) {
+    console.log("download manually and check each track page for the Content ID shield");
+  } else {
+    console.log("sign in, filter by category, and use each track's DOWNLOAD button");
+  }
 }
 
 function verify(root) {
@@ -379,7 +388,7 @@ function list(root) {
 function usage() {
   return `Usage:
   node content-studio/scripts/music-library.mjs init
-  node content-studio/scripts/music-library.mjs open
+  node content-studio/scripts/music-library.mjs open [--source youtube|pixabay]
   node content-studio/scripts/music-library.mjs add <file> --category <name> [options]
   node content-studio/scripts/music-library.mjs scan
   node content-studio/scripts/music-library.mjs list
@@ -394,7 +403,8 @@ Add options:
   --artist <text>         artist
   --mood <text>           optional mood label
   --license <name>        youtube-audio-library (default),
-                          youtube-audio-library-cc-by, cc-by-4.0, cc0
+                          youtube-audio-library-cc-by, pixabay,
+                          pixabay-cc0, cc-by-4.0, cc0
   --attribution <text>    exact credit required by the license
   --source-url <url>      track page or source reference
   --downloaded <date>     YYYY-MM-DD
@@ -417,7 +427,7 @@ function main() {
       init(root);
       return 0;
     case "open":
-      openLibrary();
+      openLibrary(args.options.source || args.positional[0] || "youtube");
       return 0;
     case "add": {
       if (!args.positional[0]) throw new Error("add requires an audio file");

@@ -312,23 +312,29 @@ The explicit repeated `--input` form joins only the files named, in that order.
 Review the result, especially clip transitions, audio sync, and color, before using it
 as a final edit.
 
-## Music library
+## Music selection
 
-YouTube Audio Library tracks are cataloged locally under
-[assets/music](../../../assets/music/README.md). The MP3s stay in the gitignored
-`local/` folder because the library license does not allow redistribution in this
-public repository. The manifest and credits are committed.
+Use [content-studio-music](../../content-studio-music/SKILL.md) to shortlist and
+approve background music from YouTube Audio Library or Pixabay Music. Tracks are
+cataloged locally under [assets/music](../../../assets/music/README.md); the MP3s
+stay in the gitignored `local/` folder because neither license allows
+redistribution in this public repository. The manifest, credits, and selection
+record are committed.
 
 ```powershell
 node content-studio/scripts/music-library.mjs init
 node content-studio/scripts/music-library.mjs open
-node content-studio/scripts/music-library.mjs add "C:\path\track.mp3" --category cinematic --title "Track" --artist "Artist"
-node content-studio/scripts/music-library.mjs list
+node content-studio/scripts/music-library.mjs open --source pixabay
+node content-studio/scripts/music-library.mjs add "C:\path\track.mp3" --category cinematic --title "Track" --artist "Artist" --license youtube-audio-library
+python ../../content-studio-music/scripts/music.py review --channel out-of-office --draft <id> --category cinematic --count 5
+python ../../content-studio-music/scripts/music.py select --channel out-of-office --draft <id> --track "Track"
 ```
 
-Download manually from the Audio Library, then use `add` or `scan`. Use
-`--license youtube-audio-library-cc-by --attribution "..."` when the track
-requires credit. The script does not scrape or download from YouTube.
+Download manually from the selected source, then use `add` or `scan`. Use
+`--license pixabay` for Pixabay and `--license youtube-audio-library-cc-by
+--attribution "..."` when a track requires credit. Neither script scrapes or
+downloads from the source sites. The approved selection is written to
+`music-selection.json`; `music-credits.txt` holds the exact description credit.
 
 ## From dataset to the next video
 

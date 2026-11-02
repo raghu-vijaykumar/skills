@@ -1,13 +1,14 @@
 # Music library
 
-Local catalog for YouTube Audio Library tracks used in vlogs.
+Local catalog for YouTube Audio Library and Pixabay Music tracks used in vlogs.
+Choose and review tracks with the `content-studio-music` skill.
 
 ## Important: the audio is not committed
 
-YouTube Audio Library tracks may be used in videos, but their license does not
-permit redistribution or standalone delivery. This repository is public, so the
-MP3s live in `local/`, which is gitignored. Git LFS does not change that
-licensing rule; it only helps with media that is legally redistributable.
+YouTube Audio Library and Pixabay Music tracks may be used in videos, but their
+licenses do not permit redistribution or standalone delivery. This repository is
+public, so the MP3s live in `local/`, which is gitignored. Git LFS does not change
+that licensing rule; it only helps with media that is legally redistributable.
 
 Only these files are committed:
 
@@ -22,13 +23,14 @@ The audio itself stays on this machine (and in any private backup you choose).
 ```powershell
 node content-studio/scripts/music-library.mjs init
 node content-studio/scripts/music-library.mjs open
+node content-studio/scripts/music-library.mjs open --source pixabay
 ```
 
 `init` creates the category folders under `local/` and refreshes the manifest.
-`open` opens the official Audio Library in your browser. There is no automated
-download: sign in to YouTube Studio, filter by genre, and use each track's
-**DOWNLOAD** button. Downloading through a bot or scraper violates YouTube's
-terms.
+`open` opens the official YouTube Audio Library, or Pixabay Music with
+`--source pixabay`. There is no automated download: sign in to YouTube Studio or
+Pixabay, filter, and use each track's download button. Downloading through a bot
+or scraper violates the site terms.
 
 ## Add a downloaded track
 
@@ -42,6 +44,7 @@ node content-studio/scripts/music-library.mjs add "C:\Users\you\Downloads\Track.
   --source-url "https://www.youtube.com/audiolibrary"
 ```
 
+For Pixabay, use `--license pixabay` and the track page as `--source-url`.
 Use `--license youtube-audio-library-cc-by` and `--attribution "Music: ..."`
 when the track requires credit. The script copies the file into
 `local/<category>/`, records its SHA-256 and duration, and regenerates
@@ -61,7 +64,7 @@ and re-add it with explicit metadata.
 | Command | Purpose |
 |---|---|
 | `init` | Create local category folders and refresh credits |
-| `open` | Open the official YouTube Audio Library |
+| `open` | Open YouTube Audio Library or Pixabay Music |
 | `add <file>` | Copy/move one download and register it |
 | `scan` | Register files already under `local/` |
 | `list` | Show the catalog grouped by category |
@@ -84,17 +87,19 @@ The folder name is the slugified category, for example
 
 ## Attribution
 
-Most Audio Library tracks need no attribution. Creative Commons tracks do.
-Check the license column before downloading and keep the generated attribution
-text with the video's description. `credits.md` groups every track and has a
-separate section for tracks that require credit.
+Most Audio Library and Pixabay tracks need no attribution. Creative Commons
+tracks do. Check the license column before downloading and keep the generated
+attribution text with the video's description. `credits.md` groups every track
+and has a separate section for tracks that require credit.
 
 ## Content ID
 
 Audio Library tracks are known to YouTube and are generally not claimed through
-Content ID. Keep `library.json` and the download date as proof of source. Do not
-re-upload the MP3s as standalone audio or publish them on another platform
-unless that track's license explicitly allows it.
+Content ID. Pixabay tracks may be registered by their contributors; check the
+track page for the Content ID shield and keep the download certificate. Keep
+`library.json` and the download date as proof of source. Do not re-upload the
+MP3s as standalone audio or publish them on another platform unless that track's
+license explicitly allows it.
 
 ## Backups
 
