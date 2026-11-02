@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+import math
 from pathlib import Path
 
 EXTS={".mp4",".mov",".mkv",".m4v",".webm",".avi"}
@@ -40,6 +41,43 @@ def read_segments(path, sources, annotations):
                        "text":s.get("text","")})
     return result
 
+def analyze_scenes(sources, folder):
+    candidates = []
+    for name, duration in sources.items():
+        p = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(folder/name),
+            "-vf", "fps=2,select='gt(scene,0.35)',showinfo", "-an", "-f", "null", "-"],
+            text=True, capture_output=True)
+        boundaries = [0.0]
+        for match in re.finditer(r"pts_time:([0-9.]+)", p.stderr):
+            t = float(match.group(1))
+            if 1 < t < duration-1 and t-boundaries[-1] >= 2:
+                boundaries.append(t)
+        boundaries.append(duration)
+        for a,b in zip(boundaries,boundaries[1:]):
+            if b-a >= 1:
+                candidates.append(dict(source=name,start=a,end=min(a+12,b),
+                    score=0.45,reason="scene change candidate (not semantically ranked)",text=""))
+    return candidates
+
+def analyze_speech(sources, folder, model):
+    try:
+        from faster_whisper import WhisperModel
+    except ImportError as exc:
+        raise RuntimeError("Install optional dependency: pip install faster-whisper") from exc
+    engine = WhisperModel(model, device="cpu", compute_type="int8")
+    segments = []
+    for name in sources:
+        chunks,_ = engine.transcribe(str(folder/name),vad_filter=True)
+        for chunk in chunks:
+            if chunk.end-chunk.start >= 0.5:
+                segments.append(dict(source=name,start=chunk.start,end=chunk.end,
+                    score=0.8,reason="speech transcription",text=chunk.text.strip()))
+    return segments
+
+def has_audio(path):
+    streams = json.loads(run(["ffprobe","-v","error","-show_streams","-of","json",str(path)]))["streams"]
+    return any(s.get("codec_type")=="audio" for s in streams)
+
 def build(args):
     folder=args.folder.resolve(); out=args.output.resolve()
     if not folder.is_dir(): raise ValueError("Input folder does not exist")
@@ -48,6 +86,8 @@ def build(args):
     sources={p.name:duration(p) for p in sorted(folder.iterdir()) if p.is_file() and p.suffix.lower() in EXTS}
     if not sources: raise ValueError("No supported videos")
     clips=read_segments(args.transcripts,sources,False)+read_segments(args.annotations,sources,True)
+    if args.auto_transcribe: clips += analyze_speech(sources,folder,args.whisper_model)
+    if args.detect_scenes: clips += analyze_scenes(sources,folder)
     if not clips:
         for name,d in sources.items():
             for start in range(0,int(d),20):
@@ -70,6 +110,7 @@ def build(args):
     out.mkdir(parents=True,exist_ok=True)
     decisions={"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
                "semantic_analysis":"external annotations only" if args.annotations else "not performed",
+               "transcription_enabled":args.auto_transcribe,"scene_detection_enabled":args.detect_scenes,
                "segments":selected}
     (out/"edit-decisions.json").write_text(json.dumps(decisions,indent=2),encoding="utf-8")
     otio={"OTIO_SCHEMA":"Timeline.1","name":"AI Rough Cut (review required)","tracks":{"OTIO_SCHEMA":"Stack.1","children":[
@@ -90,10 +131,16 @@ def build(args):
     parts=[]
     for i,c in enumerate(selected):
         path=out/f"segment-{i:04d}.mp4";parts.append(path)
-        run(["ffmpeg","-y","-hide_banner","-loglevel","error","-ss",str(c["start"]),
-             "-i",str(folder/c["source"]),"-t",str(c["end"]-c["start"]),
+        audio=has_audio(folder/c["source"])
+        command=["ffmpeg","-y","-hide_banner","-loglevel","error","-ss",str(c["start"]),
+             "-i",str(folder/c["source"])]
+        if not audio: command+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
+        command+=["-t",str(c["end"]-c["start"]),"-map","0:v:0",
+             "-map","0:a:0" if audio else "1:a:0",
              "-vf","scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
-             "-r","30","-c:v","libx264","-preset","veryfast","-crf","20","-an",str(path)])
+             "-r","30","-c:v","libx264","-preset","veryfast","-crf","20",
+             "-c:a","aac","-ar","48000","-ac","2","-b:a","192k","-shortest",str(path)]
+        run(command)
     concat=out/"segments.txt"
     concat.write_text("".join("file '"+p.name+"'\n" for p in parts),encoding="utf-8")
     run(["ffmpeg","-y","-hide_banner","-loglevel","error","-f","concat","-safe","0",
@@ -109,6 +156,9 @@ def main():
     p.add_argument("--transcripts",type=Path)
     p.add_argument("--annotations",type=Path)
     p.add_argument("--force",action="store_true")
+    p.add_argument("--auto-transcribe",action="store_true")
+    p.add_argument("--whisper-model",default="small")
+    p.add_argument("--detect-scenes",action="store_true")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):
         if not shutil.which(binary): p.error(binary+" missing from PATH")
