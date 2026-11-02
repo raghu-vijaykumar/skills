@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Canonical, versioned, editable timeline and deterministic FFmpeg renderer."""
+import argparse
+import copy
+import hashlib
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+def command(args):
+    p=subprocess.run(args,capture_output=True,text=True)
+    if p.returncode: raise RuntimeError((p.stderr or p.stdout)[-2000:])
+    return p.stdout
+
+def validate(timeline, root):
+    if timeline.get("schema")!="content-studio.timeline.v1": raise ValueError("Unsupported timeline schema")
+    ids=set()
+    for track in timeline.get("tracks",[]):
+        if track["kind"] not in ("video","audio","caption"): raise ValueError("Unsupported track kind")
+        for clip in track.get("clips",[]):
+            if clip["id"] in ids: raise ValueError("Duplicate clip ID")
+            ids.add(clip["id"])
+            if clip["start"]<0 or clip["duration"]<=0: raise ValueError("Invalid clip timing")
+            if track["kind"] in ("video","audio"):
+                src=(root/clip["source"]).resolve()
+                if not src.is_file() or not src.is_relative_to(root.resolve()): raise ValueError("Missing or unsafe source: "+clip["source"])
+                if clip["source_in"]<0 or clip["source_out"]<=clip["source_in"]: raise ValueError("Invalid source range")
+                if abs(clip["duration"]-(clip["source_out"]-clip["source_in"]))>0.01: raise ValueError("Duration mismatch")
+    video=sorted((c for t in timeline["tracks"] if t["kind"]=="video" for c in t["clips"]),key=lambda x:x["start"])
+    cursor=0.
+    for clip in video:
+        if abs(clip["start"]-cursor)>0.02: raise ValueError("Video track must be contiguous and non-overlapping")
+        cursor+=clip["duration"]
+    if not video: raise ValueError("No video clips")
+    return video
+
+def initial_timeline(segments, folder, style="travel-vlog"):
+    cursor=0.
+    clips=[]
+    for i,c in enumerate(segments):
+        length=round(c["end"]-c["start"],3)
+        clips.append({"id":f"v{i:04d}","source":c["source"],"source_in":c["start"],
+                      "source_out":c["end"],"start":round(cursor,3),"duration":length,
+                      "reason":c.get("reason",""),"audio_gain_db":0})
+        cursor+=length
+    return {"schema":"content-studio.timeline.v1","revision":1,"style":style,
+            "source_root":str(folder.resolve()),"fps":30,"width":1920,"height":1080,
+            "tracks":[{"id":"picture","kind":"video","clips":clips},
+                      {"id":"music","kind":"audio","clips":[]},
+                      {"id":"captions","kind":"caption","clips":[]}]}
+
+def write_revision(timeline, output):
+    history=output/"timeline-history"
+    history.mkdir(parents=True,exist_ok=True)
+    number=timeline["revision"]
+    snapshot=history/f"timeline-v{number:03d}.json"
+    if snapshot.exists(): raise FileExistsError("Revision already exists: "+str(snapshot))
+    encoded=json.dumps(timeline,indent=2)+"\n"
+    snapshot.write_text(encoded,encoding="utf-8")
+    (output/"timeline.json").write_text(encoded,encoding="utf-8")
+    return snapshot
+
+def revise(timeline, instructions):
+    t=copy.deepcopy(timeline)
+    picture=next(x for x in t["tracks"] if x["kind"]=="video")
+    clips=picture["clips"]
+    for op in instructions:
+        action=op["action"]
+        if action=="remove":
+            clips[:]=[c for c in clips if c["id"]!=op["id"]]
+        elif action=="trim":
+            clip=next(c for c in clips if c["id"]==op["id"])
+            a=float(op.get("source_in",clip["source_in"]))
+            b=float(op.get("source_out",clip["source_out"]))
+            if a<0 or b<=a: raise ValueError("Invalid trim")
+            clip.update(source_in=a,source_out=b,duration=round(b-a,3))
+        elif action=="move":
+            clip=next(c for c in clips if c["id"]==op["id"])
+            clips.remove(clip)
+            clips.insert(int(op["index"]),clip)
+        elif action=="gain":
+            clip=next(c for c in clips if c["id"]==op["id"])
+            clip["audio_gain_db"]=float(op["db"])
+        else: raise ValueError("Unknown edit operation: "+action)
+    cursor=0.
+    for clip in clips:
+        clip["start"]=round(cursor,3)
+        cursor+=clip["duration"]
+    t["revision"]+=1
+    return t
+
+def render(timeline, output):
+    root=Path(timeline["source_root"]).resolve()
+    video=validate(timeline,root)
+    cache=output/"render-cache"
+    cache.mkdir(parents=True,exist_ok=True)
+    parts=[]
+    for clip in video:
+        src=root/clip["source"]
+        settings={k:clip[k] for k in ("source","source_in","source_out","audio_gain_db")}
+        settings.update(fps=timeline["fps"],width=timeline["width"],height=timeline["height"],
+                        mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
+        digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
+        segment=cache/(digest+".mp4")
+        if not segment.exists():
+            audio=subprocess.run(["ffprobe","-v","error","-select_streams","a:0",
+                "-show_entries","stream=index","-of","csv=p=0",str(src)],capture_output=True,text=True)
+            has_audio=bool(audio.stdout.strip())
+            args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
+            if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
+            args+=["-t",str(clip["duration"]),"-map","0:v:0","-map","0:a:0" if has_audio else "1:a:0",
+                   "-vf",f"scale={timeline['width']}:{timeline['height']}:force_original_aspect_ratio=decrease,pad={timeline['width']}:{timeline['height']}:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
+                   "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",
+                   "-c:a","aac","-ar","48000","-ac","2","-af",f"volume={clip['audio_gain_db']}dB",
+                   "-shortest",str(segment)]
+            command(args)
+        parts.append(segment)
+    concat=output/"timeline-concat.txt"
+    concat.write_text("".join("file '"+str(p.resolve()).replace("'","'\\''")+"'\n" for p in parts),encoding="utf-8")
+    command(["ffmpeg","-y","-v","error","-f","concat","-safe","0","-i",str(concat),
+             "-c","copy",str(output/"rough-cut.mp4")])
+    return output/"rough-cut.mp4"
+
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--render",action="store_true")
+    p.add_argument("--edits",type=Path,help="JSON list of remove/trim/move/gain operations")
+    p.add_argument("--rollback",type=int)
+    a=p.parse_args()
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"): p.error("FFmpeg/FFprobe required")
+    out=a.output.resolve()
+    current=out/"timeline.json"
+    if not current.is_file(): p.error("Missing timeline.json")
+    timeline=json.loads(current.read_text(encoding="utf-8"))
+    if a.edits and a.rollback is not None: p.error("Choose edits or rollback")
+    if a.rollback is not None:
+        previous=out/"timeline-history"/f"timeline-v{a.rollback:03d}.json"
+        if not previous.is_file(): p.error("Revision not found")
+        old=json.loads(previous.read_text(encoding="utf-8"))
+        old["revision"]=timeline["revision"]+1
+        validate(old,Path(old["source_root"]))
+        write_revision(old,out)
+        timeline=old
+    elif a.edits:
+        edits=json.loads(a.edits.read_text(encoding="utf-8"))
+        timeline=revise(timeline,edits)
+        validate(timeline,Path(timeline["source_root"]))
+        write_revision(timeline,out)
+    if a.render: print(render(timeline,out))
+    else: print(json.dumps({"revision":timeline["revision"],"timeline":str(current)}))
+
+if __name__=="__main__": main()
