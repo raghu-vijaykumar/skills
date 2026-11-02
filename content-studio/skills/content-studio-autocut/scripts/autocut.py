@@ -9,6 +9,7 @@ import subprocess
 import sys
 import math
 import tempfile
+from timeline import initial_timeline, write_revision, render
 from pathlib import Path
 
 EXTS={".mp4",".mov",".mkv",".m4v",".webm",".avi"}
@@ -200,23 +201,9 @@ def build(args):
        "<h1>Review before publishing</h1><p>Automatic selections are proposals, not approved edits.</p>"+
        "<table border='1'><tr><th>Source</th><th>Range (s)</th><th>Reason</th><th>Speech</th></tr>"+
        rows+"</table>",encoding="utf-8")
-    parts=[]
-    for i,c in enumerate(selected):
-        path=out/f"segment-{i:04d}.mp4";parts.append(path)
-        audio=has_audio(folder/c["source"])
-        command=["ffmpeg","-y","-hide_banner","-loglevel","error","-ss",str(c["start"]),
-             "-i",str(folder/c["source"])]
-        if not audio: command+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
-        command+=["-t",str(c["end"]-c["start"]),"-map","0:v:0",
-             "-map","0:a:0" if audio else "1:a:0",
-             "-vf","scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
-             "-r","30","-c:v","libx264","-preset","veryfast","-crf","20",
-             "-c:a","aac","-ar","48000","-ac","2","-b:a","192k","-shortest",str(path)]
-        run(command)
-    concat=out/"segments.txt"
-    concat.write_text("".join("file '"+p.name+"'\n" for p in parts),encoding="utf-8")
-    run(["ffmpeg","-y","-hide_banner","-loglevel","error","-f","concat","-safe","0",
-         "-i",str(concat),"-c","copy",str(out/"rough-cut.mp4")])
+    timeline=initial_timeline(selected,folder,args.style)
+    write_revision(timeline,out)
+    render(timeline,out)
     assets=generate_review_assets(out,selected,folder)
     decisions["review_assets"]=assets
     (out/"edit-decisions.json").write_text(json.dumps(decisions,indent=2),encoding="utf-8")
