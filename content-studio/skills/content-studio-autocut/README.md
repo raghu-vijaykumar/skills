@@ -17,3 +17,25 @@ Requires FFmpeg and FFprobe. For local visual analysis install Ollama, pull a vi
 Outputs: `rough-cut.mp4` with original clip audio (or silence when absent), `timeline.otio`, `edit-decisions.json`, `review.html`. Video is re-encoded to 1920x1080 H.264 SDR, audio to AAC.
 
 **Known gaps:** Vision inference is now optional via Ollama; its subjective relevance score is not a calibrated visual-quality measurement. An optional exposure/sharpness heuristic is available with `--quality-score` (`pip install numpy`); motion stabilization and calibrated perceptual quality scoring remain pending. Scene-change detection is a technical signal, not understanding of the footage. Without transcripts or annotations the rough cut remains a heuristic sample. Story ordering follows filename order, not verified capture timestamps. Review the timeline before publishing. The installer now registers this skill, but existing versioned installations may require a package version bump to refresh the bundle.
+
+## Editable canonical timeline (experimental)
+
+The first rough-cut run now creates `timeline.json` and immutable `timeline-history/timeline-v001.json`. The FFmpeg renderer consumes the timeline; unchanged source segments are reused from `render-cache/`.
+
+To apply deterministic changes, create `edits.json`:
+```json
+[
+  {"action":"trim","id":"v0000","source_in":5,"source_out":12},
+  {"action":"move","id":"v0002","index":0},
+  {"action":"gain","id":"v0001","db":-4},
+  {"action":"remove","id":"v0003"}
+]
+```
+
+Run:
+```bash
+python scripts/timeline.py --output ./rough-cut --edits edits.json --render
+python scripts/timeline.py --output ./rough-cut --rollback 1 --render
+```
+
+The video track is supported by the renderer, including embedded source audio and per-clip gain. Music and captions tracks are present as empty extensibility slots; **the renderer does not yet mix music, burn captions, or implement transitions**. Edits currently require structured JSON operations; translating natural-language feedback into these operations is a separate pending agent step. A revision render does not yet regenerate the review contact sheet or reset approval state; treat any prior approval as invalid after an edit. Keep human approval before publishing.
