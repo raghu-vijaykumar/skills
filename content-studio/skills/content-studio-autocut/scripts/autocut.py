@@ -204,11 +204,12 @@ def build(args):
     timeline=initial_timeline(selected,folder,args.style)
     write_revision(timeline,out)
     render(timeline,out)
-    assets=generate_review_assets(out,selected,folder)
+    from timeline import refresh_review
+    assets=refresh_review(timeline,out)
     decisions["review_assets"]=assets
     (out/"edit-decisions.json").write_text(json.dumps(decisions,indent=2),encoding="utf-8")
     (out/"review-state.json").write_text(json.dumps({"status":"pending_review",
-        "approved":False,"feedback":[],"revision":0},indent=2),encoding="utf-8")
+        "approved":False,"feedback":[],"revision":1},indent=2),encoding="utf-8")
     print(json.dumps({"output":str(out/"rough-cut.mp4"),"review":str(out/"review/contact-sheet.html"),
         "segments":len(selected),"seconds":used},indent=2))
 
