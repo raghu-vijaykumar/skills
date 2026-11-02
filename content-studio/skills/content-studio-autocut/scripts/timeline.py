@@ -148,6 +148,12 @@ def main():
         timeline=revise(timeline,edits)
         validate(timeline,Path(timeline["source_root"]))
         write_revision(timeline,out)
+    if a.edits or a.rollback is not None:
+        state_path=out/"review-state.json"
+        if state_path.exists():
+            state=json.loads(state_path.read_text(encoding="utf-8"))
+            state.update(status="pending_review",approved=False,revision=timeline["revision"])
+            state_path.write_text(json.dumps(state,indent=2),encoding="utf-8")
     if a.render: print(render(timeline,out))
     else: print(json.dumps({"revision":timeline["revision"],"timeline":str(current)}))
 
