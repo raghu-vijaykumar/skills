@@ -15,6 +15,11 @@ class AutoCutTests(unittest.TestCase):
         self.assertEqual(module.seconds("12m"),720)
         self.assertEqual(module.seconds("45s"),45)
         self.assertEqual(module.seconds("2.5"),2.5)
+        self.assertEqual(module.seconds("2m30s"),150)
+        self.assertEqual(module.seconds("1h2m3s"),3723)
+        self.assertEqual(module.seconds("150"),150)
+        with self.assertRaises(ValueError):
+            module.seconds("soon")
 
     def test_annotation_bounds_and_source_safety(self):
         with tempfile.TemporaryDirectory() as d:

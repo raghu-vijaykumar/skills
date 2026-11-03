@@ -26,9 +26,13 @@ def duration(path):
 
 def seconds(value):
     if isinstance(value,(int,float)): return float(value)
-    if re.fullmatch(r"\d+(\.\d+)?m",value): return float(value[:-1])*60
-    if re.fullmatch(r"\d+(\.\d+)?s",value): return float(value[:-1])
-    return float(value)
+    text=str(value).strip().lower()
+    if re.fullmatch(r"\d+(\.\d+)?",text): return float(text)
+    match=re.fullmatch(r"(?:(\d+(?:\.\d+)?)h)?(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?",text)
+    if not match or not any(match.groups()):
+        raise ValueError(f"invalid duration: {value}")
+    hours,minutes,secs=(float(part) if part else 0 for part in match.groups())
+    return hours*3600+minutes*60+secs
 
 def read_segments(path, sources, annotations):
     if not path: return []
