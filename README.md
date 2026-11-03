@@ -34,6 +34,35 @@ raw footage ─────────┴── preprocess → AutoCut rough cu
                                       independent archive + Drive sync
 ```
 
+### Deterministic checklist
+
+When the main `content-studio` router is used, it creates `lifecycle-checklist.json` in the draft before production work. Direct specialist use remains one-off and does not create the checklist.
+
+The checklist has fixed IDs C01-C22, in a fixed order. Every item must end as:
+
+- `done` with evidence or a note
+- `not_applicable` with a reason
+- `deferred` with a reason (post-publish items only at approval time)
+
+`pending` blocks. Post-publish items start deferred and must be resolved before the draft is closed.
+
+```powershell
+python <bundle>/skills/content-studio/scripts/checklist.py `
+  --channel <slug> --draft <id> --kind edited init
+
+python <bundle>/skills/content-studio/scripts/checklist.py `
+  --channel <slug> --draft <id> set --id C07 --status done `
+  --evidence "video.mp4" --note "watched end to end"
+
+python <bundle>/skills/content-studio/scripts/checklist.py `
+  --channel <slug> --draft <id> verify --phase pre_publish
+
+python <bundle>/skills/content-studio/scripts/checklist.py `
+  --channel <slug> --draft <id> verify --phase all
+```
+
+The publish gate rejects a main-lifecycle draft whose pre-publish items are pending, deferred, done without evidence, or not applicable without a reason. The full fixed item list is in [the lifecycle checklist](content-studio/skills/content-studio/references/lifecycle-checklist.md).
+
 ### 1. Open or create the draft
 
 Pick the channel and one draft folder. Read the channel's owner rules and the draft's current state before changing it.

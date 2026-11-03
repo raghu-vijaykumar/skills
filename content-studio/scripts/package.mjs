@@ -76,11 +76,50 @@ export function validateDraftRecord(draft, files) {
   }
   return {kind, creative};
 }
+export function validateChecklist(draft, phase = 'pre_publish') {
+  if (!['pre_publish', 'all'].includes(phase)) throw new Error(`Unknown checklist phase: ${phase}`);
+  const manifest = readJson(path.join(draft, 'draft.json'));
+  const file = path.join(draft, 'lifecycle-checklist.json');
+  if (!fs.existsSync(file)) {
+    if (manifest.lifecycle === 'main')
+      throw new Error('Main lifecycle draft requires lifecycle-checklist.json');
+    return null;
+  }
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    throw new Error('lifecycle-checklist.json is not valid JSON');
+  }
+  if (!Array.isArray(data.items) || !data.items.length)
+    throw new Error('lifecycle-checklist.json has no items');
+  const selected = phase === 'pre_publish'
+    ? data.items.filter((item) => item.phase === 'pre_publish')
+    : data.items;
+  if (!selected.length) throw new Error(`lifecycle-checklist.json has no ${phase} items`);
+  const failures = [];
+  for (const item of selected) {
+    const id = item.id ?? '?';
+    if (item.status === 'done') {
+      if (!(Array.isArray(item.evidence) && item.evidence.length) && !String(item.note ?? '').trim())
+        failures.push(`${id}: done without evidence or note`);
+    } else if (item.status === 'not_applicable') {
+      if (!String(item.reason ?? '').trim()) failures.push(`${id}: not_applicable without reason`);
+    } else if (item.status === 'deferred') {
+      failures.push(`${id}: deferred`);
+    } else {
+      failures.push(`${id}: ${item.status ?? 'pending'}`);
+    }
+  }
+  if (failures.length) throw new Error(`Lifecycle checklist incomplete: ${failures.join(', ')}`);
+  return data;
+}
 export function approvePackage(draft, id, note) {
   if (!note?.trim()) throw new Error('Approval note is required after human review');
   const files = packageFiles(draft, id);
   if (!files.thumbnail) throw new Error('An approved thumbnail is required');
   validateDraftRecord(draft, files);
+  validateChecklist(draft, 'pre_publish');
   const approval = {approvedAt: new Date().toISOString(), note: note.trim(), files: fingerprint(files)};
   fs.writeFileSync(path.join(draft, 'package-approval.json'), JSON.stringify(approval, null, 2) + '\n');
   return approval;
@@ -90,6 +129,7 @@ export function verifyPackage(draft, id) {
   if (!approved.approvedAt || !approved.files) throw new Error('Human-reviewed package approval is missing');
   const files = packageFiles(draft, id);
   validateDraftRecord(draft, files);
+  validateChecklist(draft, 'pre_publish');
   const current = fingerprint(files);
   for (const [name, hash] of Object.entries(current)) {
     if (approved.files[name] !== hash) throw new Error(`${name} changed since package approval`);

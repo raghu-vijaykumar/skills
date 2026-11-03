@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {test} from 'node:test';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {approvePackage, sha256, verifyPackage, validateSrt} from '../scripts/package.mjs';
+import {approvePackage, sha256, verifyPackage, validateSrt, validateChecklist} from '../scripts/package.mjs';
 import {transcriptionSegments, toSrt, transcribeDraft} from '../scripts/transcribe.mjs';
 import {sourceRevision} from '../scripts/source-revision.mjs';
 import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-videogen/dist/hairline.js';
@@ -38,6 +38,39 @@ function cleanup(workspace) {
   if(!resolved.startsWith(root+path.sep) || fs.lstatSync(resolved).isSymbolicLink()) throw new Error('Unsafe test cleanup');
   fs.rmSync(resolved,{recursive:true,force:true});
 }
+function writeChecklist(draft, mutate = null) {
+  const items=Array.from({length:17},(_,index)=>({
+    id:`C${String(index+1).padStart(2,'0')}`,
+    phase:'pre_publish',
+    status:'done',
+    evidence:['reviewed'],
+    reason:'',
+    note:'reviewed',
+  }));
+  if(mutate) mutate(items);
+  fs.writeFileSync(path.join(draft,'lifecycle-checklist.json'),JSON.stringify({items}));
+}
+
+test('main lifecycle checklist blocks approval until every item is covered',()=>{
+  const {workspace,draft}=fixture();
+  try {
+    writeChecklist(draft,(items)=>{items[0].status='pending';});
+    assert.throws(()=>approvePackage(draft,'001-test','Reviewed'),/Lifecycle checklist incomplete: C01: pending/);
+    writeChecklist(draft,(items)=>{items[0].status='not_applicable';items[0].reason='';});
+    assert.throws(()=>approvePackage(draft,'001-test','Reviewed'),/C01: not_applicable without reason/);
+    writeChecklist(draft);
+    approvePackage(draft,'001-test','Reviewed with checklist');
+    assert.equal(validateChecklist(draft,'pre_publish').items.length,17);
+  } finally {cleanup(workspace);}
+});
+
+test('a main lifecycle draft cannot approve without its checklist',()=>{
+  const {workspace,draft}=fixture();
+  try {
+    fs.writeFileSync(path.join(draft,'draft.json'),JSON.stringify({production:{kind:'edited'},lifecycle:'main'}));
+    assert.throws(()=>approvePackage(draft,'001-test','Reviewed'),/requires lifecycle-checklist.json/);
+  } finally {cleanup(workspace);}
+});
 
 test('one approval fingerprints edited inputs and rejects a changed master',()=>{
   const {workspace,draft}=fixture();
