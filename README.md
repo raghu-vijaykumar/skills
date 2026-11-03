@@ -23,7 +23,7 @@ A draft is one folder under `<workspace>/<channel>/drafts/<id>`. Raw media stays
 ```text
 idea ──► treatment ──┬── Remotion: scaffold → narration → render ──┐
                      │                                             │
-raw footage ─────────┴── AutoCut rough cut → preprocess → edit ────┤
+raw footage ─────────┴── preprocess → AutoCut rough cut → edit ────┤
                                                                    ▼
                               transcript + captions + thumbnail + music
                                                                    ▼
@@ -39,35 +39,14 @@ raw footage ─────────┴── AutoCut rough cut → preproces
 Pick the channel and one draft folder. Read the channel's owner rules and the draft's current state before changing it.
 
 - **Remotion project:** run `npx videogen init <directory>` once, then `npx videogen scaffold <id> --title "Working title"`. Scaffolding preserves an existing idea brief and refuses to replace authored scenes.
-- **Vlog or camera footage:** create `drafts/<id>/` and place the raw clips at its root. For a standalone folder outside a channel, use `preprocess --folder <path>` later.
+- **Vlog or camera footage:** create `drafts/<id>/` and place the raw clips at its root. Preprocess them before AutoCut; for a standalone folder outside a channel, use `preprocess --folder <path>`.
 - **Idea first:** use `content-studio-ideagen` for analytics, comparisons, and a brief; use `content-studio-styles` to choose a treatment.
 
 `draft.json` is the draft's running record. Publication later stores the YouTube or Instagram ID and receipts there.
 
-### 2. Shape the story (optional)
+### 2. Clean and order the camera clips
 
-For raw footage, `content-studio-autocut` produces a reviewable rough cut:
-
-```powershell
-python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
-  --folder <videos> --duration 12m --style travel-vlog --output <rough-cut> `
-  --auto-transcribe --detect-scenes --quality-score
-```
-
-It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
-
-This is a proposal, not approval. Review the actual video, frames, and audio, then record a human decision:
-
-```powershell
-python <bundle>/skills/content-studio-autocut/scripts/review.py `
-  --output <rough-cut> --approve --reviewer human
-```
-
-Use `--request-changes "..."` to send it back. A revision resets approval and regenerates the review media. The deterministic heuristic uses scene cuts, silence, and duration; it does not understand landmarks or story without supplied transcripts or annotations. Do not claim semantics the analysis did not produce.
-
-### 3. Clean and order the camera clips
-
-`content-studio-videopreprocess` turns a camera dump into ordered, reviewed clips:
+`content-studio-videopreprocess` turns a camera dump into ordered, reviewed clips before any rough cut:
 
 ```powershell
 python <bundle>/skills/content-studio-videoedit/scripts/content.py `
@@ -90,6 +69,39 @@ Review gates:
 - **Blur:** inspect `review.csv` / `review.html` before approving cuts.
 - **Dolby Vision:** install `dovi_tool`, run `--dv-proof`, check playback on the usual device, then use `--dv-approved`. Never treat an HLG-only file as Dolby Vision.
 - **Final SDR:** `--final` intentionally drops the Dolby Vision RPU. Keep the proof path when DV must be preserved.
+
+The per-clip `final.mp4` files are the clean input for AutoCut. AutoCut scans only the top level of its `--folder`, so stage them flat first:
+
+```powershell
+$draft = "C:\workspace\content\<channel>\drafts\<id>"
+$stage = "$draft\analysis\autocut-input"
+New-Item -ItemType Directory -Force $stage | Out-Null
+Get-ChildItem "$draft\processed-clips" -Recurse -Filter final.mp4 |
+  ForEach-Object { Copy-Item $_.FullName (Join-Path $stage ($_.Directory.Name + ".mp4")) }
+```
+
+If `--final` was not used, stage the approved `cut.*` or `processed.*` exports instead.
+
+### 3. Shape the story with AutoCut (optional)
+
+After preprocessing, `content-studio-autocut` selects speech and shots from the cleaned clips:
+
+```powershell
+python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
+  --folder <draft>/analysis/autocut-input --duration 12m --style travel-vlog `
+  --output <draft>/rough-cut --auto-transcribe --detect-scenes --quality-score
+```
+
+It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
+
+This is a proposal, not approval. Review the actual video, frames, and audio, then record a human decision:
+
+```powershell
+python <bundle>/skills/content-studio-autocut/scripts/review.py `
+  --output <draft>/rough-cut --approve --reviewer human
+```
+
+Use `--request-changes "..."` to send it back. A revision resets approval and regenerates the review media. The deterministic heuristic uses scene cuts, silence, and duration; it does not understand landmarks or story without supplied transcripts or annotations. Do not claim semantics the analysis did not produce.
 
 ### 4. Master the audio (optional)
 
@@ -203,9 +215,9 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 
 | Gate | Evidence | Human action |
 | --- | --- | --- |
-| AutoCut rough cut | `rough-cut.mp4`, frames, audio samples, `review-state.json` | Approve or request changes |
 | Blur / stabilization | `review.csv`, `review.html`, report crop flag | Mark cuts or accept |
 | Dolby Vision | `dv-proof.mov` | Check playback, then `--dv-approved` |
+| AutoCut rough cut | `rough-cut.mp4`, frames, audio samples, `review-state.json` | Approve or request changes |
 | Audio mastering | Mastered WAV/MP4 and `manifest.json` | Listen and compare |
 | Master edit | Full `video.mp4` | Watch end to end |
 | Package | Title, description, thumbnail, captions, music credits | Approve with note and hashes |
@@ -220,6 +232,7 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | `_timeline.csv` | Capture order and original names |
 | `analysis/duplicates/` | Quarantined duplicates and review |
 | `processed-clips/` | Per-clip analysis, enhanced voice, cuts, `final.mp4` |
+| `analysis/autocut-input/` | Flat staging folder of cleaned clips for AutoCut |
 | `rough-cut/` | AutoCut outputs and review media |
 | `audio-mastered/` | Mastered WAV/MP4 and loudness manifest |
 | `video.mp4` | Final master |
