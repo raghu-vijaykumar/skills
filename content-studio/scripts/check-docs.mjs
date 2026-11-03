@@ -7,7 +7,7 @@ const bundle=path.join(root,'content-studio');
 const skillRoot=path.join(bundle,'skills');
 const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio',
-  'content-studio-autocut','content-studio-music','content-studio-publish','content-studio-archive'];
+  'content-studio-autocut','content-studio-music','content-studio-benchmark','content-studio-publish','content-studio-archive'];
 const files=[path.join(root,'README.md'),path.join(bundle,'README.md')];
 for(const name of names) {
   const folder=path.join(skillRoot,name);
@@ -29,7 +29,7 @@ function walk(folder) {
   }
 }
 walk(bundle);
-if(discovered.length!==names.length) throw new Error(`Expected eleven discoverable skills, found ${discovered.length}`);
+if(discovered.length!==names.length) throw new Error(`Expected twelve discoverable skills, found ${discovered.length}`);
 let links=0;
 for(const file of files) {
   const text=fs.readFileSync(file,'utf8');
@@ -41,4 +41,4 @@ for(const file of files) {
     links++;
   }
 }
-console.log(`Docs: ${files.length} maintained files, ${links} local links, eleven unique skills`);
+console.log(`Docs: ${files.length} maintained files, ${links} local links, twelve unique skills`);

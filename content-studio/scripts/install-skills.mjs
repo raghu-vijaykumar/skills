@@ -1,4 +1,4 @@
-// Install a version-matched bundle once, then expose its eleven skills as direct children.
+// Install a version-matched bundle once, then expose its twelve skills as direct children.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,7 +11,7 @@ const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPa
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
 const names = ['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio','content-studio-autocut','content-studio-music',
-  'content-studio-publish','content-studio-archive'];
+  'content-studio-benchmark','content-studio-publish','content-studio-archive'];
 function run(executable, args) {
   const result = spawnSync(executable, args, {encoding:'utf8', maxBuffer:16*1024*1024});
   if (result.error || result.status !== 0)

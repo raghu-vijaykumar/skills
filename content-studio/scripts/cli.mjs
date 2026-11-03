@@ -72,7 +72,7 @@ async function main() {
     return;
   }
   if (command === 'benchmark') {
-    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', 'benchmark.py');
+    const script = path.join(bundle, 'skills', 'content-studio-benchmark', 'scripts', 'benchmark.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
     process.exitCode = result.status ?? 1;
     return;
