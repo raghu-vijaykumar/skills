@@ -30,15 +30,15 @@ closed.
 | C02 | pre-publish | all | Production kind recorded | Draft is explicitly `edited` or `remotion`, and `draft.json` agrees |
 | C03 | pre-publish | all | Idea brief or story outline approved | Approved brief/outline, or justified not applicable for a supplied edit |
 | C04 | pre-publish | edited | Camera clips preprocessed | Duplicates quarantined, ordered, blur/DV gates reviewed, clean exports available |
-| C05 | pre-publish | edited | AutoCut rough cut reviewed | Human reviewed the rough cut and review media, including reframe previews when used; target orientation/fit recorded, or AutoCut explicitly deferred |
+| C05 | pre-publish | edited | AutoCut rough cut reviewed | Human reviewed the rough cut, edit timeline, and review media, including reframe previews when used; target orientation/fit recorded, or AutoCut explicitly deferred |
 | C06 | pre-publish | all | Audio mastered and reviewed | Loudness/dynamics checked; not applicable only when no audio treatment is needed |
 | C07 | pre-publish | all | Master edit or render complete | Full-length master exists and was watched end to end |
 | C08 | pre-publish | all | Color, HDR, and Dolby Vision reviewed | SDR tags/tone mapping checked; DV proof reviewed when applicable |
-| C09 | pre-publish | edited | Transcript reviewed | `transcript.json` matches the master hash and spoken content, or records `speech: false` |
-| C10 | pre-publish | edited | Captions reviewed | `captions.srt` timing/text reviewed, or captions explicitly declined (including a `speech: false` transcript) |
+| C09 | pre-publish | edited | Transcript reviewed | Not used for vlog production; optional only when explicitly requested |
+| C10 | pre-publish | edited | Captions reviewed | Not used for vlog production; optional only when explicitly requested |
 | C11 | pre-publish | all | Thumbnail approved | AI-generated 16:9 thumbnail from representative frames plus audio/voiceover context; approved |
 | C12 | pre-publish | all | Music selected, mixed, and licensed | `music-selection.json`, `music-credits.txt`, and a reviewed music-mixed master, or explicitly no music |
-| C13 | pre-publish | all | Title and description reviewed | Exact copy derived from transcript/voiceover/audio context, including required music attribution |
+| C13 | pre-publish | all | Title and description reviewed | Specific to sampled footage or supplied context; no test/draft placeholders; required attribution included |
 | C14 | pre-publish | all | Rights, licenses, and consent reviewed | Footage, music, fonts, logos, faces, locations, and client data cleared |
 | C15 | pre-publish | all | Creative metadata recorded | `creative.json` has themeId, styleId, format, renderer, choices |
 | C16 | pre-publish | all | Package approval recorded | `package-approval.json` matches current publication files |
@@ -60,7 +60,7 @@ python <this-skill>/scripts/checklist.py `
   --channel <slug> --draft <id> --kind edited init
 ```
 
-Use `--kind remotion` for code-driven videos. `init` also marks `draft.json`
+Use `--kind remotion` for code-driven videos. For a standalone draft folder outside a channel workspace, replace `--channel <slug> --draft <id>` with `--folder <path>`. `init` also marks `draft.json`
 with `"lifecycle": "main"`, which makes package approval require the checklist.
 It is idempotent; `--force` resets every status and should be rare.
 
@@ -68,7 +68,7 @@ Mark an item:
 
 ```powershell
 python <this-skill>/scripts/checklist.py --channel <slug> --draft <id> `
-  set --id C07 --status done --evidence "video.mp4" --note "watched end to end"
+  set --id C07 --status done --evidence "video/with-audio.mp4" --note "watched end to end"
 
 python <this-skill>/scripts/checklist.py --channel <slug> --draft <id> `
   set --id C10 --status not_applicable --reason "captions not published for this draft"
@@ -95,6 +95,8 @@ without a reason.
 - Post-publish items C18-C22 start `deferred` with the reason `post-publish gate`.
 - For a Remotion draft, C04, C05, C09, and C10 start `not_applicable` with the
   reason `Remotion production has no camera footage`.
+- For an edited draft, C09 and C10 start `not_applicable` because the vlog
+  workflow does not generate transcripts or captions.
 - Everything else starts `pending` and must be explicitly resolved.
 
 ## One-off use

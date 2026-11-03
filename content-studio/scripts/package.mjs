@@ -66,8 +66,7 @@ export function validateDraftRecord(draft, files) {
     throw new Error('creative.json needs themeId, styleId, format, renderer, and choices');
   const kind = manifest.production?.kind ?? (files.videoYaml ? 'remotion' : 'edited');
   if (!['edited', 'remotion'].includes(kind)) throw new Error('Unknown draft production kind');
-  if (kind === 'edited') {
-    if (!files.transcript) throw new Error('Edited export needs transcript.json');
+  if (kind === 'edited' && files.transcript) {
     const transcript = readJson(files.transcript);
     const noSpeech = transcript.speech === false;
     if (transcript.masterSha256 !== sha256(files.master) || !Array.isArray(transcript.segments) ||

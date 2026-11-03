@@ -23,6 +23,10 @@ class DraftCreationTest(unittest.TestCase):
                              "Working Title")
             self.assertEqual(json.loads((folder / "draft.json").read_text(encoding="utf-8"))["sourceId"],
                              "00077-working-title")
+            for name in ("original", ".content-studio"):
+                self.assertTrue((folder / name).is_dir(), name)
+            for name in ("video", "rough-cut", "audio"):
+                self.assertFalse((folder / name).exists(), name)
             args.id = "../escape"
             with self.assertRaisesRegex(SystemExit, "--id"):
                 content.draft(cfg, args, lambda message: None)

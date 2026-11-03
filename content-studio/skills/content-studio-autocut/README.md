@@ -4,12 +4,13 @@ Run:
 
 ```bash
 python content-studio/skills/content-studio-autocut/scripts/autocut.py \
-  --folder ./preprocessed --duration 12m --output ./rough-cut \
+  --folder ./preprocessed --duration 12m --output ./.content-studio/rough-cut \
+  --deliver ./<id>-rough-cut.mp4 \
   --orientation landscape --fit blur \
   --auto-transcribe --detect-scenes --auto-vision --quality-score
 ```
 
-Preprocess raw camera clips first with `content-studio-videopreprocess`, then stage the per-clip `final.mp4` exports in a flat folder such as `analysis/autocut-input/`. AutoCut scans only the top level of `--folder`.
+Preprocess raw camera clips first with `content-studio-videopreprocess`, then stage the per-clip `final.mp4` exports in a flat folder such as `.content-studio/autocut-input/`. AutoCut scans only the top level of `--folder`. Write `--output` to `.content-studio/rough-cut/` and use `--deliver <draft>/<id>-rough-cut.mp4` for the root deliverable.
 
 `--orientation` filters clips by measured width/height. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` (default) centers a mismatched clip over a blurred copy of itself instead of black bars; `--fit crop` fills the frame and crops; `--fit pad` uses black bars.
 
@@ -46,7 +47,7 @@ Requires FFmpeg and FFprobe. For local visual analysis install Ollama, pull a vi
 {"segments":[{"source":"clip01.mp4","start":10,"end":24,"score":0.9,"reason":"Opening hook","text":"We just arrived"}]}
 ```
 
-Outputs: `rough-cut.mp4` with original clip audio (or silence when absent), `timeline.otio`, `edit-decisions.json`, `review.html`. Video is re-encoded to 1920x1080 H.264 SDR, audio to AAC.
+Outputs: `.content-studio/rough-cut/rough-cut.mp4` with original clip audio (or silence when absent), `edit-timeline.json`, `edit-timeline.html`, `timeline.otio`, `timeline.json`, `edit-decisions.json`, `review.html`. `--deliver` copies the rough cut to the root. The edit timeline lists each source contribution in final master order. Video is re-encoded to 1920x1080 H.264 SDR, audio to AAC.
 
 **Known gaps:** Vision inference is now optional via Ollama; its subjective relevance score is not a calibrated visual-quality measurement. An optional exposure/sharpness heuristic is available with `--quality-score` (`pip install numpy`); motion stabilization and calibrated perceptual quality scoring remain pending. Scene-change detection is a technical signal, not understanding of the footage. Without transcripts or annotations the rough cut remains a heuristic sample. Story ordering follows filename order, not verified capture timestamps. Reframing uses one stable crop per selected segment; dynamic subject tracking is pending. Review the timeline before publishing. The installer now registers this skill, but existing versioned installations may require a package version bump to refresh the bundle.
 

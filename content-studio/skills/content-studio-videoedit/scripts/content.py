@@ -13,6 +13,7 @@ import sys
 import time
 from pathlib import Path
 
+import draftlayout
 import drive
 import gitrepo
 import lifecycle
@@ -223,7 +224,7 @@ def draft(cfg: dict, args, log: Log) -> int:
         for path in sorted(drafts.iterdir()) if drafts.exists() else []:
             if not path.is_dir():
                 continue
-            video = path / "video.mp4"
+            video = draftlayout.master_path(path)
             size = human_size(video.stat().st_size) if video.exists() else "no video yet"
             log(f"{path.name:40} {size}")
         return 0
@@ -238,7 +239,7 @@ def draft(cfg: dict, args, log: Log) -> int:
     folder = drafts / folder_id
     if folder.exists() and not args.force:
         raise SystemExit(f"draft already exists: {folder}")
-    (folder / "original-videos").mkdir(parents=True, exist_ok=True)
+    draftlayout.ensure_layout(folder)
     (folder / "title.txt").write_text(name + "\n", encoding="utf-8")
     if not (folder / "description.txt").exists():
         (folder / "description.txt").write_text(
@@ -266,9 +267,14 @@ def intro(cfg: dict, args, log: Log) -> int:
         else:
             raise SystemExit("pass --draft NAME or --all")
         for folder in targets:
-            video = folder / "video.mp4"
+            if not folder.is_dir():
+                continue
+            draftlayout.ensure_layout(folder)
+            for moved in draftlayout.migrate(folder, log):
+                log(f"intro: layout {moved}")
+            video = draftlayout.master_path(folder)
             if not video.exists():
-                log(f"skip {folder.name}: no video.mp4")
+                log(f"skip {folder.name}: no final-video.mp4")
                 continue
             rc |= intro_mod.apply(video, intro_path, folder, args.force, log)
     return rc
@@ -455,12 +461,12 @@ def main() -> int:
 
     p = sub.add_parser("preprocess", parents=[shared],
                        help="quarantine duplicates, clean voice, and prepare clip review")
-    p.add_argument("--draft", help="draft folder with camera clips at its root")
+    p.add_argument("--draft", help="draft folder with camera clips in original/")
     p.add_argument("--folder", help="any folder of camera clips; deduplicate, order, and process it in place")
     p.add_argument("--path", help="process one explicit camera clip")
     p.add_argument("--clip", help="camera filename in the draft; quarantined duplicates resolve to the kept clip")
     p.add_argument("--utc-offset", help="camera location offset if ordering cannot infer it")
-    p.add_argument("--out", help="output folder (default: processed-clips beside source)")
+    p.add_argument("--out", help="output folder (default: draft/.content-studio/processed-clips)")
     p.add_argument("--apply-review", action="store_true",
                    help="apply rows marked remove=yes in each review.csv")
     p.add_argument("--dv-approved", action="store_true",
@@ -480,6 +486,7 @@ def main() -> int:
     p.add_argument("action", choices=["trim", "cut", "join"])
     p.add_argument("--input", action="append", help="input video; repeat in sequence for join")
     p.add_argument("--draft", help="ordered draft folder for join")
+    p.add_argument("--folder", help="any draft folder for join; no channel config needed")
     p.add_argument("--utc-offset", help="camera location offset if ordering cannot infer it")
     p.add_argument("--start", help="trim start: SS, MM:SS or HH:MM:SS")
     p.add_argument("--end", help="trim end")
@@ -494,7 +501,7 @@ def main() -> int:
                    help="keep clips that do not match --orientation")
     p.add_argument("--allow", action="append",
                    help="include a specific mismatched filename; repeatable")
-    p.add_argument("--out", help="output file (join defaults to draft/video.mp4)")
+    p.add_argument("--out", help="output file (join defaults to draft/video/with-audio.mp4)")
 
     p = sub.add_parser("code", parents=[shared],
                        help="git-track the sources and snapshot them to Drive")

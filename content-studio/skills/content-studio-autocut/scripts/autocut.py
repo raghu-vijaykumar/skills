@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from timeline import initial_timeline, write_revision, render
+from timeline import initial_timeline, write_revision, render, write_edit_timeline
 
 EXTS={".mp4",".mov",".mkv",".m4v",".webm",".avi"}
 
@@ -271,8 +271,15 @@ def build(args):
        "<table border='1'><tr><th>Source</th><th>Range (s)</th><th>Reason</th><th>Speech</th></tr>"+
        rows+"</table>",encoding="utf-8")
     timeline=initial_timeline(selected,folder,args.style,width=width,height=height,fit=args.fit)
+    if args.force:
+        (out/"timeline-history"/"timeline-v001.json").unlink(missing_ok=True)
     write_revision(timeline,out)
+    write_edit_timeline(timeline,out)
     render(timeline,out)
+    if args.deliver:
+        args.deliver.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(out/"rough-cut.mp4",args.deliver)
+        print(f"rough cut delivered -> {args.deliver}")
     from timeline import refresh_review
     assets=refresh_review(timeline,out)
     decisions["review_assets"]=assets
@@ -289,6 +296,8 @@ def main():
     p.add_argument("--duration",default="12m")
     p.add_argument("--style",default="travel-vlog")
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--deliver",type=Path,
+                   help="copy the rendered rough-cut.mp4 to this path (for example draft/rough-cut.mp4)")
     p.add_argument("--transcripts",type=Path)
     p.add_argument("--annotations",type=Path)
     p.add_argument("--force",action="store_true")

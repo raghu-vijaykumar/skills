@@ -43,10 +43,18 @@ out-of-office/
         content/video.yaml  video.tsx  source-provenance.json  ... authored source
   shorts/2026-02-17 - Title [VIDEOID]/    published shorts
   drafts/Ahara mela/                      work in progress
-        video.mp4            edited cut (after intro)
+        original/            raw camera files (auto-migrated from the draft root)
+        .content-studio/     internal working files
+              processed-clips/<clip>/  analysis, enhanced voice, cuts, final.mp4
+              analysis/duplicates/     quarantined duplicates and review
+              rough-cut/               rough cut, timelines, review media
+              _timeline.csv            capture order
+        <id>-rough-cut.mp4    rough-cut video
+        <id>-preprocessed.mp4 full preprocessed video
+        <id>-final.mp4        final full video
+        <id>-audio-only.mp3   extracted mastered audio
         thumbnail.png
         title.txt  description.txt
-        original-videos/     clips + video-before-intro.mp4
         entry.tsx  video.tsx  content/ ...  code-generated video source
         draft.json           manifest
   assets/intro.mp4                        the intro clip used by `intro`
@@ -132,7 +140,7 @@ python scripts/content.py intro --channel out-of-office --all --force
 
 Prepends `assets/intro.mp4`, scaling/cropping it to the draft's frame and frame rate,
 adding silent audio when either clip lacks it, re-encoding with x264 crf 18. The
-un-introed cut is preserved as `original-videos/video-before-intro.mp4`; `.intro.json`
+un-introed cut is preserved as `video/before-intro.mp4`; `.intro.json`
 records the hashes so a second run is a no-op unless `--force`.
 
 ## Analytics
@@ -198,7 +206,7 @@ python scripts/content.py media audio   --channel revise-labs --draft "Ahara mel
 python scripts/content.py media clip    --channel revise-labs --video VIDEOID --start 1:05 --end 1:25
 ```
 
-- targets: `--video ID` (published folder), `--draft NAME` (draft `video.mp4`) or
+- targets: `--video ID` (published folder), `--draft NAME` (draft `<id>-final.mp4`) or
   `--path FILE`
 - times accept `SS`, `MM:SS` or `HH:MM:SS`; without `--start/--end` the whole file is used
 - `segment` writes all three: `audio-*.wav` (16 kHz mono, transcription friendly),
@@ -217,34 +225,44 @@ python scripts/content.py preprocess --channel out-of-office --draft dubai-abudh
 python scripts/content.py preprocess --folder "C:\path\to\clips" --utc-offset +00:00
 ```
 
-`--folder` treats any directory as a draft root: it deduplicates, orders and
-renumbers the clips in place, writes `_timeline.csv` and `analysis/duplicates/`, and
-defaults output to `<folder>/processed-clips`. It does not require a channel config.
+`--folder` adopts the canonical draft layout: it moves camera clips into
+`original/`, writes `_timeline.csv` under `.content-studio/`, quarantines
+duplicates under `.content-studio/analysis/duplicates/`, and defaults output to
+`.content-studio/processed-clips/`. It does not require a channel config.
 Use `--clip FILE` to process one clip from that folder. `--folder`, `--draft`, and
 `--path` are mutually exclusive.
 
-`order` writes an eight-column `_timeline.csv` and prefixes draft-root camera names
-with capture-order numbers. It keeps old timeline timestamps, including estimated ones,
-when a new clip appears; newly added files trigger a renumber before preprocessing or
-draft joining. The `--dry-run` flag previews renames without changing files. If the
-camera timezone cannot be inferred from prior timeline rows or metadata, pass
-`--utc-offset +04:00` (or the location's actual offset) to `order`, `preprocess`,
-or `edit join`. Only draft-root camera filenames change; video bytes are not edited.
+`order` writes an eight-column `.content-studio/_timeline.csv` and prefixes
+`original/` camera names with capture-order numbers. It keeps old timeline
+timestamps, including estimated ones, when a new clip appears; newly added files
+trigger a renumber before preprocessing or draft joining. The `--dry-run` flag
+previews renames without changing files. If the camera timezone cannot be
+inferred from prior timeline rows or metadata, pass `--utc-offset +04:00` (or the
+location's actual offset) to `order`, `preprocess`, or `edit join`. Only
+`original/` camera filenames change; video bytes are not edited.
 
-Preprocessing detects duplicates by content before numbering. SHA-256 matches are moved
-to `drafts/<draft>/analysis/duplicates/`; the earliest timeline entry (or filename) is
-kept, and the extras are recorded in `analysis/duplicates/report.json`. Near-duplicate
-shots with comparable duration and aspect and similar sampled 16x16 grayscale frames are
-listed in `analysis/duplicates/review.csv`. Set `remove=yes` for a row and rerun
-preprocess to quarantine it. Duplicate files are moved, never deleted, and `--clip`
-accepts a quarantined name and resolves it to the kept clip. Repeat scans reuse
-`analysis/duplicates/cache.json` keyed by file size and modification time.
+Preprocessing migrates a legacy draft first: root clips move into `original/`,
+`processed-clips/` moves under `.content-studio/`, `video.mp4` becomes
+`video.mp4` becomes `<id>-final.mp4`, `video/` and `rough-cut/` move under `.content-studio/`,
+`audio-mastered/` becomes `.content-studio/audio/`, and a legacy preprocess join becomes
+`<id>-preprocessed.mp4`. Existing files are
+never overwritten; collisions keep both names.
 
-Preprocessing leaves video bytes untouched and writes one folder per original camera
-basename under `drafts/<draft>/processed-clips/`. It selects the regular mono/stereo audio track (not
-Apple's APAC spatial track), denoises it, detects speech, lowers quiet sections by 13 dB,
-and adjusts speech toward a consistent level with no more than 13 dB boost. Short gain
-ramps and a -1 dBFS limiter prevent abrupt level jumps and clipping. `--denoise auto`
+Preprocessing detects duplicates by content before numbering. SHA-256 matches are
+moved to `.content-studio/analysis/duplicates/`; the earliest timeline entry (or
+filename) is kept, and the extras are recorded in `report.json`. Near-duplicate
+shots with comparable duration and aspect and similar sampled 16x16 grayscale frames
+are listed in `.content-studio/analysis/duplicates/review.csv`. Set `remove=yes`
+for a row and rerun preprocess to quarantine it. Duplicate files are moved, never
+deleted, and `--clip` accepts a quarantined name and resolves it to the kept clip.
+Repeat scans reuse `cache.json` keyed by file size and modification time.
+
+Preprocessing leaves video bytes untouched and writes one folder per original
+camera basename under `.content-studio/processed-clips/`. It selects the regular
+mono/stereo audio track (not Apple's APAC spatial track), denoises it, detects
+speech, lowers quiet sections by 13 dB, and adjusts speech toward a consistent
+level with no more than 13 dB boost. Short gain ramps and a -1 dBFS limiter
+prevent abrupt level jumps and clipping. `--denoise auto`
 uses DeepFilterNet when its `deep-filter.exe` (standalone Windows release) or
 `deepFilter` (Python package) executable is on PATH; otherwise it uses
 FFmpeg's `afftdn` filter and records that choice in `report.json`. Install the
@@ -256,7 +274,7 @@ its standalone Windows executable avoids that requirement. Download
 name it `deep-filter.exe`, and put its folder on PATH. `--denoise deepfilter` requires
 one of these executables explicitly.
 
-The command stabilizes non-Dolby-Vision clips with two-pass `vidstab`, retains their
+The command stabilizes non-Dolby-Vision clips with two-pass `vidstab` in both the review path and `--final`, retains their
 source dimensions and SDR/HDR color tags, and flags a crop greater than 10% in the
 report. `review.html` shows suspected blurry spans; edit the accompanying `review.csv`
 and set `remove=yes` only for spans you want cut. `--apply-review` creates a separate
@@ -272,7 +290,7 @@ python scripts/content.py preprocess --folder "C:\path\to\clips" --final --utc-o
 Final mode reuses the existing `enhanced-voice.wav` when the source size is unchanged,
 automatically treats every detected blur span as a cut, and writes `final.mp4` in each
 clip folder. Folder and draft runs then concatenate those exports into
-`<folder>/final-video.mp4` (or `draft/final-video.mp4`). Every clip is fitted to
+`<id>-preprocessed.mp4`. Every clip is fitted to
 1920x1080 16:9 BT.709 SDR at 30 fps with stereo AAC; the whole frame is kept and padded
 where the aspect differs. Dolby Vision RPU is deliberately dropped in this path, so use
 the `--dv-proof` / `--dv-approved` flow when DV must be preserved. `--final` cannot be
@@ -295,7 +313,8 @@ original and cleaned WAV in place; never treat an HLG-only result as Dolby Visio
 python scripts/content.py edit trim --input clip.mp4 --start 00:12 --end 00:30 --out clip-trim.mp4
 python scripts/content.py edit cut --input clip.mp4 --remove 00:12-00:14 --remove 01:02-01:05 --out clip-cut.mp4
 python scripts/content.py edit join --channel out-of-office --draft dubai-abudhai-day-4
-python scripts/content.py edit join --input clip-trim.mp4 --input clip-cut.mp4 --out video.mp4
+python scripts/content.py edit join --folder "C:\path\to\draft"
+python scripts/content.py edit join --input clip-trim.mp4 --input clip-cut.mp4 --out joined.mp4
 ```
 
 Trim keeps the given range; cut removes the listed ranges. Both re-encode video and
@@ -303,14 +322,14 @@ audio for frame accuracy, validate duration, and require a new output filename. 
 clips keep their camera color tags; HLG clips remain 10-bit HLG. Dolby Vision cuts
 require `--sdr`, which explicitly tone maps the HLG/PQ base layer to BT.709 SDR.
 
-Draft join uses `_timeline.csv` order and prefers approved `cut.*`, then `processed.*`,
-then voice-only video or original footage with the enhanced voice sidecar when available.
-It creates `draft/video.mp4` unless `--out` is given, and refuses an existing output.
-Each clip is normalized to 1920x1080 BT.709 SDR at 30 fps with stereo AAC before
-joining. The full frame is kept with padding where needed; HDR is tone mapped.
-The explicit repeated `--input` form joins only the files named, in that order.
-Review the result, especially clip transitions, audio sync, and color, before using it
-as a final edit.
+Draft join uses `.content-studio/_timeline.csv` order and prefers approved `cut.*`,
+then `processed.*`, then voice-only video or original footage with the enhanced voice
+sidecar when available. It creates `<id>-final.mp4` and writes
+`.content-studio/rough-cut/edit-timeline.json` plus `edit-timeline.html`. Each clip is normalized to
+1920x1080 BT.709 SDR at 30 fps with stereo AAC before joining. The full frame is kept
+with padding where needed; HDR is tone mapped. The explicit repeated `--input` form
+joins only the files named, in that order. Review the result, especially clip
+transitions, audio sync, and color, before using it as a final edit.
 
 For mixed portrait/landscape footage, filter the join by target orientation:
 

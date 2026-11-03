@@ -3,6 +3,7 @@
 import argparse
 import copy
 import hashlib
+import html
 import json
 import shutil
 import subprocess
@@ -52,6 +53,40 @@ def initial_timeline(segments, folder, style="travel-vlog", width=1920, height=1
             "tracks":[{"id":"picture","kind":"video","clips":clips},
                       {"id":"music","kind":"audio","clips":[]},
                       {"id":"captions","kind":"caption","clips":[]}]}
+
+def write_edit_timeline(timeline, output):
+    """Write the ordered contribution of each source to rough-cut.mp4."""
+    clips=validate(timeline, Path(timeline["source_root"]))
+    entries=[{"order":i,"id":clip["id"],"source":clip["source"],
+              "timeline_start":clip["start"],
+              "timeline_end":round(clip["start"]+clip["duration"],3),
+              "source_in":clip["source_in"],"source_out":clip["source_out"],
+              "duration":clip["duration"],"reason":clip.get("reason","")}
+             for i,clip in enumerate(clips,1)]
+    document={"schema":"content-studio.edit-timeline.v1","master":"rough-cut.mp4",
+              "duration_seconds":round(sum(float(e["duration"]) for e in entries),3),
+              "clips":entries}
+    (output/"edit-timeline.json").write_text(json.dumps(document,indent=2)+"\n",encoding="utf-8")
+    rows="".join("<tr><td>"+str(e["order"])+"</td><td>"+f"{e['timeline_start']:.2f}–{e['timeline_end']:.2f}"+
+        "</td><td>"+html.escape(e["source"])+"</td><td>"+
+        f"{e['source_in']:.2f}–{e['source_out']:.2f}"+"</td><td>"+
+        f"{e['duration']:.2f}"+"</td><td>"+html.escape(e["reason"])+"</td></tr>"
+        for e in entries)
+    page=("<!doctype html><meta charset='utf-8'><title>Edit timeline</title>"
+          "<style>body{font:15px/1.5 system-ui,sans-serif;margin:2rem;color:#0f172a}"
+          "h1{margin:0 0 .25rem}p{color:#475569;margin:0 0 1.25rem}"
+          "table{border-collapse:collapse;width:100%}th,td{padding:.55rem .7rem;"
+          "border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}"
+          "th{background:#f8fafc;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:#475569}"
+          "tr:hover td{background:#f8fafc}code{font-family:ui-monospace,monospace}</style>"
+          "<h1>Edit timeline</h1><p>"+str(len(entries))+" source contribution(s) · "+
+          f"{document['duration_seconds']:.2f}s master · <code>rough-cut.mp4</code></p>"
+          "<table><thead><tr><th>#</th><th>Master time (s)</th><th>Source</th>"
+          "<th>Source in–out (s)</th><th>Duration (s)</th><th>Reason</th></tr></thead>"
+          "<tbody>"+rows+"</tbody></table>")
+    (output/"edit-timeline.html").write_text(page,encoding="utf-8")
+    return output/"edit-timeline.json"
+
 
 def write_revision(timeline, output):
     history=output/"timeline-history"

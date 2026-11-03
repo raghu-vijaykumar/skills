@@ -39,6 +39,34 @@ test('selectMaster excludes range renders and requires exact metadata', () => {
   } finally { cleanup(root); }
 });
 
+test('selectMaster prefers the draft-prefixed final master', () => {
+  const {root, draft} = fixture();
+  try {
+    fs.unlinkSync(path.join(draft, 'video.mp4'));
+    fs.writeFileSync(path.join(draft, '001-test-final.mp4'), 'prefixed final');
+    assert.equal(selectMaster(draft, '001-test'), path.join(draft, '001-test-final.mp4'));
+  } finally { cleanup(root); }
+});
+
+test('selectMaster prefers final-video.mp4 at the draft root', () => {
+  const {root, draft} = fixture();
+  try {
+    fs.unlinkSync(path.join(draft, 'video.mp4'));
+    fs.writeFileSync(path.join(draft, 'final-video.mp4'), 'final master');
+    assert.equal(selectMaster(draft, '001-test'), path.join(draft, 'final-video.mp4'));
+  } finally { cleanup(root); }
+});
+
+test('selectMaster prefers the nested video master', () => {
+  const {root, draft} = fixture();
+  try {
+    fs.unlinkSync(path.join(draft, 'video.mp4'));
+    fs.mkdirSync(path.join(draft, 'video'), {recursive: true});
+    fs.writeFileSync(path.join(draft, 'video', 'with-audio.mp4'), 'nested-master');
+    assert.equal(selectMaster(draft, '001-test'), path.join(draft, 'video', 'with-audio.mp4'));
+  } finally { cleanup(root); }
+});
+
 test('partial thumbnail failure records YouTube ID and resume never uploads again', async () => {
   const {root, draft, item} = fixture();
   const previous = process.cwd();

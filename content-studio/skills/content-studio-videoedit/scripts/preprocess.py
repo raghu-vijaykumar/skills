@@ -21,6 +21,7 @@ from pathlib import Path
 
 from common import channel_root, select_channels
 import dedupe
+import draftlayout
 import editing
 import ordering
 
@@ -99,8 +100,8 @@ def source_files(args, duplicates: dict | None = None, log=None,
                     log(f"{args.clip}: quarantined duplicate; using {matched[0].name}")
         sources = matched
     if not sources:
-        raise ProcessingError("no matching camera clips in the draft root")
-    return sources, Path(args.out).expanduser().resolve() if args.out else draft / "processed-clips"
+        raise ProcessingError("no matching camera clips in original/")
+    return sources, Path(args.out).expanduser().resolve() if args.out else draftlayout.processed_dir(draft)
 
 
 def extract_audio(source: Path, audio: dict, target: Path) -> None:
@@ -683,7 +684,8 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
         # normalized_segment ignores the Dolby Vision RPU and exports BT.709 SDR,
         # so the final file plays everywhere without a DV proof step.
         editing.normalized_segment(source, voice, temp, ranges=kept,
-                                   fit=getattr(args, "fit", "blur"))
+                                   fit=getattr(args, "fit", "blur"),
+                                   stabilize=True)
         actual, rendered, out_audio = editing.probe(temp)
         if not out_audio or rendered.get("width") != 1920 or rendered.get("height") != 1080:
             raise ProcessingError(f"final export failed validation: {source.name}")
@@ -698,6 +700,7 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
         "final_duration_seconds": round(actual, 3),
         "final_removed_seconds": round(max(0.0, duration - kept_seconds), 3),
         "final_cuts": stored_cuts,
+        "stabilization": {"engine": "vidstab", "smoothing": 15, "optzoom": 1},
     })
     write_report(folder, report)
     log(f"{source.name}: final video -> {target.name} "
@@ -875,6 +878,11 @@ def run(cfg: dict, args, log) -> int:
                 draft = channel_root(cfg, slug) / "drafts" / args.draft
                 if not draft.is_dir():
                     raise ProcessingError(f"draft not found: {draft}")
+            # Adopt the canonical draft layout before scanning so originals,
+            # internal working files, and deliverables never share the root.
+            draftlayout.ensure_layout(draft)
+            for moved in draftlayout.migrate(draft, log):
+                log(f"preprocess: layout {moved}")
             # Quarantine content duplicates first so numbering and analysis
             # exclude files that should never reach the edit.
             duplicates = dedupe.scan(draft, log)
@@ -899,10 +907,18 @@ def run(cfg: dict, args, log) -> int:
             failed += 1
             log(f"{source.name}: {exc}")
     if final and draft is not None and not args.clip and not failed and finals:
-        target = draft / "final-video.mp4"
+        target = draftlayout.preprocessed_path(draft)
         try:
+            target.parent.mkdir(parents=True, exist_ok=True)
             target.unlink(missing_ok=True)
-            editing.join_normalized(finals, target)
+            editing.join_normalized(finals, target,
+                                    scratch=draftlayout.scratch_dir(draft))
+            try:
+                timeline = editing.draft_join_timeline(
+                    draft, [(path, None) for path in finals], target)
+                log(f"preprocess: edit timeline -> {timeline}")
+            except (editing.EditError, OSError, ValueError) as exc:
+                log(f"preprocess: edit timeline unavailable: {exc}")
             log(f"preprocess: joined final video -> {target}")
         except (editing.EditError, OSError, ValueError) as exc:
             failed += 1

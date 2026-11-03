@@ -11,9 +11,62 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import dedupe
+import draftlayout
 import editing
 import ordering
 import preprocess
+
+
+class LayoutTest(unittest.TestCase):
+    def test_legacy_draft_migrates_to_nested_layout(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            draft = Path(scratch) / "out-of-office" / "drafts" / "trip"
+            draft.mkdir(parents=True)
+            (draft / "IMG_1001.MOV").write_bytes(b"clip bytes")
+            (draft / "video").mkdir()
+            (draft / "video" / "with-audio.mp4").write_bytes(b"master bytes")
+            (draft / "video" / "without-audio.mp4").write_bytes(b"silent bytes")
+            (draft / "rough-cut").mkdir()
+            (draft / "rough-cut" / "rough-cut.mp4").write_bytes(b"rough bytes")
+            (draft / "rough-cut" / "preprocess-final.mp4").write_bytes(b"join bytes")
+            (draft / "rough-cut" / "review.html").write_text("review", encoding="utf-8")
+            (draft / "audio-mastered").mkdir()
+            (draft / "audio-mastered" / "clip.mastered.wav").write_bytes(b"wav")
+            processed = draft / "processed-clips" / "IMG_1001.MOV"
+            processed.mkdir(parents=True)
+            (processed / "report.json").write_text("{}", encoding="utf-8")
+            (draft / "_timeline.csv").write_text("order\n1\n", encoding="utf-8")
+
+            moves = draftlayout.migrate(draft, lambda _: None)
+
+            self.assertTrue(moves)
+            self.assertTrue((draft / "original" / "IMG_1001.MOV").exists())
+            self.assertFalse((draft / "IMG_1001.MOV").exists())
+            self.assertTrue((draft / "trip-final.mp4").exists())
+            self.assertFalse((draft / "video").exists())
+            self.assertTrue((draft / ".content-studio" / "silent.mp4").exists())
+            self.assertTrue((draft / "trip-rough-cut.mp4").exists())
+            self.assertFalse((draft / "rough-cut").exists())
+            self.assertTrue((draft / "trip-preprocessed.mp4").exists())
+            self.assertTrue((draft / ".content-studio" / "rough-cut" / "review.html").exists())
+            self.assertTrue((draft / ".content-studio" / "audio" / "clip.mastered.wav").exists())
+            self.assertTrue((draft / ".content-studio" / "processed-clips" /
+                             "IMG_1001.MOV" / "report.json").exists())
+            self.assertTrue((draft / ".content-studio" / "_timeline.csv").exists())
+            self.assertFalse((draft / "processed-clips").exists())
+            self.assertEqual(draftlayout.migrate(draft, lambda _: None), [])
+
+    def test_layout_keeps_distinct_files_instead_of_overwriting(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            draft = Path(scratch) / "trip"
+            (draft / "original").mkdir(parents=True)
+            (draft / "original" / "IMG_1.MOV").write_bytes(b"existing")
+            (draft / "IMG_1.MOV").write_bytes(b"different")
+            draftlayout.migrate(draft, lambda _: None)
+            names = sorted(p.name for p in (draft / "original").iterdir())
+            self.assertEqual(names, ["IMG_1-1.MOV", "IMG_1.MOV"])
+            self.assertEqual((draft / "original" / "IMG_1.MOV").read_bytes(), b"existing")
+            self.assertEqual((draft / "original" / "IMG_1-1.MOV").read_bytes(), b"different")
 
 
 class OrderingTest(unittest.TestCase):
@@ -81,7 +134,7 @@ class OrderingTest(unittest.TestCase):
             self.assertTrue((draft / "003 - IMG_1003.MOV").exists())
             self.assertEqual(ordering.ensure_current(draft, lambda _: None), rows)
             self.assertFalse(list(draft.glob(".order-*.tmp")))
-            with (draft / "_timeline.csv").open(newline="", encoding="utf-8") as fh:
+            with (draft / ".content-studio" / "_timeline.csv").open(newline="", encoding="utf-8") as fh:
                 self.assertEqual(len(list(csv.DictReader(fh))), 3)
 
 
@@ -112,7 +165,7 @@ class DedupeTest(unittest.TestCase):
             self.assertEqual(moved["reason"], "exact")
             self.assertTrue((draft / moved["path"]).exists())
             self.assertEqual(report["aliases"]["img_1002.mov"], "IMG_1001.MOV")
-            self.assertTrue((draft / "analysis" / "duplicates" / "report.json").exists())
+            self.assertTrue((draft / ".content-studio" / "analysis" / "duplicates" / "report.json").exists())
             again = dedupe.scan(draft, logs.append)
             self.assertEqual(again["aliases"]["img_1002.mov"], "IMG_1001.MOV")
             self.assertEqual(again["quarantined"][0]["path"], moved["path"])
@@ -151,7 +204,7 @@ class DedupeTest(unittest.TestCase):
             self.assertEqual(report["quarantined"], [])
             self.assertEqual(len(report["near"]), 1)
             self.assertEqual(report["near"][0]["action"], "review")
-            review = draft / "analysis" / "duplicates" / "review.csv"
+            review = draft / ".content-studio" / "analysis" / "duplicates" / "review.csv"
             with review.open(newline="", encoding="utf-8") as fh:
                 rows = list(csv.DictReader(fh))
             self.assertEqual([row["duplicate"] for row in rows], ["IMG_2002.mp4"])
@@ -196,9 +249,10 @@ class DedupeTest(unittest.TestCase):
                 self.assertEqual(preprocess.run({}, args, lambda _: None), 0)
             self.assertEqual(seen, ["001 - IMG_1001.MOV", "002 - IMG_1003.MOV"])
             self.assertFalse(copy.exists())
-            self.assertTrue((folder / "analysis" / "duplicates" / "report.json").exists())
-            self.assertTrue((folder / "processed-clips").is_dir())
-            with (folder / "_timeline.csv").open(newline="", encoding="utf-8") as fh:
+            self.assertTrue((folder / ".content-studio" / "analysis" / "duplicates" / "report.json").exists())
+            self.assertTrue((folder / ".content-studio" / "processed-clips").is_dir())
+            self.assertTrue((folder / "original" / "001 - IMG_1001.MOV").exists())
+            with (folder / ".content-studio" / "_timeline.csv").open(newline="", encoding="utf-8") as fh:
                 self.assertEqual(len(list(csv.DictReader(fh))), 2)
 
     def test_preprocess_rejects_multiple_input_modes(self):
@@ -230,8 +284,8 @@ class DedupeTest(unittest.TestCase):
                                    path=None, clip=None, out=None, utc_offset="+00:00",
                                    final=True, apply_review=False, dv_proof=False,
                                    dv_approved=False)
-            finals = [folder / "processed-clips" / "IMG_1001.MOV" / "final.mp4",
-                      folder / "processed-clips" / "IMG_1002.MOV" / "final.mp4"]
+            finals = [folder / ".content-studio" / "processed-clips" / "IMG_1001.MOV" / "final.mp4",
+                      folder / ".content-studio" / "processed-clips" / "IMG_1002.MOV" / "final.mp4"]
             joined = []
 
             def fake_final(source, *rest):
@@ -241,10 +295,10 @@ class DedupeTest(unittest.TestCase):
             with patch.object(ordering, "probe", return_value=(1.0, None)), \
                  patch.object(preprocess, "final_clip", side_effect=fake_final), \
                  patch.object(editing, "join_normalized",
-                              side_effect=lambda sources, target: joined.append(
+                              side_effect=lambda sources, target, **kwargs: joined.append(
                                   (sources, target))):
                 self.assertEqual(preprocess.run({}, args, lambda _: None), 0)
-            self.assertEqual(joined, [(finals, folder / "final-video.mp4")])
+            self.assertEqual(joined, [(finals, folder / "skilltest-preprocessed.mp4")])
 
     def test_preprocess_clip_resolves_a_quarantined_name(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
@@ -264,7 +318,7 @@ class DedupeTest(unittest.TestCase):
                               side_effect=lambda source, *_: seen.append(source.name)):
                 self.assertEqual(preprocess.run(cfg, args, lambda _: None), 0)
             self.assertEqual(seen, ["001 - IMG_1001.MOV"])
-            self.assertTrue((draft / "001 - IMG_1001.MOV").exists())
+            self.assertTrue((draft / "original" / "001 - IMG_1001.MOV").exists())
             self.assertFalse(copy.exists())
 
 
@@ -342,10 +396,12 @@ class EditingTest(unittest.TestCase):
                 writer.writerow([1, 0.2, 0.4, 100, "", ""])
             seen = {}
 
-            def fake_render(source, sidecar, target, ranges=None, fit="blur"):
+            def fake_render(source, sidecar, target, ranges=None, fit="blur",
+                            stabilize=False):
                 seen["sidecar"] = sidecar
                 seen["ranges"] = ranges
                 seen["fit"] = fit
+                seen["stabilize"] = stabilize
                 target.write_bytes(b"final")
 
             with patch.object(editing, "normalized_segment", side_effect=fake_render), \
@@ -357,6 +413,7 @@ class EditingTest(unittest.TestCase):
             self.assertEqual(target, folder / "final.mp4")
             self.assertTrue(target.exists())
             self.assertEqual(seen["sidecar"], folder / "enhanced-voice.wav")
+            self.assertTrue(seen["stabilize"])
             self.assertEqual(len(seen["ranges"]), 2)
             self.assertAlmostEqual(seen["ranges"][0][1], 0.2)
             self.assertAlmostEqual(seen["ranges"][1][0], 0.4)
@@ -366,11 +423,70 @@ class EditingTest(unittest.TestCase):
             self.assertEqual(final_report["final_cuts"], [[0.2, 0.4]])
             self.assertGreater(final_report["final_removed_seconds"], 0)
 
+    def test_stabilized_normalized_segment_renders_16_9(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "portrait.mp4"
+            self.make_sized_video(source, 320, 480, "blue")
+            output = root / "stabilized.mp4"
+            editing.normalized_segment(source, None, output, size=(1920, 1080),
+                                       fit="blur", stabilize=True)
+            actual, video, audio = editing.probe(output)
+            self.assertAlmostEqual(actual, 1.0, delta=0.15)
+            self.assertEqual((video["width"], video["height"]), (1920, 1080))
+            self.assertTrue(audio)
+
     def test_dolby_cut_requires_explicit_sdr(self):
         with self.assertRaisesRegex(editing.EditError, "require --sdr"):
             editing.render_ranges(Path("in.mov"), Path("out.mp4"), [(0, 1)],
                                   {"side_data_list": [{"side_data_type": "DOVI configuration record"}]},
                                   True)
+
+    def test_draft_sources_prefers_the_final_export(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            draft = Path(scratch) / "trip"
+            source = draft / "original" / "001 - clip.MOV"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"source bytes")
+            folder = draft / ".content-studio" / "processed-clips" / "clip.MOV"
+            folder.mkdir(parents=True)
+            final = folder / "final.mp4"
+            final.write_bytes(b"final bytes")
+            (folder / "report.json").write_text(json.dumps({
+                "source": str(source), "source_bytes": len(b"source bytes"),
+                "final_output": "final.mp4", "final_cuts": [[0.2, 0.4]]}),
+                encoding="utf-8")
+            rows = [{"new_name": source.name, "original_name": "clip.MOV"}]
+            with patch.object(ordering, "ensure_current", return_value=rows):
+                sources = editing.draft_sources(draft, lambda _: None)
+            self.assertEqual(sources, [(final, None)])
+
+    def test_draft_join_timeline_records_ordered_source_contributions(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            draft = Path(scratch) / "trip"
+            source = draft / "original" / "001 - clip.mp4"
+            source.parent.mkdir(parents=True)
+            self.make_sized_video(source, 320, 180, "green")
+            processed = draft / ".content-studio" / "processed-clips" / "clip" / "final.mp4"
+            processed.parent.mkdir(parents=True)
+            self.make_sized_video(processed, 320, 180, "blue")
+            (processed.parent / "report.json").write_text(json.dumps({
+                "source": str(source), "final_cuts": [[0.2, 0.4]],
+                "final_output": "final.mp4"}), encoding="utf-8")
+            master = draft / "final-video.mp4"
+            path = editing.draft_join_timeline(draft, [(processed, None)], master)
+            self.assertEqual(path, draft / ".content-studio" / "rough-cut" / "edit-timeline.json")
+            document = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(document["schema"], "content-studio.edit-timeline.v1")
+            self.assertEqual(document["master"], "final-video.mp4")
+            self.assertEqual(document["clips"][0]["source"], "original/001 - clip.mp4")
+            self.assertEqual(document["clips"][0]["rendered_source"],
+                             ".content-studio/processed-clips/clip/final.mp4")
+            self.assertIn("blur span", document["clips"][0]["note"])
+            self.assertIn("final video", document["clips"][0]["note"])
+            page = (draft / ".content-studio" / "rough-cut" / "edit-timeline.html").read_text(encoding="utf-8")
+            self.assertIn("Edit timeline", page)
+            self.assertIn("001 - clip.mp4", page)
 
     def test_portrait_clip_can_fill_landscape_with_blur_or_crop(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

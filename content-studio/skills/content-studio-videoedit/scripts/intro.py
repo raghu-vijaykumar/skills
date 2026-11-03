@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 
 from common import Log, now, read_json, write_json
+import draftlayout
 
 
 def probe(path: Path) -> dict:
@@ -45,7 +46,7 @@ def digest(path: Path) -> str:
 def apply(video: Path, intro_path: Path, folder: Path, force: bool, log: Log) -> int:
     marker = folder / ".intro.json"
     state = read_json(marker)
-    original = folder / "original-videos" / "video-before-intro.mp4"
+    original = draftlayout.internal_dir(folder) / "before-intro.mp4"
     source = video
 
     if state and not force:
@@ -78,7 +79,7 @@ def apply(video: Path, intro_path: Path, folder: Path, force: bool, log: Log) ->
                 f"atrim=0:{info['duration']:.3f}[a{index}]")
     filters.append("[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]")
 
-    temp = folder / "video.intro-tmp.mp4"
+    temp = draftlayout.internal_dir(folder) / "intro-tmp.mp4"
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
            "-i", str(intro_path), "-i", str(source),
            "-filter_complex", ";".join(filters),

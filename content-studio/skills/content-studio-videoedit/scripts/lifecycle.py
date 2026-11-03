@@ -59,10 +59,14 @@ def copy_draft_source(root: Path, draft: Path, archive: Path) -> None:
     inside(draft, root / "drafts")
     inside(archive, root)
     reserved = {"video.mp4", "video.webm", "video.mkv", "metadata.json",
+                "final-video.mp4", "final-video-with-music.mp4", "rough-cut.mp4",
                 "title.txt", "description.txt", "thumbnail.jpg", "thumbnail.png",
-                "thumbnail.webp", "draft.json"}
+                "thumbnail.webp", "draft.json", "original", ".content-studio",
+                "rough-cut", "audio", "video"}
     for child in draft.iterdir():
-        if child.name in reserved:
+        if child.name in reserved or child.name.endswith((
+                "-rough-cut.mp4", "-preprocessed.mp4", "-final.mp4",
+                "-audio-only.mp3", "-final-with-music.mp4")):
             continue
         destination = archive / child.name
         if child.is_dir():

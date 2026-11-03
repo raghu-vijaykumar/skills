@@ -8,9 +8,9 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-ideagen](content-studio/skills/content-studio-ideagen/SKILL.md) | Owned analytics, public comparisons, digest, idea brief |
 | [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | List built-in and project-enabled editorial styles and themes |
 | [content-studio-videogen](content-studio/skills/content-studio-videogen/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
-| [content-studio-autocut](content-studio/skills/content-studio-autocut/SKILL.md) | Reviewable rough cut from raw footage with transcript-aware selection |
+| [content-studio-autocut](content-studio/skills/content-studio-autocut/SKILL.md) | Reviewable rough cut from raw footage with shot and speech-aware selection |
 | [content-studio-videopreprocess](content-studio/skills/content-studio-videopreprocess/SKILL.md) | Capture ordering, footage cleanup, blur and Dolby Vision review |
-| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing or manual export review, transcription, captions, thumbnail |
+| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing or manual export review and thumbnail |
 | [content-studio-audio](content-studio/skills/content-studio-audio/SKILL.md) | Batch audio mastering with new video and extracted WAV outputs |
 | [content-studio-music](content-studio/skills/content-studio-music/SKILL.md) | Choose and record YouTube Audio Library or Pixabay background music |
 | [content-studio-publish](content-studio/skills/content-studio-publish/SKILL.md) | Reviewed package approval, YouTube now/schedule, Instagram now |
@@ -18,7 +18,7 @@ This repository is the editable source of the `content-studio` video lifecycle b
 
 ## Draft lifecycle
 
-A draft is one folder under `<workspace>/<channel>/drafts/<id>`. Raw media stays in that folder; the skills add plans, review artifacts, hashes, and publishing receipts around it. Remotion videos and camera-footage vlogs take different production paths, then converge on the same approval and publishing gate.
+A draft is one folder under `<workspace>/<channel>/drafts/<id>`. It uses a fixed layout: raw clips in `original/`, internal working files in `.content-studio/`, and deliverables named from the draft folder: `<draft>-rough-cut.mp4`, `<draft>-preprocessed.mp4`, `<draft>-final.mp4`, and `<draft>-audio-only.mp3`, with `title.txt`, `description.txt`, and `lifecycle-checklist.json` at the root. Vlog drafts do not generate transcripts or captions. Raw media stays in that folder; the skills add plans, review artifacts, hashes, and publishing receipts around it. Remotion videos and camera-footage vlogs take different production paths, then converge on the same approval and publishing gate.
 
 ```mermaid
 flowchart TD
@@ -42,22 +42,20 @@ flowchart TD
   end
 
   subgraph EDITED["2B · Camera-footage production"]
-    PRE["content.py preprocess<br/>dedupe · order · voice enhance · C04"]:::edited
+    PRE["content.py preprocess<br/>original/ → .content-studio/processed-clips · C04"]:::edited
     BLUR{"Blur and Dolby Vision reviewed?"}:::gate
-    CUT["content-studio-autocut rough cut<br/>orientation · fit · scenes · C05"]:::edited
+    CUT["content-studio-autocut rough cut<br/>.content-studio/rough-cut/ · C05"]:::edited
     CUTREVIEW{"Rough cut, frames, and audio approved?"}:::gate
-    EDIT["content.py edit join or cuts<br/>frame-accurate master · C07 · C08"]:::edited
-    AUDIO["content-studio-audio<br/>loudness and dynamics · C06"]:::optional
-    TRANSCRIPT["content.py transcribe<br/>transcript matches master · C09"]:::edited
-    CAPTIONS["content.py captions<br/>timing and text reviewed · C10"]:::edited
+    EDIT["content.py edit join or cuts<br/>draft-final.mp4 · C07 · C08"]:::edited
+    AUDIO["content-studio-audio<br/>draft/audio/ · C06"]:::optional
   end
 
   subgraph PACKAGE["3 · Review and package"]
-    MUSIC["content-studio-music<br/>selection · mix · credits · C12"]:::package
+    MUSIC["content-studio-music<br/>draft-final-with-music.mp4 · C12"]:::package
     THUMB["AI 16:9 thumbnail<br/>frames plus audio context · C11"]:::package
     COPY["Title and description<br/>exact copy · attribution · C13"]:::package
     RIGHTS["Rights, licenses, consent<br/>footage · music · fonts · faces · C14"]:::package
-    ASSEMBLE["Assemble candidate package<br/>master · thumbnail · copy · captions · credits"]:::package
+    ASSEMBLE["Assemble candidate package<br/>master · thumbnail · copy · credits"]:::package
     APPROVE["Hash-bound package approval<br/>cli.mjs approve · C16"]:::package
     VERIFY{"Checklist verify pre_publish<br/>C01–C17 documented?"}:::gate
     RESOLVE["Resolve pending or deferred items"]:::optional
@@ -99,11 +97,9 @@ flowchart TD
   CUTREVIEW -->|request changes| CUT
   CUTREVIEW -->|approved or deferred| EDIT
   BLUR -.->|no rough cut| EDIT
-  EDIT --> TRANSCRIPT --> CAPTIONS
   AUDIO -.-> EDIT
 
   RFULL --> ASSEMBLE
-  CAPTIONS --> ASSEMBLE
   MUSIC --> ASSEMBLE
   THUMB --> ASSEMBLE
   COPY --> ASSEMBLE
@@ -162,7 +158,7 @@ python <bundle>/skills/content-studio/scripts/checklist.py `
 
 python <bundle>/skills/content-studio/scripts/checklist.py `
   --channel <slug> --draft <id> set --id C07 --status done `
-  --evidence "video.mp4" --note "watched end to end"
+  --evidence "<name>-final.mp4" --note "watched end to end"
 
 python <bundle>/skills/content-studio/scripts/checklist.py `
   --channel <slug> --draft <id> verify --phase pre_publish
@@ -171,14 +167,14 @@ python <bundle>/skills/content-studio/scripts/checklist.py `
   --channel <slug> --draft <id> verify --phase all
 ```
 
-The publish gate rejects a main-lifecycle draft whose pre-publish items are pending, deferred, done without evidence, or not applicable without a reason. The full fixed item list is in [the lifecycle checklist](content-studio/skills/content-studio/references/lifecycle-checklist.md).
+The publish gate rejects a main-lifecycle draft whose pre-publish items are pending, deferred, done without evidence, or not applicable without a reason. For a standalone draft folder, use `--folder <path>` instead of `--channel <slug> --draft <id>`. The full fixed item list is in [the lifecycle checklist](content-studio/skills/content-studio/references/lifecycle-checklist.md).
 
 ### 1. Open or create the draft
 
 Pick the channel and one draft folder. Read the channel's owner rules and the draft's current state before changing it.
 
-- **Remotion project:** run `npx videogen init <directory>` once, then `npx videogen scaffold <id> --title "Working title"`. Scaffolding preserves an existing idea brief and refuses to replace authored scenes.
-- **Vlog or camera footage:** create `drafts/<id>/` and place the raw clips at its root. Preprocess them before AutoCut; for a standalone folder outside a channel, use `preprocess --folder <path>`.
+- **Remotion project:** run `npx videogen init <directory>` once, then `npx videogen scaffold <id> --title "Working title"`. Scaffolding preserves an existing idea brief and refuses to replace authored scenes. Remotion drafts keep their authored project files; publish still resolves `video.mp4` or the generated delivery render.
+- **Vlog or camera footage:** create `drafts/<id>/` and put the raw clips in `original/`. If clips are already at the draft root, the next preprocess run moves them into `original/` automatically. Preprocess them before AutoCut; for a standalone folder outside a channel, use `preprocess --folder <path>`.
 - **Idea first:** use `content-studio-ideagen` for analytics, comparisons, and a brief; use `content-studio-styles` to choose a treatment.
 
 `draft.json` is the draft's running record. Publication later stores the YouTube or Instagram ID and receipts there.
@@ -199,23 +195,25 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py `
   preprocess --folder <path> --utc-offset +00:00
 ```
 
-It detects exact and near duplicates, quarantines extras under `analysis/duplicates/`, orders clips by capture time, writes `_timeline.csv`, and renumbers them. It also extracts and enhances voice, lowers quiet gaps, proposes blur cuts, and flags stabilization crop.
+It detects exact and near duplicates, quarantines extras under `.content-studio/analysis/duplicates/`, orders clips by capture time, writes `.content-studio/_timeline.csv`, and renumbers the files in `original/`. It also extracts and enhances voice, lowers quiet gaps, proposes blur cuts, and flags stabilization crop.
 
-Outputs live in `processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready 1920x1080 16:9 SDR `final.mp4` with all detected blur spans removed. Folder and draft final runs also join the exports into `final-video.mp4`. The default fit centers a mismatched clip over a blurred copy of itself; use `--fit pad` for black pillars or `--fit crop` to fill the frame by cropping.
+On the first run it also migrates a legacy draft: root clips move to `original/`, `processed-clips/` moves under `.content-studio/`, `video.mp4` becomes `<draft>-final.mp4`, `video/` and `rough-cut/` move under `.content-studio/`, `audio-mastered/` becomes `.content-studio/audio/`, and a legacy preprocess join becomes `<draft>-preprocessed.mp4`. Existing files are never overwritten.
+
+Outputs live in `.content-studio/processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready 1920x1080 16:9 SDR `final.mp4` with all detected blur spans removed. Folder and draft final runs also join the exports into `<draft>-preprocessed.mp4`. The default fit centers a mismatched clip over a blurred copy of itself; use `--fit pad` for black pillars or `--fit crop` to fill the frame by cropping.
 
 Review gates:
 
 - **Blur:** inspect `review.csv` / `review.html` before approving cuts.
 - **Dolby Vision:** install `dovi_tool`, run `--dv-proof`, check playback on the usual device, then use `--dv-approved`. Never treat an HLG-only file as Dolby Vision.
-- **Final SDR:** `--final` intentionally drops the Dolby Vision RPU. Keep the proof path when DV must be preserved.
+- **Final SDR:** `--final` intentionally drops the Dolby Vision RPU. Keep the proof path when DV must be preserved. Two-pass `vidstab` stabilization runs by default in both preprocessing paths.
 
 The per-clip `final.mp4` files are the clean input for AutoCut. AutoCut scans only the top level of its `--folder`, so stage them flat first:
 
 ```powershell
 $draft = "C:\workspace\content\<channel>\drafts\<id>"
-$stage = "$draft\analysis\autocut-input"
+$stage = "$draft\.content-studio\autocut-input"
 New-Item -ItemType Directory -Force $stage | Out-Null
-Get-ChildItem "$draft\processed-clips" -Recurse -Filter final.mp4 |
+Get-ChildItem "$draft\.content-studio\processed-clips" -Recurse -Filter final.mp4 |
   ForEach-Object { Copy-Item $_.FullName (Join-Path $stage ($_.Directory.Name + ".mp4")) }
 ```
 
@@ -227,8 +225,9 @@ After preprocessing, `content-studio-autocut` selects speech and shots from the 
 
 ```powershell
 python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
-  --folder <draft>/analysis/autocut-input --duration 12m --style travel-vlog `
-  --output <draft>/rough-cut --orientation landscape --fit blur `
+  --folder <draft>/.content-studio/autocut-input --duration 12m --style travel-vlog `
+  --output <draft>/.content-studio/rough-cut --orientation landscape --fit blur `
+  --deliver <draft>/<name>-rough-cut.mp4 `
   --auto-transcribe --detect-scenes --quality-score
 ```
 
@@ -238,21 +237,22 @@ For a portrait Short or Reel from landscape footage, keep the same blurred-backg
 
 ```powershell
 python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
-  --folder <draft>/analysis/autocut-input --duration 60s `
-  --output <draft>/rough-cut `
+  --folder <draft>/.content-studio/autocut-input --duration 60s `
+  --output <draft>/.content-studio/rough-cut `
+  --deliver <draft>/<name>-rough-cut.mp4 `
   --size 1080x1920 --orientation portrait --include-mismatched `
   --fit blur --detect-scenes
 ```
 
 **Experimental:** subject-aware reframing (`--fit reframe`) crops each selected segment instead of using blurred bands. Use it only when the user explicitly asks for that crop. It prefers AI subject boxes from `--subjects`, then saliency, then center, and writes `reframe-preview/shot-*/reframe-review.html`. Read [the portrait reframe workflow](content-studio/skills/content-studio-autocut/references/reframe.md) for the subject-box schema.
 
-It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
+It writes `.content-studio/rough-cut/rough-cut.mp4`, `edit-timeline.json`, `edit-timeline.html`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/`. `--deliver` copies the rough cut to the root as `<draft>-rough-cut.mp4`. The edit timeline lists each source contribution in final master order, with its master time, source in/out, and duration. Every selected range carries source in/out timestamps and a reason.
 
 This is a proposal, not approval. Review the actual video, frames, and audio, then record a human decision:
 
 ```powershell
 python <bundle>/skills/content-studio-autocut/scripts/review.py `
-  --output <draft>/rough-cut --approve --reviewer human
+  --output <draft>/.content-studio/rough-cut --approve --reviewer human
 ```
 
 Use `--request-changes "..."` to send it back. A revision resets approval and regenerates the review media. The deterministic heuristic uses scene cuts, silence, and duration; it does not understand landmarks or story without supplied transcripts or annotations. Do not claim semantics the analysis did not produce.
@@ -262,31 +262,27 @@ Use `--request-changes "..."` to send it back. A revision resets approval and re
 `content-studio-audio` masters a folder of videos without joining or trimming:
 
 ```powershell
-python <bundle>/skills/content-studio-audio/scripts/master.py --folder <video-folder>
+python <bundle>/skills/content-studio-audio/scripts/master.py --folder <draft>
 ```
 
-It writes `<video-folder>/audio-mastered/<stem>.mastered.wav` (48 kHz stereo PCM), `<stem>.mastered.mp4` (video stream copied when compatible), and `manifest.json` with loudness measurements. Inputs are never overwritten.
+It writes `<name>-audio-only.mp3` (192 kbps) at the draft root and `.content-studio/audio/manifest.json` with loudness measurements. Omit `--audio-only` for non-draft folders to also write a mastered MP4. Inputs are never overwritten. For a folder outside a draft, pass `--out` or accept `<folder>/audio-mastered/`.
 
 The default chain is high-pass, mild `afftdn` denoise, 2:1 compression, and two-pass EBU R128 normalization to -16 LUFS, 11 LU LRA, -1.5 dBTP. Review the result before replacing a production asset. Do not run it on already mastered outputs. Use `--force` only to replace generated outputs.
 
 ### 5. Edit the final master
 
-`content-studio-videoedit` handles trim, cut, join, transcript, captions, and thumbnail:
+`content-studio-videoedit` handles trim, cut, join, and thumbnail:
 
 ```powershell
 python <bundle>/skills/content-studio-videoedit/scripts/content.py `
   edit join --channel <slug> --draft <id>
 ```
 
-Joined masters are 1920x1080 BT.709 SDR at 30 fps with stereo AAC; the full frame is kept and padded, HDR is tone mapped. Dolby Vision cuts require `--sdr` because the RPU cannot survive a frame-accurate re-encode.
+For a standalone draft folder such as the test folder, use `edit join --folder <path>`.
 
-When `video.mp4` exists:
+Joined masters are written to `<draft>-final.mp4`, with the edit timeline under `.content-studio/rough-cut/`. They are 1920x1080 BT.709 SDR at 30 fps with stereo AAC; the full frame is kept and padded, HDR is tone mapped. Dolby Vision cuts require `--sdr` because the RPU cannot survive a frame-accurate re-encode.
 
-```powershell
-node <bundle>/scripts/cli.mjs transcribe --channel <slug> --draft <id>
-```
-
-Review `transcript.json` and `captions.srt` against the actual audio and representative frames. If the master has no intelligible speech, `transcript.json` records `speech: false`; mark transcript and captions not applicable rather than publishing fake captions. Draft the title and description from the transcript, voiceover, or audio context, not just the visuals.
+Vlog drafts do not generate transcripts or captions. Sample 4–6 frames across the master, read visible signs, locations, subjects, and activities, and write a specific title and description from that evidence plus any supplied voiceover. Never use placeholders such as "test edit". If the footage is ambiguous, ask the user. See [the metadata workflow](content-studio/skills/content-studio-videoedit/references/metadata.md).
 
 Capture 4-6 representative frames and the spoken or voiceover context. Use an image-generation model to create a **16:9 landscape AI thumbnail** that reflects the actual subject, setting, and hook. Do not use a raw frame with overlaid text as the final thumbnail unless the user explicitly asks. Show the generated image and obtain approval before writing `thumbnail.png`. The full prompt and requirements are in [the AI thumbnail workflow](content-studio/skills/content-studio-videoedit/references/thumbnail.md).
 
@@ -302,7 +298,7 @@ python <bundle>/skills/content-studio-music/scripts/music.py select `
   --channel <slug> --draft <id> --track "Exact Title"
 ```
 
-It writes `analysis/music-review.html` with playable candidates, then `music-selection.json` and `music-credits.txt` after approval. Audio stays in the local catalog and is not copied into the draft or committed to the public skills repository.
+It writes `.content-studio/analysis/music-review.html` with playable candidates, then `music-selection.json` and `music-credits.txt` after approval. Audio stays in the local catalog and is not copied into the draft or committed to the public skills repository.
 
 Use YouTube Audio Library for YouTube-first videos. Use Pixabay Music when the same edit also goes to Instagram, TikTok, or a client channel. Both are manual downloads; the scripts do not scrape either site. If a track requires attribution, paste the exact line from `music-credits.txt` into the description.
 
@@ -313,7 +309,7 @@ python <bundle>/skills/content-studio-music/scripts/music.py mix `
   --channel <slug> --draft <id>
 ```
 
-It writes `video-with-music.mp4` and `music-mix.json`. Review the mixed master, then replace `video.mp4` and repeat package approval because the master hash changed.
+It writes `<draft>-final-with-music.mp4` and `music-mix.json`. Review the mixed master, then replace `<draft>-final.mp4` and repeat package approval because the master hash changed.
 
 ### 7. Assemble and approve the publication package
 
@@ -321,24 +317,22 @@ A publication candidate contains:
 
 | File | Purpose |
 | --- | --- |
-| `video.mp4` | Reviewed full-length master |
-| `title.txt` | Exact title derived from transcript/voiceover/audio context |
+| `<draft>-final.mp4` | Reviewed full-length master |
+| `title.txt` | Exact title from voiceover/audio context |
 | `description.txt` | Exact description from the same context, including music credit |
 | `thumbnail.png` or `.jpg` | Approved AI-generated 16:9 thumbnail |
 | `creative.json` | Theme, style, format, renderer, choices |
-| `transcript.json` | Transcript tied to the master hash (edited exports) |
-| `captions.srt` | Reviewed captions (edited exports) |
 | `music-selection.json` | Approved music choice, when used |
 | `music-credits.txt` | Exact attribution line, when required |
 
-The user reviews the master, title, description, thumbnail, captions, and music credits. Record approval only after that review:
+The user reviews the master, title, description, thumbnail, and music credits. Record approval only after that review:
 
 ```powershell
 node <bundle>/scripts/cli.mjs approve `
-  --channel <slug> --draft <id> --note "reviewed master, title, description, thumbnail, captions, music"
+  --channel <slug> --draft <id> --note "reviewed master, title, description, thumbnail, music"
 ```
 
-This writes `package-approval.json` with a hash of the publication files: master, title, description, thumbnail, transcript, captions, and creative metadata. Put the exact music credit in `description.txt` before approval; changing the description after approval makes the package stale. The publish path re-checks the hashes before uploading.
+This writes `package-approval.json` with a hash of the publication files: master, title, description, thumbnail, music, and creative metadata. Put the exact music credit in `description.txt` before approval; changing the description after approval makes the package stale. The publish path re-checks the hashes before uploading.
 
 ### 8. Publish
 
@@ -382,10 +376,10 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | --- | --- | --- |
 | Blur / stabilization | `review.csv`, `review.html`, report crop flag | Mark cuts or accept |
 | Dolby Vision | `dv-proof.mov` | Check playback, then `--dv-approved` |
-| AutoCut rough cut | `rough-cut.mp4`, frames, audio samples, `review-state.json` | Approve or request changes |
+| AutoCut rough cut | `.content-studio/rough-cut/rough-cut.mp4`, frames, audio samples, `review-state.json`; `<draft>-rough-cut.mp4` at the root | Approve or request changes |
 | Audio mastering | Mastered WAV/MP4 and `manifest.json` | Listen and compare |
-| Master edit | Full `video.mp4` | Watch end to end |
-| Package | Title, description, thumbnail, captions, music credits | Approve with note and hashes |
+| Master edit | Full `<draft>-final.mp4` | Watch end to end |
+| Package | Title, description, thumbnail, music credits | Approve with note and hashes |
 | Publication | Dry-run plan | Explicit request, then `--confirm` |
 | Archive | YouTube backup and Drive check | Verify before pruning |
 
@@ -394,14 +388,16 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | Path | Meaning |
 | --- | --- |
 | `drafts/<id>/` | Working draft |
-| `_timeline.csv` | Capture order and original names |
-| `analysis/duplicates/` | Quarantined duplicates and review |
-| `processed-clips/` | Per-clip analysis, enhanced voice, cuts, `final.mp4` |
-| `analysis/autocut-input/` | Flat staging folder of cleaned clips for AutoCut |
-| `rough-cut/` | AutoCut outputs and review media |
-| `audio-mastered/` | Mastered WAV/MP4 and loudness manifest |
-| `video.mp4` | Final master |
-| `transcript.json`, `captions.srt` | Transcript and reviewed captions |
+| `original/` | Raw camera files, auto-migrated from the draft root |
+| `.content-studio/_timeline.csv` | Capture order and original names |
+| `.content-studio/processed-clips/` | Per-clip analysis, enhanced voice, cuts, `final.mp4` |
+| `.content-studio/analysis/duplicates/` | Quarantined duplicates and review |
+| `.content-studio/rough-cut/` | Rough cut, timelines, review media |
+| `<draft>-rough-cut.mp4` | Rough-cut video |
+| `<draft>-preprocessed.mp4` | Full preprocessed video |
+| `<draft>-final.mp4` | Reviewed full-length master |
+| `<draft>-audio-only.mp3` | Extracted mastered audio |
+| `<draft>-final-with-music.mp4` | Music-mixed master, when used |
 | `title.txt`, `description.txt` | Publication copy |
 | `thumbnail.png` or `.jpg` | Approved thumbnail |
 | `creative.json` | Production metadata |

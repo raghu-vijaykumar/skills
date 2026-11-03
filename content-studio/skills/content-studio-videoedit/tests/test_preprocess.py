@@ -74,7 +74,7 @@ class PreprocessTest(unittest.TestCase):
                                    clip=None, out=None)
             sources, output = preprocess.source_files(args)
             self.assertEqual([p.name for p in sources], ["IMG_1.MOV"])
-            self.assertEqual(output, draft / "processed-clips")
+            self.assertEqual(output, draft / ".content-studio" / "processed-clips")
 
     def test_failed_dolby_proof_is_removed(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

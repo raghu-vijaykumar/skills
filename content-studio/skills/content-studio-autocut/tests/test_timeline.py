@@ -42,6 +42,20 @@ class TimelineTests(unittest.TestCase):
         self.assertIn("gblur",graph)
         self.assertIn("overlay=(W-w)/2:(H-h)/2",graph)
 
+    def test_edit_timeline_writes_ordered_contributions(self):
+        timeline=mod.initial_timeline([
+            {"source":"clip.mp4","start":0,"end":2},
+            {"source":"clip.mp4","start":4,"end":6}],self.root)
+        path=mod.write_edit_timeline(timeline,self.root)
+        self.assertEqual(path,self.root/"edit-timeline.json")
+        document=json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(document["schema"],"content-studio.edit-timeline.v1")
+        self.assertEqual([c["order"] for c in document["clips"]],[1,2])
+        self.assertEqual(document["clips"][0]["timeline_start"],0)
+        self.assertEqual(document["clips"][1]["timeline_start"],2)
+        self.assertEqual(document["clips"][1]["source_in"],4)
+        self.assertIn("Edit timeline",(self.root/"edit-timeline.html").read_text(encoding="utf-8"))
+
     def test_reframe_fit_crops_and_scales_and_survives_timeline_copy(self):
         record={"source_width":640,"source_height":360,
                 "crop":{"x":0.676167,"y":0,"w":0.316406,"h":1.0}}

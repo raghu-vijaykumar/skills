@@ -60,11 +60,18 @@ function remotionCheck(root, id) {
 }
 async function main() {
   if (!command || command === '--help' || command === '-h' || flag('help') || command === 'help') {
-    console.log('Usage: content-studio <install-skills|transcribe|approve|publish> [--channel slug --draft id]');
+    console.log('Usage: content-studio <install-skills|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
     return;
   }
   if (command === 'install-skills') {
     console.log(JSON.stringify(installSkills({global: flag('global'), target: option('target')}), null, 2));
+    return;
+  }
+  if (command === 'transcribe' && option('folder')) {
+    const draft = path.resolve(option('folder'));
+    if (!fs.statSync(draft, {throwIfNoEntry: false})?.isDirectory()) throw new Error(`Draft not found: ${draft}`);
+    console.log(JSON.stringify(transcribeDraft(path.join(draft, '.content-studio'), draft,
+      {cli: option('cli'), model: option('model'), language: option('language')}), null, 2));
     return;
   }
   const {id, root, draft, entry} = channel();

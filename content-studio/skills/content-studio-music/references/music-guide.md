@@ -138,7 +138,7 @@ python <this-skill>/scripts/music.py mix `
   --channel out-of-office --draft dubai-day-4
 ```
 
-The command reads `music-selection.json`, mixes the track under `video.mp4`, and writes `video-with-music.mp4` plus `music-mix.json`. It loops or trims the track to the master duration, fades the edges, and ducks under speech when `transcript.json` contains speech. Review the mixed master, then replace `video.mp4` after approval and repeat package approval because the master hash changed.
+The command reads `music-selection.json`, mixes the track under `<id>-final.mp4`, and writes `<id>-final-with-music.mp4` plus `music-mix.json`. It loops or trims the track to the master duration, fades the edges, and ducks under speech only when an optional transcript contains speech. Review the mixed master, then replace `<id>-final.mp4` after approval and repeat package approval because the master hash changed.
 
 Use `--volume 0.15`, `--no-duck`, or `--fade 0.5` to adjust the mix. Use `--input` and `--output` for a specific pair of files.
 

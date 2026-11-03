@@ -44,7 +44,7 @@ python <this-skill>/scripts/music.py review `
   --category cinematic --mood calm --max-duration 240 --count 5
 ```
 
-This writes `analysis/music-review.html` in the draft with local audio players. Show that page to the user and ask them to approve one track by exact title. Do not write a selection before approval.
+This writes `.content-studio/analysis/music-review.html` in the draft with local audio players. Show that page to the user and ask them to approve one track by exact title. Do not write a selection before approval.
 
 Useful filters:
 
@@ -81,10 +81,10 @@ python <this-skill>/scripts/music.py mix `
   --channel <slug> --draft <id>
 ```
 
-It writes `video-with-music.mp4` and `music-mix.json` without changing the approved master. Music is looped or trimmed to the master duration, faded at the edges, and ducked under speech when the transcript contains speech. Review the mixed master, then replace `video.mp4` only after approval and repeat package approval because the master hash changed.
+It writes `<id>-final-with-music.mp4` and `music-mix.json` without changing the approved master. Music is looped or trimmed to the master duration, faded at the edges, and ducked under speech only when an optional transcript contains speech. Review the mixed master, then replace `<id>-final.mp4` only after approval and repeat package approval because the master hash changed.
 
 ## Handoff
 
-Give `music-selection.json`, `music-mix.json`, and `video-with-music.mp4` to `content-studio-videoedit` when assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
+Give `music-selection.json`, `music-mix.json`, and `<id>-final-with-music.mp4` to `content-studio-videoedit` when assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
 
 Read [the music guide](references/music-guide.md) for license details, Pixabay Content ID handling, and catalog troubleshooting.

@@ -35,6 +35,22 @@ backup-report.json
 /drafts/*/video.mov
 /drafts/*/video.mkv
 /drafts/*/video.webm
+/drafts/*/final-video.mp4
+/drafts/*/final-video-with-music.mp4
+/drafts/*/final-video.mastered.wav
+/drafts/*/rough-cut.mp4
+/drafts/*/*-rough-cut.mp4
+/drafts/*/*-preprocessed.mp4
+/drafts/*/*-final.mp4
+/drafts/*/*-audio-only.mp3
+/drafts/*/*-final-with-music.mp4
+/drafts/*/original/
+/drafts/*/.content-studio/
+/drafts/*/rough-cut/
+/drafts/*/audio/
+/drafts/*/video/
+/drafts/*/processed-clips/
+/drafts/*/analysis/
 /shorts/*/metadata.json
 /long/*/metadata.json
 **/assets/generated/
@@ -51,6 +67,16 @@ TREE_EXCLUDES = ["--exclude", ".git/**", "--exclude", ".snapshots/**",
                  "--exclude", "**/assets/sources/**/videos/**",
                  "--exclude", "shorts/*/video.mp4", "shorts/*/video.mov", "shorts/*/video.mkv", "shorts/*/video.webm", "--exclude", "long/*/video.mp4", "long/*/video.mov", "long/*/video.mkv", "long/*/video.webm",
                  "--exclude", "drafts/*/video.mp4", "drafts/*/video.mov", "drafts/*/video.mkv", "drafts/*/video.webm", "--exclude", "drafts/*/original-videos/**",
+                 "--exclude", "drafts/*/final-video.mp4", "--exclude", "drafts/*/final-video-with-music.mp4",
+                 "--exclude", "drafts/*/final-video.mastered.wav",
+                 "--exclude", "drafts/*/rough-cut.mp4",
+                 "--exclude", "drafts/*/*-rough-cut.mp4", "--exclude", "drafts/*/*-preprocessed.mp4",
+                 "--exclude", "drafts/*/*-final.mp4", "--exclude", "drafts/*/*-audio-only.mp3",
+                 "--exclude", "drafts/*/*-final-with-music.mp4",
+                 "--exclude", "drafts/*/original/**", "--exclude", "drafts/*/.content-studio/**",
+                 "--exclude", "drafts/*/rough-cut/**", "--exclude", "drafts/*/audio/**",
+                 "--exclude", "drafts/*/video/**", "--exclude", "drafts/*/processed-clips/**",
+                 "--exclude", "drafts/*/analysis/**",
                  "--exclude", "shorts/*/metadata.json", "--exclude", "long/*/metadata.json",
                  "--exclude", "archive.txt", "--exclude", "backup-report.json"]
 

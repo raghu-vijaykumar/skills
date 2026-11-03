@@ -15,6 +15,7 @@ import re
 import subprocess
 from pathlib import Path
 
+import draftlayout
 import ordering
 
 
@@ -289,7 +290,7 @@ def scan(draft: Path, log) -> dict:
     if not files:
         return report
 
-    folder = draft / "analysis" / "duplicates"
+    folder = draftlayout.duplicates_dir(draft)
     report_path = folder / "report.json"
     cache_path = folder / "cache.json"
     review_path = folder / "review.csv"

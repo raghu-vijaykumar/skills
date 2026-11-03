@@ -83,6 +83,18 @@ test('one approval fingerprints edited inputs and rejects a changed master',()=>
   } finally {cleanup(workspace);}
 });
 
+test('edited draft approves without transcript or captions',()=>{
+  const {workspace,draft}=fixture();
+  try {
+    fs.rmSync(path.join(draft,'transcript.json'));
+    fs.rmSync(path.join(draft,'captions.srt'));
+    approvePackage(draft,'001-test','Reviewed vlog without transcript or captions');
+    const files=verifyPackage(draft,'001-test').files;
+    assert.equal(files.transcript,undefined);
+    assert.equal(files.subtitles,undefined);
+  } finally {cleanup(workspace);}
+});
+
 test('creative record and edited captions are approval gates',()=>{
   const {workspace,draft}=fixture();
   try {

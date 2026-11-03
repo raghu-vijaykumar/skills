@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from common import channel_root, select_channels
+import draftlayout
 
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".mkv"}
@@ -46,13 +47,14 @@ def analysis_folder(root: Path, name: str) -> Path:
 
 
 def camera_files(draft: Path) -> list[Path]:
-    return sorted((p for p in draft.iterdir() if p.is_file()
+    root = draftlayout.camera_root(draft)
+    return sorted((p for p in root.iterdir() if p.is_file()
                    and p.suffix.lower() in VIDEO_EXTENSIONS
                    and p.name.lower() != "video.mp4"), key=lambda p: p.name.casefold())
 
 
 def read_timeline(draft: Path) -> list[dict]:
-    path = draft / "_timeline.csv"
+    path = draftlayout.timeline_path(draft)
     if not path.exists():
         return []
     with path.open(newline="", encoding="utf-8-sig") as fh:
@@ -216,7 +218,8 @@ def planned_rows(files: list[Path], prior: list[dict], offset: timedelta,
 
 def apply_order(draft: Path, rows: list[dict], renames: list[tuple[Path, Path]]) -> None:
     """Stage all names before assigning numbers, so insertion cannot collide."""
-    root = draft.resolve()
+    root = draftlayout.camera_root(draft).resolve()
+    draftlayout.internal_dir(draft).mkdir(parents=True, exist_ok=True)
     moving = {source.resolve() for source, _ in renames}
     for source, target in renames:
         if source.resolve().parent != root or target.resolve().parent != root:
@@ -224,7 +227,7 @@ def apply_order(draft: Path, rows: list[dict], renames: list[tuple[Path, Path]])
         if target.exists() and target.resolve() not in moving:
             raise OrderError(f"rename would overwrite a file: {target.name}")
     token = uuid.uuid4().hex
-    staged = [(source, target, draft / f".order-{token}-{index}.tmp")
+    staged = [(source, target, root / f".order-{token}-{index}.tmp")
               for index, (source, target) in enumerate(renames)]
     current = {}
     try:
@@ -234,12 +237,12 @@ def apply_order(draft: Path, rows: list[dict], renames: list[tuple[Path, Path]])
         for source, target, temporary in staged:
             os.replace(temporary, target)
             current[source] = target
-        temp_csv = draft / f".order-{token}.csv"
+        temp_csv = draftlayout.internal_dir(draft) / f".order-{token}.csv"
         with temp_csv.open("w", newline="", encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, FIELDS)
             writer.writeheader()
             writer.writerows(rows)
-        os.replace(temp_csv, draft / "_timeline.csv")
+        os.replace(temp_csv, draftlayout.timeline_path(draft))
     except Exception:
         # Restore original names through a second temporary phase so target
         # filenames cannot block rollback after partial assignment.
@@ -247,12 +250,12 @@ def apply_order(draft: Path, rows: list[dict], renames: list[tuple[Path, Path]])
         for index, (source, _, _) in enumerate(staged):
             location = current.get(source)
             if location and location.exists():
-                temporary = draft / f".recover-{token}-{index}.tmp"
+                temporary = root / f".recover-{token}-{index}.tmp"
                 os.replace(location, temporary)
                 recovery.append((temporary, source))
         for temporary, source in recovery:
             os.replace(temporary, source)
-        (draft / f".order-{token}.csv").unlink(missing_ok=True)
+        (draftlayout.internal_dir(draft) / f".order-{token}.csv").unlink(missing_ok=True)
         raise
 
 

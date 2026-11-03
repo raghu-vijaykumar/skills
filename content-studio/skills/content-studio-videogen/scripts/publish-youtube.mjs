@@ -6,6 +6,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {sourceRevision} from '../../../scripts/source-revision.mjs';
+import {masterFile} from '../../../scripts/draft-paths.mjs';
 
 const API = 'https://www.googleapis.com/youtube/v3';
 const UPLOAD = 'https://www.googleapis.com/upload/youtube/v3';
@@ -18,7 +19,7 @@ async function sha256(file) {
 }
 
 export function selectMaster(draftDir, id) {
-  const direct = path.join(draftDir, 'video.mp4');
+  const direct = masterFile(draftDir);
   if (fs.existsSync(direct)) return direct;
   const dir = path.join(draftDir, 'assets', 'generated', 'video');
   const candidates = fs.existsSync(dir) ? fs.readdirSync(dir).filter((name) =>

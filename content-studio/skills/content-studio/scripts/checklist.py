@@ -34,7 +34,7 @@ ITEMS = [
     ("C04", "footage", "Camera clips preprocessed", "pre_publish", "edited",
      "Duplicates quarantined, clips ordered, blur/Dolby Vision gates reviewed, and clean or final exports available."),
     ("C05", "rough_cut", "AutoCut rough cut reviewed", "pre_publish", "edited",
-     "A human reviewed the rough cut and review media (including reframe previews when used), the target orientation/fit is recorded, or AutoCut was explicitly deferred."),
+     "A human reviewed the rough cut, edit timeline, and review media (including reframe previews when used), the target orientation/fit is recorded, or AutoCut was explicitly deferred."),
     ("C06", "audio", "Audio mastered and reviewed", "pre_publish", "all",
      "Loudness and dynamics checked; use not applicable only when no audio treatment is needed."),
     ("C07", "edit", "Master edit or render complete", "pre_publish", "all",
@@ -42,15 +42,15 @@ ITEMS = [
     ("C08", "color", "Color, HDR, and Dolby Vision reviewed", "pre_publish", "all",
      "SDR tags and tone mapping checked; Dolby Vision proof reviewed when applicable."),
     ("C09", "transcript", "Transcript reviewed", "pre_publish", "edited",
-     "transcript.json matches the master hash and the spoken content."),
+     "Not used for vlog production; only applicable when a transcript is explicitly requested."),
     ("C10", "captions", "Captions reviewed", "pre_publish", "edited",
-     "captions.srt timing and text reviewed, or captions explicitly declined."),
+     "Not used for vlog production; only applicable when captions are explicitly requested."),
     ("C11", "thumbnail", "Thumbnail approved", "pre_publish", "all",
      "An approved thumbnail exists at the platform size and limit."),
     ("C12", "music", "Music selected, mixed, and licensed", "pre_publish", "all",
      "music-selection.json, music-credits.txt, and a reviewed music-mixed master exist, or the draft explicitly has no music."),
     ("C13", "metadata", "Title and description reviewed", "pre_publish", "all",
-     "Exact title and description reviewed, including required music attribution."),
+     "Title and description are specific to the sampled footage or supplied context, with no test/draft placeholders, and include required attribution."),
     ("C14", "rights", "Rights, licenses, and consent reviewed", "pre_publish", "all",
      "Footage, music, fonts, logos, faces, locations, and client data are cleared for publication."),
     ("C15", "creative", "Creative metadata recorded", "pre_publish", "all",
@@ -84,6 +84,8 @@ def item_defaults(kind: str) -> list[dict]:
             status, reason = "deferred", "post-publish gate"
         elif applies_to == "edited" and kind == "remotion":
             status, reason = "not_applicable", "Remotion production has no camera footage"
+        elif kind == "edited" and item_id in {"C09", "C10"}:
+            status, reason = "not_applicable", "Vlog workflow does not generate transcript or captions"
         elif applies_to == "remotion" and kind == "edited":
             status, reason = "not_applicable", "Edited production does not use this Remotion step"
         items.append({
@@ -219,8 +221,13 @@ def print_status(data: dict) -> None:
 
 
 def resolve_draft(args) -> tuple[str, Path]:
+    if getattr(args, "folder", None):
+        draft = Path(args.folder).expanduser().resolve()
+        if not draft.is_dir():
+            raise SystemExit(f"draft folder not found: {draft}")
+        return draft.name, draft
     if not args.channel or not args.draft:
-        raise SystemExit("--channel and --draft are required")
+        raise SystemExit("--channel and --draft are required unless --folder is used")
     cfg = load_config(Path(args.config))
     slug, _ = select_channels(cfg, args.channel)[0]
     draft = channel_root(cfg, slug) / "drafts" / args.draft
@@ -247,11 +254,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--channel")
     parser.add_argument("--draft")
+    parser.add_argument("--folder", help="standalone draft folder; no channel config needed")
     parser.add_argument("--kind", choices=KINDS)
     shared = argparse.ArgumentParser(add_help=False)
     shared.add_argument("--config", default=argparse.SUPPRESS)
     shared.add_argument("--channel", default=argparse.SUPPRESS)
     shared.add_argument("--draft", default=argparse.SUPPRESS)
+    shared.add_argument("--folder", default=argparse.SUPPRESS)
     sub = parser.add_subparsers(dest="command", required=True)
 
     init = sub.add_parser("init", parents=[shared],

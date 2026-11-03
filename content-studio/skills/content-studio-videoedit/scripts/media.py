@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from common import Log, channel_root, human_size
+import draftlayout
 
 
 def parse_time(value: str) -> float:
@@ -54,9 +55,10 @@ def resolve_target(channel_root_path: Path, args) -> tuple[Path, str]:
             raise SystemExit(f"no local video folder for id {args.video}")
         return matches[0], args.video
     if getattr(args, "draft", None):
-        path = channel_root_path / "drafts" / args.draft / "video.mp4"
+        draft = channel_root_path / "drafts" / args.draft
+        path = draftlayout.master_path(draft)
         if not path.exists():
-            raise SystemExit(f"draft has no video.mp4: {path}")
+            raise SystemExit(f"draft has no video/with-audio.mp4: {path}")
         return path, args.draft
     raise SystemExit("pass --video ID, --draft NAME or --path FILE")
 

@@ -231,7 +231,7 @@ def mix_music(video: Path, track: Path, output: Path, *, volume: float = 0.18,
     if output.exists():
         raise SystemExit(f"output already exists: {output}")
     if duck is None:
-        transcript = video.parent / "transcript.json"
+        transcript = (video.parent.parent if video.parent.name == "video" else video.parent) / "transcript.json"
         duck = False
         if transcript.is_file():
             data = json.loads(transcript.read_text(encoding="utf-8"))
@@ -325,7 +325,7 @@ def build_parser() -> argparse.ArgumentParser:
     mix.add_argument("--channel", required=True)
     mix.add_argument("--draft", required=True)
     mix.add_argument("--track", help="catalog title/file; default: music-selection.json")
-    mix.add_argument("--input", help="video input (default: draft/video.mp4)")
+    mix.add_argument("--input", help="video input (default: draft/final-video.mp4)")
     mix.add_argument("--output", help="output (default: draft/video-with-music.mp4)")
     mix.add_argument("--volume", type=float, default=0.18,
                      help="music gain relative to the master (default 0.18)")
@@ -380,7 +380,7 @@ def run(argv: list[str] | None = None) -> int:
         if not selected:
             raise SystemExit("no matching tracks; adjust the filters or add tracks to the catalog")
         output = Path(args.out).expanduser().resolve() if args.out \
-            else draft / "analysis" / "music-review.html"
+            else draft / ".content-studio" / "analysis" / "music-review.html"
         write_review(draft, selected, catalog, output)
         print(f"draft: {slug}/{args.draft}")
         print_tracks(selected)
@@ -418,9 +418,14 @@ def run(argv: list[str] | None = None) -> int:
         track_path = Path(str(track.get("absolute_path", "")))
         if not track_path.is_file():
             raise SystemExit(f"selected audio file is missing: {track_path}")
-        video = Path(args.input).expanduser().resolve() if args.input else draft / "video.mp4"
+        current = draft / "final-video.mp4"
+        legacy_video = draft / "video" / "with-audio.mp4"
+        legacy = draft / "video.mp4"
+        video = Path(args.input).expanduser().resolve() if args.input else (
+            current if current.is_file() or not (legacy_video.is_file() or legacy.is_file())
+            else (legacy_video if legacy_video.is_file() else legacy))
         output = Path(args.output).expanduser().resolve() if args.output \
-            else draft / "video-with-music.mp4"
+            else draft / "final-video-with-music.mp4"
         if not video.is_file():
             raise SystemExit(f"master video not found: {video}")
         if output.resolve() == video.resolve():

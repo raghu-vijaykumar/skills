@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import json
+import html
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
 from common import channel_root, select_channels
+import draftlayout
 import ordering
 
 
@@ -17,8 +20,8 @@ class EditError(RuntimeError):
     pass
 
 
-def command(args: list[str]) -> None:
-    result = subprocess.run(args, capture_output=True, text=True,
+def command(args: list[str], cwd: Path | None = None) -> None:
+    result = subprocess.run(args, cwd=cwd, capture_output=True, text=True,
                             encoding="utf-8", errors="replace")
     if result.returncode:
         lines = [line for line in result.stderr.splitlines() if line.strip()]
@@ -158,17 +161,21 @@ def render_ranges(source: Path, target: Path, ranges: list[tuple[float, float]],
 
 
 def draft_sources(draft: Path, log, utc_offset: str | None = None) -> list[tuple[Path, Path | None]]:
+    draftlayout.ensure_layout(draft)
+    for moved in draftlayout.migrate(draft, log):
+        log(f"layout: {moved}")
     rows = ordering.ensure_current(draft, log, utc_offset=utc_offset)
+    originals = draftlayout.original_dir(draft)
     result = []
     for row in rows:
-        source = draft / row["new_name"]
-        folder = ordering.analysis_folder(draft / "processed-clips", row["original_name"])
+        source = originals / row["new_name"]
+        folder = ordering.analysis_folder(draftlayout.processed_dir(draft), row["original_name"])
         report_path = folder / "report.json"
         sidecar = None
         if report_path.exists():
             report = json.loads(report_path.read_text(encoding="utf-8"))
             if report.get("source_bytes") == source.stat().st_size:
-                for key in ("cut_output", "processed_output", "voice_only_output"):
+                for key in ("final_output", "cut_output", "processed_output", "voice_only_output"):
                     candidate = folder / (report.get(key) or "")
                     if report.get(key) and candidate.is_file():
                         source = candidate
@@ -239,71 +246,92 @@ def fit_graph(label: str, width: int, height: int, fit: str, out: str) -> list[s
     raise EditError(f"unknown fit mode: {fit}")
 
 
+def detect_stabilization(source: Path, work: Path) -> None:
+    command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+             "-i", str(source), "-map", "0:v:0",
+             "-vf", "vidstabdetect=shakiness=5:accuracy=9:result=transforms.trf",
+             "-an", "-f", "null", os.devnull], cwd=work)
+
+
 def normalized_segment(source: Path, sidecar: Path | None, target: Path,
                        ranges: list[tuple[float, float]] | None = None,
                        size: tuple[int, int] = (1920, 1080),
-                       fit: str = "blur") -> None:
+                       fit: str = "blur", stabilize: bool = False) -> None:
     duration, video, has_audio = probe(source)
     hdr = video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
     if is_dolby(video) and not hdr:
         raise EditError(f"Dolby Vision clip has no supported HDR base layer: {source.name}")
-    # The joined master is deliberately BT.709 SDR. Convert tagged SDR camera
-    # gamuts as well as HDR rather than just changing the output metadata.
-    sdr_convert = ("zscale=primaries=bt709:transfer=bt709:matrix=bt709,"
-                   if not hdr and all(video.get(k) not in (None, "unknown") for k in
-                                      ("color_primaries", "color_transfer", "color_space"))
-                   else "")
-    color_filter = tone_map(video) if hdr else sdr_convert
-    width, height = size
-    kept = ranges or [(0.0, duration)]
-    if not kept or any(end <= start or start < 0 or end > duration + 0.05
-                       for start, end in kept):
-        raise EditError(f"invalid kept ranges for {source.name}")
-    expected = sum(min(end, duration) - start for start, end in kept)
-    cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-           "-i", str(source)]
-    if sidecar:
-        cmd += ["-i", str(sidecar)]
-    elif not has_audio:
-        cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
-    audio_index = 1 if sidecar or not has_audio else 0
-    full_clip = len(kept) == 1 and kept[0][0] <= 0 and kept[0][1] >= duration - 1e-6
-    if full_clip:
-        graph = [f"[0:v:0]{color_filter.rstrip(',') if color_filter else 'null'}[src]"]
-        graph += fit_graph("[src]", width, height, fit, "[v]")
-        cmd += ["-filter_complex", ";".join(graph), "-map", "[v]",
-                "-map", f"{audio_index}:a:0", "-t", f"{duration:.6f}"]
-    else:
+    work = None
+    try:
+        if stabilize:
+            work = Path(tempfile.mkdtemp(prefix="vlog-stab-", dir=target.parent))
+            detect_stabilization(source, work)
+        # The joined master is deliberately BT.709 SDR. Convert tagged SDR camera
+        # gamuts as well as HDR rather than just changing the output metadata.
+        sdr_convert = ("zscale=primaries=bt709:transfer=bt709:matrix=bt709,"
+                       if not hdr and all(video.get(k) not in (None, "unknown") for k in
+                                          ("color_primaries", "color_transfer", "color_space"))
+                       else "")
+        color_filter = tone_map(video) if hdr else sdr_convert
+        width, height = size
+        kept = ranges or [(0.0, duration)]
+        if not kept or any(end <= start or start < 0 or end > duration + 0.05
+                           for start, end in kept):
+            raise EditError(f"invalid kept ranges for {source.name}")
+        expected = sum(min(end, duration) - start for start, end in kept)
+        cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+               "-i", str(source)]
+        if sidecar:
+            cmd += ["-i", str(sidecar)]
+        elif not has_audio:
+            cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+        audio_index = 1 if sidecar or not has_audio else 0
+        full_clip = len(kept) == 1 and kept[0][0] <= 0 and kept[0][1] >= duration - 1e-6
+        stabilizer = "vidstabtransform=input=transforms.trf:smoothing=15:optzoom=1"
+        video_in = "[0:v:0]"
         graph = []
-        for index, (start, end) in enumerate(kept):
-            graph.append(f"[0:v:0]trim=start={start:.6f}:end={end:.6f},"
-                         f"setpts=PTS-STARTPTS[v{index}]")
-            graph.append(f"[{audio_index}:a:0]atrim=start={start:.6f}:end={end:.6f},"
-                         f"asetpts=PTS-STARTPTS[a{index}]")
-        if len(kept) > 1:
-            graph.append("".join(f"[v{index}][a{index}]" for index in range(len(kept)))
-                         + f"concat=n={len(kept)}:v=1:a=1[vc][ac]")
-            video_label, audio_label = "[vc]", "[ac]"
+        if stabilize:
+            graph.append(f"[0:v:0]{stabilizer}[stab]")
+            video_in = "[stab]"
+        if full_clip:
+            graph.append(f"{video_in}{color_filter.rstrip(',') if color_filter else 'null'}[src]")
+            graph += fit_graph("[src]", width, height, fit, "[v]")
+            cmd += ["-filter_complex", ";".join(graph), "-map", "[v]",
+                    "-map", f"{audio_index}:a:0", "-t", f"{duration:.6f}"]
         else:
-            video_label, audio_label = "[v0]", "[a0]"
-        graph.append(f"{video_label}{color_filter.rstrip(',') if color_filter else 'null'}[src]")
-        graph += fit_graph("[src]", width, height, fit, "[v]")
-        cmd += ["-filter_complex", ";".join(graph), "-map", "[v]", "-map", audio_label,
-                "-t", f"{expected:.6f}"]
-    cmd += ["-c:v", "libx264", "-preset", "medium",
-            "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
-            "-color_primaries", "bt709", "-color_trc", "bt709",
-            "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k",
-            "-ar", "48000", "-ac", "2", "-movflags", "+faststart", str(target)]
-    command(cmd)
-    actual, rendered, audio = probe(target)
-    if not audio or rendered.get("width") != width or rendered.get("height") != height \
-            or abs(actual - expected) > max(0.25, expected * 0.005):
-        raise EditError(f"normalized clip failed duration/audio/size validation: {source.name}")
+            for index, (start, end) in enumerate(kept):
+                graph.append(f"{video_in}trim=start={start:.6f}:end={end:.6f},"
+                             f"setpts=PTS-STARTPTS[v{index}]")
+                graph.append(f"[{audio_index}:a:0]atrim=start={start:.6f}:end={end:.6f},"
+                             f"asetpts=PTS-STARTPTS[a{index}]")
+            if len(kept) > 1:
+                graph.append("".join(f"[v{index}][a{index}]" for index in range(len(kept)))
+                             + f"concat=n={len(kept)}:v=1:a=1[vc][ac]")
+                video_label, audio_label = "[vc]", "[ac]"
+            else:
+                video_label, audio_label = "[v0]", "[a0]"
+            graph.append(f"{video_label}{color_filter.rstrip(',') if color_filter else 'null'}[src]")
+            graph += fit_graph("[src]", width, height, fit, "[v]")
+            cmd += ["-filter_complex", ";".join(graph), "-map", "[v]", "-map", audio_label,
+                    "-t", f"{expected:.6f}"]
+        cmd += ["-c:v", "libx264", "-preset", "medium",
+                "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30",
+                "-color_primaries", "bt709", "-color_trc", "bt709",
+                "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k",
+                "-ar", "48000", "-ac", "2", "-movflags", "+faststart", str(target)]
+        command(cmd, cwd=work)
+        actual, rendered, audio = probe(target)
+        if not audio or rendered.get("width") != width or rendered.get("height") != height \
+                or abs(actual - expected) > max(0.25, expected * 0.005):
+            raise EditError(f"normalized clip failed duration/audio/size validation: {source.name}")
+    finally:
+        if work is not None:
+            shutil.rmtree(work, ignore_errors=True)
 
 
 def join(sources: list[tuple[Path, Path | None]], target: Path, log,
-         fit: str = "blur", size: tuple[int, int] = (1920, 1080)) -> None:
+         fit: str = "blur", size: tuple[int, int] = (1920, 1080),
+         scratch: Path | None = None) -> None:
     if not sources:
         raise EditError("no clips to join")
     if target.suffix.lower() != ".mp4":
@@ -312,8 +340,10 @@ def join(sources: list[tuple[Path, Path | None]], target: Path, log,
         raise EditError(f"output already exists or matches an input: {target}")
     width, height = size
     target.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=target.parent) as scratch:
-        work = Path(scratch)
+    scratch_root = scratch or target.parent
+    scratch_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=scratch_root) as scratch_dir:
+        work = Path(scratch_dir)
         segments = []
         for index, (source, sidecar) in enumerate(sources, 1):
             segment = work / f"{index:05d}.mp4"
@@ -337,7 +367,7 @@ def join(sources: list[tuple[Path, Path | None]], target: Path, log,
         os.replace(output, target)
 
 
-def join_normalized(sources: list[Path], target: Path) -> None:
+def join_normalized(sources: list[Path], target: Path, scratch: Path | None = None) -> None:
     """Concatenate already-normalized 1920x1080 SDR clips without re-encoding."""
     if not sources:
         raise EditError("no clips to join")
@@ -348,8 +378,10 @@ def join_normalized(sources: list[Path], target: Path) -> None:
         if not audio or video.get("width") != 1920 or video.get("height") != 1080:
             raise EditError(f"clip is not a normalized 1920x1080 export: {source.name}")
     target.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=target.parent) as scratch:
-        work = Path(scratch)
+    scratch_root = scratch or target.parent
+    scratch_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=scratch_root) as scratch_dir:
+        work = Path(scratch_dir)
         manifest = work / "concat.txt"
         manifest.write_text("".join(
             "file '" + str(p.resolve()).replace("\\", "/").replace("'", "'\\''") + "'\n"
@@ -364,6 +396,103 @@ def join_normalized(sources: list[Path], target: Path) -> None:
                 or abs(actual - expected) > max(0.5, len(sources) * 0.08):
             raise EditError(f"joined export failed validation: {actual:.3f}s vs {expected:.3f}s")
         os.replace(output, target)
+
+
+def strip_audio(source: Path, target: Path) -> None:
+    """Write a video-only copy without re-encoding the picture."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+             "-i", str(source), "-map", "0:v:0", "-c:v", "copy", "-an",
+             "-movflags", "+faststart", str(target)])
+
+
+def _relative(path: Path, root: Path) -> str:
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return str(path.resolve())
+
+
+def write_edit_timeline(entries: list[dict], output: Path, master: Path, root: Path) -> Path:
+    """Write the ordered contribution of each source to the rendered master."""
+    document = {
+        "schema": "content-studio.edit-timeline.v1",
+        "master": _relative(master, root),
+        "duration_seconds": round(sum(float(item["duration"]) for item in entries), 3),
+        "clips": entries,
+    }
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "edit-timeline.json").write_text(
+        json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    rows = "".join(
+        "<tr>"
+        f"<td>{item['order']}</td>"
+        f"<td>{float(item['timeline_start']):.2f}–{float(item['timeline_end']):.2f}</td>"
+        f"<td>{html.escape(item.get('source') or '')}</td>"
+        f"<td>{float(item['source_in']):.2f}–{float(item['source_out']):.2f}</td>"
+        f"<td>{float(item['duration']):.2f}</td>"
+        f"<td>{html.escape(item.get('note') or '')}</td>"
+        "</tr>" for item in entries)
+    page = ("<!doctype html><meta charset='utf-8'><title>Edit timeline</title>"
+            "<style>body{font:15px/1.5 system-ui,sans-serif;margin:2rem;color:#0f172a}"
+            "h1{margin:0 0 .25rem}p{color:#475569;margin:0 0 1.25rem}"
+            "table{border-collapse:collapse;width:100%}th,td{padding:.55rem .7rem;"
+            "border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}"
+            "th{background:#f8fafc;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:#475569}"
+            "tr:hover td{background:#f8fafc}code{font-family:ui-monospace,monospace}</style>"
+            "<h1>Edit timeline</h1>"
+            f"<p>{len(entries)} source contribution(s) · {document['duration_seconds']:.2f}s master · "
+            f"<code>{html.escape(document['master'])}</code></p>"
+            "<table><thead><tr><th>#</th><th>Master time (s)</th><th>Source</th>"
+            "<th>Source in–out (s)</th><th>Duration (s)</th><th>Note</th></tr></thead>"
+            f"<tbody>{rows}</tbody></table>")
+    (output / "edit-timeline.html").write_text(page, encoding="utf-8")
+    return output / "edit-timeline.json"
+
+
+def draft_join_timeline(draft: Path, sources: list[tuple[Path, Path | None]],
+                        master: Path) -> Path:
+    """Describe how each ordered draft clip contributes to the joined master."""
+    processed = draftlayout.processed_dir(draft)
+    originals = draftlayout.original_dir(draft)
+    entries = []
+    cursor = 0.0
+    for index, (source, sidecar) in enumerate(sources, 1):
+        duration, _, has_audio = probe(source)
+        folder = source.parent if source.parent.parent == processed else None
+        original = None
+        note = []
+        removed = []
+        if folder is not None:
+            report_path = folder / "report.json"
+            if report_path.exists():
+                report = json.loads(report_path.read_text(encoding="utf-8"))
+                original = report.get("source")
+                removed = report.get("final_cuts") or report.get("stored_cuts") or []
+                if removed:
+                    note.append(f"{len(removed)} blur span(s) removed")
+                if report.get("final_output"):
+                    note.append("final video")
+                elif report.get("processed_output"):
+                    note.append("processed video")
+        if original is None:
+            candidate = originals / ordering.original_name(source.name)
+            original = str(candidate if candidate.exists() else source)
+        entries.append({
+            "order": index,
+            "source": _relative(Path(original), draft),
+            "rendered_source": _relative(source, draft),
+            "timeline_start": round(cursor, 3),
+            "timeline_end": round(cursor + duration, 3),
+            "source_in": 0.0,
+            "source_out": round(duration, 3),
+            "duration": round(duration, 3),
+            "has_audio": has_audio,
+            "removed_ranges": removed,
+            "note": "; ".join(note),
+        })
+        cursor += duration
+    return write_edit_timeline(entries, draftlayout.rough_cut_dir(draft), master, draft)
 
 
 def run(cfg: dict, args, log) -> int:
@@ -391,17 +520,24 @@ def run(cfg: dict, args, log) -> int:
         else:
             if args.start or args.end or args.remove:
                 raise EditError("join accepts --input or --draft, not trim/cut ranges")
-            if bool(args.input) == bool(args.draft):
-                raise EditError("join requires either --draft or repeated --input files")
-            if args.draft:
-                slug, _ = select_channels(cfg, args.channel)[0]
-                if Path(args.draft).name != args.draft:
-                    raise EditError("pass a draft folder name with --draft")
-                draft = channel_root(cfg, slug) / "drafts" / args.draft
+            if bool(args.input) == bool(args.draft or getattr(args, "folder", None)):
+                raise EditError("join requires either --draft, --folder, or repeated --input files")
+            draft_dir = None
+            if args.draft or getattr(args, "folder", None):
+                if getattr(args, "folder", None):
+                    draft = Path(args.folder).expanduser().resolve()
+                else:
+                    if Path(args.draft).name != args.draft:
+                        raise EditError("pass a draft folder name with --draft")
+                    slug, _ = select_channels(cfg, args.channel)[0]
+                    draft = channel_root(cfg, slug) / "drafts" / args.draft
                 if not draft.is_dir():
                     raise EditError(f"draft not found: {draft}")
+                draft_dir = draft
+                draftlayout.ensure_layout(draft)
                 sources = draft_sources(draft, log, args.utc_offset)
-                target = Path(args.out).expanduser().resolve() if args.out else draft / "video.mp4"
+                target = (Path(args.out).expanduser().resolve() if args.out
+                          else draftlayout.final_path(draft))
             else:
                 if not args.out:
                     raise EditError("join with --input requires --out")
@@ -415,7 +551,11 @@ def run(cfg: dict, args, log) -> int:
                 getattr(args, "allow", None), log)
             if not sources:
                 raise EditError("no clips match the requested orientation")
-            join(sources, target, log, fit=getattr(args, "fit", "blur"))
+            join(sources, target, log, fit=getattr(args, "fit", "blur"),
+                 scratch=draftlayout.scratch_dir(draft_dir) if draft_dir else None)
+            if draft_dir is not None:
+                timeline = draft_join_timeline(draft_dir, sources, target)
+                log(f"edit join: timeline -> {timeline}")
             log(f"edit join: {len(sources)} clips -> {target} (1920x1080 SDR, 30 fps, "
                 f"fit {getattr(args, 'fit', 'blur')})")
         return 0

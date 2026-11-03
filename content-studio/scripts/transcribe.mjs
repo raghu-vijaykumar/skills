@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {sha256} from './package.mjs';
+import {masterFile} from './draft-paths.mjs';
 
 function run(executable, args, label) {
   const result = spawnSync(executable, args, {encoding: 'utf8', maxBuffer: 16 * 1024 * 1024});
@@ -57,8 +58,8 @@ export function toSrt(segments) {
   return segments.map((entry, index) => `${index + 1}\n${stamp(entry.startMs)} --> ${stamp(entry.endMs)}\n${entry.text}\n`).join('\n');
 }
 export function transcribeDraft(channelRoot, draft, options = {}) {
-  const master = path.join(draft, 'video.mp4');
-  if (!fs.existsSync(master)) throw new Error('Final manual export video.mp4 is missing');
+  const master = masterFile(draft);
+  if (!fs.existsSync(master)) throw new Error('Final manual export final-video.mp4 is missing');
   const probed = (options.probe ?? probeMaster)(master);
   const execute = options.runCommand ?? run;
   const cache = path.join(channelRoot, 'analysis', 'transcription', path.basename(draft));
