@@ -342,7 +342,7 @@ class EditingTest(unittest.TestCase):
                 writer.writerow([1, 0.2, 0.4, 100, "", ""])
             seen = {}
 
-            def fake_render(source, sidecar, target, ranges=None, fit="pad"):
+            def fake_render(source, sidecar, target, ranges=None, fit="blur"):
                 seen["sidecar"] = sidecar
                 seen["ranges"] = ranges
                 seen["fit"] = fit

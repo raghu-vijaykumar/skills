@@ -290,8 +290,8 @@ def main():
                    help="keep clips whose orientation does not match the target")
     p.add_argument("--allow",action="append",
                    help="include a specific mismatched filename; repeatable")
-    p.add_argument("--fit",choices=["pad","blur","crop"],default="pad",
-                   help="fit mismatched clips with black padding, a blurred copy, or crop")
+    p.add_argument("--fit",choices=["pad","blur","crop"],default="blur",
+                   help="fit mismatched clips with a blurred copy (default), black padding, or crop")
     p.add_argument("--size",help="target size WxH; default 1920x1080")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):

@@ -320,11 +320,11 @@ python scripts/content.py edit join --channel out-of-office --draft <id> --orien
 ```
 
 `--orientation` keeps only matching clips. `--include-mismatched` keeps all clips;
-`--allow <filename>` adds one specific exception. `--fit pad` uses black bars,
-`--fit blur` centers a mismatched clip over a blurred copy of the same footage,
-and `--fit crop` fills the frame by cropping. `preprocess --final --fit blur`
-applies the same treatment to per-clip final exports. AutoCut exposes the same
-flags when it builds its timeline.
+`--allow <filename>` adds one specific exception. `--fit blur` is the default and
+centers a mismatched clip over a blurred copy of the same footage; `--fit pad`
+uses black bars and `--fit crop` fills the frame by cropping. `preprocess --final`
+uses the same default; override it with `--fit pad` or `--fit crop`. AutoCut
+exposes the same flags when it builds its timeline.
 
 ## Music selection
 

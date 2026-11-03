@@ -683,7 +683,7 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
         # normalized_segment ignores the Dolby Vision RPU and exports BT.709 SDR,
         # so the final file plays everywhere without a DV proof step.
         editing.normalized_segment(source, voice, temp, ranges=kept,
-                                   fit=getattr(args, "fit", "pad"))
+                                   fit=getattr(args, "fit", "blur"))
         actual, rendered, out_audio = editing.probe(temp)
         if not out_audio or rendered.get("width") != 1920 or rendered.get("height") != 1080:
             raise ProcessingError(f"final export failed validation: {source.name}")

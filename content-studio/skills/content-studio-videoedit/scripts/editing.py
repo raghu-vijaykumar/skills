@@ -242,7 +242,7 @@ def fit_graph(label: str, width: int, height: int, fit: str, out: str) -> list[s
 def normalized_segment(source: Path, sidecar: Path | None, target: Path,
                        ranges: list[tuple[float, float]] | None = None,
                        size: tuple[int, int] = (1920, 1080),
-                       fit: str = "pad") -> None:
+                       fit: str = "blur") -> None:
     duration, video, has_audio = probe(source)
     hdr = video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
     if is_dolby(video) and not hdr:
@@ -303,7 +303,7 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path,
 
 
 def join(sources: list[tuple[Path, Path | None]], target: Path, log,
-         fit: str = "pad", size: tuple[int, int] = (1920, 1080)) -> None:
+         fit: str = "blur", size: tuple[int, int] = (1920, 1080)) -> None:
     if not sources:
         raise EditError("no clips to join")
     if target.suffix.lower() != ".mp4":
@@ -415,9 +415,9 @@ def run(cfg: dict, args, log) -> int:
                 getattr(args, "allow", None), log)
             if not sources:
                 raise EditError("no clips match the requested orientation")
-            join(sources, target, log, fit=getattr(args, "fit", "pad"))
+            join(sources, target, log, fit=getattr(args, "fit", "blur"))
             log(f"edit join: {len(sources)} clips -> {target} (1920x1080 SDR, 30 fps, "
-                f"fit {getattr(args, 'fit', 'pad')})")
+                f"fit {getattr(args, 'fit', 'blur')})")
         return 0
     except (EditError, ordering.OrderError, OSError, ValueError) as exc:
         log(f"edit: {exc}")

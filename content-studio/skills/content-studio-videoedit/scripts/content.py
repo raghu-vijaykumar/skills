@@ -469,8 +469,8 @@ def main() -> int:
                    help="create or refresh a short Dolby Vision stabilization proof")
     p.add_argument("--final", action="store_true",
                    help="render final.mp4 (16:9 SDR) with enhanced voice and detected blur spans removed")
-    p.add_argument("--fit", choices=["pad", "blur", "crop"], default="pad",
-                   help="how --final fits mismatched aspect ratios: pad, blurred background, or crop")
+    p.add_argument("--fit", choices=["pad", "blur", "crop"], default="blur",
+                   help="how --final fits mismatched aspect ratios: blurred background (default), pad, or crop")
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
     p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
@@ -486,8 +486,8 @@ def main() -> int:
     p.add_argument("--remove", action="append", help="cut range START-END; repeatable")
     p.add_argument("--sdr", action="store_true",
                    help="convert HDR/Dolby Vision trim or cut to labeled SDR")
-    p.add_argument("--fit", choices=["pad", "blur", "crop"], default="pad",
-                   help="join fit for mismatched aspect ratios: pad, blurred background, or crop")
+    p.add_argument("--fit", choices=["pad", "blur", "crop"], default="blur",
+                   help="join fit for mismatched aspect ratios: blurred background (default), pad, or crop")
     p.add_argument("--orientation", choices=["any", "landscape", "portrait", "square"],
                    default="any", help="join only clips matching this orientation")
     p.add_argument("--include-mismatched", action="store_true",

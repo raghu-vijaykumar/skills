@@ -35,7 +35,7 @@ def validate(timeline, root):
     if not video: raise ValueError("No video clips")
     return video
 
-def initial_timeline(segments, folder, style="travel-vlog", width=1920, height=1080, fit="pad"):
+def initial_timeline(segments, folder, style="travel-vlog", width=1920, height=1080, fit="blur"):
     cursor=0.
     clips=[]
     for i,c in enumerate(segments):
@@ -94,7 +94,7 @@ def revise(timeline, instructions):
 def fit_filter(label, width, height, fit, out):
     if width<=0 or height<=0 or width%2 or height%2:
         raise ValueError("target size must be positive even dimensions")
-    fit=str(fit or "pad").lower()
+    fit=str(fit or "blur").lower()
     if fit=="pad":
         return [f"{label}scale={width}:{height}:force_original_aspect_ratio=decrease:"
                 f"force_divisible_by=2,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
@@ -116,7 +116,7 @@ def fit_filter(label, width, height, fit, out):
 def render(timeline, output):
     root=Path(timeline["source_root"]).resolve()
     video=validate(timeline,root)
-    fit=timeline.get("fit","pad")
+    fit=timeline.get("fit","blur")
     width=timeline["width"]; height=timeline["height"]
     cache=output/"render-cache"
     cache.mkdir(parents=True,exist_ok=True)
