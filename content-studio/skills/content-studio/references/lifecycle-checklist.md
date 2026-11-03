@@ -33,7 +33,7 @@ closed.
 | C05 | pre-publish | edited | AutoCut rough cut reviewed | Human reviewed the rough cut, edit timeline, and review media, including reframe previews when used; target orientation/fit recorded, or AutoCut explicitly deferred |
 | C06 | pre-publish | all | Audio mastered and reviewed | Loudness/dynamics checked; not applicable only when no audio treatment is needed |
 | C07 | pre-publish | all | Master edit or render complete | Full-length master exists and was watched end to end |
-| C08 | pre-publish | all | Color, HDR, and Dolby Vision reviewed | SDR tags/tone mapping checked; DV proof reviewed when applicable |
+| C08 | pre-publish | all | Color, HDR, Dolby Vision, and enhancement reviewed | SDR tags/tone mapping checked; DV proof reviewed when applicable; enhancement decisions reviewed when analysis was run |
 | C09 | pre-publish | edited | Transcript reviewed | Not used for vlog production; optional only when explicitly requested |
 | C10 | pre-publish | edited | Captions reviewed | Not used for vlog production; optional only when explicitly requested |
 | C11 | pre-publish | all | Thumbnail approved | AI-generated 16:9 thumbnail from representative frames plus audio/voiceover context; approved |

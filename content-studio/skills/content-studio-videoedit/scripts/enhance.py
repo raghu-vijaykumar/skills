@@ -591,14 +591,20 @@ def render_manifest(manifest_path: Path, output: Path,
         shutil.copy2(source, output)
         validation = {"status": "skipped", "reason": "no approved corrections"}
     else:
-        run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-             "-i", str(source), "-vf", ",".join(filters), "-c:v", "libx264",
-             "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-             "-c:a", "copy", "-movflags", "+faststart", str(output)])
-        validation = validate_render(manifest, source, output)
-        if validation["status"] == "rejected":
-            output.unlink(missing_ok=True)
-            raise EnhanceError("quality validation rejected the correction")
+        temp = output.with_name(output.stem + ".tmp" + output.suffix)
+        temp.unlink(missing_ok=True)
+        try:
+            run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-i", str(source), "-vf", ",".join(filters), "-c:v", "libx264",
+                 "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+                 "-c:a", "copy", "-movflags", "+faststart", str(temp)])
+            validation = validate_render(manifest, source, temp)
+            if validation["status"] == "rejected":
+                temp.unlink(missing_ok=True)
+                raise EnhanceError("quality validation rejected the correction")
+            os.replace(temp, output)
+        finally:
+            temp.unlink(missing_ok=True)
     validation_path = manifest_path.parent / "validation.json"
     validation_path.write_text(json.dumps(validation, indent=2) + "\n", encoding="utf-8")
     if validation["status"] == "passed":
