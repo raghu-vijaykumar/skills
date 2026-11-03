@@ -303,7 +303,8 @@ must remove at least 1 dB of noise or raise SNR by 1 dB; and it only replaces th
 default when it leads by more than `--margin` points, which keeps measurement noise
 from flipping the choice. Profiles, metrics, and
 listenable WAVs are written under `.content-studio/analysis/tuning/`, with
-`tuning.csv` and `tuning.html` summarizing the run. Listen to the WAVs before a
+`tuning.csv` and `tuning.html` summarizing the current profiles in that folder and
+inline players for the default and chosen candidates. Listen to the WAVs before a
 batch and use the profiles to decide whether that clip should be denoised at all or
 take a gentler pass; preprocess does not apply the profiles automatically.
 `--limit` samples across clip durations; `--sample` is the seconds measured per clip;

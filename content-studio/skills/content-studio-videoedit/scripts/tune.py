@@ -17,6 +17,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import quote
 
 import numpy as np
 
@@ -414,13 +415,16 @@ def write_summary(profiles: list[dict], output_root: Path) -> tuple[Path, Path]:
         folder = output_root / profile["clip"].rsplit(".", 1)[0] / "candidates"
         chosen = profile["chosen"]
         players = []
+        names = []
         for name in (BASELINE, chosen):
-            if not name:
-                continue
+            if name and name not in names:
+                names.append(name)
+        for name in names:
             matches = sorted(folder.glob(f"window-1-{name}.wav"))
             if matches:
+                relative = f"{folder.parent.name}/candidates/{matches[0].name}"
                 players.append(f"<div>{name}: <audio controls preload='none' "
-                               f"src='{folder.name}/{matches[0].name}'></audio></div>")
+                               f"src='{quote(relative)}'></audio></div>")
         row = next(item for item in rows if item["clip"] == profile["clip"])
         html.append(
             f"<tr><td>{profile['clip']}</td><td>{chosen}</td>"
@@ -484,7 +488,15 @@ def run(cfg: dict, args, log) -> int:
             if profile:
                 profiles.append(profile)
         if profiles:
-            csv_path, html_path = write_summary(profiles, output_root)
+            merged = {profile["clip"]: profile for profile in profiles}
+            for path in sorted(output_root.glob("*/profile.json")):
+                try:
+                    profile = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if profile.get("tune_version") == TUNE_VERSION:
+                    merged.setdefault(profile["clip"], profile)
+            csv_path, html_path = write_summary(list(merged.values()), output_root)
             log(f"tune: profiles -> {csv_path}")
             log(f"tune: listen -> {html_path}")
         log(f"tune: {len(profiles)} profiled, {failed} failed")

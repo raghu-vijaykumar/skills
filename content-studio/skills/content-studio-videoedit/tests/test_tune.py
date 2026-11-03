@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -131,6 +132,27 @@ class TuneTest(unittest.TestCase):
         summary = tune.aggregate([metrics(noise_floor_dbfs=-40.0),
                                   metrics(noise_floor_dbfs=-60.0)])
         self.assertAlmostEqual(summary["noise_floor_dbfs"], -50.0)
+
+    def test_summary_players_link_into_the_clip_folder(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            folder = root / "001 - clip" / "candidates"
+            folder.mkdir(parents=True)
+            (folder / "window-1-default.wav").write_bytes(b"")
+            (folder / "window-1-pf.wav").write_bytes(b"")
+            profile = {
+                "clip": "001 - clip.mp4", "chosen": "pf", "reason": "pf won",
+                "runner_up": "none", "runner_up_score": 20.0,
+                "source_metrics": metrics(), "candidates": [
+                    {"name": "default", "score": 70.0, "issues": [],
+                     "metrics": metrics()},
+                    {"name": "pf", "score": 80.0, "issues": [], "metrics": metrics()},
+                ],
+            }
+            tune.write_summary([profile], root)
+            html = (root / "tuning.html").read_text(encoding="utf-8")
+            self.assertIn("001%20-%20clip/candidates/window-1-default.wav", html)
+            self.assertIn("001%20-%20clip/candidates/window-1-pf.wav", html)
 
 
 if __name__ == "__main__":
