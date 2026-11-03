@@ -291,7 +291,7 @@ Final mode reuses the existing `enhanced-voice.wav` when the source size is unch
 automatically treats every detected blur span as a cut, and writes `final.mp4` in each
 clip folder. Folder and draft runs then concatenate those exports into
 `<id>-preprocessed.mp4`. Every clip is fitted to
-1920x1080 16:9 BT.709 SDR at 30 fps with stereo AAC; the whole frame is kept and padded
+the highest source resolution, BT.709 SDR at 30 fps with stereo AAC; the whole frame is kept and padded
 where the aspect differs. Dolby Vision RPU is deliberately dropped in this path, so use
 the `--dv-proof` / `--dv-approved` flow when DV must be preserved. `--final` cannot be
 combined with `--apply-review`, `--dv-proof`, or `--dv-approved`.
@@ -326,7 +326,7 @@ Draft join uses `.content-studio/_timeline.csv` order and prefers approved `cut.
 then `processed.*`, then voice-only video or original footage with the enhanced voice
 sidecar when available. It creates `<id>-final.mp4` and writes
 `.content-studio/rough-cut/edit-timeline.json` plus `edit-timeline.html`. Each clip is normalized to
-1920x1080 BT.709 SDR at 30 fps with stereo AAC before joining. The full frame is kept
+the highest source resolution, BT.709 SDR at 30 fps with stereo AAC before joining. Mixed resolutions use the largest canvas and upscale smaller clips, never downscaling the largest. The full frame is kept
 with padding where needed; HDR is tone mapped. The explicit repeated `--input` form
 joins only the files named, in that order. Review the result, especially clip
 transitions, audio sync, and color, before using it as a final edit.

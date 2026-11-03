@@ -53,8 +53,21 @@ def media_info(path):
     if not video: raise ValueError("No video stream: "+str(path))
     duration=float(data.get("format",{}).get("duration") or 0)
     width=int(video.get("width") or 0); height=int(video.get("height") or 0)
+    rotation=0
+    for side in video.get("side_data_list",[]):
+        if "rotation" in side: rotation=int(side["rotation"])
+    if abs(rotation)%180==90: width,height=height,width
     if duration<=0 or width<=0 or height<=0: raise ValueError("Invalid media metadata: "+str(path))
     return duration,width,height
+
+
+def max_resolution(dimensions):
+    best=None
+    for width,height in dimensions.values():
+        key=(width*height,1 if width>=height else 0)
+        if best is None or key>best[0]: best=(key,width,height)
+    if best is None: raise ValueError("No source dimensions")
+    return best[1],best[2]
 
 def filter_source_map(sources,dimensions,target,include_mismatched=False,allow=None):
     if target in (None,"","any"): return dict(sources),[]
@@ -197,8 +210,8 @@ def build(args):
             sources[path.name]=clip_duration
             dimensions[path.name]=(width,height)
     if not sources: raise ValueError("No supported videos")
-    width,height=parse_size(args.size) if args.size else (1920,1080)
-    target_orientation=args.orientation or (orientation(width,height) if args.size else "any")
+    width,height=parse_size(args.size) if args.size and args.size.lower() not in {"auto","max","source"} else max_resolution(dimensions)
+    target_orientation=args.orientation or ("any" if not args.size else orientation(width,height))
     sources,skipped=filter_source_map(sources,dimensions,target_orientation,
                                       args.include_mismatched,args.allow)
     if not sources:
@@ -319,7 +332,7 @@ def main():
                    help="subject signal for --fit reframe: AI boxes, saliency, or center")
     p.add_argument("--subjects",type=Path,
                    help="JSON subject boxes for --fit reframe (source/start/end/box)")
-    p.add_argument("--size",help="target size WxH; default 1920x1080")
+    p.add_argument("--size",help="target size: auto/max or WxH; default highest source resolution")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):
         if not shutil.which(binary): p.error(binary+" missing from PATH")

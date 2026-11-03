@@ -199,7 +199,7 @@ It detects exact and near duplicates, quarantines extras under `.content-studio/
 
 On the first run it also migrates a legacy draft: root clips move to `original/`, `processed-clips/` moves under `.content-studio/`, `video.mp4` becomes `<draft>-final.mp4`, `video/` and `rough-cut/` move under `.content-studio/`, `audio-mastered/` becomes `.content-studio/audio/`, and a legacy preprocess join becomes `<draft>-preprocessed.mp4`. Existing files are never overwritten.
 
-Outputs live in `.content-studio/processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready 1920x1080 16:9 SDR `final.mp4` with all detected blur spans removed. Folder and draft final runs also join the exports into `<draft>-preprocessed.mp4`. The default fit centers a mismatched clip over a blurred copy of itself; use `--fit pad` for black pillars or `--fit crop` to fill the frame by cropping.
+Outputs live in `.content-studio/processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready SDR `final.mp4` at the highest source resolution, with all detected blur spans removed and 30 fps. A 4K dataset stays 4K; mixed 1080p and 4K uses a 4K canvas and upscales the 1080p clips, never downscaling the 4K source. Use `--size WxH` to override. Folder and draft final runs also join the exports into `<draft>-preprocessed.mp4`. The default fit centers a mismatched clip over a blurred copy of itself; use `--fit pad` for black pillars or `--fit crop` to fill the frame by cropping.
 
 Review gates:
 
@@ -280,7 +280,7 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py `
 
 For a standalone draft folder such as the test folder, use `edit join --folder <path>`.
 
-Joined masters are written to `<draft>-final.mp4`, with the edit timeline under `.content-studio/rough-cut/`. They are 1920x1080 BT.709 SDR at 30 fps with stereo AAC; the full frame is kept and padded, HDR is tone mapped. Dolby Vision cuts require `--sdr` because the RPU cannot survive a frame-accurate re-encode.
+Joined masters are written to `<draft>-final.mp4`, with the edit timeline under `.content-studio/rough-cut/`. They use the highest source resolution, BT.709 SDR, 30 fps, and stereo AAC; mixed resolutions use the largest canvas and upscale smaller clips without downscaling the largest. The full frame is kept and padded; HDR is tone mapped. Dolby Vision cuts require `--sdr` because the RPU cannot survive a frame-accurate re-encode.
 
 Vlog drafts do not generate transcripts or captions. Sample 4–6 frames across the master, read visible signs, locations, subjects, and activities, and write a specific title and description from that evidence plus any supplied voiceover. Never use placeholders such as "test edit". If the footage is ambiguous, ask the user. See [the metadata workflow](content-studio/skills/content-studio-videoedit/references/metadata.md).
 

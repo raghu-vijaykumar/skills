@@ -477,6 +477,8 @@ def main() -> int:
                    help="render final.mp4 (16:9 SDR) with enhanced voice and detected blur spans removed")
     p.add_argument("--fit", choices=["pad", "blur", "crop"], default="blur",
                    help="how --final fits mismatched aspect ratios: blurred background (default), pad, or crop")
+    p.add_argument("--size",
+                   help="final target: auto/max or WxH (default: highest source resolution)")
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
     p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
@@ -501,7 +503,8 @@ def main() -> int:
                    help="keep clips that do not match --orientation")
     p.add_argument("--allow", action="append",
                    help="include a specific mismatched filename; repeatable")
-    p.add_argument("--out", help="output file (join defaults to draft/video/with-audio.mp4)")
+    p.add_argument("--out", help="output file (join defaults to draft/<id>-final.mp4)")
+    p.add_argument("--size", help="join target: auto/max or WxH (default: highest source resolution)")
 
     p = sub.add_parser("code", parents=[shared],
                        help="git-track the sources and snapshot them to Drive")

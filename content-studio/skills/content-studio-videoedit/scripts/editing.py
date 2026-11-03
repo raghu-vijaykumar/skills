@@ -45,6 +45,44 @@ def probe(path: Path) -> tuple[float, dict, bool]:
     return duration, video, has_audio
 
 
+def display_dimensions(video: dict) -> tuple[int, int]:
+    width = int(video.get("width") or 0)
+    height = int(video.get("height") or 0)
+    rotation = 0
+    for side in video.get("side_data_list", []):
+        if "rotation" in side:
+            rotation = int(side["rotation"])
+    if abs(rotation) % 180 == 90:
+        width, height = height, width
+    return max(2, width - width % 2), max(2, height - height % 2)
+
+
+def max_target_size(sources: list[Path]) -> tuple[int, int]:
+    """Pick the largest source resolution by pixel area; never choose smaller."""
+    best = None
+    for source in sources:
+        _, video, _ = probe(source)
+        width, height = display_dimensions(video)
+        key = (width * height, 1 if width >= height else 0)
+        if best is None or key > best[0]:
+            best = (key, width, height)
+    if best is None:
+        raise EditError("no sources for target resolution")
+    return best[1], best[2]
+
+
+def parse_target_size(value: str | None, sources: list[Path]) -> tuple[int, int]:
+    if not value or str(value).strip().lower() in {"auto", "max", "source"}:
+        return max_target_size(sources)
+    match = re.fullmatch(r"(\d+)x(\d+)", str(value).strip().lower())
+    if not match:
+        raise EditError("size must be auto, max, or WxH")
+    width, height = int(match.group(1)), int(match.group(2))
+    if width <= 0 or height <= 0 or width % 2 or height % 2:
+        raise EditError("size must be positive even dimensions")
+    return width, height
+
+
 def timestamp(value: str) -> float:
     if not re.fullmatch(r"\d+(?::\d{1,2}){0,2}(?:\.\d+)?", value or ""):
         raise EditError(f"invalid timestamp: {value!r}")
@@ -367,16 +405,18 @@ def join(sources: list[tuple[Path, Path | None]], target: Path, log,
         os.replace(output, target)
 
 
-def join_normalized(sources: list[Path], target: Path, scratch: Path | None = None) -> None:
-    """Concatenate already-normalized 1920x1080 SDR clips without re-encoding."""
+def join_normalized(sources: list[Path], target: Path, scratch: Path | None = None,
+                    size: tuple[int, int] = (1920, 1080)) -> None:
+    """Concatenate already-normalized SDR clips without re-encoding."""
     if not sources:
         raise EditError("no clips to join")
     if target.suffix.lower() != ".mp4":
         raise EditError("joined output must use an .mp4 filename")
+    width, height = size
     for source in sources:
         _, video, audio = probe(source)
-        if not audio or video.get("width") != 1920 or video.get("height") != 1080:
-            raise EditError(f"clip is not a normalized 1920x1080 export: {source.name}")
+        if not audio or video.get("width") != width or video.get("height") != height:
+            raise EditError(f"clip is not a normalized {width}x{height} export: {source.name}")
     target.parent.mkdir(parents=True, exist_ok=True)
     scratch_root = scratch or target.parent
     scratch_root.mkdir(parents=True, exist_ok=True)
@@ -392,7 +432,7 @@ def join_normalized(sources: list[Path], target: Path, scratch: Path | None = No
                  "-movflags", "+faststart", str(output)])
         expected = sum(probe(p)[0] for p in sources)
         actual, video, audio = probe(output)
-        if not audio or video.get("width") != 1920 or video.get("height") != 1080 \
+        if not audio or video.get("width") != width or video.get("height") != height \
                 or abs(actual - expected) > max(0.5, len(sources) * 0.08):
             raise EditError(f"joined export failed validation: {actual:.3f}s vs {expected:.3f}s")
         os.replace(output, target)
@@ -551,13 +591,16 @@ def run(cfg: dict, args, log) -> int:
                 getattr(args, "allow", None), log)
             if not sources:
                 raise EditError("no clips match the requested orientation")
+            size = parse_target_size(getattr(args, "size", None),
+                                     [source for source, _ in sources])
             join(sources, target, log, fit=getattr(args, "fit", "blur"),
+                 size=size,
                  scratch=draftlayout.scratch_dir(draft_dir) if draft_dir else None)
             if draft_dir is not None:
                 timeline = draft_join_timeline(draft_dir, sources, target)
                 log(f"edit join: timeline -> {timeline}")
-            log(f"edit join: {len(sources)} clips -> {target} (1920x1080 SDR, 30 fps, "
-                f"fit {getattr(args, 'fit', 'blur')})")
+            log(f"edit join: {len(sources)} clips -> {target} "
+                f"({size[0]}x{size[1]} SDR, 30 fps, fit {getattr(args, 'fit', 'blur')})")
         return 0
     except (EditError, ordering.OrderError, OSError, ValueError) as exc:
         log(f"edit: {exc}")

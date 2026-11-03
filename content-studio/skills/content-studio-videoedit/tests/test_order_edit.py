@@ -283,7 +283,7 @@ class DedupeTest(unittest.TestCase):
             args = SimpleNamespace(channel=None, draft=None, folder=str(folder),
                                    path=None, clip=None, out=None, utc_offset="+00:00",
                                    final=True, apply_review=False, dv_proof=False,
-                                   dv_approved=False)
+                                   dv_approved=False, size="1920x1080")
             finals = [folder / ".content-studio" / "processed-clips" / "IMG_1001.MOV" / "final.mp4",
                       folder / ".content-studio" / "processed-clips" / "IMG_1002.MOV" / "final.mp4"]
             joined = []
@@ -377,6 +377,17 @@ class EditingTest(unittest.TestCase):
             self.assertEqual((video["width"], video["height"]), (1920, 1080))
             self.assertTrue(audio)
 
+    def test_normalized_segment_can_render_a_larger_canvas(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "source.mp4"
+            self.make_sized_video(source, 320, 180, "blue")
+            output = root / "large.mp4"
+            editing.normalized_segment(source, None, output, size=(640, 360))
+            _, video, audio = editing.probe(output)
+            self.assertEqual((video["width"], video["height"]), (640, 360))
+            self.assertTrue(audio)
+
     def test_final_clip_reuses_voice_and_cuts_review_spans(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)
@@ -397,11 +408,12 @@ class EditingTest(unittest.TestCase):
             seen = {}
 
             def fake_render(source, sidecar, target, ranges=None, fit="blur",
-                            stabilize=False):
+                            stabilize=False, size=(1920, 1080)):
                 seen["sidecar"] = sidecar
                 seen["ranges"] = ranges
                 seen["fit"] = fit
                 seen["stabilize"] = stabilize
+                seen["size"] = size
                 target.write_bytes(b"final")
 
             with patch.object(editing, "normalized_segment", side_effect=fake_render), \
@@ -422,6 +434,17 @@ class EditingTest(unittest.TestCase):
             self.assertEqual(final_report["final_output"], "final.mp4")
             self.assertEqual(final_report["final_cuts"], [[0.2, 0.4]])
             self.assertGreater(final_report["final_removed_seconds"], 0)
+
+    def test_max_target_size_selects_the_largest_source(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            small = root / "small.mp4"
+            large = root / "large.mp4"
+            self.make_sized_video(small, 320, 180, "blue")
+            self.make_sized_video(large, 640, 360, "green")
+            self.assertEqual(editing.max_target_size([small, large]), (640, 360))
+            self.assertEqual(editing.parse_target_size("auto", [small, large]), (640, 360))
+            self.assertEqual(editing.parse_target_size("1920x1080", [small]), (1920, 1080))
 
     def test_stabilized_normalized_segment_renders_16_9(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

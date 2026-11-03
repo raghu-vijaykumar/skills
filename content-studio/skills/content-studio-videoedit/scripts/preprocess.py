@@ -622,7 +622,8 @@ def write_report(folder: Path, report: dict) -> None:
     (folder / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
-def final_clip(source: Path, output_root: Path, args, log) -> Path:
+def final_clip(source: Path, output_root: Path, args, log,
+               size: tuple[int, int] = (1920, 1080)) -> Path:
     """Render one publish-ready 16:9 SDR clip with voice enhancement and blur cuts."""
     folder = ordering.analysis_folder(output_root, source.name)
     folder.mkdir(parents=True, exist_ok=True)
@@ -675,8 +676,8 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
     if (not getattr(args, "force", False) and same_source and target.is_file()
             and report.get("final_cuts") == stored_cuts):
         existing_actual, existing_video, existing_audio = editing.probe(target)
-        if (existing_audio and existing_video.get("width") == 1920
-                and existing_video.get("height") == 1080):
+        if (existing_audio and existing_video.get("width") == size[0]
+                and existing_video.get("height") == size[1]):
             log(f"{source.name}: final video already current -> {target.name}")
             return target
     with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:
@@ -685,7 +686,7 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
         # so the final file plays everywhere without a DV proof step.
         editing.normalized_segment(source, voice, temp, ranges=kept,
                                    fit=getattr(args, "fit", "blur"),
-                                   stabilize=True)
+                                   size=size, stabilize=True)
         actual, rendered, out_audio = editing.probe(temp)
         if not out_audio or rendered.get("width") != 1920 or rendered.get("height") != 1080:
             raise ProcessingError(f"final export failed validation: {source.name}")
@@ -696,7 +697,7 @@ def final_clip(source: Path, output_root: Path, args, log) -> Path:
         "source": str(source), "source_bytes": source.stat().st_size,
         "status": "final_ready",
         "final_output": target.name,
-        "final_format": "1920x1080 16:9 BT.709 SDR 30 fps",
+        "final_format": f"{size[0]}x{size[1]} BT.709 SDR 30 fps",
         "final_duration_seconds": round(actual, 3),
         "final_removed_seconds": round(max(0.0, duration - kept_seconds), 3),
         "final_cuts": stored_cuts,
@@ -895,12 +896,19 @@ def run(cfg: dict, args, log) -> int:
         log(f"preprocess: {exc}")
         return 1
     output_root.mkdir(parents=True, exist_ok=True)
+    target_size = None
+    if final:
+        try:
+            target_size = editing.parse_target_size(getattr(args, "size", None), sources)
+        except (editing.EditError, OSError, ValueError) as exc:
+            log(f"preprocess: {exc}")
+            return 1
     failed = 0
     finals = []
     for source in sources:
         try:
             if final:
-                finals.append(final_clip(source, output_root, args, log))
+                finals.append(final_clip(source, output_root, args, log, target_size))
             else:
                 process_clip(source, output_root, args, log)
         except (ProcessingError, ordering.OrderError, OSError, ValueError) as exc:
@@ -912,7 +920,8 @@ def run(cfg: dict, args, log) -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.unlink(missing_ok=True)
             editing.join_normalized(finals, target,
-                                    scratch=draftlayout.scratch_dir(draft))
+                                    scratch=draftlayout.scratch_dir(draft),
+                                    size=target_size)
             try:
                 timeline = editing.draft_join_timeline(
                     draft, [(path, None) for path in finals], target)
