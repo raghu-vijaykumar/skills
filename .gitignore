@@ -9,3 +9,6 @@ content-studio/skills/content-studio-videogen/dist/
 videogen-test-*/
 tmp/
 content-studio/assets/music/local/
+
+content-studio/skills/content-studio-videoedit/tests/tmp*/
+
