@@ -286,6 +286,26 @@ Vlog drafts do not generate transcripts or captions. Sample 4–6 frames across 
 
 Capture 4-6 representative frames and the spoken or voiceover context. Use an image-generation model to create a **16:9 landscape AI thumbnail** that reflects the actual subject, setting, and hook. Do not use a raw frame with overlaid text as the final thumbnail unless the user explicitly asks. Show the generated image and obtain approval before writing `thumbnail.png`. The full prompt and requirements are in [the AI thumbnail workflow](content-studio/skills/content-studio-videoedit/references/thumbnail.md).
 
+### 5b. Diagnose and enhance video quality (optional)
+
+Run a diagnosis-first pass before committing to color or reflection changes:
+
+```powershell
+node <bundle>/scripts/cli.mjs enhance analyze --folder <draft>
+```
+
+It writes `.content-studio/enhancement/<clip>/analysis/report.json`, evidence frames, `manifests/enhancement.yaml`, and `reports/quality.html`. Every issue independently becomes `SKIP`, `FIX`, `REVIEW`, or `UNSUPPORTED`. Clean footage is not processed. Strong reflections are never auto-removed.
+
+Render only approved color corrections:
+
+```powershell
+node <bundle>/scripts/cli.mjs enhance render `
+  --manifest <draft>/.content-studio/enhancement/<clip>/manifests/enhancement.yaml `
+  --output <draft>/<name>-enhanced.mp4
+```
+
+See [the enhancement workflow](content-studio/skills/content-studio-videoedit/references/enhancement.md) for the manifest, validation limits, caching, and reflection-backend limitations.
+
 ### 6. Choose the music
 
 `content-studio-music` builds a shortlist from the local catalog and records an approved selection:
@@ -393,6 +413,7 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | `.content-studio/processed-clips/` | Per-clip analysis, enhanced voice, cuts, `final.mp4` |
 | `.content-studio/analysis/duplicates/` | Quarantined duplicates and review |
 | `.content-studio/rough-cut/` | Rough cut, timelines, review media |
+| `.content-studio/enhancement/` | Quality analysis, evidence, manifests, previews |
 | `<draft>-rough-cut.mp4` | Rough-cut video |
 | `<draft>-preprocessed.mp4` | Full preprocessed video |
 | `<draft>-final.mp4` | Reviewed full-length master |

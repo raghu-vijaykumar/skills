@@ -513,7 +513,14 @@ def main() -> int:
     p.add_argument("--keep", type=int, default=5)
     p.add_argument("--dry-run", action="store_true")
 
+    p = sub.add_parser("enhance",
+                       help="diagnose and selectively correct video quality")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
+
     args = parser.parse_args()
+    if args.command == "enhance":
+        import enhance
+        return enhance.main(args.rest)
     if args.command == "preprocess" and getattr(args, "folder", None):
         # An arbitrary folder is self-contained; no channel workspace is needed.
         folder = Path(args.folder).expanduser().resolve()
