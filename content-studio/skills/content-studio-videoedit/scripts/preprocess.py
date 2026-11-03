@@ -676,8 +676,8 @@ def final_clip(source: Path, output_root: Path, args, log,
     if (not getattr(args, "force", False) and same_source and target.is_file()
             and report.get("final_cuts") == stored_cuts):
         existing_actual, existing_video, existing_audio = editing.probe(target)
-        if (existing_audio and existing_video.get("width") == size[0]
-                and existing_video.get("height") == size[1]):
+        if (existing_audio and existing_video.get("width") >= size[0]
+                and existing_video.get("height") >= size[1]):
             log(f"{source.name}: final video already current -> {target.name}")
             return target
     with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:

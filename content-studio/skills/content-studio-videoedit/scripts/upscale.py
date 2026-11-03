@@ -122,7 +122,8 @@ def run_realesrgan(executable: Path, frames: Path, upscaled: Path,
 
 
 def reassemble(upscaled: Path, source: Path, output: Path,
-               start: float, duration: float, fps: str, has_audio: bool) -> None:
+               start: float, duration: float, fps: str, has_audio: bool,
+               size: tuple[int, int] | None = None) -> None:
     cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
            "-framerate", fps, "-i", str(upscaled / "%06d.png")]
     if start > 0:
@@ -130,6 +131,8 @@ def reassemble(upscaled: Path, source: Path, output: Path,
     if duration > 0:
         cmd += ["-t", f"{duration:.3f}"]
     cmd += ["-i", str(source)]
+    if size:
+        cmd += ["-vf", f"scale={size[0]}:{size[1]}:flags=lanczos"]
     if has_audio:
         cmd += ["-map", "0:v:0", "-map", "1:a:0", "-c:a", "copy"]
     else:
@@ -160,6 +163,92 @@ def compare_frame(source: Path, output: Path, source_at: float, output_at: float
     canvas.save(target, quality=90)
 
 
+def parse_target(value: str | None) -> tuple[int, int] | None:
+    if not value:
+        return None
+    text = str(value).strip().lower()
+    presets = {"4k": (3840, 2160), "2160p": (3840, 2160),
+               "1080p": (1920, 1080), "1440p": (2560, 1440),
+               "720p": (1280, 720)}
+    if text in presets:
+        return presets[text]
+    match = __import__("re").fullmatch(r"(\d+)x(\d+)", text)
+    if not match:
+        raise UpscaleError("target must be 4k, 2160p, 1080p, or WxH")
+    width, height = int(match.group(1)), int(match.group(2))
+    if width <= 0 or height <= 0 or width % 2 or height % 2:
+        raise UpscaleError("target must be positive even dimensions")
+    return width, height
+
+
+def upscale_draft(args) -> dict:
+    draft = Path(args.draft).expanduser().resolve()
+    target = parse_target(args.target or "4k")
+    if target is None:
+        raise UpscaleError("target is required")
+    processed = draft / ".content-studio" / "processed-clips"
+    if not processed.is_dir():
+        raise UpscaleError(f"processed clips not found: {processed}")
+    files = sorted(processed.glob("*/final.mp4"))
+    if args.limit:
+        files = files[:max(1, int(args.limit))]
+    target_width, target_height = target
+    results = []
+    for source in files:
+        info = probe(source)
+        source_orientation = "portrait" if info["height"] > info["width"] else "landscape"
+        target_orientation = "portrait" if target_height > target_width else "landscape"
+        if source_orientation != target_orientation:
+            results.append({"source": str(source), "status": "orientation_mismatch",
+                            "size": [info["width"], info["height"]],
+                            "target": list(target)})
+            continue
+        if info["width"] >= target_width and info["height"] >= target_height:
+            results.append({"source": str(source), "status": "already_at_target",
+                            "size": [info["width"], info["height"]]})
+            continue
+        factor = max(2, int(np.ceil(max(target_width / info["width"],
+                                       target_height / info["height"]))))
+        factor = min(4, factor)
+        output = source.with_name("final-4k.mp4")
+        if args.dry_run:
+            results.append({"source": str(source), "status": "would_upscale",
+                            "factor": factor, "size": [info["width"], info["height"]],
+                            "target": list(target)})
+            continue
+        manifest = upscale(argparse.Namespace(
+            input=source, output=output, scale=factor, backend=args.backend,
+            realesrgan=args.realesrgan, model=args.model, tile=args.tile,
+            start=None, duration=None, work=source.parent / "upscale-work",
+            force=args.force, target=args.target))
+        backup = source.with_name("final-pre-upscale.mp4")
+        if not backup.exists():
+            shutil.copy2(source, backup)
+        os.replace(output, source)
+        report_path = source.parent / "report.json"
+        if report_path.is_file():
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            report["upscale"] = manifest
+            report["final_format"] = f"{manifest['output_size'][0]}x{manifest['output_size'][1]} SDR 30 fps"
+            report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        results.append({"source": str(source), "status": "upscaled",
+                        "factor": factor, "output": manifest})
+    summary = {
+        "schema_version": 1,
+        "generated_at": now(),
+        "draft": str(draft),
+        "target": list(target),
+        "clips": results,
+        "upscaled": sum(1 for item in results if item["status"] == "upscaled"),
+        "skipped": sum(1 for item in results if item["status"] == "already_at_target"),
+    }
+    manifest_dir = draft / ".content-studio" / "upscale"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    (manifest_dir / "upscale-batch.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return summary
+
+
 def upscale(args) -> dict:
     source = Path(args.input).expanduser().resolve()
     if not source.is_file() or source.suffix.lower() not in VIDEO_EXTENSIONS:
@@ -172,12 +261,16 @@ def upscale(args) -> dict:
     if start < 0 or duration <= 0 or start + duration > info["duration"] + 0.1:
         raise UpscaleError("start/duration outside the source")
     scale = max(1, int(args.scale))
-    width = int(info["width"]) * scale
-    height = int(info["height"]) * scale
-    if width % 2:
-        width += 1
-    if height % 2:
-        height += 1
+    target = parse_target(getattr(args, "target", None))
+    if target:
+        width, height = target
+    else:
+        width = int(info["width"]) * scale
+        height = int(info["height"]) * scale
+        if width % 2:
+            width += 1
+        if height % 2:
+            height += 1
     output = Path(args.output).expanduser().resolve()
     if output.resolve() == source.resolve():
         raise UpscaleError("output must differ from the source")
@@ -201,7 +294,7 @@ def upscale(args) -> dict:
         if after != before:
             raise UpscaleError(f"upscaler produced {after} frames; expected {before}")
         reassemble(upscaled, source, output, start, duration, info["fps"],
-                   info["has_audio"])
+                   info["has_audio"], size=target)
     else:
         run_lanczos(source, output, (width, height), start, duration,
                     info["has_audio"], info["fps"])
@@ -238,8 +331,14 @@ def upscale(args) -> dict:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--input", type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--draft", type=Path,
+                        help="batch-upscale a vlog draft's processed final.mp4 clips")
+    parser.add_argument("--target", help="target: 4k, 2160p, 1080p, or WxH")
+    parser.add_argument("--limit", type=int, help="batch: process only the first N clips")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="batch: report what would be upscaled")
     parser.add_argument("--scale", type=int, choices=[2, 3, 4], default=2,
                         help="upscale factor; 2 turns 1080p into 4K")
     parser.add_argument("--backend", choices=["realesrgan", "lanczos"],
@@ -259,7 +358,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        manifest = upscale(args)
+        if args.draft:
+            manifest = upscale_draft(args)
+        else:
+            if not args.input or not args.output:
+                raise UpscaleError("use --input and --output, or --draft")
+            manifest = upscale(args)
         print(json.dumps(manifest, indent=2))
         return 0
     except (UpscaleError, OSError, ValueError) as exc:

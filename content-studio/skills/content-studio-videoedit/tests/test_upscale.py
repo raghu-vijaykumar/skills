@@ -38,6 +38,21 @@ class UpscaleTest(unittest.TestCase):
             self.assertTrue((target.parent / ".content-studio" / "upscale" /
                              source.stem / "before-after.jpg").is_file())
 
+    def test_draft_dry_run_plans_4k_upscale(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            draft = Path(scratch) / "vlog"
+            clip = draft / ".content-studio" / "processed-clips" / "clip"
+            clip.mkdir(parents=True)
+            source = clip / "final.mp4"
+            self.make_video(source)
+            args = upscale.build_parser().parse_args([
+                "--draft", str(draft), "--target", "4k", "--dry-run"])
+            summary = upscale.upscale_draft(args)
+            self.assertEqual(summary["clips"][0]["status"], "would_upscale")
+            self.assertEqual(summary["clips"][0]["target"], [3840, 2160])
+            self.assertTrue((draft / ".content-studio" / "upscale" /
+                             "upscale-batch.json").is_file())
+
     def test_upscale_rejects_same_output_path(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

@@ -69,6 +69,8 @@ ITEMS = [
      "rclone check evidence confirms the durable media copy."),
     ("C22", "close", "Draft handoff or close recorded", "post_publish", "all",
      "The draft is moved or closed under channel policy and the source remains retained."),
+    ("C23", "upscale", "Vlog clips upscaled to 4K", "pre_publish", "edited",
+     "Clips below 4K were AI-upscaled or explicitly accepted at lower resolution; backend, model, scale, and before/after evidence are recorded."),
 ]
 
 
@@ -144,7 +146,14 @@ def init_checklist(draft: Path, channel: str, kind: str, force: bool = False) ->
     mark_main_lifecycle(draft, kind)
     path = checklist_path(draft)
     if path.exists() and not force:
-        return load_checklist(draft), False
+        data = load_checklist(draft)
+        existing = {item.get("id") for item in data.get("items", [])}
+        missing = [item for item in item_defaults(kind)
+                   if item["id"] not in existing]
+        if missing:
+            data["items"].extend(missing)
+            save_checklist(draft, data)
+        return data, False
     data = {
         "schema_version": 1,
         "channel": channel,

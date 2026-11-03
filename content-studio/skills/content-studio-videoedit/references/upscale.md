@@ -14,6 +14,42 @@ fine patterns.
 Do not upscale to hide focus misses, motion blur, noise, or a bad color cast.
 Run `enhance analyze` first and keep those corrections separate.
 
+## Vlog 4K stage
+
+For vlog drafts, upscale the cleaned `processed-clips/*/final.mp4` files before
+final assembly:
+
+```powershell
+content-studio upscale --draft <draft> --target 4k
+```
+
+- Clips already at 4K are skipped.
+- Lower-resolution clip files are AI-upscaled and replaced; the previous file is
+  kept as `final-pre-upscale.mp4`.
+- `upscale-batch.json` records every decision.
+- `--dry-run` lists what would change.
+- `--limit 1` tests one clip first.
+
+Lifecycle order for a 4K vlog:
+
+```text
+preprocess
+  → AutoCut rough cut + approval
+  → upscale low-resolution processed clips to 4K
+  → final join at 4K
+  → color analysis and correction on the 4K master
+  → music
+  → package approval
+```
+
+Color correction deliberately happens **after** upscaling. Upscaling can change
+noise and edge character, so correcting color before upscaling would invalidate
+the review evidence.
+
+The batch command refuses portrait/landscape mismatches rather than distorting
+them. Use a matching `--target` or keep that clip at its native resolution and
+mark C23 not applicable with a reason.
+
 ## Command
 
 ```powershell

@@ -48,6 +48,7 @@ closed.
 | C20 | post-publish | all | Public YouTube backup completed | Video, exact metadata, thumbnail, and publish receipt backed up |
 | C21 | post-publish | all | Drive sync verified | `rclone check` evidence confirms the durable media copy |
 | C22 | post-publish | all | Draft handoff or close recorded | Draft moved/closed under channel policy; source retained |
+| C23 | pre-publish | edited | Vlog clips upscaled to 4K | Clips below 4K were AI-upscaled or explicitly accepted at lower resolution; backend, model, scale, and evidence recorded |
 
 Do not renumber existing IDs. Add new items at the end with the next ID.
 
@@ -97,6 +98,8 @@ without a reason.
   reason `Remotion production has no camera footage`.
 - For an edited draft, C09 and C10 start `not_applicable` because the vlog
   workflow does not generate transcripts or captions.
+- C23 starts `pending` for edited drafts; mark it not applicable when the
+  channel explicitly does not need a 4K vlog delivery.
 - Everything else starts `pending` and must be explicitly resolved.
 
 ## One-off use

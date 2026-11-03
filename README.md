@@ -46,7 +46,9 @@ flowchart TD
     BLUR{"Blur and Dolby Vision reviewed?"}:::gate
     CUT["content-studio-autocut rough cut<br/>.content-studio/rough-cut/ · C05"]:::edited
     CUTREVIEW{"Rough cut, frames, and audio approved?"}:::gate
-    EDIT["content.py edit join or cuts<br/>draft-final.mp4 · C07 · C08"]:::edited
+    UPSCALE["upscale --draft --target 4k<br/>4K clips · C23"]:::edited
+    EDIT["content.py edit join or cuts<br/>draft-final.mp4 · C07"]:::edited
+    COLOR["enhance analyze + render<br/>color after upscale · C08"]:::edited
     AUDIO["content-studio-audio<br/>draft/audio/ · C06"]:::optional
   end
 
@@ -95,11 +97,14 @@ flowchart TD
   BLUR -->|approved| CUT
   CUT --> CUTREVIEW
   CUTREVIEW -->|request changes| CUT
-  CUTREVIEW -->|approved or deferred| EDIT
-  BLUR -.->|no rough cut| EDIT
+  CUTREVIEW -->|approved or deferred| UPSCALE
+  BLUR -.->|no rough cut| UPSCALE
+  UPSCALE --> EDIT
+  EDIT --> COLOR
   AUDIO -.-> EDIT
 
   RFULL --> ASSEMBLE
+  COLOR --> ASSEMBLE
   MUSIC --> ASSEMBLE
   THUMB --> ASSEMBLE
   COPY --> ASSEMBLE
@@ -286,9 +291,19 @@ Vlog drafts do not generate transcripts or captions. Sample 4–6 frames across 
 
 Capture 4-6 representative frames and the spoken or voiceover context. Use an image-generation model to create a **16:9 landscape AI thumbnail** that reflects the actual subject, setting, and hook. Do not use a raw frame with overlaid text as the final thumbnail unless the user explicitly asks. Show the generated image and obtain approval before writing `thumbnail.png`. The full prompt and requirements are in [the AI thumbnail workflow](content-studio/skills/content-studio-videoedit/references/thumbnail.md).
 
-### 5b. Diagnose and enhance video quality (optional)
+### 5b. Upscale vlog clips to 4K (optional)
 
-Run a diagnosis-first pass before committing to color or reflection changes:
+Upscaling is separate from color correction. It reconstructs resolution; it does not fix exposure, white balance, or motion blur. For a 4K vlog, run this before final assembly, then run color correction:
+
+```powershell
+node <bundle>/scripts/cli.mjs upscale --draft <draft> --target 4k
+```
+
+The batch command skips clips already at 4K, records `upscale-batch.json`, and keeps the previous clip as `final-pre-upscale.mp4`. Use `--dry-run` or `--limit 1` first. See [the upscale workflow](content-studio/skills/content-studio-videoedit/references/upscale.md).
+
+### 5c. Diagnose and enhance color after upscaling (optional)
+
+Run the diagnosis-first pass on the upscaled clips or the 4K master:
 
 ```powershell
 node <bundle>/scripts/cli.mjs enhance analyze --folder <draft>
@@ -305,18 +320,6 @@ node <bundle>/scripts/cli.mjs enhance render `
 ```
 
 See [the enhancement workflow](content-studio/skills/content-studio-videoedit/references/enhancement.md) for the manifest, validation limits, caching, and reflection-backend limitations.
-
-### 5c. Upscale explicitly (optional)
-
-Upscaling is separate from color correction. It reconstructs resolution; it does not fix exposure, white balance, or motion blur.
-
-```powershell
-node <bundle>/scripts/cli.mjs upscale `
-  --input <clip> --output <clip-4k.mp4> `
-  --scale 2 --model realesr-animevideov3 --tile 256
-```
-
-Real-ESRGAN ncnn/Vulkan is used when installed; otherwise the command falls back to Lanczos. See [the upscale workflow](content-studio/skills/content-studio-videoedit/references/upscale.md).
 
 ### 6. Choose the music
 
