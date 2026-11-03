@@ -11,6 +11,21 @@ from pathlib import Path
 EXTS = {".mp4", ".mov", ".mkv", ".m4v", ".webm", ".avi"}
 FILTER = "highpass=f=80,afftdn=nf=-28,acompressor=threshold=0.12:ratio=2:attack=15:release=180"
 
+
+def build_filter(cleanup=False, deess=False, gate=False, arnndn_model=None):
+    parts = ["highpass=f=80"]
+    if arnndn_model:
+        escaped = str(Path(arnndn_model).expanduser().resolve()).replace("\\", "/").replace(":", "\\:")
+        parts.append(f"arnndn=m='{escaped}'")
+    else:
+        parts.append("afftdn=nf=-28")
+    parts.append("acompressor=threshold=0.12:ratio=2:attack=15:release=180")
+    if cleanup or deess:
+        parts.append("deesser")
+    if cleanup or gate:
+        parts.append("agate=threshold=0.03:ratio=2:attack=10:release=200")
+    return ",".join(parts)
+
 def run(cmd):
     p = subprocess.run(cmd, text=True, capture_output=True)
     if p.returncode:
@@ -38,7 +53,7 @@ def measure(path, filters):
         raise RuntimeError("No loudness measurement returned")
     return json.loads(matches[-1])
 
-def master(source, dest, force, audio_only=False):
+def master(source, dest, force, audio_only=False, filters=FILTER):
     streams = probe(source)
     if not any(s["codec_type"] == "audio" for s in streams):
         return {"source": str(source), "status": "skipped_no_audio"}
@@ -47,8 +62,8 @@ def master(source, dest, force, audio_only=False):
     if not force and ((wav.exists() and audio_only) or
                       (not audio_only and (wav.exists() or video.exists()))):
         return {"source": str(source), "status": "skipped_output_exists"}
-    m = measure(source, FILTER)
-    second = (f"{FILTER},loudnorm=I=-16:LRA=11:TP=-1.5:"
+    m = measure(source, filters)
+    second = (f"{filters},loudnorm=I=-16:LRA=11:TP=-1.5:"
               f"measured_I={m['input_i']}:measured_LRA={m['input_lra']}:"
               f"measured_TP={m['input_tp']}:measured_thresh={m['input_thresh']}:"
               f"offset={m['target_offset']}:linear=true")
@@ -82,6 +97,11 @@ def main():
     ap.add_argument("--folder", type=Path, required=True)
     ap.add_argument("--out", type=Path, help="output folder (default: draft root for WAV, or <folder>/audio-mastered)")
     ap.add_argument("--audio-only", action="store_true", help="write mastered WAV only; no mastered MP4 (always on for drafts)")
+    ap.add_argument("--cleanup", action="store_true",
+                    help="add de-esser and noise gate for vlog dialogue")
+    ap.add_argument("--deess", action="store_true", help="add de-essing")
+    ap.add_argument("--gate", action="store_true", help="add a gentle noise gate")
+    ap.add_argument("--arnndn-model", help="use RNNoise speech denoise model instead of afftdn")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     if not args.folder.is_dir():
@@ -110,6 +130,8 @@ def main():
     dest.mkdir(parents=True, exist_ok=True)
     manifest.parent.mkdir(parents=True, exist_ok=True)
     audio_only = args.audio_only or draft is not None
+    filters = build_filter(cleanup=args.cleanup, deess=args.deess, gate=args.gate,
+                           arnndn_model=args.arnndn_model)
     if draft is not None:
         candidates = [draft / f"{draft.name}-final.mp4", draft / "final-video.mp4",
                       draft / "video.mp4", draft / "video" / "with-audio.mp4"]
@@ -121,7 +143,8 @@ def main():
         if not source.is_file() or source.suffix.lower() not in EXTS:
             continue
         try:
-            result = master(source, dest, args.force, audio_only=audio_only)
+            result = master(source, dest, args.force, audio_only=audio_only,
+                            filters=filters)
             if draft is not None and result.get("status") == "ok":
                 wav_path = Path(result["audio"])
                 mp3 = draft / f"{draft.name}-audio-only.mp3"

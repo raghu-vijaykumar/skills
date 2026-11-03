@@ -71,6 +71,12 @@ async function main() {
     process.exitCode = result.status ?? 1;
     return;
   }
+  if (command === 'polish' || command === 'match' || command === 'quality') {
+    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', `${command}.py`);
+    const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
+    process.exitCode = result.status ?? 1;
+    return;
+  }
   if (command === 'benchmark') {
     const script = path.join(bundle, 'skills', 'content-studio-benchmark', 'scripts', 'benchmark.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
@@ -78,7 +84,7 @@ async function main() {
     return;
   }
   if (!command || command === '--help' || command === '-h' || flag('help') || command === 'help') {
-    console.log('Usage: content-studio <install-skills|enhance|upscale|benchmark|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
+    console.log('Usage: content-studio <install-skills|enhance|upscale|polish|match|quality|benchmark|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
     return;
   }
   if (command === 'install-skills') {

@@ -521,6 +521,12 @@ def main() -> int:
     p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("upscale", help="upscale video with Real-ESRGAN or Lanczos")
     p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("polish", help="ordered denoise, deflicker, lens, match, sharpen")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("match", help="shot-to-shot color balance matching")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("quality", help="SSIM, PSNR, and VMAF measurement")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
     if args.command == "enhance":
@@ -529,6 +535,15 @@ def main() -> int:
     if args.command == "upscale":
         import upscale
         return upscale.main(args.rest)
+    if args.command == "polish":
+        import polish
+        return polish.main(args.rest)
+    if args.command == "match":
+        import match
+        return match.main(args.rest)
+    if args.command == "quality":
+        import quality
+        return quality.main(args.rest)
     if args.command == "preprocess" and getattr(args, "folder", None):
         # An arbitrary folder is self-contained; no channel workspace is needed.
         folder = Path(args.folder).expanduser().resolve()
