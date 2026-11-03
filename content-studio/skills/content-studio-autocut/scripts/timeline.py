@@ -35,7 +35,7 @@ def validate(timeline, root):
     if not video: raise ValueError("No video clips")
     return video
 
-def initial_timeline(segments, folder, style="travel-vlog"):
+def initial_timeline(segments, folder, style="travel-vlog", width=1920, height=1080, fit="pad"):
     cursor=0.
     clips=[]
     for i,c in enumerate(segments):
@@ -45,7 +45,8 @@ def initial_timeline(segments, folder, style="travel-vlog"):
                       "reason":c.get("reason",""),"audio_gain_db":0})
         cursor+=length
     return {"schema":"content-studio.timeline.v1","revision":1,"style":style,
-            "source_root":str(folder.resolve()),"fps":30,"width":1920,"height":1080,
+            "source_root":str(folder.resolve()),"fps":30,"width":width,"height":height,
+            "fit":fit,
             "tracks":[{"id":"picture","kind":"video","clips":clips},
                       {"id":"music","kind":"audio","clips":[]},
                       {"id":"captions","kind":"caption","clips":[]}]}
@@ -90,16 +91,40 @@ def revise(timeline, instructions):
     t["revision"]+=1
     return t
 
+def fit_filter(label, width, height, fit, out):
+    if width<=0 or height<=0 or width%2 or height%2:
+        raise ValueError("target size must be positive even dimensions")
+    fit=str(fit or "pad").lower()
+    if fit=="pad":
+        return [f"{label}scale={width}:{height}:force_original_aspect_ratio=decrease:"
+                f"force_divisible_by=2,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
+                f"format=yuv420p{out}"]
+    if fit=="crop":
+        return [f"{label}scale={width}:{height}:force_original_aspect_ratio=increase:"
+                f"force_divisible_by=2,crop={width}:{height},format=yuv420p{out}"]
+    if fit=="blur":
+        return [
+            f"{label}split=2[bg][fg]",
+            f"[bg]scale={width}:{height}:force_original_aspect_ratio=increase:"
+            f"force_divisible_by=2,crop={width}:{height},gblur=sigma=20[bgblur]",
+            f"[fg]scale={width}:{height}:force_original_aspect_ratio=decrease:"
+            f"force_divisible_by=2[fgfit]",
+            f"[bgblur][fgfit]overlay=(W-w)/2:(H-h)/2,format=yuv420p{out}",
+        ]
+    raise ValueError("Unknown fit mode: "+fit)
+
 def render(timeline, output):
     root=Path(timeline["source_root"]).resolve()
     video=validate(timeline,root)
+    fit=timeline.get("fit","pad")
+    width=timeline["width"]; height=timeline["height"]
     cache=output/"render-cache"
     cache.mkdir(parents=True,exist_ok=True)
     parts=[]
     for clip in video:
         src=root/clip["source"]
         settings={k:clip[k] for k in ("source","source_in","source_out","audio_gain_db")}
-        settings.update(fps=timeline["fps"],width=timeline["width"],height=timeline["height"],
+        settings.update(fps=timeline["fps"],width=width,height=height,fit=fit,
                         mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
         digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
         segment=cache/(digest+".mp4")
@@ -109,8 +134,9 @@ def render(timeline, output):
             has_audio=bool(audio.stdout.strip())
             args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
             if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
-            args+=["-t",str(clip["duration"]),"-map","0:v:0","-map","0:a:0" if has_audio else "1:a:0",
-                   "-vf",f"scale={timeline['width']}:{timeline['height']}:force_original_aspect_ratio=decrease,pad={timeline['width']}:{timeline['height']}:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
+            graph=fit_filter("[0:v:0]",width,height,fit,"[v]")
+            args+=["-t",str(clip["duration"]),"-filter_complex",";".join(graph),
+                   "-map","[v]","-map","0:a:0" if has_audio else "1:a:0",
                    "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",
                    "-c:a","aac","-ar","48000","-ac","2","-af",f"volume={clip['audio_gain_db']}dB",
                    "-shortest",str(segment)]

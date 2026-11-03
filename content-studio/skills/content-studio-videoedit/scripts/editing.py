@@ -180,8 +180,69 @@ def draft_sources(draft: Path, log, utc_offset: str | None = None) -> list[tuple
     return result
 
 
+def orientation(width: int, height: int) -> str:
+    if width > height:
+        return "landscape"
+    if height > width:
+        return "portrait"
+    return "square"
+
+
+def filter_orientation(sources: list[tuple[Path, Path | None]], target: str,
+                       include_mismatched: bool = False, allow: list[str] | None = None,
+                       log=None) -> list[tuple[Path, Path | None]]:
+    if target in (None, "", "any"):
+        return sources
+    allowed = {name.lower() for name in (allow or [])}
+    kept = []
+    for source, sidecar in sources:
+        _, video, _ = probe(source)
+        value = orientation(int(video.get("width") or 0), int(video.get("height") or 0))
+        names = {source.name.lower(), source.parent.name.lower()}
+        if value == target or include_mismatched or names & allowed:
+            kept.append((source, sidecar))
+        elif log:
+            log(f"join: skipped {source.name} ({value}, target {target})")
+    return kept
+
+
+def parse_size(value: str) -> tuple[int, int]:
+    match = re.fullmatch(r"(\d+)x(\d+)", str(value).strip().lower())
+    if not match:
+        raise EditError("size must look like 1920x1080")
+    width, height = int(match.group(1)), int(match.group(2))
+    if width <= 0 or height <= 0 or width % 2 or height % 2:
+        raise EditError("size must be positive even dimensions")
+    return width, height
+
+
+def fit_graph(label: str, width: int, height: int, fit: str, out: str) -> list[str]:
+    if width <= 0 or height <= 0 or width % 2 or height % 2:
+        raise EditError("target size must be positive even dimensions")
+    fit = fit.lower()
+    if fit == "pad":
+        return [f"{label}scale={width}:{height}:force_original_aspect_ratio=decrease:"
+                f"force_divisible_by=2,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
+                f"fps=30,format=yuv420p{out}"]
+    if fit == "crop":
+        return [f"{label}scale={width}:{height}:force_original_aspect_ratio=increase:"
+                f"force_divisible_by=2,crop={width}:{height},fps=30,format=yuv420p{out}"]
+    if fit == "blur":
+        return [
+            f"{label}split=2[bg][fg]",
+            f"[bg]scale={width}:{height}:force_original_aspect_ratio=increase:"
+            f"force_divisible_by=2,crop={width}:{height},gblur=sigma=20[bgblur]",
+            f"[fg]scale={width}:{height}:force_original_aspect_ratio=decrease:"
+            f"force_divisible_by=2[fgfit]",
+            f"[bgblur][fgfit]overlay=(W-w)/2:(H-h)/2,fps=30,format=yuv420p{out}",
+        ]
+    raise EditError(f"unknown fit mode: {fit}")
+
+
 def normalized_segment(source: Path, sidecar: Path | None, target: Path,
-                       ranges: list[tuple[float, float]] | None = None) -> None:
+                       ranges: list[tuple[float, float]] | None = None,
+                       size: tuple[int, int] = (1920, 1080),
+                       fit: str = "pad") -> None:
     duration, video, has_audio = probe(source)
     hdr = video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
     if is_dolby(video) and not hdr:
@@ -192,9 +253,8 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path,
                    if not hdr and all(video.get(k) not in (None, "unknown") for k in
                                       ("color_primaries", "color_transfer", "color_space"))
                    else "")
-    video_filter = (tone_map(video) if hdr else sdr_convert) + (
-        "scale=1920:1080:force_original_aspect_ratio=decrease,"
-        "pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p")
+    color_filter = tone_map(video) if hdr else sdr_convert
+    width, height = size
     kept = ranges or [(0.0, duration)]
     if not kept or any(end <= start or start < 0 or end > duration + 0.05
                        for start, end in kept):
@@ -209,8 +269,10 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path,
     audio_index = 1 if sidecar or not has_audio else 0
     full_clip = len(kept) == 1 and kept[0][0] <= 0 and kept[0][1] >= duration - 1e-6
     if full_clip:
-        cmd += ["-map", "0:v:0", "-map", f"{audio_index}:a:0", "-vf", video_filter,
-                "-t", f"{duration:.6f}"]
+        graph = [f"[0:v:0]{color_filter.rstrip(',') if color_filter else 'null'}[src]"]
+        graph += fit_graph("[src]", width, height, fit, "[v]")
+        cmd += ["-filter_complex", ";".join(graph), "-map", "[v]",
+                "-map", f"{audio_index}:a:0", "-t", f"{duration:.6f}"]
     else:
         graph = []
         for index, (start, end) in enumerate(kept):
@@ -224,7 +286,8 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path,
             video_label, audio_label = "[vc]", "[ac]"
         else:
             video_label, audio_label = "[v0]", "[a0]"
-        graph.append(f"{video_label}{video_filter}[v]")
+        graph.append(f"{video_label}{color_filter.rstrip(',') if color_filter else 'null'}[src]")
+        graph += fit_graph("[src]", width, height, fit, "[v]")
         cmd += ["-filter_complex", ";".join(graph), "-map", "[v]", "-map", audio_label,
                 "-t", f"{expected:.6f}"]
     cmd += ["-c:v", "libx264", "-preset", "medium",
@@ -233,25 +296,28 @@ def normalized_segment(source: Path, sidecar: Path | None, target: Path,
             "-colorspace", "bt709", "-c:a", "aac", "-b:a", "192k",
             "-ar", "48000", "-ac", "2", "-movflags", "+faststart", str(target)]
     command(cmd)
-    actual, _, audio = probe(target)
-    if not audio or abs(actual - expected) > max(0.25, expected * 0.005):
-        raise EditError(f"normalized clip failed duration/audio validation: {source.name}")
+    actual, rendered, audio = probe(target)
+    if not audio or rendered.get("width") != width or rendered.get("height") != height \
+            or abs(actual - expected) > max(0.25, expected * 0.005):
+        raise EditError(f"normalized clip failed duration/audio/size validation: {source.name}")
 
 
-def join(sources: list[tuple[Path, Path | None]], target: Path, log) -> None:
+def join(sources: list[tuple[Path, Path | None]], target: Path, log,
+         fit: str = "pad", size: tuple[int, int] = (1920, 1080)) -> None:
     if not sources:
         raise EditError("no clips to join")
     if target.suffix.lower() != ".mp4":
         raise EditError("joined output must use an .mp4 filename")
     if target.exists() or any(source.resolve() == target.resolve() for source, _ in sources):
         raise EditError(f"output already exists or matches an input: {target}")
+    width, height = size
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="vlog-join-", dir=target.parent) as scratch:
         work = Path(scratch)
         segments = []
         for index, (source, sidecar) in enumerate(sources, 1):
             segment = work / f"{index:05d}.mp4"
-            normalized_segment(source, sidecar, segment)
+            normalized_segment(source, sidecar, segment, size=size, fit=fit)
             segments.append(segment)
             log(f"join: normalized {index}/{len(sources)} {source.name}")
         manifest = work / "concat.txt"
@@ -265,7 +331,7 @@ def join(sources: list[tuple[Path, Path | None]], target: Path, log) -> None:
                  "-movflags", "+faststart", str(output)])
         expected = sum(probe(p)[0] for p in segments)
         actual, video, audio = probe(output)
-        if not audio or video.get("width") != 1920 or video.get("height") != 1080 \
+        if not audio or video.get("width") != width or video.get("height") != height \
                 or abs(actual - expected) > max(0.5, len(segments) * 0.08):
             raise EditError(f"joined export failed validation: {actual:.3f}s vs {expected:.3f}s")
         os.replace(output, target)
@@ -343,8 +409,15 @@ def run(cfg: dict, args, log) -> int:
                 target = Path(args.out).expanduser().resolve()
             if any(not source.is_file() for source, _ in sources):
                 raise EditError("one or more join inputs are missing")
-            join(sources, target, log)
-            log(f"edit join: {len(sources)} clips -> {target} (1920x1080 SDR, 30 fps)")
+            sources = filter_orientation(
+                sources, getattr(args, "orientation", "any"),
+                getattr(args, "include_mismatched", False),
+                getattr(args, "allow", None), log)
+            if not sources:
+                raise EditError("no clips match the requested orientation")
+            join(sources, target, log, fit=getattr(args, "fit", "pad"))
+            log(f"edit join: {len(sources)} clips -> {target} (1920x1080 SDR, 30 fps, "
+                f"fit {getattr(args, 'fit', 'pad')})")
         return 0
     except (EditError, ordering.OrderError, OSError, ValueError) as exc:
         log(f"edit: {exc}")

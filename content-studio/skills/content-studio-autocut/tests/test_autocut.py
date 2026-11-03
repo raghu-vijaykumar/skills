@@ -32,6 +32,21 @@ class AutoCutTests(unittest.TestCase):
             self.assertEqual(len(items),1)
             self.assertEqual(items[0]["source"],"clip.mp4")
 
+    def test_orientation_filtering_and_size_parsing(self):
+        sources={"land.mp4":10,"port.mp4":20,"square.mp4":30}
+        dimensions={"land.mp4":(1920,1080),"port.mp4":(1080,1920),"square.mp4":(1080,1080)}
+        kept,skipped=module.filter_source_map(sources,dimensions,"landscape")
+        self.assertEqual(kept,{"land.mp4":10})
+        self.assertEqual({item["source"] for item in skipped},{"port.mp4","square.mp4"})
+        kept,_=module.filter_source_map(sources,dimensions,"landscape",include_mismatched=True)
+        self.assertEqual(len(kept),3)
+        kept,_=module.filter_source_map(sources,dimensions,"landscape",allow=["port.mp4"])
+        self.assertEqual(set(kept),{"land.mp4","port.mp4"})
+        self.assertEqual(module.parse_size("1080x1920"),(1080,1920))
+        self.assertEqual(module.orientation(1080,1920),"portrait")
+        with self.assertRaises(ValueError):
+            module.parse_size("1080x1919")
+
     def test_empty_annotations(self):
         with tempfile.TemporaryDirectory() as d:
             path=Path(d)/"empty.json"

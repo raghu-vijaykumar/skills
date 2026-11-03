@@ -312,6 +312,20 @@ The explicit repeated `--input` form joins only the files named, in that order.
 Review the result, especially clip transitions, audio sync, and color, before using it
 as a final edit.
 
+For mixed portrait/landscape footage, filter the join by target orientation:
+
+```powershell
+python scripts/content.py edit join --channel out-of-office --draft <id> --orientation landscape
+python scripts/content.py edit join --channel out-of-office --draft <id> --orientation landscape --include-mismatched --fit blur
+```
+
+`--orientation` keeps only matching clips. `--include-mismatched` keeps all clips;
+`--allow <filename>` adds one specific exception. `--fit pad` uses black bars,
+`--fit blur` centers a mismatched clip over a blurred copy of the same footage,
+and `--fit crop` fills the frame by cropping. `preprocess --final --fit blur`
+applies the same treatment to per-clip final exports. AutoCut exposes the same
+flags when it builds its timeline.
+
 ## Music selection
 
 Use [content-studio-music](../../content-studio-music/SKILL.md) to shortlist and

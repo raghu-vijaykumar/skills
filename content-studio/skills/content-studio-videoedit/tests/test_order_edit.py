@@ -276,6 +276,13 @@ class EditingTest(unittest.TestCase):
                         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
                         "-shortest", str(path)], check=True, capture_output=True)
 
+    def make_sized_video(self, path, width, height, color="red"):
+        subprocess.run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                        "-f", "lavfi", "-i", f"color=c={color}:s={width}x{height}:r=30:d=1",
+                        "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=1",
+                        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+                        "-shortest", str(path)], check=True, capture_output=True)
+
     def test_trim_cut_join_real_media(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)
@@ -335,9 +342,10 @@ class EditingTest(unittest.TestCase):
                 writer.writerow([1, 0.2, 0.4, 100, "", ""])
             seen = {}
 
-            def fake_render(source, sidecar, target, ranges=None):
+            def fake_render(source, sidecar, target, ranges=None, fit="pad"):
                 seen["sidecar"] = sidecar
                 seen["ranges"] = ranges
+                seen["fit"] = fit
                 target.write_bytes(b"final")
 
             with patch.object(editing, "normalized_segment", side_effect=fake_render), \
@@ -363,6 +371,34 @@ class EditingTest(unittest.TestCase):
             editing.render_ranges(Path("in.mov"), Path("out.mp4"), [(0, 1)],
                                   {"side_data_list": [{"side_data_type": "DOVI configuration record"}]},
                                   True)
+
+    def test_portrait_clip_can_fill_landscape_with_blur_or_crop(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "portrait.mp4"
+            self.make_sized_video(source, 320, 480, "blue")
+            for fit in ("pad", "blur", "crop"):
+                output = root / f"portrait-{fit}.mp4"
+                editing.normalized_segment(source, None, output, fit=fit)
+                actual, video, audio = editing.probe(output)
+                self.assertAlmostEqual(actual, 1.0, delta=0.15)
+                self.assertEqual((video["width"], video["height"]), (1920, 1080))
+                self.assertTrue(audio)
+
+    def test_join_orientation_filter_keeps_matching_and_explicit_exceptions(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            landscape = root / "landscape.mp4"
+            portrait = root / "portrait.mp4"
+            self.make_sized_video(landscape, 320, 180, "green")
+            self.make_sized_video(portrait, 180, 320, "red")
+            sources = [(landscape, None), (portrait, None)]
+            self.assertEqual(editing.filter_orientation(sources, "landscape"),
+                             [(landscape, None)])
+            self.assertEqual(len(editing.filter_orientation(sources, "landscape",
+                                                            include_mismatched=True)), 2)
+            self.assertEqual(len(editing.filter_orientation(sources, "landscape",
+                                                            allow=["portrait.mp4"])), 2)
 
 
 if __name__ == "__main__":

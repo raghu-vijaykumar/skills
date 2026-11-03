@@ -34,6 +34,42 @@ def seconds(value):
     hours,minutes,secs=(float(part) if part else 0 for part in match.groups())
     return hours*3600+minutes*60+secs
 
+def parse_size(value):
+    match=re.fullmatch(r"(\d+)x(\d+)",str(value).strip().lower())
+    if not match: raise ValueError("size must look like 1920x1080")
+    width,height=int(match.group(1)),int(match.group(2))
+    if width<=0 or height<=0 or width%2 or height%2:
+        raise ValueError("size must be positive even dimensions")
+    return width,height
+
+def orientation(width,height):
+    if width>height: return "landscape"
+    if height>width: return "portrait"
+    return "square"
+
+def media_info(path):
+    data=json.loads(run(["ffprobe","-v","error","-show_streams","-show_format","-of","json",str(path)]))
+    video=next((s for s in data.get("streams",[]) if s.get("codec_type")=="video"),None)
+    if not video: raise ValueError("No video stream: "+str(path))
+    duration=float(data.get("format",{}).get("duration") or 0)
+    width=int(video.get("width") or 0); height=int(video.get("height") or 0)
+    if duration<=0 or width<=0 or height<=0: raise ValueError("Invalid media metadata: "+str(path))
+    return duration,width,height
+
+def filter_source_map(sources,dimensions,target,include_mismatched=False,allow=None):
+    if target in (None,"","any"): return dict(sources),[]
+    allowed={str(name).lower() for name in (allow or [])}
+    kept={}; skipped=[]
+    for name,duration in sources.items():
+        width,height=dimensions[name]
+        value=orientation(width,height)
+        if value==target or include_mismatched or name.lower() in allowed:
+            kept[name]=duration
+        else:
+            skipped.append({"source":name,"width":width,"height":height,
+                            "orientation":value,"reason":"does not match target orientation"})
+    return kept,skipped
+
 def read_segments(path, sources, annotations):
     if not path: return []
     data=json.loads(Path(path).read_text(encoding="utf-8"))
@@ -154,8 +190,19 @@ def build(args):
     if not folder.is_dir(): raise ValueError("Input folder does not exist")
     if folder==out: raise ValueError("Output must differ from input")
     if out.exists() and any(out.iterdir()) and not args.force: raise ValueError("Output folder not empty; use --force")
-    sources={p.name:duration(p) for p in sorted(folder.iterdir()) if p.is_file() and p.suffix.lower() in EXTS}
+    sources={}; dimensions={}
+    for path in sorted(folder.iterdir()):
+        if path.is_file() and path.suffix.lower() in EXTS:
+            clip_duration,width,height=media_info(path)
+            sources[path.name]=clip_duration
+            dimensions[path.name]=(width,height)
     if not sources: raise ValueError("No supported videos")
+    width,height=parse_size(args.size) if args.size else (1920,1080)
+    target_orientation=args.orientation or (orientation(width,height) if args.size else "any")
+    sources,skipped=filter_source_map(sources,dimensions,target_orientation,
+                                      args.include_mismatched,args.allow)
+    if not sources:
+        raise ValueError("No videos match orientation "+str(target_orientation))
     clips=read_segments(args.transcripts,sources,False)+read_segments(args.annotations,sources,True)
     if args.auto_vision:
         with tempfile.TemporaryDirectory() as tmp:
@@ -188,6 +235,8 @@ def build(args):
     if not selected: raise ValueError("No eligible segments")
     out.mkdir(parents=True,exist_ok=True)
     decisions={"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
+               "orientation":target_orientation,"size":f"{width}x{height}","fit":args.fit,
+               "skipped_sources":skipped,
                "semantic_analysis":"local Ollama vision" if args.auto_vision else ("external annotations" if args.annotations else "not performed"),
                "transcription_enabled":args.auto_transcribe,"scene_detection_enabled":args.detect_scenes,
                "segments":selected}
@@ -207,7 +256,7 @@ def build(args):
        "<h1>Review before publishing</h1><p>Automatic selections are proposals, not approved edits.</p>"+
        "<table border='1'><tr><th>Source</th><th>Range (s)</th><th>Reason</th><th>Speech</th></tr>"+
        rows+"</table>",encoding="utf-8")
-    timeline=initial_timeline(selected,folder,args.style)
+    timeline=initial_timeline(selected,folder,args.style,width=width,height=height,fit=args.fit)
     write_revision(timeline,out)
     render(timeline,out)
     from timeline import refresh_review
@@ -217,7 +266,8 @@ def build(args):
     (out/"review-state.json").write_text(json.dumps({"status":"pending_review",
         "approved":False,"feedback":[],"revision":1},indent=2),encoding="utf-8")
     print(json.dumps({"output":str(out/"rough-cut.mp4"),"review":str(out/"review/contact-sheet.html"),
-        "segments":len(selected),"seconds":used},indent=2))
+        "segments":len(selected),"seconds":used,"orientation":target_orientation,
+        "size":f"{width}x{height}","fit":args.fit,"skipped":len(skipped)},indent=2))
 
 def main():
     p=argparse.ArgumentParser()
@@ -235,6 +285,14 @@ def main():
     p.add_argument("--auto-vision",action="store_true")
     p.add_argument("--vision-model",default="llava")
     p.add_argument("--ollama-endpoint",default="http://127.0.0.1:11434")
+    p.add_argument("--orientation",choices=["any","landscape","portrait","square"])
+    p.add_argument("--include-mismatched",action="store_true",
+                   help="keep clips whose orientation does not match the target")
+    p.add_argument("--allow",action="append",
+                   help="include a specific mismatched filename; repeatable")
+    p.add_argument("--fit",choices=["pad","blur","crop"],default="pad",
+                   help="fit mismatched clips with black padding, a blurred copy, or crop")
+    p.add_argument("--size",help="target size WxH; default 1920x1080")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):
         if not shutil.which(binary): p.error(binary+" missing from PATH")

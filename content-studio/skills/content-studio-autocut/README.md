@@ -5,10 +5,13 @@ Run:
 ```bash
 python content-studio/skills/content-studio-autocut/scripts/autocut.py \
   --folder ./preprocessed --duration 12m --output ./rough-cut \
+  --orientation landscape --fit blur \
   --auto-transcribe --detect-scenes --auto-vision --quality-score
 ```
 
 Preprocess raw camera clips first with `content-studio-videopreprocess`, then stage the per-clip `final.mp4` exports in a flat folder such as `analysis/autocut-input/`. AutoCut scans only the top level of `--folder`.
+
+`--orientation` filters clips by measured width/height. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` centers a mismatched clip over a blurred copy of itself instead of black bars; `--fit crop` fills the frame and crops.
 
 Requires FFmpeg and FFprobe. For local visual analysis install Ollama, pull a vision model such as `ollama pull llava`, and use `--auto-vision` (or `--vision-model <model>`). For automatic speech transcription install `faster-whisper` (`pip install faster-whisper`); the selected Whisper model may download on first use. Without `--auto-transcribe`, supply a timestamped transcript using `--transcripts`. Optional semantic judgments from a vision/LLM model can be supplied as `--annotations`:
 

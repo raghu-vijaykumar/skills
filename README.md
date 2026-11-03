@@ -91,7 +91,7 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py `
 
 It detects exact and near duplicates, quarantines extras under `analysis/duplicates/`, orders clips by capture time, writes `_timeline.csv`, and renumbers them. It also extracts and enhances voice, lowers quiet gaps, proposes blur cuts, and flags stabilization crop.
 
-Outputs live in `processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready 1920x1080 16:9 SDR `final.mp4` with all detected blur spans removed. Folder and draft final runs also join the exports into `final-video.mp4`.
+Outputs live in `processed-clips/<camera-name>/`: `report.json`, `review.csv`, `review.html`, `enhanced-voice.wav`, and blur images. Set `remove=yes` for approved blur rows and rerun with `--apply-review`, or use `--final` to render a publish-ready 1920x1080 16:9 SDR `final.mp4` with all detected blur spans removed. Folder and draft final runs also join the exports into `final-video.mp4`. Use `--fit blur` to center a mismatched portrait clip over a blurred copy of itself instead of black pillars; `--fit pad` is the default and `--fit crop` fills the frame by cropping.
 
 Review gates:
 
@@ -118,8 +118,11 @@ After preprocessing, `content-studio-autocut` selects speech and shots from the 
 ```powershell
 python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
   --folder <draft>/analysis/autocut-input --duration 12m --style travel-vlog `
-  --output <draft>/rough-cut --auto-transcribe --detect-scenes --quality-score
+  --output <draft>/rough-cut --orientation landscape --fit blur `
+  --auto-transcribe --detect-scenes --quality-score
 ```
+
+`--orientation landscape` filters portrait clips from a landscape edit. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` centers a mismatched clip over a blurred copy of the same footage; `--fit crop` fills the frame by cropping; `--fit pad` leaves black bars. The decisions file records `orientation`, `size`, `fit`, and `skipped_sources`, and the timeline keeps the same fit for later renders.
 
 It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
 

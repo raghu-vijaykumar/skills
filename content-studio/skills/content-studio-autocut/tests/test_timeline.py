@@ -23,6 +23,19 @@ class TimelineTests(unittest.TestCase):
     def test_valid_initial_timeline(self):
         self.assertEqual(len(mod.validate(self.timeline,self.root)),2)
 
+    def test_initial_timeline_records_size_and_fit(self):
+        timeline=mod.initial_timeline([{"source":"clip.mp4","start":0,"end":4}],
+                                      self.root,width=1080,height=1920,fit="blur")
+        self.assertEqual((timeline["width"],timeline["height"]), (1080,1920))
+        self.assertEqual(timeline["fit"],"blur")
+
+    def test_blur_fit_filter_uses_background_and_foreground(self):
+        graph=";".join(mod.fit_filter("[0:v:0]",1920,1080,"blur","[v]"))
+        self.assertIn("split=2",graph)
+        self.assertIn("gblur",graph)
+        self.assertIn("overlay",graph)
+        self.assertIn("[v]",graph)
+
     def test_trim_recomputes_positions(self):
         t=mod.revise(self.timeline,[{"action":"trim","id":"v0000","source_out":2}])
         clips=mod.validate(t,self.root)
