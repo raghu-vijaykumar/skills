@@ -21,9 +21,14 @@ def probe(path):
     p = run(["ffprobe", "-v", "error", "-show_streams", "-of", "json", str(path)])
     return json.loads(p.stdout)["streams"]
 
+def measure_filter(filters):
+    return ",".join(part for part in
+                    (filters, "loudnorm=I=-16:LRA=11:TP=-1.5:print_format=json")
+                    if part)
+
 def measure(path, filters):
     cmd = ["ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-vn",
-           "-af", filters + ",loudnorm=I=-16:LRA=11:TP=-1.5:print_format=json",
+           "-af", measure_filter(filters),
            "-f", "null", "-"]
     p = subprocess.run(cmd, text=True, capture_output=True)
     if p.returncode:
