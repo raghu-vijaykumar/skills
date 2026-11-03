@@ -48,8 +48,9 @@ content-studio enhance apply-timeline `
   --output-timeline <draft>/.content-studio/rough-cut/timeline-enhanced.json
 ```
 
-The AutoCut timeline renderer applies these clip-relative filters. Approved
-corrections therefore survive later timeline edits and rendering.
+The AutoCut timeline renderer applies approved color corrections. Minor-glare
+masks are applied by the single-clip renderer; carrying masks through timeline
+rendering remains future work.
 
 Render approved corrections:
 
