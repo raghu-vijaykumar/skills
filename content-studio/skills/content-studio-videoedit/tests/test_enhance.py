@@ -75,6 +75,8 @@ class EnhanceTest(unittest.TestCase):
             self.assertEqual(validation["status"], "passed")
             self.assertTrue(target.is_file())
             self.assertGreater(target.stat().st_size, 0)
+            previews = list((output_root / "dark" / "previews" / "before-after").glob("*.mp4"))
+            self.assertTrue(previews)
 
     def test_reflection_benchmark_runs_external_adapter(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
@@ -113,6 +115,11 @@ class EnhanceTest(unittest.TestCase):
                                               selected_clips=True)
             self.assertEqual(report["selected_clips"], True)
             self.assertEqual(report["clips"][0]["name"], "clip.mp4")
+            manifest = yaml.safe_load(
+                (root / "enhancement" / "manifests" /
+                 "timeline-enhancement.yaml").read_text())
+            self.assertEqual(manifest["clips"][0]["selected_ranges"],
+                             [{"start_seconds": 0.0, "end_seconds": 2.0}])
 
     def test_strong_glare_is_never_auto_corrected(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

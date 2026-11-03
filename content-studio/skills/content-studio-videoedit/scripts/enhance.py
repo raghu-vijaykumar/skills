@@ -333,6 +333,29 @@ def write_before_after(source: Path, output: Path, manifest: dict, target: Path)
     canvas.save(target, quality=88)
 
 
+def write_preview_clips(source: Path, output: Path, manifest: dict, folder: Path) -> None:
+    for scene in manifest.get("clips", [{}])[0].get("scenes", []):
+        if not approved_scene(scene, True):
+            continue
+        start = float(scene["start_seconds"])
+        end = float(scene["end_seconds"])
+        length = max(0.5, min(3.0, end - start - 0.1))
+        midpoint = start + max(0.0, (end - start - length) / 2)
+        target = folder / f"{scene['id']}.mp4"
+        try:
+            run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-ss", f"{midpoint:.3f}", "-t", f"{length:.3f}", "-i", str(source),
+                 "-ss", f"{midpoint:.3f}", "-t", f"{length:.3f}", "-i", str(output),
+                 "-filter_complex",
+                 "[0:v]scale=640:360,setpts=PTS-STARTPTS[a];"
+                 "[1:v]scale=640:360,setpts=PTS-STARTPTS[b];"
+                 "[a][b]hstack=inputs=2[v]",
+                 "-map", "[v]", "-an", "-c:v", "libx264", "-preset", "veryfast",
+                 "-crf", "22", "-pix_fmt", "yuv420p", str(target)])
+        except EnhanceError:
+            target.unlink(missing_ok=True)
+
+
 def write_html(report: dict, path: Path) -> None:
     rows = []
     for clip in report["clips"]:
@@ -475,22 +498,39 @@ def analyze_timeline(timeline_path: Path, output_root: Path | None = None,
     timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
     source_root = Path(timeline.get("source_root") or timeline_path.parent).resolve()
     names = []
+    ranges: dict[str, list[dict]] = {}
     for track in timeline.get("tracks", []):
         if track.get("kind") != "video":
             continue
         for clip in track.get("clips", []):
             name = clip.get("source")
-            if name and name not in names:
+            if not name:
+                continue
+            if name not in names:
                 names.append(name)
+                ranges[name] = []
+            if clip.get("source_in") is not None and clip.get("source_out") is not None:
+                ranges[name].append({"start_seconds": float(clip["source_in"]),
+                                     "end_seconds": float(clip["source_out"])})
     if not names:
         raise EnhanceError("timeline has no video clips")
     output_root = output_root or source_root / ".content-studio" / "enhancement"
     clips = []
+    timeline_clips = []
     for name in names:
         source = (source_root / name).resolve()
         if not source.is_file():
             raise EnhanceError(f"timeline source missing: {source}")
-        clips.append(analyze_clip(source, output_root, force=force, auto_fix=auto_fix))
+        result = analyze_clip(source, output_root, force=force, auto_fix=auto_fix)
+        clips.append(result)
+        timeline_clips.append({
+            "source": str(source),
+            "source_hash": result["clips"][0]["source_hash"],
+            "selected_ranges": ranges[name],
+            "manifest": str((output_root / source.stem / "manifests" /
+                             "enhancement.yaml").resolve()),
+            "summary": result["clips"][0]["summary"],
+        })
     report = {
         "schema_version": SCHEMA_VERSION,
         "analysis_version": ANALYSIS_VERSION,
@@ -499,6 +539,19 @@ def analyze_timeline(timeline_path: Path, output_root: Path | None = None,
         "selected_clips": selected_clips,
         "clips": [clip for entry in clips for clip in entry["clips"]],
     }
+    timeline_manifest = {
+        "schema_version": SCHEMA_VERSION,
+        "analysis_version": ANALYSIS_VERSION,
+        "generated_at": report["generated_at"],
+        "timeline": str(timeline_path.resolve()),
+        "timeline_source_root": str(source_root),
+        "clips": timeline_clips,
+    }
+    (output_root / "manifests").mkdir(parents=True, exist_ok=True)
+    (output_root / "manifests" / "timeline-enhancement.yaml").write_text(
+        yaml.safe_dump(timeline_manifest, sort_keys=False), encoding="utf-8")
+    report["timeline_manifest"] = str(
+        (output_root / "manifests" / "timeline-enhancement.yaml").resolve())
     report_path = output_root / "analysis" / "report.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
@@ -552,6 +605,8 @@ def render_manifest(manifest_path: Path, output: Path,
         write_before_after(source, output, manifest,
                            manifest_path.parent.parent / "previews" / "before-after" /
                            f"{source.stem}.jpg")
+        write_preview_clips(source, output, manifest,
+                            manifest_path.parent.parent / "previews" / "before-after")
     manifest["output"] = str(output.resolve())
     manifest["validation"] = validation
     manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
