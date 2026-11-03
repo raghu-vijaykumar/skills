@@ -34,7 +34,7 @@ ITEMS = [
     ("C04", "footage", "Camera clips preprocessed", "pre_publish", "edited",
      "Duplicates quarantined, clips ordered, blur/Dolby Vision gates reviewed, and clean or final exports available."),
     ("C05", "rough_cut", "AutoCut rough cut reviewed", "pre_publish", "edited",
-     "A human reviewed the rough cut and review media, the target orientation/fit is recorded, or AutoCut was explicitly deferred."),
+     "A human reviewed the rough cut and review media (including reframe previews when used), the target orientation/fit is recorded, or AutoCut was explicitly deferred."),
     ("C06", "audio", "Audio mastered and reviewed", "pre_publish", "all",
      "Loudness and dynamics checked; use not applicable only when no audio treatment is needed."),
     ("C07", "edit", "Master edit or render complete", "pre_publish", "all",

@@ -40,9 +40,11 @@ def initial_timeline(segments, folder, style="travel-vlog", width=1920, height=1
     clips=[]
     for i,c in enumerate(segments):
         length=round(c["end"]-c["start"],3)
-        clips.append({"id":f"v{i:04d}","source":c["source"],"source_in":c["start"],
-                      "source_out":c["end"],"start":round(cursor,3),"duration":length,
-                      "reason":c.get("reason",""),"audio_gain_db":0})
+        clip={"id":f"v{i:04d}","source":c["source"],"source_in":c["start"],
+              "source_out":c["end"],"start":round(cursor,3),"duration":length,
+              "reason":c.get("reason",""),"audio_gain_db":0}
+        if c.get("reframe"): clip["reframe"]=c["reframe"]
+        clips.append(clip)
         cursor+=length
     return {"schema":"content-studio.timeline.v1","revision":1,"style":style,
             "source_root":str(folder.resolve()),"fps":30,"width":width,"height":height,
@@ -91,10 +93,21 @@ def revise(timeline, instructions):
     t["revision"]+=1
     return t
 
-def fit_filter(label, width, height, fit, out):
+def fit_filter(label, width, height, fit, out, reframe=None):
     if width<=0 or height<=0 or width%2 or height%2:
         raise ValueError("target size must be positive even dimensions")
     fit=str(fit or "blur").lower()
+    if fit=="reframe":
+        if not reframe: raise ValueError("reframe fit requires reframe metadata")
+        source_width=int(reframe["source_width"]); source_height=int(reframe["source_height"])
+        crop=reframe["crop"]
+        crop_width=max(2,int(round(float(crop["w"])*source_width)))
+        crop_height=max(2,int(round(float(crop["h"])*source_height)))
+        crop_width-=crop_width%2; crop_height-=crop_height%2
+        x=max(0,min(source_width-crop_width,int(round(float(crop["x"])*source_width))))
+        y=max(0,min(source_height-crop_height,int(round(float(crop["y"])*source_height))))
+        return [f"{label}crop={crop_width}:{crop_height}:{x}:{y},"
+                f"scale={width}:{height},format=yuv420p{out}"]
     if fit=="pad":
         return [f"{label}scale={width}:{height}:force_original_aspect_ratio=decrease:"
                 f"force_divisible_by=2,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
@@ -124,6 +137,7 @@ def render(timeline, output):
     for clip in video:
         src=root/clip["source"]
         settings={k:clip[k] for k in ("source","source_in","source_out","audio_gain_db")}
+        if clip.get("reframe"): settings["reframe"]=clip["reframe"]
         settings.update(fps=timeline["fps"],width=width,height=height,fit=fit,
                         mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
         digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
@@ -134,7 +148,7 @@ def render(timeline, output):
             has_audio=bool(audio.stdout.strip())
             args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
             if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
-            graph=fit_filter("[0:v:0]",width,height,fit,"[v]")
+            graph=fit_filter("[0:v:0]",width,height,fit,"[v]",clip.get("reframe"))
             args+=["-t",str(clip["duration"]),"-filter_complex",";".join(graph),
                    "-map","[v]","-map","0:a:0" if has_audio else "1:a:0",
                    "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",

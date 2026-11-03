@@ -30,7 +30,7 @@ closed.
 | C02 | pre-publish | all | Production kind recorded | Draft is explicitly `edited` or `remotion`, and `draft.json` agrees |
 | C03 | pre-publish | all | Idea brief or story outline approved | Approved brief/outline, or justified not applicable for a supplied edit |
 | C04 | pre-publish | edited | Camera clips preprocessed | Duplicates quarantined, ordered, blur/DV gates reviewed, clean exports available |
-| C05 | pre-publish | edited | AutoCut rough cut reviewed | Human reviewed the rough cut and review media, target orientation/fit recorded, or AutoCut explicitly deferred |
+| C05 | pre-publish | edited | AutoCut rough cut reviewed | Human reviewed the rough cut and review media, including reframe previews when used; target orientation/fit recorded, or AutoCut explicitly deferred |
 | C06 | pre-publish | all | Audio mastered and reviewed | Loudness/dynamics checked; not applicable only when no audio treatment is needed |
 | C07 | pre-publish | all | Master edit or render complete | Full-length master exists and was watched end to end |
 | C08 | pre-publish | all | Color, HDR, and Dolby Vision reviewed | SDR tags/tone mapping checked; DV proof reviewed when applicable |

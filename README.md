@@ -124,6 +124,19 @@ python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
 
 `--orientation landscape` filters portrait clips from a landscape edit. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. The default `--fit blur` centers a mismatched clip over a blurred copy of the same footage; `--fit crop` fills the frame by cropping; `--fit pad` leaves black bars. The decisions file records `orientation`, `size`, `fit`, and `skipped_sources`, and the timeline keeps the same fit for later renders.
 
+For a portrait Short or Reel from landscape footage:
+
+```powershell
+python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
+  --folder <draft>/analysis/autocut-input --duration 60s `
+  --output <draft>/rough-cut `
+  --size 1080x1920 --orientation portrait --include-mismatched `
+  --fit reframe --reframe-mode auto --subjects <draft>/analysis/subjects.json `
+  --detect-scenes
+```
+
+`reframe` uses AI subject boxes first, saliency second, and center last. Each selected segment gets a stable crop plus `reframe-preview/shot-*/reframe-review.html` showing the crop rectangle and framed result. Read [the portrait reframe workflow](content-studio/skills/content-studio-autocut/references/reframe.md) for the subject-box schema.
+
 It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
 
 This is a proposal, not approval. Review the actual video, frames, and audio, then record a human decision:

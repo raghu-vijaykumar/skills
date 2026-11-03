@@ -13,6 +13,18 @@ Preprocess raw camera clips first with `content-studio-videopreprocess`, then st
 
 `--orientation` filters clips by measured width/height. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` (default) centers a mismatched clip over a blurred copy of itself instead of black bars; `--fit crop` fills the frame and crops; `--fit pad` uses black bars.
 
+For a portrait reel from landscape footage:
+
+```bash
+python content-studio/skills/content-studio-autocut/scripts/autocut.py \
+  --folder ./preprocessed --duration 60s --output ./rough-cut \
+  --size 1080x1920 --orientation portrait --include-mismatched \
+  --fit reframe --reframe-mode auto --subjects ./subjects.json \
+  --detect-scenes
+```
+
+`reframe` uses AI subject boxes first, then saliency, then center. Each selected segment gets a stable crop and `reframe-preview/shot-*/reframe-review.html`. Read [the portrait reframe workflow](references/reframe.md).
+
 Requires FFmpeg and FFprobe. For local visual analysis install Ollama, pull a vision model such as `ollama pull llava`, and use `--auto-vision` (or `--vision-model <model>`). For automatic speech transcription install `faster-whisper` (`pip install faster-whisper`); the selected Whisper model may download on first use. Without `--auto-transcribe`, supply a timestamped transcript using `--transcripts`. Optional semantic judgments from a vision/LLM model can be supplied as `--annotations`:
 
 ```json
@@ -21,7 +33,7 @@ Requires FFmpeg and FFprobe. For local visual analysis install Ollama, pull a vi
 
 Outputs: `rough-cut.mp4` with original clip audio (or silence when absent), `timeline.otio`, `edit-decisions.json`, `review.html`. Video is re-encoded to 1920x1080 H.264 SDR, audio to AAC.
 
-**Known gaps:** Vision inference is now optional via Ollama; its subjective relevance score is not a calibrated visual-quality measurement. An optional exposure/sharpness heuristic is available with `--quality-score` (`pip install numpy`); motion stabilization and calibrated perceptual quality scoring remain pending. Scene-change detection is a technical signal, not understanding of the footage. Without transcripts or annotations the rough cut remains a heuristic sample. Story ordering follows filename order, not verified capture timestamps. Review the timeline before publishing. The installer now registers this skill, but existing versioned installations may require a package version bump to refresh the bundle.
+**Known gaps:** Vision inference is now optional via Ollama; its subjective relevance score is not a calibrated visual-quality measurement. An optional exposure/sharpness heuristic is available with `--quality-score` (`pip install numpy`); motion stabilization and calibrated perceptual quality scoring remain pending. Scene-change detection is a technical signal, not understanding of the footage. Without transcripts or annotations the rough cut remains a heuristic sample. Story ordering follows filename order, not verified capture timestamps. Reframing uses one stable crop per selected segment; dynamic subject tracking is pending. Review the timeline before publishing. The installer now registers this skill, but existing versioned installations may require a package version bump to refresh the bundle.
 
 ## Editable canonical timeline (experimental)
 

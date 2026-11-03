@@ -233,10 +233,24 @@ def build(args):
         used+=length
     selected.sort(key=lambda c:(list(sources).index(c["source"]),c["start"]))
     if not selected: raise ValueError("No eligible segments")
+    reframe_records=[]
+    if args.fit=="reframe":
+        import reframe
+        for index,clip in enumerate(selected):
+            record=reframe.analyze_segment(folder/clip["source"],clip["start"],clip["end"],
+                                           (width,height),args.reframe_mode,args.subjects)
+            clip["reframe"]=record
+            reframe_records.append(record)
+            preview_dir=out/"reframe-preview"/f"shot-{index:04d}"
+            preview_dir.mkdir(parents=True,exist_ok=True)
+            preview=reframe.write_preview(folder/clip["source"],record,preview_dir)
+            if preview: record["preview"]=str(preview.relative_to(out))
     out.mkdir(parents=True,exist_ok=True)
     decisions={"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
                "orientation":target_orientation,"size":f"{width}x{height}","fit":args.fit,
                "skipped_sources":skipped,
+               "reframe_mode":args.reframe_mode if args.fit=="reframe" else None,
+               "reframe":reframe_records,
                "semantic_analysis":"local Ollama vision" if args.auto_vision else ("external annotations" if args.annotations else "not performed"),
                "transcription_enabled":args.auto_transcribe,"scene_detection_enabled":args.detect_scenes,
                "segments":selected}
@@ -290,8 +304,12 @@ def main():
                    help="keep clips whose orientation does not match the target")
     p.add_argument("--allow",action="append",
                    help="include a specific mismatched filename; repeatable")
-    p.add_argument("--fit",choices=["pad","blur","crop"],default="blur",
-                   help="fit mismatched clips with a blurred copy (default), black padding, or crop")
+    p.add_argument("--fit",choices=["pad","blur","crop","reframe"],default="blur",
+                   help="fit mismatched clips with a blurred copy (default), black padding, crop, or subject reframe")
+    p.add_argument("--reframe-mode",choices=["auto","subjects","saliency","center"],default="auto",
+                   help="subject signal for --fit reframe: AI boxes, saliency, or center")
+    p.add_argument("--subjects",type=Path,
+                   help="JSON subject boxes for --fit reframe (source/start/end/box)")
     p.add_argument("--size",help="target size WxH; default 1920x1080")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):

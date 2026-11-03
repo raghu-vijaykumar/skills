@@ -36,6 +36,17 @@ class TimelineTests(unittest.TestCase):
         self.assertIn("overlay",graph)
         self.assertIn("[v]",graph)
 
+    def test_reframe_fit_crops_and_scales_and_survives_timeline_copy(self):
+        record={"source_width":640,"source_height":360,
+                "crop":{"x":0.676167,"y":0,"w":0.316406,"h":1.0}}
+        graph=";".join(mod.fit_filter("[0:v:0]",1080,1920,"reframe","[v]",record))
+        self.assertIn("crop=202:360:433:0",graph)
+        self.assertIn("scale=1080:1920",graph)
+        timeline=mod.initial_timeline([
+            {"source":"clip.mp4","start":0,"end":4,"reframe":record}],
+            self.root,width=1080,height=1920,fit="reframe")
+        self.assertEqual(timeline["tracks"][0]["clips"][0]["reframe"],record)
+
     def test_trim_recomputes_positions(self):
         t=mod.revise(self.timeline,[{"action":"trim","id":"v0000","source_out":2}])
         clips=mod.validate(t,self.root)
