@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 
 import enhance
+import match
 import polish
 
 CANDIDATES = {
@@ -105,7 +106,7 @@ def choose_candidate(source: Path, start: float, duration: float,
 
 
 def color_enhancements(source: Path, start: float, end: float,
-                       analysis_root: Path) -> list[dict]:
+                       analysis_root: Path, auto_fix: bool = False) -> list[dict]:
     report = enhance.analyze_clip(source, analysis_root)
     items = []
     for scene in report["clips"][0]["scenes"]:
@@ -115,11 +116,15 @@ def color_enhancements(source: Path, start: float, end: float,
             continue
         if scene["decision"] != "FIX" or not scene.get("corrections"):
             continue
+        status = (scene.get("review") or {}).get("status")
+        if not auto_fix and status not in {"approved", "auto_approved"}:
+            continue
         items.append({"stage": "color",
                       "source_start": overlap_start,
                       "source_end": overlap_end,
                       "filters": list(scene["corrections"]),
-                      "scene": scene["id"]})
+                      "scene": scene["id"],
+                      "review_status": "auto_approved" if auto_fix else status})
     return items
 
 
@@ -135,6 +140,18 @@ def refine(args) -> dict:
     report = {"schema_version": 1,
               "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
               "timeline": str(timeline_path), "clips": []}
+    source_colors = {}
+    for track in timeline.get("tracks", []):
+        if track.get("kind") != "video":
+            continue
+        for clip in track.get("clips", []):
+            source = (source_root / clip["source"]).resolve()
+            if source not in source_colors:
+                info = enhance.probe_video(source)
+                source_colors[source] = match.mean_color(source,
+                                                          info["duration_seconds"])
+    target = {key: float(np.median([color[key] for color in source_colors.values()]))
+              for key in ("r", "g", "b")}
     try:
         for track in timeline.get("tracks", []):
             if track.get("kind") != "video":
@@ -152,7 +169,15 @@ def refine(args) -> dict:
                                   "filters": selected["selected"]["filters"],
                                   "metrics": {"before": selected["selected"]["before"],
                                               "after": selected["selected"]["after"]}})
-                items.extend(color_enhancements(source, start, end, analysis_root))
+                gains = match.gains_for(source_colors[source], target)
+                if any(abs(gains[key] - 1.0) > 0.005 for key in gains):
+                    items.append({"stage": "match",
+                                  "source_start": start, "source_end": end,
+                                  "gains": gains,
+                                  "filters": ["colorchannelmixer="
+                                              f"rr={gains['r']}:gg={gains['g']}:bb={gains['b']}"]})
+                items.extend(color_enhancements(source, start, end, analysis_root,
+                                                auto_fix=args.auto_fix))
                 clip["enhancements"] = items
                 report["clips"].append({"source": clip["source"],
                                         "source_in": start, "source_out": end,
@@ -175,6 +200,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeline", type=Path, required=True)
     parser.add_argument("--output-timeline", type=Path, required=True)
     parser.add_argument("--analysis-dir", type=Path)
+    parser.add_argument("--auto-fix", action="store_true",
+                        help="include conservative analyzer FIX color corrections without prior approval")
     return parser
 
 

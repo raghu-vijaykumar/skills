@@ -23,6 +23,7 @@ from pathlib import Path
 
 import numpy as np
 
+import editing
 import enhance
 
 DENOISE = {
@@ -78,6 +79,10 @@ def match_gains(source: Path, reference: Path, duration: float) -> dict | None:
 def build_filter(args, info: dict) -> tuple[list[str], dict]:
     filters = []
     used = {}
+    hdr = info.get("color_transfer") in {"arib-std-b67", "smpte2084"}
+    if hdr:
+        filters.append(editing.tone_map(info).rstrip(","))
+        used["tone_map"] = info.get("color_transfer")
     if args.lens_k1 is not None or args.lens_k2 is not None:
         k1 = float(args.lens_k1 or 0.0)
         k2 = float(args.lens_k2 or 0.0)
@@ -135,11 +140,14 @@ def polish(args) -> dict:
                  "-i", str(source), "-map", "0:v:0",
                  "-vf", "vidstabdetect=shakiness=5:accuracy=9:result=transforms.trf",
                  "-an", "-f", "null", os.devnull], cwd=work)
+        color = (["-color_primaries", "bt709", "-color_trc", "bt709",
+                  "-colorspace", "bt709"]
+                 if info.get("color_transfer") in {"arib-std-b67", "smpte2084"} else [])
         run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
              "-i", str(source), "-vf", ",".join(filters),
              "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-             "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart",
-             str(output)], cwd=work)
+             "-pix_fmt", "yuv420p", *color, "-c:a", "copy",
+             "-movflags", "+faststart", str(output)], cwd=work)
     finally:
         if work is not None:
             shutil.rmtree(work, ignore_errors=True)

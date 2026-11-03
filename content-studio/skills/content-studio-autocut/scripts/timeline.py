@@ -170,7 +170,12 @@ def enhancement_filters(clip):
         start=max(0.0,float(item.get("source_start",0))-source_in)
         end=min(duration,float(item.get("source_end",0))-source_in)
         if end<=start: continue
+        status=item.get("review_status")
+        if status not in (None,"approved","auto_approved"): continue
         if item.get("stage") == "polish":
+            filters.extend(value for value in (item.get("filters") or []) if value)
+            continue
+        if item.get("stage") == "match":
             filters.extend(value for value in (item.get("filters") or []) if value)
             continue
         for value in item.get("filters") or []:

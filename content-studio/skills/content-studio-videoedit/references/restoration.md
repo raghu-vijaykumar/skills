@@ -33,8 +33,9 @@ For every video clip, `refine`:
 2. measures edge sharpness, flat-area noise, clipping, and luma
 3. selects the highest-scoring candidate
 4. adds the selected polish filters to the timeline under `enhancements`
-5. adds approved analyzer color corrections to the same clip
-6. writes `refine.json` with every candidate and metric
+5. adds per-clip shot-matching gains to the same clip
+6. adds approved analyzer color corrections to the same clip
+7. writes `refine.json` with every candidate and metric
 
 The timeline renderer consumes `clip.enhancements`, so the applied filters survive
 later timeline edits. Upscaling is deliberately excluded.
