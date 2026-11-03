@@ -40,6 +40,9 @@ class RefineTest(unittest.TestCase):
             self.assertTrue((root / "refine.json").is_file())
             clip = json.loads(output.read_text())["tracks"][0]["clips"][0]
             self.assertIn("enhancements", clip)
+            stages = [item.get("stage") for item in clip["enhancements"]]
+            if "sharpen" in stages:
+                self.assertEqual(stages[-1], "sharpen")
             self.assertEqual(report["clips"][0]["source"], "clip.mp4")
             self.assertIn(report["clips"][0]["selected"], {"off", "light", "medium"})
             self.assertEqual(len(report["clips"][0]["alternatives"]), 3)

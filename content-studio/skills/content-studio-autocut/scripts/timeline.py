@@ -172,10 +172,7 @@ def enhancement_filters(clip):
         if end<=start: continue
         status=item.get("review_status")
         if status not in (None,"approved","auto_approved"): continue
-        if item.get("stage") == "polish":
-            filters.extend(value for value in (item.get("filters") or []) if value)
-            continue
-        if item.get("stage") == "match":
+        if item.get("stage") in {"polish", "match", "sharpen"}:
             filters.extend(value for value in (item.get("filters") or []) if value)
             continue
         for value in item.get("filters") or []:

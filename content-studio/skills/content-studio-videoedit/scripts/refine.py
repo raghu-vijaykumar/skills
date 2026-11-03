@@ -162,13 +162,19 @@ def refine(args) -> dict:
                 end = float(clip["source_out"])
                 selected = choose_candidate(source, start, end - start, work)
                 items = []
+                sharpen = []
                 if selected["selected"]["filters"]:
-                    items.append({"stage": "polish",
-                                  "source_start": start, "source_end": end,
-                                  "candidate": selected["selected"]["candidate"],
-                                  "filters": selected["selected"]["filters"],
-                                  "metrics": {"before": selected["selected"]["before"],
-                                              "after": selected["selected"]["after"]}})
+                    sharpen = [value for value in selected["selected"]["filters"]
+                               if value.startswith(("cas=", "unsharp="))]
+                    polish_filters = [value for value in selected["selected"]["filters"]
+                                      if value not in sharpen]
+                    if polish_filters:
+                        items.append({"stage": "polish",
+                                      "source_start": start, "source_end": end,
+                                      "candidate": selected["selected"]["candidate"],
+                                      "filters": polish_filters,
+                                      "metrics": {"before": selected["selected"]["before"],
+                                                  "after": selected["selected"]["after"]}})
                 gains = match.gains_for(source_colors[source], target)
                 if any(abs(gains[key] - 1.0) > 0.005 for key in gains):
                     items.append({"stage": "match",
@@ -178,6 +184,10 @@ def refine(args) -> dict:
                                               f"rr={gains['r']}:gg={gains['g']}:bb={gains['b']}"]})
                 items.extend(color_enhancements(source, start, end, analysis_root,
                                                 auto_fix=args.auto_fix))
+                if sharpen:
+                    items.append({"stage": "sharpen",
+                                  "source_start": start, "source_end": end,
+                                  "filters": sharpen})
                 clip["enhancements"] = items
                 report["clips"].append({"source": clip["source"],
                                         "source_in": start, "source_out": end,
