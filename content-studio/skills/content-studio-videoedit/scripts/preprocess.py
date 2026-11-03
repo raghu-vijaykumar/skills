@@ -32,6 +32,18 @@ QUIET_GAIN_DB = -13.0
 MAX_VOICE_BOOST_DB = 13.0
 VOICE_RMS_DBFS = -21.0
 LIMIT = 10 ** (-1 / 20)
+# A/V duration drift allowed between a render and its source, before the
+# source's own audio tail is added.
+DURATION_TOLERANCE = 0.07
+# A level correction larger than this is a red flag, not an enhancement, so
+# the match is bounded instead of hiding a destroyed program behind gain.
+MAX_LEVEL_MATCH_DB = 13.0
+# Denoise that drops integrated loudness further than this removed program
+# material rather than noise.
+CONTENT_LOSS_DB = 12.0
+# Bump when the audio chain changes so cached clips are rebuilt instead of
+# silently keeping an older render.
+ENHANCE_VERSION = 3
 
 
 class ProcessingError(RuntimeError):
@@ -110,15 +122,26 @@ def extract_audio(source: Path, audio: dict, target: Path) -> None:
              "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", str(target)])
 
 
-def deepfilter(source: Path, out_dir: Path) -> Path:
+def deepfilter(source: Path, out_dir: Path, attenuation: float | None = None,
+               post_filter: bool = False, beta: float = 0.02) -> Path:
     exe = shutil.which("deep-filter") or shutil.which("deepFilter")
     if not exe:
         raise ProcessingError("DeepFilterNet is required: install deep-filter.exe or pip install deepfilternet")
     out_dir.mkdir(parents=True, exist_ok=True)
     # The standalone Rust release works on Windows without a Python wheel;
     # the Python package exposes a different CLI spelling and output flag.
-    args = [exe, "-D", "-o", str(out_dir), str(source)] if Path(exe).stem.lower() == "deep-filter" else [
-        exe, "--compensate-delay", "--output-dir", str(out_dir), str(source)]
+    rust = Path(exe).stem.lower() == "deep-filter"
+    if rust:
+        args = [exe, "-D", "-o", str(out_dir)]
+    else:
+        args = [exe, "--compensate-delay", "--output-dir", str(out_dir)]
+    if attenuation is not None:
+        # Caps how far any content is suppressed, which keeps music, ambience,
+        # and speech the model is unsure about instead of gating them away.
+        args += ["-a" if rust else "--atten-lim-db", str(attenuation)]
+    if post_filter:
+        args += ["--pf", "--pf-beta", str(beta)]
+    args.append(str(source))
     command(args)
     outputs = list(out_dir.glob("*.wav"))
     if len(outputs) != 1:
@@ -135,6 +158,31 @@ def pcm16(path: Path) -> tuple[int, "numpy.ndarray"]:
         rate, channels = wav.getframerate(), wav.getnchannels()
         data = np.frombuffer(wav.readframes(wav.getnframes()), dtype="<i2")
     return rate, data.reshape(-1, channels).astype(np.float32) / 32768.0
+
+
+def measure_loudness(path: Path) -> float | None:
+    """Integrated loudness (EBU R128), or None when the signal is silence."""
+    output = command(["ffmpeg", "-nostdin", "-hide_banner", "-i", str(path),
+                      "-map", "0:a:0", "-af", "ebur128=peak=true", "-f", "null", "-"],
+                     stderr=True)
+    found = re.findall(r"I:\s*(-?\d+(?:\.\d+)?)\s*LUFS", output)
+    if not found:
+        return None
+    loudness = float(found[-1])
+    return None if loudness <= -69.0 else loudness
+
+
+def level_match_db(candidate: float | None, reference: float | None,
+                   limit: float = MAX_LEVEL_MATCH_DB) -> float:
+    """Gain that brings a candidate to the reference loudness, bounded.
+
+    Matching to the source keeps a clip at the level it was captured at. The
+    bound matters more than the match: without it, a denoiser that removed the
+    program material could be papered over with huge makeup gain.
+    """
+    if candidate is None or reference is None:
+        return 0.0
+    return max(-limit, min(limit, reference - candidate))
 
 
 def speech_intervals(clean_pcm: Path) -> list[tuple[float, float]]:
@@ -208,10 +256,27 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
                  "-c:a", "pcm_s16le", str(enhanced)])
     report["denoise_engine"] = engine
     report["speech_gain"] = speech_gain
+    report["enhance_version"] = ENHANCE_VERSION
     clean = work / "clean.wav"
     command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
              "-i", str(enhanced), "-ac", "2", "-ar", str(SAMPLE_RATE),
              "-c:a", "pcm_s16le", str(clean)])
+    # A speech denoiser can remove the whole program on a clip that carries no
+    # speech. Fall back to the source so a drive-by scene keeps its ambience
+    # and level instead of shipping a near-silent export with a hidden defect.
+    source_loudness = measure_loudness(original)
+    denoised_loudness = measure_loudness(clean)
+    lost_db = (source_loudness - denoised_loudness
+               if source_loudness is not None and denoised_loudness is not None else 0.0)
+    report["denoise"] = {"engine": engine,
+                         "source_lufs": None if source_loudness is None else round(source_loudness, 2),
+                         "denoised_lufs": None if denoised_loudness is None else round(denoised_loudness, 2)}
+    if lost_db > CONTENT_LOSS_DB:
+        command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-i", str(original), "-af", "highpass=f=80", "-ac", "2",
+                 "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", str(clean)])
+        report["denoise_engine"] = "skipped"
+        report["denoise"]["fallback"] = "content-loss"
     _, raw = pcm16(original)
     _, samples = pcm16(clean)
     # Model delay or padding must never move dialogue against the camera frame.
@@ -220,9 +285,13 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
     samples = samples[:len(raw)]
     if speech_gain == "off":
         # Skipping speech detection means no quiet-floor ducking and no voice
-        # lift, so the denoised levels are kept and only the limiter applies.
-        envelope = np.ones(len(samples), dtype=np.float32)
-        report["audio"] = {"speech_gain": "off", "peak_ceiling_dbfs": -1}
+        # lift, so one bounded gain restores the source level and only the
+        # limiter shapes peaks.
+        match_db = level_match_db(measure_loudness(clean), source_loudness)
+        envelope = np.full(len(samples), 10 ** (match_db / 20), dtype=np.float32)
+        report["audio"] = {"speech_gain": "off", "level_match_db": round(match_db, 2),
+                           "level_match_bounded": abs(match_db) >= MAX_LEVEL_MATCH_DB - 1e-9,
+                           "peak_ceiling_dbfs": -1}
     else:
         intervals = speech_intervals(clean)
         envelope, levels = gain_envelope(samples, intervals)
@@ -503,12 +572,29 @@ def validate_render(source: Path, output: Path, source_video: dict,
     video, audio = streams(result)
     if not audio:
         raise ProcessingError("render has no enhanced audio track")
+    source_info = probe(source)
     expected_duration = (sum(end - start for start, end in kept) if kept
-                         else float(probe(source)["format"]["duration"]))
+                         else float(source_info["format"]["duration"]))
     video_duration = float(video.get("duration") or result["format"]["duration"])
     audio_duration = float(audio.get("duration") or result["format"]["duration"])
-    if abs(video_duration - expected_duration) > 0.07 or abs(audio_duration - video_duration) > 0.07:
-        raise ProcessingError("render duration or audio sync changed unexpectedly")
+    # Phone captures already carry an audio tail beyond the last video frame, so
+    # the A/V delta is compared against the source instead of from zero; a fixed
+    # tolerance would reject correctly synced clips whose source delta is larger.
+    source_audio = streams(source_info)[1]
+    source_delta = 0.0
+    if source_audio:
+        source_video_duration = float(source_video.get("duration")
+                                      or source_info["format"]["duration"])
+        source_audio_duration = float(source_audio.get("duration")
+                                      or source_info["format"]["duration"])
+        source_delta = max(0.0, source_audio_duration - source_video_duration)
+    tolerance = DURATION_TOLERANCE + source_delta
+    if abs(video_duration - expected_duration) > tolerance or \
+            abs(audio_duration - video_duration) > tolerance:
+        raise ProcessingError(
+            "render duration or audio sync changed unexpectedly: "
+            f"video {video_duration:.3f}s, audio {audio_duration:.3f}s, "
+            f"expected {expected_duration:.3f}s, source A/V delta {source_delta:.3f}s")
     for key in ("width", "height", "color_primaries", "color_transfer", "color_space"):
         if video.get(key) != source_video.get(key):
             raise ProcessingError(f"render changed {key}: {source_video.get(key)} -> {video.get(key)}")
@@ -657,6 +743,7 @@ def final_clip(source: Path, output_root: Path, args, log,
     voice = folder / "enhanced-voice.wav"
     reusable = (same_source and voice.is_file()
                 and not getattr(args, "force", False)
+                and report.get("enhance_version", 1) == ENHANCE_VERSION
                 and (requested == "auto" or requested == report.get("denoise_engine"))
                 and report.get("speech_gain", "auto") == speech_gain)
     if not reusable:
@@ -729,6 +816,7 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     if report_path.exists() and not args.force and not args.apply_review and not args.dv_approved and not args.dv_proof:
         previous = json.loads(report_path.read_text(encoding="utf-8"))
         if previous.get("source_bytes") == source.stat().st_size and \
+                previous.get("enhance_version", 1) == ENHANCE_VERSION and \
                 previous.get("speech_gain", "auto") == getattr(args, "speech_gain", "auto"):
             # Keep the report's source pointer in sync with timeline renames.
             if previous.get("source") != str(source):

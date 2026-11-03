@@ -30,16 +30,46 @@ class PreprocessTest(unittest.TestCase):
             report = {}
             samples = np.zeros((preprocess.SAMPLE_RATE, 2), dtype=np.float32)
             with patch.object(preprocess, "extract_audio"), \
-                 patch.object(preprocess, "command"), \
+                 patch.object(preprocess, "command", return_value=""), \
                  patch.object(preprocess, "pcm16",
                               return_value=(preprocess.SAMPLE_RATE, samples)), \
                  patch.object(preprocess, "speech_intervals",
                               side_effect=AssertionError("VAD must not run")):
                 preprocess.enhance_audio(Path("in.mp4"), {"index": 1}, work, report,
                                          "ffmpeg", "off")
-            self.assertEqual(report["audio"], {"speech_gain": "off", "peak_ceiling_dbfs": -1})
+            self.assertEqual(report["audio"], {"speech_gain": "off", "level_match_db": 0.0,
+                                               "level_match_bounded": False,
+                                               "peak_ceiling_dbfs": -1})
             self.assertEqual(report["speech_gain"], "off")
             self.assertNotIn("speech_intervals", report["audio"])
+            self.assertNotIn("fallback", report["denoise"])
+
+    def test_denoise_that_removes_the_program_falls_back_to_source(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            work = Path(scratch)
+            report = {}
+            samples = np.zeros((preprocess.SAMPLE_RATE, 2), dtype=np.float32)
+            # source, denoised, re-measured source, match reference
+            loudness = [-19.4, -40.0, -19.4, -19.4]
+            with patch.object(preprocess, "extract_audio"), \
+                 patch.object(preprocess, "command", return_value=""), \
+                 patch.object(preprocess, "pcm16",
+                              return_value=(preprocess.SAMPLE_RATE, samples)), \
+                 patch.object(preprocess, "measure_loudness", side_effect=loudness):
+                preprocess.enhance_audio(Path("in.mp4"), {"index": 1}, work, report,
+                                         "ffmpeg", "off")
+            self.assertEqual(report["denoise"]["fallback"], "content-loss")
+            self.assertEqual(report["denoise_engine"], "skipped")
+            self.assertEqual(report["denoise"]["denoised_lufs"], -40.0)
+            self.assertEqual(report["audio"]["level_match_db"], 0.0)
+
+    def test_level_match_is_bounded_to_the_reference(self):
+        self.assertEqual(preprocess.level_match_db(-40.0, -19.0),
+                         preprocess.MAX_LEVEL_MATCH_DB)
+        self.assertEqual(preprocess.level_match_db(-5.0, -19.0),
+                         -preprocess.MAX_LEVEL_MATCH_DB)
+        self.assertAlmostEqual(preprocess.level_match_db(-22.0, -19.0), 3.0)
+        self.assertEqual(preprocess.level_match_db(None, -19.0), 0.0)
 
     def test_blur_candidates_are_review_only_and_use_source_times(self):
         times = [i / 10 for i in range(10)]
@@ -92,6 +122,47 @@ class PreprocessTest(unittest.TestCase):
             sources, output = preprocess.source_files(args)
             self.assertEqual([p.name for p in sources], ["IMG_1.MOV"])
             self.assertEqual(output, draft / ".content-studio" / "processed-clips")
+
+    def test_render_tolerates_source_audio_tail(self):
+        source_video = {"codec_type": "video", "width": 1920, "height": 1080,
+                        "duration": "15.755", "color_primaries": "bt709",
+                        "color_transfer": "bt709", "color_space": "bt709"}
+        source_audio = {"codec_type": "audio", "duration": "15.808"}
+        output_video = dict(source_video, duration="15.755")
+        output_audio = {"codec_type": "audio", "channels": 2, "duration": "15.82"}
+        probes = {
+            Path("in.mp4"): {"streams": [source_video, source_audio],
+                             "format": {"duration": "15.822"}},
+            Path("out.mp4"): {"streams": [output_video, output_audio],
+                              "format": {"duration": "15.822"}},
+        }
+        with patch.object(preprocess, "probe", side_effect=lambda path: probes[path]), \
+             patch.object(preprocess, "frame_times", return_value=[0, 1]), \
+             patch.object(preprocess, "frame_count", return_value=2), \
+             patch.object(preprocess, "command"):
+            preprocess.validate_render(Path("in.mp4"), Path("out.mp4"),
+                                       source_video, None, False)
+
+    def test_render_rejects_audio_drift_beyond_source_tail(self):
+        source_video = {"codec_type": "video", "width": 1920, "height": 1080,
+                        "duration": "15.755", "color_primaries": "bt709",
+                        "color_transfer": "bt709", "color_space": "bt709"}
+        source_audio = {"codec_type": "audio", "duration": "15.808"}
+        output_video = dict(source_video)
+        output_audio = {"codec_type": "audio", "channels": 2, "duration": "16.05"}
+        probes = {
+            Path("in.mp4"): {"streams": [source_video, source_audio],
+                             "format": {"duration": "15.822"}},
+            Path("out.mp4"): {"streams": [output_video, output_audio],
+                              "format": {"duration": "15.822"}},
+        }
+        with patch.object(preprocess, "probe", side_effect=lambda path: probes[path]), \
+             patch.object(preprocess, "frame_times", return_value=[0, 1]), \
+             patch.object(preprocess, "frame_count", return_value=2), \
+             patch.object(preprocess, "command"):
+            with self.assertRaisesRegex(preprocess.ProcessingError, "audio sync"):
+                preprocess.validate_render(Path("in.mp4"), Path("out.mp4"),
+                                           source_video, None, False)
 
     def test_failed_dolby_proof_is_removed(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
