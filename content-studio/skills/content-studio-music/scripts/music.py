@@ -8,6 +8,7 @@ import html
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -209,6 +210,64 @@ def write_selection(draft: Path, track: dict, catalog: Path, channel: str,
     return selection, credits
 
 
+def probe_media(path: Path) -> tuple[float, bool]:
+    result = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(path)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if result.returncode:
+        raise SystemExit(f"ffprobe failed for {path}: {result.stderr.strip()[-400:]}")
+    data = json.loads(result.stdout or "{}")
+    duration = float(data.get("format", {}).get("duration") or 0)
+    audio = any(stream.get("codec_type") == "audio" for stream in data.get("streams", []))
+    if duration <= 0 or not audio:
+        raise SystemExit(f"media needs a positive duration and audio: {path}")
+    return duration, audio
+
+
+def mix_music(video: Path, track: Path, output: Path, *, volume: float = 0.18,
+              duck: bool | None = None, fade: float = 1.0) -> dict:
+    duration, _ = probe_media(video)
+    probe_media(track)
+    if output.exists():
+        raise SystemExit(f"output already exists: {output}")
+    if duck is None:
+        transcript = video.parent / "transcript.json"
+        duck = False
+        if transcript.is_file():
+            data = json.loads(transcript.read_text(encoding="utf-8"))
+            duck = data.get("speech") is not False
+    fade = max(0.0, min(float(fade), duration / 2))
+    filters = [f"volume={volume:.4f}", f"atrim=0:{duration:.6f}", "asetpts=PTS-STARTPTS"]
+    if fade > 0:
+        filters += [f"afade=t=in:st=0:d={fade:.3f}",
+                    f"afade=t=out:st={max(0.0, duration - fade):.3f}:d={fade:.3f}"]
+    music = "[1:a]" + ",".join(filters) + "[music]"
+    if duck:
+        graph = ("[0:a]asplit=2[voice][key];" + music
+                 + ";[music][key]sidechaincompress=threshold=0.05:ratio=4:"
+                   "attack=20:release=300[ducked]"
+                   ";[voice][ducked]amix=inputs=2:duration=first:dropout_transition=2[a]")
+    else:
+        graph = music + ";[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[a]"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+         "-i", str(video), "-stream_loop", "-1", "-i", str(track),
+         "-filter_complex", graph, "-map", "0:v:0", "-map", "[a]",
+         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+         "-t", f"{duration:.6f}", "-movflags", "+faststart", str(output)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if result.returncode:
+        output.unlink(missing_ok=True)
+        raise SystemExit(f"ffmpeg music mix failed: {result.stderr.strip()[-600:]}")
+    actual, _ = probe_media(output)
+    if abs(actual - duration) > max(0.2, duration * 0.005):
+        output.unlink(missing_ok=True)
+        raise SystemExit(f"music mix duration changed: {duration:.3f}s -> {actual:.3f}s")
+    return {"duration_seconds": round(actual, 3), "volume": volume,
+            "duck": bool(duck), "fade_seconds": fade}
+
+
 def draft_for(args) -> tuple[str, Path]:
     if not getattr(args, "channel", None) or not getattr(args, "draft", None):
         raise SystemExit("--channel and --draft are required")
@@ -260,6 +319,21 @@ def build_parser() -> argparse.ArgumentParser:
     select.add_argument("--draft", required=True)
     select.add_argument("--track", required=True,
                         help="exact title, file name, or a unique substring")
+
+    mix = sub.add_parser("mix", parents=[shared],
+                         help="mix the selected track under the draft master")
+    mix.add_argument("--channel", required=True)
+    mix.add_argument("--draft", required=True)
+    mix.add_argument("--track", help="catalog title/file; default: music-selection.json")
+    mix.add_argument("--input", help="video input (default: draft/video.mp4)")
+    mix.add_argument("--output", help="output (default: draft/video-with-music.mp4)")
+    mix.add_argument("--volume", type=float, default=0.18,
+                     help="music gain relative to the master (default 0.18)")
+    mix.add_argument("--fade", type=float, default=1.0,
+                     help="fade in/out seconds (default 1.0)")
+    mix.add_argument("--duck", action=argparse.BooleanOptionalAction, default=None,
+                     help="duck music under speech; default: auto from transcript.speech")
+    mix.add_argument("--force", action="store_true", help="replace an existing output")
 
     show = sub.add_parser("show", parents=[shared],
                           help="show the recorded selection for a draft")
@@ -323,6 +397,52 @@ def run(argv: list[str] | None = None) -> int:
         print(f"selected: {track.get('title')} — {track.get('artist')}")
         print(f"selection: {selection}")
         print(f"credits: {credits}")
+        return 0
+
+    if args.command == "mix":
+        slug, draft = draft_for(args)
+        if args.track:
+            track = resolve_track(tracks, args.track)
+            selection_note = None
+        else:
+            selection = draft / "music-selection.json"
+            if not selection.is_file():
+                raise SystemExit(f"no music selection yet: {selection}")
+            payload = json.loads(selection.read_text(encoding="utf-8"))
+            track = dict(payload.get("track", {}))
+            if not track.get("absolute_path"):
+                catalog_root = Path(payload.get("catalog") or catalog)
+                track["absolute_path"] = str(
+                    (catalog_root / "local" / Path(str(track.get("file", "")))).resolve())
+            selection_note = selection.name
+        track_path = Path(str(track.get("absolute_path", "")))
+        if not track_path.is_file():
+            raise SystemExit(f"selected audio file is missing: {track_path}")
+        video = Path(args.input).expanduser().resolve() if args.input else draft / "video.mp4"
+        output = Path(args.output).expanduser().resolve() if args.output \
+            else draft / "video-with-music.mp4"
+        if not video.is_file():
+            raise SystemExit(f"master video not found: {video}")
+        if output.resolve() == video.resolve():
+            raise SystemExit("music mix output must differ from the input master")
+        if output.exists():
+            if not args.force:
+                raise SystemExit(f"output already exists: {output} (use --force)")
+            output.unlink()
+        result = mix_music(video, track_path, output, volume=args.volume,
+                           duck=args.duck, fade=args.fade)
+        record = {
+            "mixed_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "selection": selection_note,
+            "track": track,
+            "input": str(video),
+            "output": str(output),
+            **result,
+        }
+        (draft / "music-mix.json").write_text(json.dumps(record, indent=2) + "\n",
+                                              encoding="utf-8")
+        print(f"mixed: {track.get('title')} -> {output}")
+        print(f"record: {draft / 'music-mix.json'}")
         return 0
     return 1
 

@@ -1,4 +1,5 @@
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -107,6 +108,31 @@ class MusicSelectionTest(unittest.TestCase):
             text = credits.read_text(encoding="utf-8")
             self.assertIn("Attribution: Music: Pulse by Beat Maker", text)
             self.assertIn("License: YouTube Audio Library (CC BY 4.0)", text)
+
+    def test_mix_music_writes_a_new_master_with_ducking(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            video = root / "video.mp4"
+            track = root / "music.wav"
+            subprocess.run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                            "-f", "lavfi", "-i", "color=c=blue:s=320x180:r=30:d=2",
+                            "-f", "lavfi", "-i",
+                            "sine=frequency=440:sample_rate=48000:duration=2",
+                            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+                            "-shortest", str(video)], check=True, capture_output=True)
+            subprocess.run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                            "-f", "lavfi", "-i",
+                            "sine=frequency=880:sample_rate=48000:duration=1",
+                            "-c:a", "pcm_s16le", str(track)], check=True,
+                           capture_output=True)
+            output = root / "video-with-music.mp4"
+            result = music.mix_music(video, track, output, volume=0.2,
+                                     duck=True, fade=0.25)
+            self.assertTrue(output.exists())
+            duration, audio = music.probe_media(output)
+            self.assertAlmostEqual(duration, 2.0, delta=0.2)
+            self.assertTrue(audio)
+            self.assertTrue(result["duck"])
 
 
 if __name__ == "__main__":

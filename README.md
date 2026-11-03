@@ -181,6 +181,15 @@ It writes `analysis/music-review.html` with playable candidates, then `music-sel
 
 Use YouTube Audio Library for YouTube-first videos. Use Pixabay Music when the same edit also goes to Instagram, TikTok, or a client channel. Both are manual downloads; the scripts do not scrape either site. If a track requires attribution, paste the exact line from `music-credits.txt` into the description.
 
+After approval, mix the track under the master:
+
+```powershell
+python <bundle>/skills/content-studio-music/scripts/music.py mix `
+  --channel <slug> --draft <id>
+```
+
+It writes `video-with-music.mp4` and `music-mix.json`. Review the mixed master, then replace `video.mp4` and repeat package approval because the master hash changed.
+
 ### 7. Assemble and approve the publication package
 
 A publication candidate contains:

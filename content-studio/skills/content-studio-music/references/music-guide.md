@@ -131,6 +131,17 @@ draft/
 
 `music-selection.json` includes the catalog root, relative file, title, artist, category, mood, duration, license, attribution, and SHA-256. The audio remains in the local catalog; do not copy it into the content repository.
 
+## Mixing
+
+```powershell
+python <this-skill>/scripts/music.py mix `
+  --channel out-of-office --draft dubai-day-4
+```
+
+The command reads `music-selection.json`, mixes the track under `video.mp4`, and writes `video-with-music.mp4` plus `music-mix.json`. It loops or trims the track to the master duration, fades the edges, and ducks under speech when `transcript.json` contains speech. Review the mixed master, then replace `video.mp4` after approval and repeat package approval because the master hash changed.
+
+Use `--volume 0.15`, `--no-duck`, or `--fade 0.5` to adjust the mix. Use `--input` and `--output` for a specific pair of files.
+
 ## Attribution and publishing
 
 - If `music-credits.txt` says “No attribution required,” the description may omit music credit.

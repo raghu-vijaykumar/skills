@@ -1,6 +1,6 @@
 ---
 name: content-studio-music
-description: Choose, review, and save background music from YouTube Audio Library or Pixabay Music for one draft, with license and attribution tracking. Use after the edit and before publication.
+description: Choose, review, mix, and save background music from YouTube Audio Library or Pixabay Music for one draft, with license and attribution tracking. Use after the edit and before publication.
 ---
 
 # Content Studio Music
@@ -74,8 +74,17 @@ Confirm with:
 python <this-skill>/scripts/music.py show --channel <slug> --draft <id>
 ```
 
+## Mix the approved track
+
+```powershell
+python <this-skill>/scripts/music.py mix `
+  --channel <slug> --draft <id>
+```
+
+It writes `video-with-music.mp4` and `music-mix.json` without changing the approved master. Music is looped or trimmed to the master duration, faded at the edges, and ducked under speech when the transcript contains speech. Review the mixed master, then replace `video.mp4` only after approval and repeat package approval because the master hash changed.
+
 ## Handoff
 
-Give `music-selection.json` to `content-studio-videoedit` when mixing or assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
+Give `music-selection.json`, `music-mix.json`, and `video-with-music.mp4` to `content-studio-videoedit` when assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
 
 Read [the music guide](references/music-guide.md) for license details, Pixabay Content ID handling, and catalog troubleshooting.

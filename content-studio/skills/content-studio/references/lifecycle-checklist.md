@@ -37,7 +37,7 @@ closed.
 | C09 | pre-publish | edited | Transcript reviewed | `transcript.json` matches the master hash and spoken content, or records `speech: false` |
 | C10 | pre-publish | edited | Captions reviewed | `captions.srt` timing/text reviewed, or captions explicitly declined (including a `speech: false` transcript) |
 | C11 | pre-publish | all | Thumbnail approved | AI-generated 16:9 thumbnail from representative frames plus audio/voiceover context; approved |
-| C12 | pre-publish | all | Music selected and licensed | `music-selection.json` and `music-credits.txt`, or explicitly no music |
+| C12 | pre-publish | all | Music selected, mixed, and licensed | `music-selection.json`, `music-credits.txt`, and a reviewed music-mixed master, or explicitly no music |
 | C13 | pre-publish | all | Title and description reviewed | Exact copy derived from transcript/voiceover/audio context, including required music attribution |
 | C14 | pre-publish | all | Rights, licenses, and consent reviewed | Footage, music, fonts, logos, faces, locations, and client data cleared |
 | C15 | pre-publish | all | Creative metadata recorded | `creative.json` has themeId, styleId, format, renderer, choices |
