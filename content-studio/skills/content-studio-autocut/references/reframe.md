@@ -1,4 +1,13 @@
-# Portrait reframe workflow
+# Portrait reframe workflow (experimental)
+
+**Experimental.** Use this workflow only when the user explicitly asks for a
+portrait Short, Reel, or vertical cut from landscape footage. Do not choose
+landscape-in-portrait reframing on your own.
+
+For the default landscape-in-portrait treatment, use `--fit blur` instead. It
+centers the landscape clip at full width over a blurred copy of itself, giving
+horizontal blurred bands above and below — the mirror of the vertical blurred
+bands used for a portrait clip in a landscape edit.
 
 Use this when the source footage is landscape but the deliverable is a 9:16
 Short, Reel, or vertical cut.

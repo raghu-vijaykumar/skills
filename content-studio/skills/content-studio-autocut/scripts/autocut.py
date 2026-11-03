@@ -305,7 +305,7 @@ def main():
     p.add_argument("--allow",action="append",
                    help="include a specific mismatched filename; repeatable")
     p.add_argument("--fit",choices=["pad","blur","crop","reframe"],default="blur",
-                   help="fit mismatched clips with a blurred copy (default), black padding, crop, or subject reframe")
+                   help="fit mismatched clips with a blurred copy (default), black padding, crop, or subject reframe; reframe is experimental and only for an explicitly requested portrait deliverable")
     p.add_argument("--reframe-mode",choices=["auto","subjects","saliency","center"],default="auto",
                    help="subject signal for --fit reframe: AI boxes, saliency, or center")
     p.add_argument("--subjects",type=Path,

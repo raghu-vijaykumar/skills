@@ -385,6 +385,18 @@ class EditingTest(unittest.TestCase):
                 self.assertEqual((video["width"], video["height"]), (1920, 1080))
                 self.assertTrue(audio)
 
+    def test_landscape_clip_can_fill_portrait_with_blur(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "landscape.mp4"
+            self.make_sized_video(source, 320, 180, "green")
+            output = root / "landscape-portrait-blur.mp4"
+            editing.normalized_segment(source, None, output, size=(1080, 1920), fit="blur")
+            actual, video, audio = editing.probe(output)
+            self.assertAlmostEqual(actual, 1.0, delta=0.15)
+            self.assertEqual((video["width"], video["height"]), (1080, 1920))
+            self.assertTrue(audio)
+
     def test_join_orientation_filter_keeps_matching_and_explicit_exceptions(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

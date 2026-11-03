@@ -20,19 +20,129 @@ This repository is the editable source of the `content-studio` video lifecycle b
 
 A draft is one folder under `<workspace>/<channel>/drafts/<id>`. Raw media stays in that folder; the skills add plans, review artifacts, hashes, and publishing receipts around it. Remotion videos and camera-footage vlogs take different production paths, then converge on the same approval and publishing gate.
 
-```text
-idea ──► treatment ──┬── Remotion: scaffold → narration → render ──┐
-                     │                                             │
-raw footage ─────────┴── preprocess → AutoCut rough cut → edit ────┤
-                                                                   ▼
-                              transcript + captions + thumbnail + music
-                                                                   ▼
-                                    hash-bound human package approval
-                                                                   ▼
-                                      publish YouTube / Instagram
-                                                                   ▼
-                                      independent archive + Drive sync
+```mermaid
+flowchart TD
+  subgraph DISCOVER["1 · Discover and set up"]
+    IDEA(["Idea, request, or supplied edit"]):::entry
+    DRAFT["Open channel and draft<br/>read owner rules · C01"]:::setup
+    BRIEF["content-studio-ideagen<br/>analytics · comparisons · brief · C03"]:::optional
+    STYLE["content-studio-styles<br/>theme · style · format · C15"]:::setup
+    KIND{"Production kind<br/>edited or remotion · C02"}:::gate
+  end
+
+  subgraph REMOTION["2A · Remotion production"]
+    RINIT["npx videogen init<br/>once per project"]:::remotion
+    RSCAFFOLD["npx videogen scaffold id<br/>preserves brief and scenes"]:::remotion
+    RAUTHOR["Author video.yaml and scenes<br/>theme · style · narration text"]:::remotion
+    RNARRATE["Narrated? videogen narration<br/>cue timing · videogen check"]:::remotion
+    REVIDENCE["Evidence render<br/>videogen render --from --to"]:::remotion
+    RREVIEW{"Rendered frames and motion approved?"}:::gate
+    RFULL["Full delivery render<br/>videogen render --delivery · C07 · C08"]:::remotion
+    RPOST["Optional carousel or post<br/>content-check · content-render"]:::optional
+  end
+
+  subgraph EDITED["2B · Camera-footage production"]
+    PRE["content.py preprocess<br/>dedupe · order · voice enhance · C04"]:::edited
+    BLUR{"Blur and Dolby Vision reviewed?"}:::gate
+    CUT["content-studio-autocut rough cut<br/>orientation · fit · scenes · C05"]:::edited
+    CUTREVIEW{"Rough cut, frames, and audio approved?"}:::gate
+    EDIT["content.py edit join or cuts<br/>frame-accurate master · C07 · C08"]:::edited
+    AUDIO["content-studio-audio<br/>loudness and dynamics · C06"]:::optional
+    TRANSCRIPT["content.py transcribe<br/>transcript matches master · C09"]:::edited
+    CAPTIONS["content.py captions<br/>timing and text reviewed · C10"]:::edited
+  end
+
+  subgraph PACKAGE["3 · Review and package"]
+    MUSIC["content-studio-music<br/>selection · mix · credits · C12"]:::package
+    THUMB["AI 16:9 thumbnail<br/>frames plus audio context · C11"]:::package
+    COPY["Title and description<br/>exact copy · attribution · C13"]:::package
+    RIGHTS["Rights, licenses, consent<br/>footage · music · fonts · faces · C14"]:::package
+    ASSEMBLE["Assemble candidate package<br/>master · thumbnail · copy · captions · credits"]:::package
+    APPROVE["Hash-bound package approval<br/>cli.mjs approve · C16"]:::package
+    VERIFY{"Checklist verify pre_publish<br/>C01–C17 documented?"}:::gate
+    RESOLVE["Resolve pending or deferred items"]:::optional
+    PREVIEW["Publish plan preview<br/>platform · visibility · schedule · C17"]:::package
+  end
+
+  subgraph PUBLISH["4 · Publish"]
+    REQUEST{"Human publication request?"}:::gate
+    YTNOW["YouTube now<br/>publish --confirm"]:::publish
+    YTSCHED["YouTube schedule<br/>publish --at ISO --confirm"]:::publish
+    IGREEL["Instagram Reel now<br/>publish --platform instagram --confirm"]:::publish
+    RECEIPT["Record platform ID and receipt<br/>C18"]:::publish
+    LIVE["Verify live or scheduled status<br/>C19"]:::publish
+  end
+
+  subgraph ARCHIVE["5 · Archive and close"]
+    BACKUP["content-studio-archive backup<br/>public video · metadata · receipt · C20"]:::archive
+    DRIVE["content.py sync plus rclone check<br/>durable media verified · C21"]:::archive
+    CLOSE["Move to shorts or long, or close draft<br/>source retained · C22"]:::archive
+  end
+
+  IDEA --> DRAFT
+  DRAFT --> BRIEF
+  BRIEF --> STYLE
+  STYLE --> KIND
+  DRAFT -.->|supplied edit| KIND
+
+  KIND -->|Remotion| RINIT
+  RINIT --> RSCAFFOLD --> RAUTHOR --> RNARRATE --> REVIDENCE --> RREVIEW
+  RREVIEW -->|changes| RAUTHOR
+  RREVIEW -->|approved| RFULL
+  RAUTHOR -.-> RPOST
+
+  KIND -->|Camera footage| PRE
+  PRE --> BLUR
+  BLUR -->|fix| PRE
+  BLUR -->|approved| CUT
+  CUT --> CUTREVIEW
+  CUTREVIEW -->|request changes| CUT
+  CUTREVIEW -->|approved or deferred| EDIT
+  BLUR -.->|no rough cut| EDIT
+  EDIT --> TRANSCRIPT --> CAPTIONS
+  AUDIO -.-> EDIT
+
+  RFULL --> ASSEMBLE
+  CAPTIONS --> ASSEMBLE
+  MUSIC --> ASSEMBLE
+  THUMB --> ASSEMBLE
+  COPY --> ASSEMBLE
+  RIGHTS --> ASSEMBLE
+  ASSEMBLE --> APPROVE --> VERIFY
+  VERIFY -->|blocked| RESOLVE
+  RESOLVE --> VERIFY
+  VERIFY -->|pass| PREVIEW --> REQUEST
+
+  REQUEST -->|YouTube now| YTNOW
+  REQUEST -->|YouTube schedule| YTSCHED
+  REQUEST -->|Instagram Reel| IGREEL
+  YTNOW --> RECEIPT
+  YTSCHED --> RECEIPT
+  IGREEL --> RECEIPT
+  RECEIPT --> LIVE
+  LIVE -.->|uncertain result| RECEIPT
+
+  LIVE --> BACKUP --> DRIVE --> CLOSE
+
+  classDef entry fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+  classDef setup fill:#111827,stroke:#64748b,stroke-width:1.5px,color:#e2e8f0;
+  classDef remotion fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#eef2ff;
+  classDef edited fill:#082f49,stroke:#38bdf8,stroke-width:2px,color:#e0f2fe;
+  classDef gate fill:#3f2d0b,stroke:#f59e0b,stroke-width:2px,color:#fef3c7;
+  classDef package fill:#1c1917,stroke:#a8a29e,stroke-width:1.5px,color:#fafaf9;
+  classDef publish fill:#052e16,stroke:#22c55e,stroke-width:2px,color:#dcfce7;
+  classDef archive fill:#2e1065,stroke:#c084fc,stroke-width:2px,color:#f3e8ff;
+  classDef optional fill:#0f172a,stroke:#64748b,stroke-width:1.5px,stroke-dasharray:5 5,color:#cbd5e1;
+  linkStyle default stroke:#94a3b8,stroke-width:1.5px;
+  style DISCOVER fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
+  style REMOTION fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
+  style EDITED fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
+  style PACKAGE fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
+  style PUBLISH fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
+  style ARCHIVE fill:#f8fafc,stroke:#cbd5e1,stroke-width:1.5px,color:#334155;
 ```
+
+Solid arrows are required lifecycle steps; dashed arrows are optional or bypass paths; diamonds are human review gates. `C##` refers to the fixed checklist item in [the lifecycle checklist](content-studio/skills/content-studio/references/lifecycle-checklist.md).
 
 ### Deterministic checklist
 
@@ -124,18 +234,17 @@ python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
 
 `--orientation landscape` filters portrait clips from a landscape edit. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. The default `--fit blur` centers a mismatched clip over a blurred copy of the same footage; `--fit crop` fills the frame by cropping; `--fit pad` leaves black bars. The decisions file records `orientation`, `size`, `fit`, and `skipped_sources`, and the timeline keeps the same fit for later renders.
 
-For a portrait Short or Reel from landscape footage:
+For a portrait Short or Reel from landscape footage, keep the same blurred-background approach: the landscape clip is centered at full width with horizontal blurred bands above and below.
 
 ```powershell
 python <bundle>/skills/content-studio-autocut/scripts/autocut.py `
   --folder <draft>/analysis/autocut-input --duration 60s `
   --output <draft>/rough-cut `
   --size 1080x1920 --orientation portrait --include-mismatched `
-  --fit reframe --reframe-mode auto --subjects <draft>/analysis/subjects.json `
-  --detect-scenes
+  --fit blur --detect-scenes
 ```
 
-`reframe` uses AI subject boxes first, saliency second, and center last. Each selected segment gets a stable crop plus `reframe-preview/shot-*/reframe-review.html` showing the crop rectangle and framed result. Read [the portrait reframe workflow](content-studio/skills/content-studio-autocut/references/reframe.md) for the subject-box schema.
+**Experimental:** subject-aware reframing (`--fit reframe`) crops each selected segment instead of using blurred bands. Use it only when the user explicitly asks for that crop. It prefers AI subject boxes from `--subjects`, then saliency, then center, and writes `reframe-preview/shot-*/reframe-review.html`. Read [the portrait reframe workflow](content-studio/skills/content-studio-autocut/references/reframe.md) for the subject-box schema.
 
 It writes `rough-cut.mp4`, `edit-decisions.json`, `timeline.otio`, `timeline.json`, `review.html`, `review-state.json`, and review media under `review/` (contact sheet, frames, audio samples). Every selected range carries source in/out timestamps and a reason.
 

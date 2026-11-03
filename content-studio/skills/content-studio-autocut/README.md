@@ -13,7 +13,22 @@ Preprocess raw camera clips first with `content-studio-videopreprocess`, then st
 
 `--orientation` filters clips by measured width/height. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` (default) centers a mismatched clip over a blurred copy of itself instead of black bars; `--fit crop` fills the frame and crops; `--fit pad` uses black bars.
 
-For a portrait reel from landscape footage:
+## Portrait deliverables from landscape footage
+
+Use the same blurred-background fit as portrait clips in a landscape edit. The landscape clip stays centered at full width with horizontal blurred bands above and below:
+
+```bash
+python content-studio/skills/content-studio-autocut/scripts/autocut.py \
+  --folder ./preprocessed --duration 60s --output ./rough-cut \
+  --size 1080x1920 --orientation portrait --include-mismatched \
+  --fit blur --detect-scenes
+```
+
+`--fit blur` is already the default; it produces horizontal blurred bands for a landscape source in a portrait target, matching the vertical blurred bands used for a portrait source in a landscape target.
+
+### Subject-aware reframe (experimental)
+
+**Experimental.** Use this only when the user explicitly asks for a subject-aware crop instead of the blurred bands.
 
 ```bash
 python content-studio/skills/content-studio-autocut/scripts/autocut.py \

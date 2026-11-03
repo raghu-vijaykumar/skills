@@ -36,6 +36,12 @@ class TimelineTests(unittest.TestCase):
         self.assertIn("overlay",graph)
         self.assertIn("[v]",graph)
 
+    def test_blur_fit_filter_supports_portrait_target(self):
+        graph=";".join(mod.fit_filter("[0:v:0]",1080,1920,"blur","[v]"))
+        self.assertIn("scale=1080:1920",graph)
+        self.assertIn("gblur",graph)
+        self.assertIn("overlay=(W-w)/2:(H-h)/2",graph)
+
     def test_reframe_fit_crops_and_scales_and_survives_timeline_copy(self):
         record={"source_width":640,"source_height":360,
                 "crop":{"x":0.676167,"y":0,"w":0.316406,"h":1.0}}
