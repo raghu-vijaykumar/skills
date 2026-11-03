@@ -35,7 +35,14 @@ export function transcriptionSegments(data) {
   return raw.map((entry) => ({startMs: Number(entry.offsets?.from ?? entry.start * 1000),
     endMs: Number(entry.offsets?.to ?? entry.end * 1000), text: String(entry.text ?? '').trim()}))
     .filter((entry) => Number.isFinite(entry.startMs) && Number.isFinite(entry.endMs) &&
-      entry.endMs > entry.startMs && entry.text);
+      entry.endMs > entry.startMs && isSpeechText(entry.text));
+}
+export function isSpeechText(text) {
+  const cleaned = String(text ?? '').replace(/\[[^\]]*\]/g, '').trim();
+  if (!cleaned) return false;
+  const visible = cleaned.replace(/\s/g, '');
+  const letters = (cleaned.match(/[\p{L}\p{N}]/gu) ?? []).length;
+  return visible.length > 0 && letters / visible.length >= 0.5;
 }
 export function toSrt(segments) {
   return segments.map((entry, index) => `${index + 1}\n${stamp(entry.startMs)} --> ${stamp(entry.endMs)}\n${entry.text}\n`).join('\n');
@@ -56,16 +63,19 @@ export function transcribeDraft(channelRoot, draft, options = {}) {
   execute('ffmpeg', ['-nostdin','-y','-v','error','-i',master,'-vn','-ac','1','-ar','16000','-c:a','pcm_s16le',audio], 'audio extraction');
   execute(cli, ['-m',model,'-f',audio,'-l','auto','-oj','-of',prefix], 'whisper.cpp transcription');
   const segments = transcriptionSegments(JSON.parse(fs.readFileSync(`${prefix}.json`,'utf8')));
-  if (!segments.length) throw new Error('Transcription contained no timed speech; inspect the final export audio');
+  const speech = segments.length > 0;
   const transcript = {model: 'whisper.cpp-v1.9.4-small', masterSha256: sha256(master),
-    generatedAt: new Date().toISOString(), durationSeconds: probed.durationSeconds, segments};
+    generatedAt: new Date().toISOString(), durationSeconds: probed.durationSeconds, speech, segments};
   fs.writeFileSync(path.join(draft,'transcript.json'), JSON.stringify(transcript,null,2)+'\n');
-  fs.writeFileSync(path.join(draft,'captions.srt'), toSrt(segments));
+  const captions = path.join(draft,'captions.srt');
+  if (speech) fs.writeFileSync(captions, toSrt(segments));
+  else fs.rmSync(captions, {force: true});
   for (const portion of [0.1,0.5,0.9]) {
     const at = Math.min(probed.durationSeconds - 0.05, Math.max(0, probed.durationSeconds * portion));
     execute('ffmpeg', ['-nostdin','-y','-v','error','-ss',String(at),'-i',master,'-frames:v','1',
       '-vf','scale=640:-2',path.join(cache,`frame-${Math.round(portion*100)}.png`)], 'reference frame');
   }
-  return {transcript: path.join(draft,'transcript.json'), captions: path.join(draft,'captions.srt'),
-    frameDir: cache, segments: segments.length, durationSeconds: probed.durationSeconds};
+  return {transcript: path.join(draft,'transcript.json'),
+    captions: speech ? captions : null,
+    frameDir: cache, speech, segments: segments.length, durationSeconds: probed.durationSeconds};
 }

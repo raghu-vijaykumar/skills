@@ -34,8 +34,8 @@ closed.
 | C06 | pre-publish | all | Audio mastered and reviewed | Loudness/dynamics checked; not applicable only when no audio treatment is needed |
 | C07 | pre-publish | all | Master edit or render complete | Full-length master exists and was watched end to end |
 | C08 | pre-publish | all | Color, HDR, and Dolby Vision reviewed | SDR tags/tone mapping checked; DV proof reviewed when applicable |
-| C09 | pre-publish | edited | Transcript reviewed | `transcript.json` matches the master hash and spoken content |
-| C10 | pre-publish | edited | Captions reviewed | `captions.srt` timing/text reviewed, or captions explicitly declined |
+| C09 | pre-publish | edited | Transcript reviewed | `transcript.json` matches the master hash and spoken content, or records `speech: false` |
+| C10 | pre-publish | edited | Captions reviewed | `captions.srt` timing/text reviewed, or captions explicitly declined (including a `speech: false` transcript) |
 | C11 | pre-publish | all | Thumbnail approved | Approved thumbnail at platform size and limit |
 | C12 | pre-publish | all | Music selected and licensed | `music-selection.json` and `music-credits.txt`, or explicitly no music |
 | C13 | pre-publish | all | Title and description reviewed | Exact copy reviewed, including required music attribution |

@@ -67,12 +67,16 @@ export function validateDraftRecord(draft, files) {
   const kind = manifest.production?.kind ?? (files.videoYaml ? 'remotion' : 'edited');
   if (!['edited', 'remotion'].includes(kind)) throw new Error('Unknown draft production kind');
   if (kind === 'edited') {
-    if (!files.transcript || !files.subtitles) throw new Error('Edited export needs transcript.json and captions.srt');
+    if (!files.transcript) throw new Error('Edited export needs transcript.json');
     const transcript = readJson(files.transcript);
+    const noSpeech = transcript.speech === false;
     if (transcript.masterSha256 !== sha256(files.master) || !Array.isArray(transcript.segments) ||
-        !transcript.segments.length)
+        (noSpeech && transcript.segments.length) || (!noSpeech && !transcript.segments.length))
       throw new Error('Edited export transcript/captions do not match this master');
-    validateSrt(files.subtitles, transcript.durationSeconds);
+    if (!noSpeech) {
+      if (!files.subtitles) throw new Error('Edited export needs captions.srt');
+      validateSrt(files.subtitles, transcript.durationSeconds);
+    }
   }
   return {kind, creative};
 }

@@ -128,6 +128,27 @@ test('caption gate rejects overlaps and timestamps beyond the export',()=>{
   } finally {cleanup(workspace);}
 });
 
+test('non-speech annotations and garbage are not captions',()=>{
+  const segments=transcriptionSegments({transcription:[
+    {offsets:{from:0,to:1000},text:'[MUSIC]'},
+    {offsets:{from:1000,to:2000},text:'�-�-�-�'},
+    {offsets:{from:2000,to:3000},text:'Hello world'},
+  ]});
+  assert.deepEqual(segments,[{startMs:2000,endMs:3000,text:'Hello world'}]);
+});
+
+test('a no-speech transcript approves without fake captions',()=>{
+  const {workspace,draft}=fixture();
+  try {
+    fs.writeFileSync(path.join(draft,'transcript.json'),JSON.stringify({
+      masterSha256:sha256(path.join(draft,'video.mp4')),durationSeconds:10,speech:false,segments:[]}));
+    fs.rmSync(path.join(draft,'captions.srt'));
+    approvePackage(draft,'001-test','Reviewed silent travel edit without captions');
+    assert.equal(verifyPackage(draft,'001-test').files.subtitles,undefined);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(draft,'transcript.json'),'utf8')).speech,false);
+  } finally {cleanup(workspace);}
+});
+
 test('whisper JSON segments produce timed captions',()=>{
   const segments=transcriptionSegments({transcription:[{offsets:{from:250,to:1250},text:'  Hello world  '}]});
   assert.deepEqual(segments,[{startMs:250,endMs:1250,text:'Hello world'}]);
@@ -158,6 +179,35 @@ test('edited-export transcription writes caption and representative-frame refere
     assert.match(fs.readFileSync(result.captions,'utf8'),/A real sentence/);
     assert.equal(commands.filter((entry)=>entry.label==='reference frame').length,3);
     assert.ok(commands.find((entry)=>entry.label==='whisper.cpp transcription').args.includes('auto'));
+  } finally {cleanup(workspace);}
+});
+
+test('no-speech whisper output writes a no-speech transcript and removes captions',()=>{
+  const {workspace,channel,draft}=fixture();
+  try {
+    const cli=path.join(workspace,'whisper-cli.exe');
+    const model=path.join(workspace,'ggml-small.bin');
+    fs.writeFileSync(cli,'stub');
+    fs.writeFileSync(model,'stub');
+    const result=transcribeDraft(channel,draft,{cli,model,
+      probe:()=>({durationSeconds:10}),
+      runCommand:(binary,args,label)=>{
+        if(label==='whisper.cpp transcription') {
+          const prefix=args[args.indexOf('-of')+1];
+          fs.writeFileSync(`${prefix}.json`,JSON.stringify({transcription:[
+            {offsets:{from:0,to:1000},text:'[MUSIC]'},
+            {offsets:{from:1000,to:2000},text:'�-�-�-�'}]}));
+        } else {
+          fs.writeFileSync(args[args.length-1],'proof');
+        }
+      }});
+    assert.equal(result.speech,false);
+    assert.equal(result.segments,0);
+    assert.equal(result.captions,null);
+    assert.equal(fs.existsSync(path.join(draft,'captions.srt')),false);
+    const transcript=JSON.parse(fs.readFileSync(path.join(draft,'transcript.json'),'utf8'));
+    assert.equal(transcript.speech,false);
+    assert.deepEqual(transcript.segments,[]);
   } finally {cleanup(workspace);}
 });
 
