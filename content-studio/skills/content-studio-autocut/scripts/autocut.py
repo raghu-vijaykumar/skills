@@ -9,8 +9,10 @@ import subprocess
 import sys
 import math
 import tempfile
-from timeline import initial_timeline, write_revision, render
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from timeline import initial_timeline, write_revision, render
 
 EXTS={".mp4",".mov",".mkv",".m4v",".webm",".avi"}
 
