@@ -30,11 +30,12 @@ class PolishTest(unittest.TestCase):
                 "--input", str(source), "--output", str(output),
                 "--lens-k1", "0.01", "--denoise", "light",
                 "--deflicker", "--match-reference", str(reference),
-                "--sharpen", "light"])
+                "--stabilize", "--sharpen", "light"])
             manifest = polish.polish(args)
             self.assertTrue(output.is_file())
             self.assertEqual(manifest["used"]["denoise"], "light")
             self.assertTrue(manifest["used"]["deflicker"])
+            self.assertTrue(manifest["used"]["stabilize"])
             self.assertEqual(manifest["used"]["sharpen"], "light")
             self.assertEqual(manifest["output_size"], [320, 180])
             self.assertTrue((root / "polish.json").is_file())

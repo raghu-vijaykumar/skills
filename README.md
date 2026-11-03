@@ -322,7 +322,7 @@ node <bundle>/scripts/cli.mjs enhance render `
 
 See [the enhancement workflow](content-studio/skills/content-studio-videoedit/references/enhancement.md) for the manifest, validation limits, caching, and reflection-backend limitations.
 
-Restoration order is lens/perspective → temporal denoise → deflicker → upscale → shot matching → color correction → sharpen. Use `content-studio polish`, `content-studio match`, and `content-studio quality`; audio cleanup is `master.py --cleanup`. See [the restoration order](content-studio/skills/content-studio-videoedit/references/restoration.md).
+Restoration order is lens/perspective → temporal denoise → deflicker → upscale → shot matching → color correction → sharpen. Use `content-studio polish`, `content-studio match`, and `content-studio quality`; audio cleanup is `master.py --cleanup`. Use `content-studio refine --timeline <timeline.json>` to evaluate per-clip candidates and capture the selected polish/color filters in the timeline. See [the restoration order](content-studio/skills/content-studio-videoedit/references/restoration.md).
 
 ### 5d. Build a synchronized benchmark grid (optional)
 

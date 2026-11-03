@@ -527,6 +527,8 @@ def main() -> int:
     p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("quality", help="SSIM, PSNR, and VMAF measurement")
     p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("refine", help="iteratively select polish settings per clip")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
     if args.command == "enhance":
@@ -544,6 +546,9 @@ def main() -> int:
     if args.command == "quality":
         import quality
         return quality.main(args.rest)
+    if args.command == "refine":
+        import refine
+        return refine.main(args.rest)
     if args.command == "preprocess" and getattr(args, "folder", None):
         # An arbitrary folder is self-contained; no channel workspace is needed.
         folder = Path(args.folder).expanduser().resolve()

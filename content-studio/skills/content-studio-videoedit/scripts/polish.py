@@ -13,8 +13,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -38,8 +41,8 @@ class PolishError(RuntimeError):
     pass
 
 
-def run(args: list[str]) -> None:
-    result = subprocess.run(args, capture_output=True, text=True,
+def run(args: list[str], cwd: Path | None = None) -> None:
+    result = subprocess.run(args, cwd=cwd, capture_output=True, text=True,
                             encoding="utf-8", errors="replace")
     if result.returncode:
         raise PolishError((result.stderr or result.stdout)[-3000:])
@@ -83,6 +86,9 @@ def build_filter(args, info: dict) -> tuple[list[str], dict]:
     if args.perspective:
         filters.append(f"perspective={args.perspective}")
         used["perspective"] = args.perspective
+    if args.stabilize:
+        filters.append("vidstabtransform=input=transforms.trf:smoothing=15:optzoom=1")
+        used["stabilize"] = {"smoothing": 15, "optzoom": 1}
     if args.denoise != "off":
         filters.append(DENOISE[args.denoise])
         used["denoise"] = args.denoise
@@ -121,11 +127,22 @@ def polish(args) -> dict:
     if not filters:
         raise PolishError("no filters selected")
     output.parent.mkdir(parents=True, exist_ok=True)
-    run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-         "-i", str(source), "-vf", ",".join(filters),
-         "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-         "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart",
-         str(output)])
+    work = None
+    try:
+        if args.stabilize:
+            work = Path(tempfile.mkdtemp(prefix="polish-stab-", dir=output.parent))
+            run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-i", str(source), "-map", "0:v:0",
+                 "-vf", "vidstabdetect=shakiness=5:accuracy=9:result=transforms.trf",
+                 "-an", "-f", "null", os.devnull], cwd=work)
+        run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+             "-i", str(source), "-vf", ",".join(filters),
+             "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+             "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart",
+             str(output)], cwd=work)
+    finally:
+        if work is not None:
+            shutil.rmtree(work, ignore_errors=True)
     produced = probe(output)
     manifest = {
         "schema_version": 1,
@@ -151,6 +168,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lens-k1", type=float)
     parser.add_argument("--lens-k2", type=float)
     parser.add_argument("--perspective", help="raw FFmpeg perspective coordinates")
+    parser.add_argument("--stabilize", action="store_true",
+                        help="two-pass vidstab stabilization after lens/perspective")
     parser.add_argument("--denoise", choices=["off", "light", "medium", "nlmeans"],
                         default="light")
     parser.add_argument("--deflicker", action="store_true")

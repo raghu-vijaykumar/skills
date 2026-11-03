@@ -170,6 +170,9 @@ def enhancement_filters(clip):
         start=max(0.0,float(item.get("source_start",0))-source_in)
         end=min(duration,float(item.get("source_end",0))-source_in)
         if end<=start: continue
+        if item.get("stage") == "polish":
+            filters.extend(value for value in (item.get("filters") or []) if value)
+            continue
         for value in item.get("filters") or []:
             if value:
                 filters.append(f"{value}:enable='between(t,{start:.3f},{end:.3f})'")

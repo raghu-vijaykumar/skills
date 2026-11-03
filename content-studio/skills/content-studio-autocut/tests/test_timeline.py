@@ -49,6 +49,16 @@ class TimelineTests(unittest.TestCase):
         self.assertEqual(mod.enhancement_filters(clip),
                          ["eq=brightness=0.05:enable='between(t,2.000,4.000)'"])
 
+    def test_enhancement_filters_keep_polish_global(self):
+        clip={"source_in":0.0,"duration":5.0,"enhancements":[
+            {"stage":"polish","source_start":0,"source_end":5,
+             "filters":["hqdn3d=2:1:3:2","deflicker=mode=pm:size=10"]},
+            {"stage":"color","source_start":1,"source_end":2,
+             "filters":["eq=brightness=0.02"]}]}
+        self.assertEqual(mod.enhancement_filters(clip),
+                         ["hqdn3d=2:1:3:2","deflicker=mode=pm:size=10",
+                          "eq=brightness=0.02:enable='between(t,1.000,2.000)'"])
+
     def test_edit_timeline_writes_ordered_contributions(self):
         timeline=mod.initial_timeline([
             {"source":"clip.mp4","start":0,"end":2},

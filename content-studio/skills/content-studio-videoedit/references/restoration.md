@@ -6,6 +6,7 @@ resolution fourth, color fifth, and sharpening last.
 ```text
 lens correction
   → rolling-shutter / perspective correction
+  → stabilization
   → temporal denoise
   → deflicker / exposure stabilization
   → upscale
@@ -18,15 +19,51 @@ lens correction
 Audio cleanup is independent and runs after final assembly or on the audio
 master.
 
+## Iterative per-clip feedback
+
+```powershell
+content-studio refine `
+  --timeline <timeline.json> `
+  --output-timeline <timeline-refined.json>
+```
+
+For every video clip, `refine`:
+
+1. evaluates `off`, `light`, and `medium` polish candidates on short proxies
+2. measures edge sharpness, flat-area noise, clipping, and luma
+3. selects the highest-scoring candidate
+4. adds the selected polish filters to the timeline under `enhancements`
+5. adds approved analyzer color corrections to the same clip
+6. writes `refine.json` with every candidate and metric
+
+The timeline renderer consumes `clip.enhancements`, so the applied filters survive
+later timeline edits. Upscaling is deliberately excluded.
+
+Polished timeline entries look like:
+
+```json
+{
+  "stage": "polish",
+  "source_start": 0,
+  "source_end": 22.4,
+  "candidate": "light",
+  "filters": ["hqdn3d=2:1:3:2", "deflicker=mode=pm:size=10", "cas=strength=0.25"],
+  "metrics": {"before": {}, "after": {}}
+}
+```
+
+Color entries carry `stage: "color"` and their scene time range.
+
 ## Pre-upscale polish
 
 ```powershell
 content-studio polish `
   --input <clip> --output <clip-polished.mp4> `
-  --lens-k1 0.01 --denoise light --deflicker `
+  --lens-k1 0.01 --denoise light --deflicker --stabilize `
   --match-reference <reference-clip.mp4>
 ```
 
+- `--stabilize`: two-pass `vidstab` after lens/perspective and before denoise.
 - `--lens-k1` / `--lens-k2`: lens distortion correction. These must come from a
   lens profile or a manual calibration; the tool does not guess them.
 - `--perspective`: raw FFmpeg perspective coordinates for a manual
