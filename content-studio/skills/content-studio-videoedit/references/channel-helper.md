@@ -23,6 +23,7 @@ content.py insights   build the analytics dataset that a model turns into ideas
 content.py media      extract audio, frames or a clip for segment review
 content.py order      refresh mixed-device capture order and _timeline.csv
 content.py preprocess clean vlog voice, stabilize camera clips, and review blur candidates
+content.py tune      score audio-enhancement candidates per clip before preprocessing
 content.py edit       trim, cut, or join vlog clips
 content.py code       git-track the sources, snapshot to Drive, restore, prune
 content.py analytics  retention and performance numbers
@@ -263,8 +264,8 @@ mono/stereo audio track (not Apple's APAC spatial track), denoises it, detects
 speech, lowers quiet sections by 13 dB, and adjusts speech toward a consistent
 level with no more than 13 dB boost. Short gain ramps and a -1 dBFS limiter
 prevent abrupt level jumps and clipping. Pass `--speech-gain off` to skip speech
-detection entirely: the denoised levels are kept, only the limiter applies, and
-Silero VAD is never loaded. `--denoise auto`
+detection entirely: one bounded gain restores the clip's source loudness, only the
+limiter shapes peaks, and Silero VAD is never loaded. `--denoise auto`
 uses DeepFilterNet when its `deep-filter.exe` (standalone Windows release) or
 `deepFilter` (Python package) executable is on PATH; otherwise it uses
 FFmpeg's `afftdn` filter and records that choice in `report.json`. Install the
@@ -274,7 +275,38 @@ its standalone Windows executable avoids that requirement. Download
 `deep-filter-0.5.6-x86_64-pc-windows-msvc.exe` from the
 [official release](https://github.com/Rikorose/DeepFilterNet/releases/tag/v0.5.6),
 name it `deep-filter.exe`, and put its folder on PATH. `--denoise deepfilter` requires
-one of these executables explicitly.
+one of these executables explicitly. A speech denoiser removes everything the model
+does not consider speech, which on a music or ambience clip can delete the whole
+program. Preprocess measures EBU R128 loudness before and after denoising; if the
+clip drops by more than 12 dB, it keeps the source audio with an 80 Hz high-pass,
+records `denoise.fallback: "content-loss"` with both loudness values in
+`report.json`, and still matches the source level.
+
+### Tune audio per clip
+
+Preprocessing applies one chain to every clip, but the best denoise strength depends
+on what the clip contains. Score candidates on a few clips before committing to a
+batch:
+
+```powershell
+python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --limit 5 --sample 40
+python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --clip "003 - VID20260112101914.mp4" --force
+```
+
+`tune` samples the beginning, middle, and end of each clip, renders every candidate
+through the same denoise, level-match, and limiter chain preprocess uses, and
+measures each result against the untouched source window. The candidate grid includes
+the current default, post-filter strengths, an attenuation-limited pass that keeps
+music and ambience, and a no-denoise option. A candidate cannot be chosen if it
+clips, hollows the speech band, or loses more than 12 dB of program loudness; a
+candidate only replaces the default when it leads by more than `--margin` points,
+which keeps measurement noise from flipping the choice. Profiles, metrics, and
+listenable WAVs are written under `.content-studio/analysis/tuning/`, with
+`tuning.csv` and `tuning.html` summarizing the run. Listen to the WAVs before a
+batch and use the profiles to decide whether that clip should be denoised at all or
+take a gentler pass; preprocess does not apply the profiles automatically.
+`--limit` samples across clip durations; `--sample` is the seconds measured per clip;
+`--discard-audio` removes the WAVs after measuring.
 
 The command stabilizes non-Dolby-Vision clips with two-pass `vidstab` in both the review path and `--final`, retains their
 source dimensions and SDR/HDR color tags, and flags a crop greater than 10% in the

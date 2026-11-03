@@ -485,6 +485,22 @@ def main() -> int:
     p.add_argument("--speech-gain", choices=["auto", "off"], default="auto",
                    help="auto lifts speech over a quiet floor; off skips speech detection and only denoises")
 
+    p = sub.add_parser("tune", parents=[shared],
+                       help="score audio-enhancement candidates per clip before preprocessing")
+    p.add_argument("--draft", help="draft folder name")
+    p.add_argument("--folder", help="any folder of camera clips")
+    p.add_argument("--clip", action="append", help="tune only these camera filenames")
+    p.add_argument("--limit", type=int, default=5,
+                   help="clips to sample across durations (default 5)")
+    p.add_argument("--sample", type=float, default=40.0,
+                   help="seconds of audio measured per clip (default 40)")
+    p.add_argument("--margin", type=float, default=1.5,
+                   help="score lead a candidate needs to replace the default")
+    p.add_argument("--out", help="output folder (default: draft/.content-studio/analysis/tuning)")
+    p.add_argument("--force", action="store_true", help="re-tune existing profiles")
+    p.add_argument("--discard-audio", action="store_true",
+                   help="delete candidate WAVs after measuring")
+
     p = sub.add_parser("edit", parents=[shared],
                        help="frame-accurate trim/cut or join ordered clips")
     p.add_argument("action", choices=["trim", "cut", "join"])
@@ -600,6 +616,10 @@ def main() -> int:
         import preprocess
 
         return preprocess.run(cfg, args, log)
+    if args.command == "tune":
+        import tune
+
+        return tune.run(cfg, args, log)
     if args.command == "edit":
         import editing
 
