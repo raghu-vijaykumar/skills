@@ -161,7 +161,9 @@ When `video.mp4` exists:
 node <bundle>/scripts/cli.mjs transcribe --channel <slug> --draft <id>
 ```
 
-Review `transcript.json` and `captions.srt` against the actual audio and representative frames. Then generate a thumbnail candidate from the transcript and frames, show it to the user, and write `thumbnail.png` only after approval.
+Review `transcript.json` and `captions.srt` against the actual audio and representative frames. If the master has no intelligible speech, `transcript.json` records `speech: false`; mark transcript and captions not applicable rather than publishing fake captions. Draft the title and description from the transcript, voiceover, or audio context, not just the visuals.
+
+Capture 4-6 representative frames and the spoken or voiceover context. Use an image-generation model to create a **16:9 landscape AI thumbnail** that reflects the actual subject, setting, and hook. Do not use a raw frame with overlaid text as the final thumbnail unless the user explicitly asks. Show the generated image and obtain approval before writing `thumbnail.png`. The full prompt and requirements are in [the AI thumbnail workflow](content-studio/skills/content-studio-videoedit/references/thumbnail.md).
 
 ### 6. Choose the music
 
@@ -186,9 +188,9 @@ A publication candidate contains:
 | File | Purpose |
 | --- | --- |
 | `video.mp4` | Reviewed full-length master |
-| `title.txt` | Exact title |
-| `description.txt` | Exact description, including music credit |
-| `thumbnail.png` or `.jpg` | Approved thumbnail, 2 MB or less for YouTube |
+| `title.txt` | Exact title derived from transcript/voiceover/audio context |
+| `description.txt` | Exact description from the same context, including music credit |
+| `thumbnail.png` or `.jpg` | Approved AI-generated 16:9 thumbnail |
 | `creative.json` | Theme, style, format, renderer, choices |
 | `transcript.json` | Transcript tied to the master hash (edited exports) |
 | `captions.srt` | Reviewed captions (edited exports) |
