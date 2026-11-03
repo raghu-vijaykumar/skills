@@ -306,6 +306,18 @@ node <bundle>/scripts/cli.mjs enhance render `
 
 See [the enhancement workflow](content-studio/skills/content-studio-videoedit/references/enhancement.md) for the manifest, validation limits, caching, and reflection-backend limitations.
 
+### 5c. Upscale explicitly (optional)
+
+Upscaling is separate from color correction. It reconstructs resolution; it does not fix exposure, white balance, or motion blur.
+
+```powershell
+node <bundle>/scripts/cli.mjs upscale `
+  --input <clip> --output <clip-4k.mp4> `
+  --scale 2 --model realesr-animevideov3 --tile 256
+```
+
+Real-ESRGAN ncnn/Vulkan is used when installed; otherwise the command falls back to Lanczos. See [the upscale workflow](content-studio/skills/content-studio-videoedit/references/upscale.md).
+
 ### 6. Choose the music
 
 `content-studio-music` builds a shortlist from the local catalog and records an approved selection:

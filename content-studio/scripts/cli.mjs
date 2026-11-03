@@ -65,8 +65,14 @@ async function main() {
     process.exitCode = result.status ?? 1;
     return;
   }
+  if (command === 'upscale') {
+    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', 'upscale.py');
+    const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
+    process.exitCode = result.status ?? 1;
+    return;
+  }
   if (!command || command === '--help' || command === '-h' || flag('help') || command === 'help') {
-    console.log('Usage: content-studio <install-skills|enhance|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
+    console.log('Usage: content-studio <install-skills|enhance|upscale|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
     return;
   }
   if (command === 'install-skills') {

@@ -519,11 +519,16 @@ def main() -> int:
     p = sub.add_parser("enhance",
                        help="diagnose and selectively correct video quality")
     p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("upscale", help="upscale video with Real-ESRGAN or Lanczos")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
 
     args = parser.parse_args()
     if args.command == "enhance":
         import enhance
         return enhance.main(args.rest)
+    if args.command == "upscale":
+        import upscale
+        return upscale.main(args.rest)
     if args.command == "preprocess" and getattr(args, "folder", None):
         # An arbitrary folder is self-contained; no channel workspace is needed.
         folder = Path(args.folder).expanduser().resolve()
