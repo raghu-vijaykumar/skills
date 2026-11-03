@@ -161,6 +161,21 @@ def fit_filter(label, width, height, fit, out, reframe=None):
         ]
     raise ValueError("Unknown fit mode: "+fit)
 
+def enhancement_filters(clip):
+    """Translate source-time enhancements into clip-relative FFmpeg filters."""
+    filters=[]
+    source_in=float(clip["source_in"])
+    duration=float(clip["duration"])
+    for item in clip.get("enhancements") or []:
+        start=max(0.0,float(item.get("source_start",0))-source_in)
+        end=min(duration,float(item.get("source_end",0))-source_in)
+        if end<=start: continue
+        for value in item.get("filters") or []:
+            if value:
+                filters.append(f"{value}:enable='between(t,{start:.3f},{end:.3f})'")
+    return filters
+
+
 def render(timeline, output):
     root=Path(timeline["source_root"]).resolve()
     video=validate(timeline,root)
@@ -173,6 +188,7 @@ def render(timeline, output):
         src=root/clip["source"]
         settings={k:clip[k] for k in ("source","source_in","source_out","audio_gain_db")}
         if clip.get("reframe"): settings["reframe"]=clip["reframe"]
+        if clip.get("enhancements"): settings["enhancements"]=clip["enhancements"]
         settings.update(fps=timeline["fps"],width=width,height=height,fit=fit,
                         mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
         digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
@@ -184,6 +200,10 @@ def render(timeline, output):
             args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
             if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
             graph=fit_filter("[0:v:0]",width,height,fit,"[v]",clip.get("reframe"))
+            extra=enhancement_filters(clip)
+            if extra:
+                graph=["[0:v:0]"+",".join(extra)+"[enh]"]+fit_filter(
+                    "[enh]",width,height,fit,"[v]",clip.get("reframe"))
             args+=["-t",str(clip["duration"]),"-filter_complex",";".join(graph),
                    "-map","[v]","-map","0:a:0" if has_audio else "1:a:0",
                    "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",

@@ -70,10 +70,16 @@ def probe_video(path: Path) -> dict:
     for side in video.get("side_data_list", []):
         if "rotation" in side:
             rotation = int(side["rotation"])
+    width = int(video.get("width") or 0)
+    height = int(video.get("height") or 0)
+    display_width, display_height = ((height, width) if abs(rotation) % 180 == 90
+                                     else (width, height))
     return {
         "duration_seconds": float(data.get("format", {}).get("duration") or 0),
-        "width": int(video.get("width") or 0),
-        "height": int(video.get("height") or 0),
+        "width": width,
+        "height": height,
+        "display_width": display_width,
+        "display_height": display_height,
         "rotation": rotation,
         "fps": video.get("avg_frame_rate") or video.get("r_frame_rate"),
         "codec": video.get("codec_name"),
@@ -175,7 +181,7 @@ def make_issue(issue_id: str, kind: str, detected: bool, confidence: float,
 
 
 def analyze_scene(path: Path, scene_id: str, start: float, end: float,
-                  work: Path) -> dict:
+                  work: Path, display_width: int = SAMPLE_WIDTH) -> dict:
     duration = max(0.4, end - start)
     samples = []
     evidence = []
@@ -191,6 +197,7 @@ def analyze_scene(path: Path, scene_id: str, start: float, end: float,
     cast = max(metrics["channel_r"], metrics["channel_g"], metrics["channel_b"]) - \
         min(metrics["channel_r"], metrics["channel_g"], metrics["channel_b"])
     issues = {}
+    region_masks = []
 
     if metrics["luma_mean"] < 0.20:
         confidence = min(0.99, (0.20 - metrics["luma_mean"]) / 0.15)
@@ -231,15 +238,46 @@ def analyze_scene(path: Path, scene_id: str, start: float, end: float,
             parameters={"saturation": round(max(0.85, min(1.18, saturation)), 4)})
     if metrics["glare_fraction"] > 0.015:
         strong = metrics["glare_fraction"] > 0.06
-        issues["reflection"] = make_issue(
+        action = "UNSUPPORTED" if strong else "FIX"
+        reflection = make_issue(
             "reflection", "reflection", True,
             min(0.98, 0.55 + metrics["glare_fraction"] * 4),
-            "high" if strong else "moderate",
-            "UNSUPPORTED" if strong else "REVIEW",
+            "high" if strong else "moderate", action,
             type="strong_reflection" if strong else "glare",
             parameters={"glare_fraction": metrics["glare_fraction"],
                         "reason": ("licensed reflection-separation backend not configured"
-                                   if strong else "conservative highlight review required")})
+                                   if strong else "masked highlight compression")})
+        region_masks = []
+        if not strong:
+            try:
+                mask_frame = extract_frame(path, start + duration * 0.5,
+                                           width=max(320, display_width))
+                luma = (0.2126 * mask_frame[:, :, 0] + 0.7152 * mask_frame[:, :, 1]
+                        + 0.0722 * mask_frame[:, :, 2])
+                maximum = mask_frame.max(axis=2)
+                minimum = mask_frame.min(axis=2)
+                saturation = np.divide(maximum - minimum, maximum,
+                                       out=np.zeros_like(maximum),
+                                       where=maximum > 1e-5)
+                mask = ((luma > 0.94) & (saturation < 0.20)).astype(np.uint8)
+                for _ in range(2):
+                    mask = np.maximum.reduce([
+                        np.roll(mask, 1, 0), np.roll(mask, -1, 0),
+                        np.roll(mask, 1, 1), np.roll(mask, -1, 1), mask])
+                mask_path = work / "masks" / f"{scene_id}.png"
+                mask_path.parent.mkdir(parents=True, exist_ok=True)
+                Image.fromarray(mask * 255).save(mask_path)
+                reflection["parameters"]["region_mask"] = str(mask_path)
+                region_masks.append({
+                    "start_seconds": round(start, 3),
+                    "end_seconds": round(end, 3),
+                    "filter": "eq=brightness=-0.04:contrast=1.06",
+                    "mask": str(mask_path),
+                })
+            except (EnhanceError, OSError, ValueError):
+                reflection["action"] = "REVIEW"
+                reflection["parameters"]["reason"] = "mask generation failed"
+        issues["reflection"] = reflection
 
     actions = [issue["action"] for issue in issues.values()]
     if "FIX" in actions:
@@ -260,6 +298,7 @@ def analyze_scene(path: Path, scene_id: str, start: float, end: float,
         "issues": issues,
         "decision": decision,
         "corrections": [item for item in corrections if item],
+        "region_masks": region_masks,
         "evidence": evidence,
         "review": {"status": "pending", "preview": None},
     }
@@ -404,7 +443,8 @@ def analyze_clip(path: Path, output_root: Path, force: bool = False,
     scenes = detect_scenes(path, metadata["duration_seconds"])
     analyzed = []
     for index, (start, end) in enumerate(scenes, 1):
-        scene = analyze_scene(path, f"scene-{index:03d}", start, end, work)
+        scene = analyze_scene(path, f"scene-{index:03d}", start, end, work,
+                              metadata.get("display_width", SAMPLE_WIDTH))
         if auto_fix and scene["decision"] == "FIX" and all(
                 issue["action"] in {"FIX", "SKIP"} for issue in scene["issues"].values()):
             scene["review"]["status"] = "auto_approved"
@@ -458,6 +498,7 @@ def analyze_clip(path: Path, output_root: Path, force: bool = False,
                 "end_seconds": scene["end_seconds"],
                 "decision": scene["decision"],
                 "corrections": scene["corrections"],
+                "region_masks": scene.get("region_masks", []),
                 "issues": scene["issues"],
                 "review": scene["review"],
                 "evidence": scene["evidence"],
@@ -560,14 +601,17 @@ def analyze_timeline(timeline_path: Path, output_root: Path | None = None,
 
 
 def approved_scene(scene: dict, allow_pending: bool) -> bool:
-    if scene.get("decision") != "FIX" or not scene.get("corrections"):
+    if scene.get("decision") != "FIX" or not (scene.get("corrections") or
+                                              scene.get("region_masks")):
         return False
     status = (scene.get("review") or {}).get("status")
     return allow_pending or status in {"approved", "auto_approved"}
 
 
 def render_manifest(manifest_path: Path, output: Path,
-                    allow_pending: bool = False) -> dict:
+                    allow_pending: bool = False,
+                    lut: Path | None = None,
+                    denoise: str | None = None) -> dict:
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
     clip = (manifest.get("clips") or [None])[0]
     if not clip:
@@ -580,24 +624,66 @@ def render_manifest(manifest_path: Path, output: Path,
     if sha256_file(source) != clip.get("source_hash"):
         raise EnhanceError("source changed since analysis; rerun analysis")
     filters = []
+    masks = []
+    global_filters = []
+    if denoise:
+        global_filters.append("hqdn3d=2:1:3:2" if denoise == "light"
+                              else "hqdn3d=4:3:6:4")
+    if lut:
+        escaped = str(lut.resolve()).replace("\\", "/").replace(":", "\\:")
+        global_filters.append(f"lut3d=file='{escaped}'")
     for scene in clip.get("scenes", []):
         if not approved_scene(scene, allow_pending):
             continue
         start, end = float(scene["start_seconds"]), float(scene["end_seconds"])
         for correction in scene.get("corrections", []):
             filters.append(f"{correction}:enable='between(t,{start:.3f},{end:.3f})'")
+        for item in scene.get("region_masks", []):
+            masks.append(item)
     output.parent.mkdir(parents=True, exist_ok=True)
-    if not filters:
+    if not filters and not masks and not global_filters:
         shutil.copy2(source, output)
         validation = {"status": "skipped", "reason": "no approved corrections"}
     else:
         temp = output.with_name(output.stem + ".tmp" + output.suffix)
         temp.unlink(missing_ok=True)
         try:
-            run(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-                 "-i", str(source), "-vf", ",".join(filters), "-c:v", "libx264",
-                 "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-                 "-c:a", "copy", "-movflags", "+faststart", str(temp)])
+            if masks:
+                dimensions = probe_video(source)
+                width = int(dimensions["display_width"])
+                height = int(dimensions["display_height"])
+                color_chain = ",".join(global_filters + filters) or "null"
+                graph = [f"[0:v]{color_chain}[v0]",
+                         "[v0]split=2[base][over]"]
+                overlay_filter = str(masks[0].get("filter") or
+                                     "eq=brightness=-0.04:contrast=1.06")
+                graph.append(f"[over]{overlay_filter}[overc]")
+                previous = "[base]"
+                cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                       "-i", str(source)]
+                for index, item in enumerate(masks, 1):
+                    mask_path = Path(item["mask"])
+                    if not mask_path.is_file():
+                        raise EnhanceError(f"mask missing: {mask_path}")
+                    cmd += ["-loop", "1", "-framerate", "30", "-i", str(mask_path)]
+                    graph.append(f"[{index}:v]scale={width}:{height},format=gray[mask{index}]")
+                    start = float(item["start_seconds"])
+                    end = float(item["end_seconds"])
+                    graph.append(f"{previous}[overc][mask{index}]maskedmerge="
+                                 f"enable='between(t,{start:.3f},{end:.3f})'[m{index}]")
+                    previous = f"[m{index}]"
+                cmd += ["-filter_complex", ";".join(graph), "-map", previous,
+                        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+                        "-pix_fmt", "yuv420p", "-c:a", "copy", "-shortest",
+                        "-t", f"{float(dimensions['duration_seconds']):.3f}",
+                        "-movflags", "+faststart", str(temp)]
+            else:
+                cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                       "-i", str(source), "-vf", ",".join(global_filters + filters),
+                       "-c:v", "libx264",
+                       "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+                       "-c:a", "copy", "-movflags", "+faststart", str(temp)]
+            run(cmd)
             validation = validate_render(manifest, source, temp)
             if validation["status"] == "rejected":
                 temp.unlink(missing_ok=True)
@@ -743,6 +829,46 @@ def run_benchmark(source: Path, config_path: Path, output_root: Path,
     return document
 
 
+def apply_timeline(timeline_path: Path, manifest_path: Path, output_path: Path,
+                   allow_pending: bool = False) -> dict:
+    timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+    sidecar = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    source_root = Path(timeline.get("source_root") or timeline_path.parent).resolve()
+    entries = {str(Path(item["source"]).resolve()): item
+               for item in sidecar.get("clips", [])}
+    applied = 0
+    for track in timeline.get("tracks", []):
+        if track.get("kind") != "video":
+            continue
+        for clip in track.get("clips", []):
+            source = (source_root / clip["source"]).resolve()
+            entry = entries.get(str(source))
+            if not entry:
+                continue
+            manifest = yaml.safe_load(Path(entry["manifest"]).read_text(encoding="utf-8"))
+            planned = []
+            for scene in manifest.get("clips", [{}])[0].get("scenes", []):
+                if scene.get("decision") != "FIX" or not scene.get("corrections"):
+                    continue
+                status = (scene.get("review") or {}).get("status")
+                if not allow_pending and status not in {"approved", "auto_approved"}:
+                    continue
+                planned.append({
+                    "source_start": float(scene["start_seconds"]),
+                    "source_end": float(scene["end_seconds"]),
+                    "filters": list(scene["corrections"]),
+                    "scene": scene.get("id"),
+                })
+            if planned:
+                clip["enhancements"] = planned
+                applied += len(planned)
+            else:
+                clip.pop("enhancements", None)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(timeline, indent=2) + "\n", encoding="utf-8")
+    return {"timeline": str(output_path.resolve()), "applied_scenes": applied}
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
@@ -762,6 +888,9 @@ def build_parser() -> argparse.ArgumentParser:
     render.add_argument("--manifest", type=Path, required=True)
     render.add_argument("--output", type=Path, required=True)
     render.add_argument("--allow-pending", action="store_true")
+    render.add_argument("--lut", type=Path, help="optional .cube LUT for creative grading")
+    render.add_argument("--denoise", choices=["light", "medium"],
+                        help="optional hqdn3d video denoise")
     benchmark = sub.add_parser("benchmark",
                                help="benchmark an external reflection backend on evidence frames")
     benchmark.add_argument("--file", type=Path, required=True)
@@ -770,6 +899,13 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--out", type=Path)
     benchmark.add_argument("--frames", type=int, default=3)
     benchmark.add_argument("--timeout", type=int, default=300)
+    apply = sub.add_parser("apply-timeline",
+                           help="copy approved enhancements into an editable timeline")
+    apply.add_argument("--timeline", type=Path, required=True)
+    apply.add_argument("--manifest", type=Path, required=True,
+                       help="timeline-enhancement.yaml from analyze --timeline")
+    apply.add_argument("--output-timeline", type=Path, required=True)
+    apply.add_argument("--allow-pending", action="store_true")
     return parser
 
 
@@ -804,7 +940,13 @@ def main(argv: list[str] | None = None) -> int:
                                      frames=args.frames, timeout=args.timeout)
             print(json.dumps(document["summary"], indent=2))
             return 0
-        validation = render_manifest(args.manifest, args.output, args.allow_pending)
+        if args.action == "apply-timeline":
+            result = apply_timeline(args.timeline, args.manifest,
+                                    args.output_timeline, args.allow_pending)
+            print(json.dumps(result, indent=2))
+            return 0
+        validation = render_manifest(args.manifest, args.output, args.allow_pending,
+                                     lut=args.lut, denoise=args.denoise)
         print(json.dumps(validation, indent=2))
         return 0
     except (EnhanceError, OSError, ValueError) as exc:

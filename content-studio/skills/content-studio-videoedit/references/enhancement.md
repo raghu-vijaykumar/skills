@@ -38,6 +38,19 @@ content-studio enhance analyze --timeline <draft>/.content-studio/rough-cut/time
 The timeline source ranges are used to choose which files to inspect; corrections
 are still planned at the source-clip scene level.
 
+After reviewing the manifests, copy approved corrections into an editable
+timeline copy:
+
+```powershell
+content-studio enhance apply-timeline `
+  --timeline <draft>/.content-studio/rough-cut/timeline.json `
+  --manifest <draft>/.content-studio/enhancement/manifests/timeline-enhancement.yaml `
+  --output-timeline <draft>/.content-studio/rough-cut/timeline-enhanced.json
+```
+
+The AutoCut timeline renderer applies these clip-relative filters. Approved
+corrections therefore survive later timeline edits and rendering.
+
 Render approved corrections:
 
 ```powershell
@@ -121,8 +134,15 @@ Supported technical corrections:
 - saturation
 - white-balance channel gains
 
-Creative grading is not part of this analyzer. Add it as an explicit,
-separate step.
+Creative grading and video denoising are opt-in rendering flags:
+
+```powershell
+content-studio enhance render `
+  --manifest <manifest.yaml> --output <out.mp4> `
+  --lut <look.cube> --denoise light
+```
+
+They are not applied by analysis and never run unless explicitly requested.
 
 ## Reflections and glare
 
@@ -131,9 +151,12 @@ Reflection separation is **not** applied automatically. The current cascade is:
 | Situation | Action |
 | --- | --- |
 | No glare | `SKIP` |
-| Minor glare | `REVIEW` |
+| Minor glare | `FIX` with a per-scene highlight mask |
 | Strong reflection / large glare area | `UNSUPPORTED` |
 | Licensed backend installed and benchmarked | explicit integration required |
+
+Minor glare uses a generated region mask and `maskedmerge` to compress only the
+bright pixels. Strong reflections are never auto-corrected.
 
 Do not treat inpainting as faithful reconstruction. XReflection, WindowSeat,
 GenSIRR, PRISM, and ProPainter must be evaluated for accuracy, temporal
@@ -170,8 +193,11 @@ parameters, evidence frames, review status, and validation results.
 - The color model is heuristic, not a calibrated colorimeter.
 - Reflection detection is glare-based and conservative; it does not distinguish
   a bright sky from a glass reflection reliably.
-- No reflection-removal or inpainting backend is bundled.
-- The renderer applies approved color corrections only. Reflection masks and
-  generative reconstruction remain future work.
-- Only the first clip in a manifest is rendered; folder-level batch rendering
-  should be driven from the folder report.
+- No reflection-removal or inpainting backend is bundled. Minor glare uses a
+  masked highlight correction; strong reflections remain review/unsupported.
+- Creative LUTs and video denoising are opt-in render flags, not analysis
+  decisions.
+- The renderer applies approved color corrections and minor-glare masks. Strong
+  reflection masks and generative reconstruction remain future work.
+- Only the first clip in a single-clip manifest is rendered; folder-level batch
+  rendering is driven from the folder report.

@@ -42,6 +42,13 @@ class TimelineTests(unittest.TestCase):
         self.assertIn("gblur",graph)
         self.assertIn("overlay=(W-w)/2:(H-h)/2",graph)
 
+    def test_enhancement_filters_are_clip_relative(self):
+        clip={"source_in":10.0,"duration":5.0,"enhancements":[
+            {"source_start":12.0,"source_end":14.0,
+             "filters":["eq=brightness=0.05"]}]}
+        self.assertEqual(mod.enhancement_filters(clip),
+                         ["eq=brightness=0.05:enable='between(t,2.000,4.000)'"])
+
     def test_edit_timeline_writes_ordered_contributions(self):
         timeline=mod.initial_timeline([
             {"source":"clip.mp4","start":0,"end":2},

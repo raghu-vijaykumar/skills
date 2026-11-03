@@ -1,0 +1,62 @@
+schema_version: 1
+analysis_version: '1'
+generated_at: '2026-11-03T16:14:27+05:30'
+source: C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\minor-glare.mp4
+source_hash: da11e0f9549a6b274a16c05567319601726127e6fb7e9e88797f8a89a3baae1d
+output: null
+clips:
+- name: minor-glare.mp4
+  source: C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\minor-glare.mp4
+  source_hash: da11e0f9549a6b274a16c05567319601726127e6fb7e9e88797f8a89a3baae1d
+  scenes:
+  - id: scene-001
+    start_seconds: 0.0
+    end_seconds: 2.0
+    decision: FIX
+    corrections:
+    - eq=saturation=1.132:brightness=0.0:contrast=1.0
+    region_masks:
+    - start_seconds: 0.0
+      end_seconds: 2.0
+      filter: eq=brightness=-0.04:contrast=1.06
+      mask: C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\enhancement\minor-glare\masks\scene-001.png
+    issues:
+      exposure:
+        id: exposure
+        kind: exposure
+        detected: true
+        confidence: 0.9
+        severity: high
+        action: REVIEW
+        type: highlight_clipping
+        parameters:
+          reason: clipped highlights cannot be reconstructed safely
+      saturation:
+        id: saturation
+        kind: color
+        detected: true
+        confidence: 0.8
+        severity: moderate
+        action: FIX
+        type: low_saturation
+        parameters:
+          saturation: 1.132
+      reflection:
+        id: reflection
+        kind: reflection
+        detected: true
+        confidence: 0.665
+        severity: moderate
+        action: FIX
+        type: glare
+        parameters:
+          glare_fraction: 0.02875
+          reason: masked highlight compression
+          region_mask: C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\enhancement\minor-glare\masks\scene-001.png
+    review:
+      status: auto_approved
+      preview: null
+    evidence:
+    - C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\enhancement\minor-glare\evidence\scene-001-1.jpg
+    - C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\enhancement\minor-glare\evidence\scene-001-2.jpg
+    - C:\workspace\skills\content-studio\skills\content-studio-videoedit\tests\tmpo7xblphv\enhancement\minor-glare\evidence\scene-001-3.jpg
