@@ -52,6 +52,28 @@ The Python entry point is also available directly:
 python <bundle>/skills/content-studio-videoedit/scripts/content.py enhance analyze --folder <draft>
 ```
 
+## Reflection backend benchmarks
+
+No reflection model is bundled. Evaluate a licensed backend on the clip's
+reflection evidence frames before selecting it:
+
+```json
+{
+  "name": "xreflection",
+  "license": "research-only",
+  "checkpoint": "sha256:...",
+  "command": ["python", "adapter.py", "{input}", "{output}"]
+}
+```
+
+```powershell
+content-studio enhance benchmark --file <clip> --config <backend.json> --frames 3
+```
+
+The harness writes `benchmark.html` and `benchmarks.json` with runtime, glare
+reduction, luma change, sharpness ratio, and an accepted/rejected result. It
+does not install the backend or change the default reflection policy.
+
 ## Decisions
 
 Each detected issue receives one action independently:

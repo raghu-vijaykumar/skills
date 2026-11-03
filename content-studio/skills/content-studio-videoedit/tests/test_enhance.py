@@ -76,6 +76,26 @@ class EnhanceTest(unittest.TestCase):
             self.assertTrue(target.is_file())
             self.assertGreater(target.stat().st_size, 0)
 
+    def test_reflection_benchmark_runs_external_adapter(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "glare.mp4"
+            self.make_video(source, "drawbox=x=100:y=40:w=120:h=100:color=white:t=fill")
+            adapter = root / "adapter.py"
+            adapter.write_text(
+                "import shutil, sys\nshutil.copy2(sys.argv[1], sys.argv[2])\n",
+                encoding="utf-8")
+            config = root / "backend.json"
+            config.write_text(json.dumps({
+                "name": "copy-test", "license": "test-only",
+                "command": [sys.executable, str(adapter), "{input}", "{output}"],
+            }), encoding="utf-8")
+            document = enhance.run_benchmark(source, config, root / "benchmarks", frames=1)
+            self.assertEqual(document["summary"]["samples"], 1)
+            self.assertEqual(document["summary"]["accepted"], 1)
+            self.assertTrue((root / "benchmarks" / "copy-test" / "benchmarks.json").is_file())
+            self.assertTrue((root / "benchmarks" / "copy-test" / "benchmark.html").is_file())
+
     def test_timeline_analysis_uses_referenced_sources(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -579,6 +580,108 @@ def validate_render(manifest: dict, source: Path, output: Path) -> dict:
             "failures": failures, "samples": samples}
 
 
+def run_benchmark(source: Path, config_path: Path, output_root: Path,
+                  frames: int = 3, timeout: int = 300) -> dict:
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    name = str(config.get("name") or "external").strip()
+    command = config.get("command")
+    if not isinstance(command, list) or not command:
+        raise EnhanceError("backend config needs a command array")
+    template = " ".join(str(part) for part in command)
+    if "{input}" not in template or "{output}" not in template:
+        raise EnhanceError("backend command needs {input} and {output} placeholders")
+    work = output_root / name
+    work.mkdir(parents=True, exist_ok=True)
+    report = analyze_clip(source, work / "analysis")
+    scenes = [scene for scene in report["clips"][0]["scenes"]
+              if "reflection" in scene["issues"]]
+    if not scenes:
+        raise EnhanceError("no reflection evidence in this clip")
+    metadata = report["clips"][0]["metadata"]
+    sample_width = min(1280, max(320, int(metadata.get("width") or 1280)))
+    results = []
+    for index, scene in enumerate(scenes[:max(1, frames)], 1):
+        midpoint = (float(scene["start_seconds"]) + float(scene["end_seconds"])) / 2
+        before_rgb = extract_frame(source, midpoint, width=sample_width)
+        input_path = work / f"input-{index:03d}.png"
+        output_path = work / f"output-{index:03d}.png"
+        Image.fromarray((before_rgb * 255).astype(np.uint8)).save(input_path)
+        argv = [str(part).replace("{input}", str(input_path.resolve()))
+                .replace("{output}", str(output_path.resolve())) for part in command]
+        started = time.perf_counter()
+        try:
+            proc = subprocess.run(argv, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=timeout)
+            runtime = time.perf_counter() - started
+            if proc.returncode != 0:
+                raise EnhanceError((proc.stderr or proc.stdout)[-1000:])
+            if not output_path.is_file():
+                raise EnhanceError("backend did not write the output image")
+            after_rgb = np.asarray(Image.open(output_path).convert("RGB"),
+                                   dtype=np.float32) / 255.0
+            if after_rgb.shape != before_rgb.shape:
+                raise EnhanceError("backend changed image dimensions")
+            before = frame_metrics(before_rgb)
+            after = frame_metrics(after_rgb)
+            before["scene"] = scene["id"]
+            after["scene"] = scene["id"]
+            results.append({
+                "scene": scene["id"],
+                "runtime_seconds": round(runtime, 3),
+                "before": before,
+                "after": after,
+                "glare_reduction": round(before["glare_fraction"] - after["glare_fraction"], 5),
+                "luma_delta": round(abs(after["luma_mean"] - before["luma_mean"]), 5),
+                "sharpness_ratio": round(after["sharpness"] / max(before["sharpness"], 1e-6), 3),
+                "accepted": (abs(after["luma_mean"] - before["luma_mean"]) <= 0.20
+                             and after["sharpness"] >= before["sharpness"] * 0.5),
+            })
+        except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
+            results.append({"scene": scene["id"], "error": str(exc),
+                            "accepted": False})
+    valid = [item for item in results if "error" not in item]
+    summary = {
+        "backend": name,
+        "license": config.get("license"),
+        "checkpoint": config.get("checkpoint"),
+        "samples": len(results),
+        "accepted": sum(1 for item in results if item.get("accepted")),
+        "failed": sum(1 for item in results if "error" in item),
+        "mean_runtime_seconds": round(
+            sum(item["runtime_seconds"] for item in valid) / len(valid), 3) if valid else None,
+        "mean_glare_reduction": round(
+            sum(item["glare_reduction"] for item in valid) / len(valid), 5) if valid else None,
+    }
+    document = {"schema_version": SCHEMA_VERSION, "generated_at": now(),
+                "source": str(source.resolve()), "config": str(config_path.resolve()),
+                "summary": summary, "results": results}
+    (work / "benchmarks.json").write_text(json.dumps(document, indent=2) + "\n",
+                                          encoding="utf-8")
+    rows = "".join(
+        "<tr>"
+        f"<td>{item.get('scene')}</td>"
+        f"<td>{item.get('runtime_seconds', '')}</td>"
+        f"<td>{item.get('glare_reduction', '')}</td>"
+        f"<td>{item.get('luma_delta', '')}</td>"
+        f"<td>{item.get('sharpness_ratio', '')}</td>"
+        f"<td>{'yes' if item.get('accepted') else 'no'}</td>"
+        f"<td>{item.get('error', '')}</td></tr>" for item in results)
+    page = ("<!doctype html><meta charset='utf-8'><title>Reflection benchmark</title>"
+            "<style>body{font:15px/1.5 system-ui,sans-serif;margin:2rem;color:#0f172a}"
+            "table{border-collapse:collapse;width:100%}th,td{padding:.5rem .65rem;"
+            "border-bottom:1px solid #e2e8f0;text-align:left}"
+            "th{background:#f8fafc;text-transform:uppercase;font-size:.75rem}</style>"
+            f"<h1>Reflection benchmark: {name}</h1>"
+            f"<p>License: {config.get('license') or 'unspecified'} · "
+            f"accepted {summary['accepted']}/{summary['samples']} · "
+            f"mean runtime {summary['mean_runtime_seconds'] or '-'}s</p>"
+            "<table><thead><tr><th>Scene</th><th>Runtime (s)</th><th>Glare reduction</th>"
+            "<th>Luma delta</th><th>Sharpness ratio</th><th>Accepted</th><th>Error</th>"
+            f"</tr></thead><tbody>{rows}</tbody></table>")
+    (work / "benchmark.html").write_text(page, encoding="utf-8")
+    return document
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
@@ -598,6 +701,14 @@ def build_parser() -> argparse.ArgumentParser:
     render.add_argument("--manifest", type=Path, required=True)
     render.add_argument("--output", type=Path, required=True)
     render.add_argument("--allow-pending", action="store_true")
+    benchmark = sub.add_parser("benchmark",
+                               help="benchmark an external reflection backend on evidence frames")
+    benchmark.add_argument("--file", type=Path, required=True)
+    benchmark.add_argument("--config", type=Path, required=True,
+                           help="JSON adapter with name, license, checkpoint, and command")
+    benchmark.add_argument("--out", type=Path)
+    benchmark.add_argument("--frames", type=int, default=3)
+    benchmark.add_argument("--timeout", type=int, default=300)
     return parser
 
 
@@ -625,6 +736,12 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 for clip in report["clips"]:
                     print(f"{clip['name']}: {clip['summary']}")
+            return 0
+        if args.action == "benchmark":
+            out = args.out or args.file.parent / ".content-studio" / "enhancement" / "benchmarks"
+            document = run_benchmark(args.file, args.config, out,
+                                     frames=args.frames, timeout=args.timeout)
+            print(json.dumps(document["summary"], indent=2))
             return 0
         validation = render_manifest(args.manifest, args.output, args.allow_pending)
         print(json.dumps(validation, indent=2))
