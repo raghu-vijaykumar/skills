@@ -192,7 +192,7 @@ def gain_envelope(samples, intervals: list[tuple[float, float]]):
 
 
 def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
-                  denoise: str = "auto") -> Path:
+                  denoise: str = "auto", speech_gain: str = "auto") -> Path:
     import numpy as np
 
     original = work / "original.wav"
@@ -207,6 +207,7 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
                  "-i", str(original), "-af", "highpass=f=80,afftdn=nr=12:tn=1",
                  "-c:a", "pcm_s16le", str(enhanced)])
     report["denoise_engine"] = engine
+    report["speech_gain"] = speech_gain
     clean = work / "clean.wav"
     command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
              "-i", str(enhanced), "-ac", "2", "-ar", str(SAMPLE_RATE),
@@ -217,10 +218,16 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
     if len(samples) < len(raw):
         samples = np.pad(samples, ((0, len(raw) - len(samples)), (0, 0)))
     samples = samples[:len(raw)]
-    intervals = speech_intervals(clean)
-    envelope, levels = gain_envelope(samples, intervals)
-    report["audio"] = {"speech_intervals": intervals, "speech_gain_db": levels,
-                       "quiet_gain_db": QUIET_GAIN_DB, "peak_ceiling_dbfs": -1}
+    if speech_gain == "off":
+        # Skipping speech detection means no quiet-floor ducking and no voice
+        # lift, so the denoised levels are kept and only the limiter applies.
+        envelope = np.ones(len(samples), dtype=np.float32)
+        report["audio"] = {"speech_gain": "off", "peak_ceiling_dbfs": -1}
+    else:
+        intervals = speech_intervals(clean)
+        envelope, levels = gain_envelope(samples, intervals)
+        report["audio"] = {"speech_intervals": intervals, "speech_gain_db": levels,
+                           "quiet_gain_db": QUIET_GAIN_DB, "peak_ceiling_dbfs": -1}
     float_audio = work / "gained.f32le"
     (samples * envelope[:, None]).astype("<f4").tofile(float_audio)
     result = work / "enhanced-voice.wav"
@@ -646,15 +653,17 @@ def final_clip(source: Path, output_root: Path, args, log,
                   "status": "processing"}
 
     requested = getattr(args, "denoise", "auto")
+    speech_gain = getattr(args, "speech_gain", "auto")
     voice = folder / "enhanced-voice.wav"
     reusable = (same_source and voice.is_file()
                 and not getattr(args, "force", False)
-                and (requested == "auto" or requested == report.get("denoise_engine")))
+                and (requested == "auto" or requested == report.get("denoise_engine"))
+                and report.get("speech_gain", "auto") == speech_gain)
     if not reusable:
         with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:
             work = Path(scratch)
             if audio:
-                generated = enhance_audio(source, audio, work, report, requested)
+                generated = enhance_audio(source, audio, work, report, requested, speech_gain)
             else:
                 generated = silent_audio(duration, work / "silent.wav")
                 report["audio"] = {"status": "no source audio; silent stereo track added"}
@@ -719,7 +728,8 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     report_path = folder / "report.json"
     if report_path.exists() and not args.force and not args.apply_review and not args.dv_approved and not args.dv_proof:
         previous = json.loads(report_path.read_text(encoding="utf-8"))
-        if previous.get("source_bytes") == source.stat().st_size:
+        if previous.get("source_bytes") == source.stat().st_size and \
+                previous.get("speech_gain", "auto") == getattr(args, "speech_gain", "auto"):
             # Keep the report's source pointer in sync with timeline renames.
             if previous.get("source") != str(source):
                 previous["source"] = str(source)
@@ -817,7 +827,8 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     with tempfile.TemporaryDirectory(prefix="vlog-", dir=folder) as scratch:
         work = Path(scratch)
         if audio:
-            voice = enhance_audio(source, audio, work, report, args.denoise)
+            voice = enhance_audio(source, audio, work, report, args.denoise,
+                                  getattr(args, "speech_gain", "auto"))
         else:
             voice = silent_audio(duration, work / "silent.wav")
             report["audio"] = {"status": "no source audio; silent stereo track added"}

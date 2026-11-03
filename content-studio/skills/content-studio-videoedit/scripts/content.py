@@ -482,6 +482,8 @@ def main() -> int:
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
     p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
+    p.add_argument("--speech-gain", choices=["auto", "off"], default="auto",
+                   help="auto lifts speech over a quiet floor; off skips speech detection and only denoises")
 
     p = sub.add_parser("edit", parents=[shared],
                        help="frame-accurate trim/cut or join ordered clips")

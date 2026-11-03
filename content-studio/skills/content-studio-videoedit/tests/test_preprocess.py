@@ -24,6 +24,23 @@ class PreprocessTest(unittest.TestCase):
         self.assertLess(float(envelope[int(0.9 * preprocess.SAMPLE_RATE)]),
                         float(envelope[int(1.5 * preprocess.SAMPLE_RATE)]))
 
+    def test_speech_gain_off_skips_vad_and_keeps_levels(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            work = Path(scratch)
+            report = {}
+            samples = np.zeros((preprocess.SAMPLE_RATE, 2), dtype=np.float32)
+            with patch.object(preprocess, "extract_audio"), \
+                 patch.object(preprocess, "command"), \
+                 patch.object(preprocess, "pcm16",
+                              return_value=(preprocess.SAMPLE_RATE, samples)), \
+                 patch.object(preprocess, "speech_intervals",
+                              side_effect=AssertionError("VAD must not run")):
+                preprocess.enhance_audio(Path("in.mp4"), {"index": 1}, work, report,
+                                         "ffmpeg", "off")
+            self.assertEqual(report["audio"], {"speech_gain": "off", "peak_ceiling_dbfs": -1})
+            self.assertEqual(report["speech_gain"], "off")
+            self.assertNotIn("speech_intervals", report["audio"])
+
     def test_blur_candidates_are_review_only_and_use_source_times(self):
         times = [i / 10 for i in range(10)]
         scores = [100, 95, 90, 4, 3, 95, 100, 90, 95, 100]

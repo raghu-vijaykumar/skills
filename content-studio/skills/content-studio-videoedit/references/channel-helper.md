@@ -262,7 +262,9 @@ camera basename under `.content-studio/processed-clips/`. It selects the regular
 mono/stereo audio track (not Apple's APAC spatial track), denoises it, detects
 speech, lowers quiet sections by 13 dB, and adjusts speech toward a consistent
 level with no more than 13 dB boost. Short gain ramps and a -1 dBFS limiter
-prevent abrupt level jumps and clipping. `--denoise auto`
+prevent abrupt level jumps and clipping. Pass `--speech-gain off` to skip speech
+detection entirely: the denoised levels are kept, only the limiter applies, and
+Silero VAD is never loaded. `--denoise auto`
 uses DeepFilterNet when its `deep-filter.exe` (standalone Windows release) or
 `deepFilter` (Python package) executable is on PATH; otherwise it uses
 FFmpeg's `afftdn` filter and records that choice in `report.json`. Install the
