@@ -98,7 +98,7 @@ test('Remotion package uses the same approval gate and shared dry-run publisher'
   const {workspace,channel,draft}=fixture('remotion');
   try {
     const config=path.join(workspace,'channels.json');
-    fs.writeFileSync(config,JSON.stringify({workspace,channels:{sample:{name:'Sample'}}}));
+    fs.writeFileSync(config,'\uFEFF'+JSON.stringify({workspace,channels:{sample:{name:'Sample'}}}));
     const cli=path.resolve('content-studio/scripts/cli.mjs');
     const invoke=(...args)=>spawnSync(process.execPath,[cli,'publish','--channel','sample','--draft','001-test','--config',config,...args],{encoding:'utf8'});
     const now=invoke();

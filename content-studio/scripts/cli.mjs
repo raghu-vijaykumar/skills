@@ -26,13 +26,16 @@ function merge(base, override) {
   }
   return base;
 }
+function readJsonFile(file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+}
 function channel() {
   const slug = option('channel');
   if (!slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('--channel needs a configured slug');
   const configFile = option('config') ?? path.join(bundle, 'skills', 'content-studio-videoedit', 'config.json');
-  const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+  const config = readJsonFile(configFile);
   const override = path.join(path.dirname(configFile), 'config.local.json');
-  if (fs.existsSync(override)) merge(config, JSON.parse(fs.readFileSync(override, 'utf8')));
+  if (fs.existsSync(override)) merge(config, readJsonFile(override));
   const entry = config.channels?.[slug];
   if (!entry) throw new Error(`Unknown channel: ${slug}`);
   const root = path.resolve(config.workspace, slug);
