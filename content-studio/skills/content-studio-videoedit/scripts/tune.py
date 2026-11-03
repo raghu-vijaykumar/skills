@@ -25,7 +25,7 @@ import ordering
 import preprocess
 from preprocess import SAMPLE_RATE, ProcessingError, command, pcm16, probe, streams
 
-TUNE_VERSION = 2
+TUNE_VERSION = 3
 WINDOW_FRACTIONS = (0.3, 0.7)
 ANALYSIS_HOP_SECONDS = 0.02
 BAND_LOW_HZ = 300.0
@@ -37,6 +37,11 @@ BASELINE = "default"
 LEVEL_DRIFT_DB = 6.0
 # Fidelity gates: a candidate that trips any of these cannot be chosen.
 FIDELITY_ISSUES = ("clipping", "speech-band loss", "content loss")
+# A denoise pass must remove at least this much noise or raise SNR this much to
+# be worth applying; otherwise metric jitter decides between near-identical
+# chains.
+MIN_NOISE_CUT_DB = 1.0
+MIN_SNR_GAIN_DB = 1.0
 
 CSV_FIELDS = ("clip", "chosen", "score", "runner_up", "runner_up_score",
               "noise_reduction_db", "snr_gain_db", "speech_band_ratio",
@@ -238,23 +243,50 @@ def score_candidate(metrics: dict, source: dict) -> tuple[float, list[str]]:
     return round(score, 2), issues
 
 
-def choose(scored: list[dict], margin: float) -> dict:
-    """Pick the best candidate, but only replace the default by a clear margin."""
+def measurable_gain(candidate: dict, source: dict) -> bool:
+    """Whether a candidate removed noise or raised SNR against the source."""
+    metrics = candidate.get("metrics")
+    if not metrics or not source:
+        return True
+    noise_cut = source["noise_floor_dbfs"] - metrics["noise_floor_dbfs"]
+    snr_gain = metrics["snr_db"] - source["snr_db"]
+    return noise_cut >= MIN_NOISE_CUT_DB or snr_gain >= MIN_SNR_GAIN_DB
+
+
+def choose(scored: list[dict], margin: float, source: dict | None = None) -> dict:
+    """Pick the best candidate, but only replace the status quo for a reason.
+
+    The default chain is the status quo and no-denoise is the conservative
+    fallback. A candidate has to clear the fidelity gates, beat the anchor by
+    more than the measurement margin, and measurably reduce noise before it is
+    worth applying.
+    """
     valid = [item for item in scored
              if not set(item["issues"]) & set(FIDELITY_ISSUES)]
     if not valid:
         return {"chosen": None, "reason": "every candidate failed the fidelity gates"}
     baseline = next((item for item in scored if item["name"] == BASELINE), None)
     valid_baseline = baseline if baseline in valid else None
+    leave_alone = next((item for item in valid if item["name"] == "none"), None)
     best = max(valid, key=lambda item: item["score"])
-    if valid_baseline and best["name"] != BASELINE \
-            and best["score"] - valid_baseline["score"] <= margin:
+    if best["name"] == BASELINE:
+        return {"chosen": BASELINE, "reason": "the current default scored highest"}
+    if valid_baseline and best["score"] - valid_baseline["score"] <= margin:
         return {"chosen": BASELINE,
                 "reason": f"{best['name']} leads {BASELINE} by "
                           f"{best['score'] - valid_baseline['score']:.2f} <= margin "
                           f"{margin:g}; kept the current default"}
-    if best["name"] == BASELINE:
-        return {"chosen": BASELINE, "reason": "the current default scored highest"}
+    kept = BASELINE if valid_baseline else "none"
+    if leave_alone and best["name"] != "none" \
+            and not measurable_gain(best, source):
+        return {"chosen": kept,
+                "reason": f"{best['name']} did not measurably reduce noise; kept {kept}"}
+    if not valid_baseline and leave_alone and best["name"] != "none" \
+            and best["score"] - leave_alone["score"] <= margin:
+        return {"chosen": "none",
+                "reason": f"{best['name']} leads no-denoise by "
+                          f"{best['score'] - leave_alone['score']:.2f} <= margin "
+                          f"{margin:g}; kept the source"}
     runner = max((item for item in valid if item["name"] != best["name"]),
                  key=lambda item: item["score"], default=None)
     lead = (f"{best['score'] - runner['score']:.2f} ahead of {runner['name']} "
@@ -310,7 +342,7 @@ def tune_clip(source: Path, output_root: Path, candidates: list[dict], args, log
         score, issues = score_candidate(summary, source_summary)
         scored.append({"name": candidate["name"], "params": candidate, "score": score,
                        "issues": issues, "metrics": summary})
-    decision = choose(scored, args.margin)
+    decision = choose(scored, args.margin, source_summary)
     valid_scores = sorted((item for item in scored
                            if not set(item["issues"]) & set(FIDELITY_ISSUES)),
                           key=lambda item: item["score"], reverse=True)

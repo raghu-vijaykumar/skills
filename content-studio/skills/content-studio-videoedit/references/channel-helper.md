@@ -298,9 +298,10 @@ through the same denoise, level-match, and limiter chain preprocess uses, and
 measures each result against the untouched source window. The candidate grid includes
 the current default, post-filter strengths, an attenuation-limited pass that keeps
 music and ambience, and a no-denoise option. A candidate cannot be chosen if it
-clips, hollows the speech band, or loses more than 12 dB of program loudness; a
-candidate only replaces the default when it leads by more than `--margin` points,
-which keeps measurement noise from flipping the choice. Profiles, metrics, and
+clips, hollows the speech band, or loses more than 12 dB of program loudness; it
+must remove at least 1 dB of noise or raise SNR by 1 dB; and it only replaces the
+default when it leads by more than `--margin` points, which keeps measurement noise
+from flipping the choice. Profiles, metrics, and
 listenable WAVs are written under `.content-studio/analysis/tuning/`, with
 `tuning.csv` and `tuning.html` summarizing the run. Listen to the WAVs before a
 batch and use the profiles to decide whether that clip should be denoised at all or

@@ -52,6 +52,30 @@ class TuneTest(unittest.TestCase):
         self.assertIn("content loss", decision["reason"])
         self.assertIn("disqualified", decision["reason"])
 
+    def test_denoise_must_measurably_reduce_noise_to_be_applied(self):
+        source = metrics(noise_floor_dbfs=-32.5, snr_db=5.6)
+        scored = [
+            {"name": "default", "score": 80.0, "issues": ["content loss"]},
+            {"name": "pf-safe", "score": 29.29, "issues": [],
+             "metrics": metrics(noise_floor_dbfs=-32.7, snr_db=5.8)},
+            {"name": "none", "score": 29.21, "issues": [],
+             "metrics": metrics(noise_floor_dbfs=-32.5, snr_db=5.6)},
+        ]
+        decision = tune.choose(scored, 1.5, source)
+        self.assertEqual(decision["chosen"], "none")
+        self.assertIn("did not measurably reduce noise", decision["reason"])
+
+    def test_measurable_win_over_no_denoise_is_applied(self):
+        source = metrics(noise_floor_dbfs=-32.5, snr_db=5.6)
+        scored = [
+            {"name": "default", "score": 80.0, "issues": ["content loss"]},
+            {"name": "pf-safe", "score": 40.0, "issues": [],
+             "metrics": metrics(noise_floor_dbfs=-40.5, snr_db=13.6)},
+            {"name": "none", "score": 24.0, "issues": [],
+             "metrics": metrics(noise_floor_dbfs=-32.5, snr_db=5.6)},
+        ]
+        self.assertEqual(tune.choose(scored, 1.5, source)["chosen"], "pf-safe")
+
     def test_windows_spread_and_cover_short_clips(self):
         self.assertEqual(tune.windows_for(12.0, 40.0), [(0.0, 12.0)])
         windows = tune.windows_for(100.0, 40.0)
