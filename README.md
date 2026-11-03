@@ -321,6 +321,21 @@ node <bundle>/scripts/cli.mjs enhance render `
 
 See [the enhancement workflow](content-studio/skills/content-studio-videoedit/references/enhancement.md) for the manifest, validation limits, caching, and reflection-backend limitations.
 
+### 5d. Build a synchronized benchmark grid (optional)
+
+```powershell
+node <bundle>/scripts/cli.mjs benchmark `
+  --original <original-with-cuts.mp4> `
+  --preprocessed <preprocessed.mp4> `
+  --upscaled <upscaled-4k.mp4> `
+  --color <color-natural-4k.mp4> `
+  --color-warm <color-warm-4k.mp4> `
+  --audio <preprocessed.mp4> `
+  --output <content-studio-benchmark.mp4>
+```
+
+The 5-panel layout keeps 1080p panels at 1080p and 4K panels at 4K, with no crop or downscale. See [the benchmark grid workflow](content-studio/skills/content-studio-videoedit/references/benchmark.md).
+
 ### 6. Choose the music
 
 `content-studio-music` builds a shortlist from the local catalog and records an approved selection:
