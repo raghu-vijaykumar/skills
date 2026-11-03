@@ -69,7 +69,7 @@ async function main() {
   }
   const {id, root, draft, entry} = channel();
   if (command === 'transcribe') {
-    console.log(JSON.stringify(transcribeDraft(root, draft, {cli: option('cli'), model: option('model')}), null, 2));
+    console.log(JSON.stringify(transcribeDraft(root, draft, {cli: option('cli'), model: option('model'), language: option('language')}), null, 2));
     return;
   }
   if (command === 'approve') {

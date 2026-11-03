@@ -42,7 +42,16 @@ export function isSpeechText(text) {
   if (!cleaned) return false;
   const visible = cleaned.replace(/\s/g, '');
   const letters = (cleaned.match(/[\p{L}\p{N}]/gu) ?? []).length;
-  return visible.length > 0 && letters / visible.length >= 0.5;
+  if (visible.length === 0 || letters / visible.length < 0.5) return false;
+  const chars = [...visible];
+  if (chars.length >= 20) {
+    const unique = new Set(chars).size;
+    const counts = new Map();
+    for (const char of chars) counts.set(char, (counts.get(char) ?? 0) + 1);
+    if (unique / chars.length < 0.15) return false;
+    if (Math.max(...counts.values()) / chars.length > 0.4) return false;
+  }
+  return true;
 }
 export function toSrt(segments) {
   return segments.map((entry, index) => `${index + 1}\n${stamp(entry.startMs)} --> ${stamp(entry.endMs)}\n${entry.text}\n`).join('\n');
@@ -61,7 +70,8 @@ export function transcribeDraft(channelRoot, draft, options = {}) {
   const model = options.model ?? process.env.CONTENT_STUDIO_WHISPER_MODEL ?? path.join(home, 'models', 'ggml-small.bin');
   if (!fs.existsSync(cli) || !fs.existsSync(model)) throw new Error(`Local whisper.cpp v1.9.4 and multilingual small model are required; run setup-whisper.ps1 or set CONTENT_STUDIO_WHISPER_CLI and CONTENT_STUDIO_WHISPER_MODEL`);
   execute('ffmpeg', ['-nostdin','-y','-v','error','-i',master,'-vn','-ac','1','-ar','16000','-c:a','pcm_s16le',audio], 'audio extraction');
-  execute(cli, ['-m',model,'-f',audio,'-l','auto','-oj','-of',prefix], 'whisper.cpp transcription');
+  const language = options.language ?? 'auto';
+  execute(cli, ['-m',model,'-f',audio,'-l',language,'-oj','-of',prefix], 'whisper.cpp transcription');
   const segments = transcriptionSegments(JSON.parse(fs.readFileSync(`${prefix}.json`,'utf8')));
   const speech = segments.length > 0;
   const transcript = {model: 'whisper.cpp-v1.9.4-small', masterSha256: sha256(master),

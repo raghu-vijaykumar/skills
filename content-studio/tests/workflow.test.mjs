@@ -7,7 +7,7 @@ import {test} from 'node:test';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {approvePackage, sha256, verifyPackage, validateSrt, validateChecklist} from '../scripts/package.mjs';
-import {transcriptionSegments, toSrt, transcribeDraft} from '../scripts/transcribe.mjs';
+import {transcriptionSegments, toSrt, transcribeDraft, isSpeechText} from '../scripts/transcribe.mjs';
 import {sourceRevision} from '../scripts/source-revision.mjs';
 import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-videogen/dist/hairline.js';
 
@@ -135,6 +135,7 @@ test('non-speech annotations and garbage are not captions',()=>{
     {offsets:{from:2000,to:3000},text:'Hello world'},
   ]});
   assert.deepEqual(segments,[{startMs:2000,endMs:3000,text:'Hello world'}]);
+  assert.equal(isSpeechText('ʕᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗ'),false);
 });
 
 test('a no-speech transcript approves without fake captions',()=>{
@@ -189,14 +190,15 @@ test('no-speech whisper output writes a no-speech transcript and removes caption
     const model=path.join(workspace,'ggml-small.bin');
     fs.writeFileSync(cli,'stub');
     fs.writeFileSync(model,'stub');
-    const result=transcribeDraft(channel,draft,{cli,model,
+    const result=transcribeDraft(channel,draft,{cli,model,language:'en',
       probe:()=>({durationSeconds:10}),
       runCommand:(binary,args,label)=>{
         if(label==='whisper.cpp transcription') {
+          assert.ok(args.includes('en'));
           const prefix=args[args.indexOf('-of')+1];
           fs.writeFileSync(`${prefix}.json`,JSON.stringify({transcription:[
             {offsets:{from:0,to:1000},text:'[MUSIC]'},
-            {offsets:{from:1000,to:2000},text:'�-�-�-�'}]}));
+            {offsets:{from:1000,to:2000},text:'ʕᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗᵗ'}]}));
         } else {
           fs.writeFileSync(args[args.length-1],'proof');
         }
