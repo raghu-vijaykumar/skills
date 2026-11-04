@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "workspace": "./my-vlog-draft",
+  "source_video": "original/my-vlog.mp4",
+  "human_context": {
+    "trip": "Dubai Day 2",
+    "language": "Kannada-English",
+    "tone": "natural, conversational",
+    "facts_to_include": [
+      "Sunrise at Burj Khalifa",
+      "Miracle Garden",
+      "Fountain show"
+    ],
+    "avoid_claims_not_visible": true
+  },
+  "edit_decisions": {
+    "original_audio": "mute_selected",
+    "mute_ranges_seconds": [],
+    "keep_original_dialogue_ranges_seconds": [],
+    "voiceover": "generate_script_for_approval",
+    "voice_profile": "pending_samples",
+    "upscale": "no",
+    "color_correction": "diagnose_first",
+    "stabilization": "diagnose_first",
+    "music": "review_before_use",
+    "captions": "optional"
+  },
+  "publishing": {
+    "platform": "youtube",
+    "requires_explicit_approval": true
+  },
+  "steps": [
+    {
+      "id": "inspect_video",
+      "command": [
+        "python",
+        "../content-studio/skills/content-studio-understand/scripts/understand.py",
+        "--video",
+        "original/my-vlog.mp4",
+        "--out",
+        ".content-studio/understanding",
+        "--context",
+        "context.json"
+      ],
+      "inputs": [
+        "original/my-vlog.mp4",
+        "context.json"
+      ],
+      "outputs": [
+        ".content-studio/understanding/evidence.json"
+      ],
+      "retries": 1
+    },
+    {
+      "id": "review_voiceover",
+      "depends_on": [
+        "inspect_video"
+      ],
+      "approval_required": true
+    },
+    {
+      "id": "review_final_master",
+      "depends_on": [
+        "review_voiceover"
+      ],
+      "approval_required": true
+    }
+  ]
+}
