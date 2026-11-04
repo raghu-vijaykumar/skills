@@ -57,3 +57,17 @@ The importer parses simple MLT producer/chain resources and playlist entries, re
 The learning command groups repeated **explicit human feedback reasons** by category and feature; requires at least three events from at least two projects; and emits reviewable preference candidates only. It does not update preferences or infer motives from Kdenlive changes. A user must confirm any candidate before adding an explicit preference with `memory.py set`.
 
 Run tests locally using `python -m unittest discover -s content-studio/skills/content-studio-memory/tests`. Tests are committed but not verified in this environment.
+
+## Applying confirmed preferences to AutoCut
+
+AutoCut supports `--memory-db D:/ContentStudio/memory/memory.sqlite --category travel --project dubai-day-2`. Only explicit `autocut_fit` (pad/blur/crop), `autocut_duration` (valid time <= 4h) and `autocut_style` are applied. The exact applied values are recorded in `edit-decisions.json`. Inferred candidates are never applied. An explicitly supplied CLI value may be overridden by a stored preference; omit `--memory-db` to bypass preferences.
+
+## Recording verified Kdenlive observations
+
+After visually checking the imported source ranges and comparison report, the **human** may run:
+
+```bash
+python content-studio/skills/content-studio-memory/scripts/confirm_diff.py --db "D:/ContentStudio/memory/memory.sqlite" --report comparison.json --scope travel --project dubai-day-2 --confirm-reviewed --reason "Removed repetitive shots"
+```
+
+This adds observed human-confirmed events, once per report/project fingerprint. Reports with importer issues are rejected. Confirmed observations **do not become preferences** without explicit confirmation. The `learn.py` candidate generator intentionally considers only changed/rejected decisions, not generic observations. Complex Kdenlive tractor/compositing reconstruction remains unsupported; the importer explicitly reports this rather than pretending to know rendered track order.
