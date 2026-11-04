@@ -198,7 +198,35 @@ def generate_review_assets(out, selected, folder):
         "".join(cards)+"</main>",encoding="utf-8")
     return assets
 
+def apply_memory(args):
+    """Apply only explicitly supported, user-confirmed AutoCut settings."""
+    if not args.memory_db:return {}
+    import importlib.util
+    module_path=Path(__file__).resolve().parents[2]/"content-studio-memory"/"scripts"/"memory.py"
+    spec=importlib.util.spec_from_file_location("content_studio_memory",module_path)
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    db=module.connect(args.memory_db.expanduser().resolve())
+    prefs=module.retrieve(db,args.category,args.project)["preferences"]
+    applied={}
+    for key,attr,allowed in (
+        ("autocut_fit","fit",{"pad","blur","crop"}),
+        ("autocut_duration","duration",None),
+        ("autocut_style","style",None),
+    ):
+        item=prefs.get(key)
+        if not item or item.get("source")!="explicit":continue
+        value=item["value"]
+        if not isinstance(value,str) or not value.strip():continue
+        if allowed and value not in allowed:continue
+        if key=="autocut_duration":
+            try:
+                if not 1<=seconds(value)<=14400:continue
+            except ValueError:continue
+        setattr(args,attr,value);applied[key]=value
+    return applied
+
 def build(args):
+    applied_preferences=apply_memory(args)
     folder=args.folder.resolve(); out=args.output.resolve()
     if not folder.is_dir(): raise ValueError("Input folder does not exist")
     if folder==out: raise ValueError("Output must differ from input")
@@ -259,7 +287,7 @@ def build(args):
             preview=reframe.write_preview(folder/clip["source"],record,preview_dir)
             if preview: record["preview"]=str(preview.relative_to(out))
     out.mkdir(parents=True,exist_ok=True)
-    decisions={"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
+    decisions={"memory_preferences_applied":applied_preferences,"style":args.style,"target_seconds":target,"actual_seconds":round(used,3),
                "orientation":target_orientation,"size":f"{width}x{height}","fit":args.fit,
                "skipped_sources":skipped,
                "reframe_mode":args.reframe_mode if args.fit=="reframe" else None,
@@ -333,6 +361,9 @@ def main():
     p.add_argument("--subjects",type=Path,
                    help="JSON subject boxes for --fit reframe (source/start/end/box)")
     p.add_argument("--size",help="target size: auto/max or WxH; default highest source resolution")
+    p.add_argument("--memory-db",type=Path,help="Optional local editing memory database")
+    p.add_argument("--category",choices=["travel","cooking","daily"],default="travel")
+    p.add_argument("--project",default="")
     args=p.parse_args()
     for binary in ("ffmpeg","ffprobe"):
         if not shutil.which(binary): p.error(binary+" missing from PATH")
