@@ -34,10 +34,30 @@ def validate(data: dict) -> tuple[Path, float, list[dict], dict]:
         start, end = float(event["start"]), float(event["end"])
         if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= duration + 0.02):
             raise ValueError(f"Event {index} is outside the source duration")
-        if event.get("kind") not in {"ingredient", "cta"}:
-            raise ValueError(f"Event {index} needs ingredient or cta kind")
+        if event.get("kind") not in {"ingredient", "ingredient_list", "leaves", "title", "cta"}:
+            raise ValueError(f"Event {index} has an unsupported motion-graphic kind")
         if event["kind"] == "ingredient" and not all(event.get(key) for key in ("label", "action", "evidence")):
             raise ValueError(f"Ingredient event {index} needs label, action, and evidence")
+        if event["kind"] == "title" and len(str(event.get("label", "")).split(maxsplit=1)) != 2:
+            raise ValueError(f"Title event {index} needs a two-part label")
+        if event["kind"] == "ingredient_list":
+            items = event.get("items", [])
+            if not 1 <= len(items) <= 12:
+                raise ValueError(f"Ingredient list {index} needs 1–12 items")
+            if any(not item.get("label") or not start <= float(item.get("at", -1)) < end for item in items):
+                raise ValueError(f"Ingredient list {index} has an untimed item")
+            if [float(item["at"]) for item in items] != sorted(float(item["at"]) for item in items):
+                raise ValueError(f"Ingredient list {index} must be chronological")
+        if event["kind"] == "leaves":
+            pairs = event.get("pairs", [])
+            if len(pairs) != 3 or any(not pair.get("english") or not pair.get("kannada") for pair in pairs):
+                raise ValueError(f"Leaf event {index} needs three English and Kannada names")
+        if event["kind"] == "cta":
+            beats = event.get("beats", [{"label": "LIKE", "emoji": "👍"},
+                                        {"label": "SHARE", "emoji": "📤"},
+                                        {"label": "SUBSCRIBE", "emoji": "🔔"}])
+            if not 1 <= len(beats) <= 3 or any(not beat.get("label") or not beat.get("emoji") for beat in beats):
+                raise ValueError(f"CTA event {index} needs 1–3 labeled emoji beats")
     return source, duration, events, video
 
 
@@ -89,8 +109,14 @@ def line(layer: int, start: float, end: float, body: str) -> str:
     return f"Dialogue: {layer},{stamp(start)},{stamp(end)},Default,,0,0,0,,{body}"
 
 
-def motion(x: int, y: int, entering_from: int, duration_ms: int = 430) -> str:
-    return f"\\an7\\move({entering_from},{y},{x},{y},0,{duration_ms})\\fad(170,260)"
+def motion(x: int, y: int, entering_from: int, duration_ms: int = 250) -> str:
+    return f"\\an7\\move({entering_from},{y},{x},{y},0,{duration_ms})\\fad(75,150)"
+
+
+def bounce(x: int, y: int, entering_y: int, duration_ms: int = 220) -> str:
+    return (f"\\an7\\move({x},{entering_y},{x},{y},0,{duration_ms})\\fad(65,140)"
+            f"\\fscx82\\fscy82\\t(0,160,\\fscx110\\fscy110)"
+            f"\\t(160,300,\\fscx100\\fscy100)")
 
 
 def ass(data: dict, offset: float = 0, length: float | None = None) -> str:
@@ -115,7 +141,62 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
         start, end = max(0, start), min(end, length) if length is not None else end
         if end - start < 0.1:
             continue
-        if event["kind"] == "ingredient":
+        if event["kind"] == "title":
+            # Two words hit on separate beats against the open wall beside the presenter.
+            x, y = 90, 170
+            first, second = str(event["label"]).split(maxsplit=1)
+            panel = "m 20 0 l 710 0 l 750 40 l 750 285 l 730 305 l 20 305 l 0 285 l 0 20 l 20 0"
+            rows.append(line(0, start, end, "{" + motion(x + 8, y + 10, -842) + "\\1c&H00202C22&\\alpha&HA0&\\p1}" + panel + "{\\p0}"))
+            rows.append(line(1, start, end, "{" + motion(x, y, -850) + "\\1c&H003F3F12&\\alpha&H18&\\p1}" + panel + "{\\p0}"))
+            rows.append(line(2, start, end, "{" + bounce(x + 38, y + 27, y + 65) + "\\fs26\\1c&H005B70EF&}" + "OUT OF OFFICE MODE  /  COOK"))
+            rows.append(line(3, start + 0.12, end, "{" + bounce(x + 38, y + 76, y + 145) + "\\fs67\\1c&H00E9F3F7&}" + clean(first).upper()))
+            rows.append(line(4, start + 0.34, end, "{" + bounce(x + 34, y + 138, y + 238) + "\\fs124\\1c&H006BD6FF&}" + clean(second).upper()))
+            rows.append(line(4, start + 0.72, end, "{" + bounce(x + 42, y + 253, y + 300) + "\\fnNirmala UI\\fs43\\1c&H00E9F3F7&}" + clean(event.get("kannada", ""))))
+        elif event["kind"] == "ingredient_list":
+            # Each chip is a continuing list item, so earlier ingredients stay on screen.
+            x, y = 46, 787
+            upper = "m 18 0 l 1810 0 l 1828 18 l 1828 121 l 1810 139 l 18 139 l 0 121 l 0 18 l 18 0"
+            lower = "m 18 0 l 1810 0 l 1828 18 l 1828 71 l 1810 89 l 18 89 l 0 71 l 0 18 l 18 0"
+            rows.append(line(0, start, end, "{" + motion(x, y, -1850) + "\\1c&H003F3F12&\\alpha&H34&\\p1}" + upper + "{\\p0}"))
+            rows.append(line(1, start, end, "{" + motion(x + 24, y + 15, -1826) + "\\fs33\\1c&H006BD6FF&}" + "INGREDIENTS  /  ONE BY ONE"))
+            items = event["items"]
+            if len(items) > 6:
+                lower_start = max(0, float(items[6]["at"]) - offset)
+                if lower_start < end:
+                    rows.append(line(0, lower_start, end, "{" + motion(x, 919, -1850) + "\\1c&H003F3F12&\\alpha&H34&\\p1}" + lower + "{\\p0}"))
+            for item_index, item in enumerate(items):
+                item_start = max(0, float(item["at"]) - offset)
+                if item_start >= end:
+                    continue
+                cx, cy = 73 + (item_index % 6) * 294, 851 + (item_index // 6) * 75
+                chip = "m 11 0 l 260 0 b 270 0 276 7 276 17 l 276 48 b 276 58 270 64 260 64 l 11 64 b 3 64 0 58 0 48 l 0 17 b 0 7 3 0 11 0"
+                rows.append(line(1, item_start, end, "{" + bounce(cx, cy, cy + 30) + "\\1c&H006BD6FF&\\t(0,360,\\1c&H00E9F3F7&)\\alpha&H08&\\p1}" + chip + "{\\p0}"))
+                english_y = cy + (5 if item.get("kannada") else 12)
+                rows.append(line(2, item_start, end, "{" + bounce(cx + 15, english_y, english_y + 30) + "\\fs29\\1c&H005B70EF&\\t(0,330,\\1c&H002D3020&)}" + clean(item["label"])))
+                if item.get("kannada"):
+                    rows.append(line(2, item_start + 0.10, end, "{" + bounce(cx + 15, cy + 35, cy + 55) + "\\fnNirmala UI\\fs24\\1c&H00686A17&}" + clean(item["kannada"])))
+                hero_end = min(end, item_start + 0.92)
+                rows.append(line(3, item_start, hero_end, "{" + bounce(82, 683, 766) + "\\fs86\\1c&H006BD6FF&\\bord2\\3c&H003F3F12&}" + clean(item["label"]).upper()))
+                next_at = float(items[item_index + 1]["at"]) - offset if item_index + 1 < len(items) else end
+                counter_end = min(end, next_at)
+                if counter_end > item_start:
+                    rows.append(line(2, item_start, counter_end, "{\\an7\\pos(1740,805)\\fs31\\1c&H006BD6FF&}" + f"{item_index + 1:02d} / {len(items):02d}"))
+        elif event["kind"] == "leaves":
+            # The same text position cycles through three English/Kannada leaf names.
+            x, y = 72, 92
+            panel = "m 18 0 l 725 0 l 745 20 l 745 305 l 725 325 l 18 325 l 0 305 l 0 18 l 18 0"
+            rows.append(line(0, start, end, "{" + motion(x, y, -760) + "\\1c&H003F3F12&\\alpha&H1C&\\p1}" + panel + "{\\p0}"))
+            rows.append(line(1, start, end, "{" + motion(x + 36, y + 27, -724) + "\\fs28\\1c&H006BD6FF&}" + "THREE FRESH LEAVES  🌿"))
+            span = (float(event["end"]) - float(event["start"])) / 3
+            for leaf_index, pair in enumerate(event["pairs"]):
+                a = max(0, float(event["start"]) - offset + leaf_index * span)
+                b = min(end, float(event["start"]) - offset + (leaf_index + 1) * span)
+                if b - a < 0.1:
+                    continue
+                rows.append(line(2, a, b, "{" + bounce(x + 38, y + 93, y + 165) + "\\fs78\\1c&H00E9F3F7&}" + clean(pair["english"]).upper()))
+                rows.append(line(3, a + 0.12, b, "{" + bounce(x + 41, y + 207, y + 272) + "\\fnNirmala UI\\fs48\\1c&H006BD6FF&}" + clean(pair["kannada"])))
+                rows.append(line(2, a, b, "{\\an7\\pos(690,125)\\fs26\\1c&H005B70EF&}" + f"0{leaf_index + 1} / 03"))
+        elif event["kind"] == "ingredient":
             # Cream recipe cards, teal ink, and coral/yellow details borrow from the channel intro.
             x, y = 72, 82
             card = "m 18 0 l 610 0 b 626 0 636 10 636 26 l 636 106 b 636 120 626 130 610 130 l 18 130 b 5 130 0 120 0 106 l 0 22 b 0 10 5 0 18 0"
@@ -123,23 +204,26 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             rows.append(line(1, start, end, "{" + motion(x, y, -650) + "\\1c&H00E9F3F7&\\alpha&H08&\\p1}" + card + "{\\p0}"))
             rows.append(line(2, start, end, "{" + motion(x, y + 117, -650) + "\\1c&H00686A17&\\p1}m 18 0 l 610 0 l 610 5 l 18 5{\\p0}"))
             rows.append(line(3, start, end, "{" + motion(x + 30, y + 17, -620) + "\\fs25\\1c&H005B70EF&}" + clean(event["action"]).upper()))
-            rows.append(line(4, start, end, "{" + motion(x + 30, y + 57, -620) + "\\fs49\\1c&H002D3020&\\fscx92\\fscy92\\t(0,480,\\fscx100\\fscy100)}" + clean(event["label"])))
+            rows.append(line(4, start, end, "{" + motion(x + 30, y + 57, -620) + "\\fs49\\1c&H002D3020&\\fscx86\\fscy86\\t(0,170,\\fscx110\\fscy110)\\t(170,300,\\fscx100\\fscy100)}" + clean(event["label"])))
             rows.append(line(3, start, end, "{" + motion(x + 554, y + 17, -96) + "\\fs28\\1c&H005B70EF&}" + f"{index:02d} →"))
         else:
-            # Staggered polaroid-like prompts use the same channel colors as the ingredient cards.
-            labels = [("LIKE", "♥"), ("SHARE", "↗"), ("SUBSCRIBE", "▶")]
-            for beat, (label, icon) in enumerate(labels):
-                a = start + beat * 0.45
+            # Emoji-led prompts arrive on three beats and remain reusable through cue data.
+            beats = event.get("beats", [{"label": "LIKE", "emoji": "👍"},
+                                        {"label": "SHARE", "emoji": "📤"},
+                                        {"label": "SUBSCRIBE", "emoji": "🔔"}])
+            for beat, item in enumerate(beats):
+                a = max(0, float(event["start"]) - offset + beat * 1.12)
                 if a >= end:
                     break
-                x, y = 1370, 92 + beat * 82
-                card = "m 14 0 l 454 0 b 465 0 470 6 470 16 l 470 52 b 470 63 464 68 454 68 l 14 68 b 4 68 0 62 0 52 l 0 16 b 0 5 5 0 14 0"
-                rows.append(line(0, a, end, "{" + motion(x + 5, y + 6, 1975) + "\\1c&H002B4A39&\\alpha&HB0&\\p1}" + card + "{\\p0}"))
-                rows.append(line(1, a, end, "{" + motion(x, y, 1970) + "\\1c&H00E9F3F7&\\alpha&H08&\\p1}" + card + "{\\p0}"))
-                rows.append(line(2, a, end, "{" + motion(x + 22, y + 14, 1992) + "\\fs36\\1c&H00686A17&}" + label))
-                rows.append(line(2, a, end, "{" + motion(x + 418, y + 12, 2388) + "\\fs38\\1c&H005B70EF&}" + icon))
-            rows.append(line(1, start, end, "{" + motion(1370, 44, 1970) + "\\1c&H0063CFFF&\\alpha&H08&\\p1}m 10 0 l 460 0 l 470 10 l 470 35 l 0 35 l 0 10 l 10 0{\\p0}"))
-            rows.append(line(2, start, end, "{" + motion(1390, 48, 1990) + "\\fs24\\1c&H00686A17&}" + "OUT OF OFFICE MODE  /  COOK"))
+                x, y = 1260, 104 + beat * 112
+                card = "m 16 0 l 584 0 b 600 0 610 10 610 26 l 610 70 b 610 86 600 96 584 96 l 16 96 b 4 96 0 86 0 70 l 0 26 b 0 10 4 0 16 0"
+                fill = ["&H00E9F3F7&", "&H00DDE9BD&", "&H006BD6FF&"][beat % 3]
+                rows.append(line(0, a, end, "{" + motion(x + 7, y + 8, 1977) + "\\1c&H002B4A39&\\alpha&HB0&\\p1}" + card + "{\\p0}"))
+                rows.append(line(1, a, end, "{" + motion(x, y, 1970) + f"\\1c{fill}\\alpha&H04&\\p1}}" + card + "{\\p0}"))
+                rows.append(line(2, a, end, "{" + bounce(x + 30, y + 8, y + 60) + "\\fnSegoe UI Emoji\\fs71\\1c&H005B70EF&\\frz-12\\t(0,260,\\frz0)}" + clean(item["emoji"])))
+                rows.append(line(3, a + 0.08, end, "{" + bounce(x + 145, y + 21, y + 75) + "\\fs55\\1c&H003F3F12&}" + clean(item["label"]).upper()))
+            rows.append(line(1, start, end, "{" + motion(1260, 50, 1970) + "\\1c&H0063CFFF&\\alpha&H06&\\p1}m 14 0 l 596 0 l 610 12 l 610 38 l 0 38 l 0 12 l 14 0{\\p0}"))
+            rows.append(line(2, start, end, "{" + motion(1282, 57, 1992) + "\\fs26\\1c&H003F3F12&}" + clean(event.get("brand", "OUT OF OFFICE MODE  /  COOK"))))
     return "\n".join(rows) + "\n"
 
 

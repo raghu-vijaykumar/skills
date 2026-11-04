@@ -33,6 +33,39 @@ class OverlayTest(unittest.TestCase):
         self.assertNotIn(r"{\bord20}", rendered)
         self.assertIn("Rice(/bord20)", rendered)
 
+    def test_kinetic_cues_keep_bilingual_text_and_emoji(self):
+        data = {"events": [
+            {"kind": "title", "start": 3, "end": 7, "label": "VEGETABLE PALAV", "kannada": "ತರಕಾರಿ ಪಲಾವ್"},
+            {"kind": "ingredient_list", "start": 14, "end": 50,
+             "items": [{"at": 14, "label": "Palak", "kannada": "ಪಾಲಕ್ ಸೊಪ್ಪು"},
+                       {"at": 20, "label": "Onions"}]},
+            {"kind": "leaves", "start": 218, "end": 224,
+             "pairs": [{"english": "Palak", "kannada": "ಪಾಲಕ್ ಸೊಪ್ಪು"},
+                       {"english": "Methi", "kannada": "ಮೆಂತ್ಯ ಸೊಪ್ಪು"},
+                       {"english": "Coriander", "kannada": "ಕೊತ್ತಂಬರಿ ಸೊಪ್ಪು"}]},
+            {"kind": "cta", "start": 482, "end": 491,
+             "beats": [{"label": "LIKE", "emoji": "👍"},
+                       {"label": "SHARE", "emoji": "📤"},
+                       {"label": "SUBSCRIBE", "emoji": "🔔"}]}]}
+        rendered = overlay.ass(data)
+        # The cue data drives text and retains the script and emoji characters in ASS.
+        for expected in ("VEGETABLE", "PALAV", "ತರಕಾರಿ ಪಲಾವ್", "ಪಾಲಕ್ ಸೊಪ್ಪು",
+                         "ಮೆಂತ್ಯ ಸೊಪ್ಪು", "ಕೊತ್ತಂಬರಿ ಸೊಪ್ಪು", "👍", "📤", "🔔"):
+            self.assertIn(expected, rendered)
+        self.assertIn("0:00:14.00,0:00:50.00", rendered)
+
+    def test_rejects_out_of_order_ingredient_list(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "source.mp4"
+            source.touch()
+            data = {"source": str(source), "events": [{"kind": "ingredient_list", "start": 14, "end": 50,
+                    "items": [{"at": 23, "label": "Beans"}, {"at": 20, "label": "Onions"}]}]}
+            probe = {"format": {"duration": "60"}, "streams": [
+                {"codec_type": "video"}, {"codec_type": "audio"}]}
+            with patch.object(overlay, "probe", return_value=probe):
+                with self.assertRaisesRegex(ValueError, "must be chronological"):
+                    overlay.validate(data)
+
     def test_hlg_render_preserves_source_signal_and_audio(self):
         video = {"width": 3840, "height": 2160, "pix_fmt": "yuv420p10le",
                  "color_primaries": "bt2020", "color_transfer": "arib-std-b67",
