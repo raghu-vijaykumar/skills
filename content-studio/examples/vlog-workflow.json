@@ -1,69 +1,26 @@
 {
-  "schema_version": 1,
-  "workspace": "./my-vlog-draft",
-  "source_video": "original/my-vlog.mp4",
-  "human_context": {
-    "trip": "Dubai Day 2",
+  "video": "/path/to/approved-final.mp4",
+  "workspace": "/path/to/vlog-draft",
+  "voiceover": {
+    "enabled": true,
     "language": "Kannada-English",
-    "tone": "natural, conversational",
-    "facts_to_include": [
-      "Sunrise at Burj Khalifa",
-      "Miracle Garden",
-      "Fountain show"
-    ],
-    "avoid_claims_not_visible": true
+    "tone": "natural conversational",
+    "context": "We visited Burj Khalifa at sunrise, Miracle Garden and the Dubai Fountain. Include personal experiences I provide, never invent details.",
+    "use_original_dialogue": true,
+    "voice": "my-voice-when-configured",
+    "require_script_approval": true
   },
-  "edit_decisions": {
-    "original_audio": "mute_selected",
-    "mute_ranges_seconds": [],
-    "keep_original_dialogue_ranges_seconds": [],
-    "voiceover": "generate_script_for_approval",
-    "voice_profile": "pending_samples",
-    "upscale": "no",
-    "color_correction": "diagnose_first",
-    "stabilization": "diagnose_first",
-    "music": "review_before_use",
-    "captions": "optional"
+  "editing": {
+    "mute_original_audio": "selected",
+    "mute_ranges": [],
+    "keep_original_audio_ranges": [],
+    "upscale": false,
+    "color": "diagnose-first",
+    "stabilization": "diagnose-first",
+    "music": "review"
   },
-  "publishing": {
+  "publish": {
     "platform": "youtube",
-    "requires_explicit_approval": true
-  },
-  "steps": [
-    {
-      "id": "inspect_video",
-      "command": [
-        "python",
-        "../content-studio/skills/content-studio-understand/scripts/understand.py",
-        "--video",
-        "original/my-vlog.mp4",
-        "--out",
-        ".content-studio/understanding",
-        "--context",
-        "context.json"
-      ],
-      "inputs": [
-        "original/my-vlog.mp4",
-        "context.json"
-      ],
-      "outputs": [
-        ".content-studio/understanding/evidence.json"
-      ],
-      "retries": 1
-    },
-    {
-      "id": "review_voiceover",
-      "depends_on": [
-        "inspect_video"
-      ],
-      "approval_required": true
-    },
-    {
-      "id": "review_final_master",
-      "depends_on": [
-        "review_voiceover"
-      ],
-      "approval_required": true
-    }
-  ]
+    "require_approval": true
+  }
 }
