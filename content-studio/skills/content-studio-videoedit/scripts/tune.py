@@ -26,7 +26,7 @@ import ordering
 import preprocess
 from preprocess import SAMPLE_RATE, ProcessingError, command, pcm16, probe, streams
 
-TUNE_VERSION = 3
+TUNE_VERSION = 4
 WINDOW_FRACTIONS = (0.3, 0.7)
 ANALYSIS_HOP_SECONDS = 0.02
 BAND_LOW_HZ = 300.0
@@ -43,6 +43,11 @@ FIDELITY_ISSUES = ("clipping", "speech-band loss", "content loss")
 # chains.
 MIN_NOISE_CUT_DB = 1.0
 MIN_SNR_GAIN_DB = 1.0
+# Past this much reduction a speech denoiser is removing the program bed, not
+# just noise, which can sound gated; score it down instead of rewarding it.
+OVER_SUPPRESSION_DB = 24.0
+OVER_SUPPRESSION_PENALTY = 0.6
+OVER_SUPPRESSION_CAP = 30.0
 
 CSV_FIELDS = ("clip", "chosen", "score", "runner_up", "runner_up_score",
               "noise_reduction_db", "snr_gain_db", "speech_band_ratio",
@@ -68,6 +73,10 @@ def candidate_grid(deepfilter_executable: str | None) -> list[dict]:
              "beta": 0.02, "highpass": 0, "attenuation": None},
             {"name": "pf-safe", "engine": "deepfilter", "post_filter": True,
              "beta": 0.02, "highpass": 0, "attenuation": 10},
+            {"name": "pf-20", "engine": "deepfilter", "post_filter": True,
+             "beta": 0.02, "highpass": 0, "attenuation": 20},
+            {"name": "pf-30", "engine": "deepfilter", "post_filter": True,
+             "beta": 0.02, "highpass": 0, "attenuation": 30},
             {"name": "pf-strong", "engine": "deepfilter", "post_filter": True,
              "beta": 0.05, "highpass": 0, "attenuation": None},
             {"name": "none", "engine": "none", "post_filter": False,
@@ -230,6 +239,8 @@ def score_candidate(metrics: dict, source: dict) -> tuple[float, list[str]]:
         + 0.10 * clamp01(1.0 - metrics["noise_modulation_db"] / 12.0)
         + 0.05 * clamp01(1.0 - level_drift / LEVEL_DRIFT_DB)
     )
+    excess = max(0.0, noise_reduction - OVER_SUPPRESSION_DB)
+    score -= min(OVER_SUPPRESSION_CAP, OVER_SUPPRESSION_PENALTY * excess)
     issues = []
     if metrics["peak_dbfs"] > -0.5 or metrics["clip_ratio"] > 0:
         issues.append("clipping")
@@ -237,7 +248,7 @@ def score_candidate(metrics: dict, source: dict) -> tuple[float, list[str]]:
         issues.append("speech-band loss")
     if metrics.get("content_loss_db", 0.0) > preprocess.CONTENT_LOSS_DB:
         issues.append("content loss")
-    if noise_reduction > 25.0:
+    if noise_reduction > OVER_SUPPRESSION_DB:
         issues.append("over-suppressed")
     if level_drift > LEVEL_DRIFT_DB:
         issues.append("level drift")
@@ -268,21 +279,25 @@ def choose(scored: list[dict], margin: float, source: dict | None = None) -> dic
         return {"chosen": None, "reason": "every candidate failed the fidelity gates"}
     baseline = next((item for item in scored if item["name"] == BASELINE), None)
     valid_baseline = baseline if baseline in valid else None
+    # The margin protects a healthy status quo. An over-suppressed default is
+    # the thing we are trying to move away from, so it gets no protection.
+    baseline_fit = (valid_baseline is not None
+                    and "over-suppressed" not in valid_baseline["issues"])
     leave_alone = next((item for item in valid if item["name"] == "none"), None)
     best = max(valid, key=lambda item: item["score"])
     if best["name"] == BASELINE:
         return {"chosen": BASELINE, "reason": "the current default scored highest"}
-    if valid_baseline and best["score"] - valid_baseline["score"] <= margin:
+    if baseline_fit and best["score"] - valid_baseline["score"] <= margin:
         return {"chosen": BASELINE,
                 "reason": f"{best['name']} leads {BASELINE} by "
                           f"{best['score'] - valid_baseline['score']:.2f} <= margin "
                           f"{margin:g}; kept the current default"}
-    kept = BASELINE if valid_baseline else "none"
+    kept = BASELINE if baseline_fit else "none"
     if leave_alone and best["name"] != "none" \
             and not measurable_gain(best, source):
         return {"chosen": kept,
                 "reason": f"{best['name']} did not measurably reduce noise; kept {kept}"}
-    if not valid_baseline and leave_alone and best["name"] != "none" \
+    if not baseline_fit and leave_alone and best["name"] != "none" \
             and best["score"] - leave_alone["score"] <= margin:
         return {"chosen": "none",
                 "reason": f"{best['name']} leads no-denoise by "
@@ -293,7 +308,7 @@ def choose(scored: list[dict], margin: float, source: dict | None = None) -> dic
     lead = (f"{best['score'] - runner['score']:.2f} ahead of {runner['name']} "
             f"({runner['score']:.2f})" if runner else "the only eligible candidate")
     reason = f"{best['name']} scored {best['score']:.2f}, {lead}"
-    if baseline and not valid_baseline:
+    if baseline and not baseline_fit:
         reason += (f"; the current default was disqualified "
                    f"({', '.join(baseline['issues'])})")
     return {"chosen": best["name"], "reason": reason}

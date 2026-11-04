@@ -33,6 +33,26 @@ class TuneTest(unittest.TestCase):
             names = [candidate["name"] for candidate in tune.candidate_grid(executable)]
             self.assertIn("none", names)
 
+    def test_deepfilter_grid_spans_attenuation_limits(self):
+        grid = tune.candidate_grid("deep-filter.exe")
+        limits = {candidate["name"]: candidate.get("attenuation") for candidate in grid}
+        self.assertEqual(limits["pf-safe"], 10)
+        self.assertEqual(limits["pf-20"], 20)
+        self.assertEqual(limits["pf-30"], 30)
+        self.assertIsNone(limits["pf-strong"])
+
+    def test_extreme_suppression_is_penalised(self):
+        source = metrics()
+        moderate = metrics(noise_floor_dbfs=source["noise_floor_dbfs"] - 24.0,
+                           snr_db=source["snr_db"] + 20.0)
+        extreme = metrics(noise_floor_dbfs=source["noise_floor_dbfs"] - 90.0,
+                          snr_db=source["snr_db"] + 90.0)
+        moderate_score, moderate_issues = tune.score_candidate(moderate, source)
+        extreme_score, extreme_issues = tune.score_candidate(extreme, source)
+        self.assertNotIn("over-suppressed", moderate_issues)
+        self.assertIn("over-suppressed", extreme_issues)
+        self.assertGreater(moderate_score - extreme_score, 20.0)
+
     def test_content_loss_blocks_a_candidate(self):
         source = metrics()
         destroyed = metrics(noise_floor_dbfs=-72.0, snr_db=54.0,
@@ -76,6 +96,17 @@ class TuneTest(unittest.TestCase):
              "metrics": metrics(noise_floor_dbfs=-32.5, snr_db=5.6)},
         ]
         self.assertEqual(tune.choose(scored, 1.5, source)["chosen"], "pf-safe")
+
+    def test_over_suppressed_default_is_not_protected_by_margin(self):
+        scored = [
+            {"name": "default", "score": 81.96,
+             "issues": ["over-suppressed", "level drift"]},
+            {"name": "pf-30", "score": 82.35, "issues": ["level drift"]},
+            {"name": "none", "score": 26.31, "issues": []},
+        ]
+        decision = tune.choose(scored, 1.5)
+        self.assertEqual(decision["chosen"], "pf-30")
+        self.assertIn("disqualified", decision["reason"])
 
     def test_windows_spread_and_cover_short_clips(self):
         self.assertEqual(tune.windows_for(12.0, 40.0), [(0.0, 12.0)])

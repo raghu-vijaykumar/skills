@@ -296,12 +296,14 @@ python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day
 `tune` samples the beginning, middle, and end of each clip, renders every candidate
 through the same denoise, level-match, and limiter chain preprocess uses, and
 measures each result against the untouched source window. The candidate grid includes
-the current default, post-filter strengths, an attenuation-limited pass that keeps
-music and ambience, and a no-denoise option. A candidate cannot be chosen if it
-clips, hollows the speech band, or loses more than 12 dB of program loudness; it
-must remove at least 1 dB of noise or raise SNR by 1 dB; and it only replaces the
-default when it leads by more than `--margin` points, which keeps measurement noise
-from flipping the choice. Profiles, metrics, and
+the current default, post-filter strengths, attenuation-limited passes at 10, 20, and
+30 dB that keep music and ambience, and a no-denoise option. A candidate cannot be
+chosen if it clips, hollows the speech band, or loses more than 12 dB of program
+loudness; it must remove at least 1 dB of noise or raise SNR by 1 dB; suppression
+beyond 24 dB is scored down because a speech denoiser that removes the whole bed
+sounds gated; and it only replaces a healthy default when it leads by more than
+`--margin` points, which keeps measurement noise from flipping the choice. An
+over-suppressed default gets no margin protection. Profiles, metrics, and
 listenable WAVs are written under `.content-studio/analysis/tuning/`, with
 `tuning.csv` and `tuning.html` summarizing the current profiles in that folder and
 inline players for the default and chosen candidates. Listen to the WAVs before a
