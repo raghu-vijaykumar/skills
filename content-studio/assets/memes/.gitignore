@@ -1,0 +1,4 @@
+# In case a local library is accidentally placed here
+*
+!.gitignore
+!README.md
