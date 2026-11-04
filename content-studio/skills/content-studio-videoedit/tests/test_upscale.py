@@ -194,6 +194,13 @@ class UpscaleTest(unittest.TestCase):
         self.assertEqual((info["width"], info["height"]), (320, 180))
         self.assertTrue(info["has_audio"])
 
+    def test_encode_args_honours_the_encoder_choice(self):
+        info = {"pix_fmt": "yuv420p"}
+        self.assertIn("hevc_nvenc", upscale.encode_args(info, encoder="nvenc"))
+        self.assertIn("libx265", upscale.encode_args(info, encoder="libx265"))
+        ten_bit = upscale.encode_args({"pix_fmt": "yuv420p10le"}, encoder="nvenc")
+        self.assertIn("p010le", ten_bit)
+
     def test_frame_deltas_extend_to_the_window_tail(self):
         deltas = upscale.frame_deltas([0.0, 0.5, 1.0], 30.0, tail=0.4)
         self.assertAlmostEqual(sum(deltas), 1.4, places=6)

@@ -272,16 +272,41 @@ def color_args(info: dict) -> list[str]:
     return args
 
 
-def encode_args(info: dict, preset: str = "medium") -> list[str]:
+def encode_args(info: dict, preset: str = "medium",
+                encoder: str = "auto") -> list[str]:
     ten_bit = "10" in str(info.get("pix_fmt") or "")
     pixel_format = "yuv420p10le" if ten_bit else "yuv420p"
+    choice = encoder or "auto"
+    if choice == "auto":
+        choice = "nvenc" if encoder_available("hevc_nvenc") else "libx265"
+    if choice == "nvenc":
+        nvenc_format = "p010le" if ten_bit else "yuv420p"
+        return (["-c:v", "hevc_nvenc", "-preset", "p5", "-rc", "vbr",
+                 "-cq", "19", "-pix_fmt", nvenc_format, "-tag:v", "hvc1"]
+                + color_args(info))
     return (["-c:v", "libx265", "-preset", preset, "-crf", "18",
              "-pix_fmt", pixel_format, "-tag:v", "hvc1"] + color_args(info))
 
 
+_ENCODER_CACHE: dict[str, bool] = {}
+
+
+def encoder_available(name: str) -> bool:
+    if name not in _ENCODER_CACHE:
+        try:
+            output = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"],
+                                    capture_output=True, text=True,
+                                    encoding="utf-8", errors="replace").stdout
+        except OSError:
+            output = ""
+        _ENCODER_CACHE[name] = name in output
+    return _ENCODER_CACHE[name]
+
+
 def run_lanczos(source: Path, output: Path, size: tuple[int, int],
                 start: float, duration: float, has_audio: bool,
-                fps: str, info: dict | None = None, preset: str = "medium") -> None:
+                fps: str, info: dict | None = None, preset: str = "medium",
+                encoder: str = "auto") -> None:
     width, height = size
     info = info or probe(source)
     cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error"]
@@ -291,7 +316,7 @@ def run_lanczos(source: Path, output: Path, size: tuple[int, int],
         cmd += ["-t", f"{duration:.3f}"]
     cmd += ["-i", str(source), "-vf",
             f"scale={width}:{height}:flags=lanczos,unsharp=5:5:0.35:5:5:0.0",
-            "-fps_mode", "vfr"] + encode_args(info, preset)
+            "-fps_mode", "vfr"] + encode_args(info, preset, encoder)
     if has_audio:
         cmd += ["-map", "0:v:0", "-map", "0:a:0", "-c:a", "copy"]
     else:
@@ -301,10 +326,13 @@ def run_lanczos(source: Path, output: Path, size: tuple[int, int],
 
 
 def run_realesrgan(executable: Path, frames: Path, upscaled: Path,
-                   model: str, scale: int, tile: int) -> None:
+                   model: str, scale: int, tile: int,
+                   staging: str = "jpeg") -> None:
     upscaled.mkdir(parents=True, exist_ok=True)
+    fmt = "jpg" if staging == "jpeg" else "png"
     cmd = [str(executable), "-i", str(frames), "-o", str(upscaled),
-           "-n", model, "-s", str(scale), "-t", str(max(TILE_MIN, tile))]
+           "-n", model, "-s", str(scale), "-t", str(max(TILE_MIN, tile)),
+           "-f", fmt]
     models = executable.parent / "models"
     if models.is_dir():
         cmd += ["-m", str(models)]
@@ -313,7 +341,8 @@ def run_realesrgan(executable: Path, frames: Path, upscaled: Path,
 
 def run_realesrgan_pytorch(frames: Path, upscaled: Path, model: str, scale: int,
                            tile: int, denoise_strength: float | None,
-                           weights: str | None, weights2: str | None = None) -> dict:
+                           weights: str | None, weights2: str | None = None,
+                           staging: str = "jpeg") -> dict:
     """Opt-in PyTorch adapter; weights are explicit, never downloaded silently."""
     if not weights:
         raise UpscaleError("the PyTorch backend needs --weights to a verified "
@@ -338,8 +367,13 @@ def run_realesrgan_pytorch(frames: Path, upscaled: Path, model: str, scale: int,
                                                 tile=tile, tile_pad=10)
         peak = max(peak, used)
         array = output.squeeze(0).permute(1, 2, 0).float().cpu().numpy() * 255.0
-        Image.fromarray(np.clip(array, 0, 255).round().astype(np.uint8)).save(
-            upscaled / path.name)
+        image = Image.fromarray(np.clip(array, 0, 255).round().astype(np.uint8))
+        if staging == "jpeg":
+            image.save(upscaled / f"{path.stem}.jpg", format="JPEG",
+                       quality=95, subsampling=0)
+        else:
+            image.save(upscaled / f"{path.stem}.png", format="PNG",
+                       compress_level=1)
     if device == "cuda":
         peak = max(peak, torch.cuda.max_memory_allocated() / (1024 ** 2))
     return {"device": device, "peak_vram_mb": round(peak, 1) if peak else None}
@@ -347,12 +381,12 @@ def run_realesrgan_pytorch(frames: Path, upscaled: Path, model: str, scale: int,
 
 def encode_chunk(upscaled: Path, concat: Path, output: Path,
                  size: tuple[int, int] | None, info: dict,
-                 preset: str = "medium") -> None:
+                 preset: str = "medium", encoder: str = "auto") -> None:
     cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
            "-f", "concat", "-safe", "0", "-i", str(concat)]
     if size:
         cmd += ["-vf", f"scale={size[0]}:{size[1]}:flags=lanczos"]
-    cmd += ["-an"] + encode_args(info, preset) + [str(output)]
+    cmd += ["-an"] + encode_args(info, preset, encoder) + [str(output)]
     run(cmd)
 
 
@@ -395,7 +429,8 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
               start: float, duration: float, info: dict, chunk: int = 0,
               denoise_strength: float | None = None,
               weights: str | None = None, weights2: str | None = None,
-              preset: str = "medium") -> dict:
+              preset: str = "medium", staging: str = "jpeg",
+              encoder: str = "auto") -> dict:
     """Render an upscaled video track with source timestamps preserved."""
     fps = fps_value(info.get("fps"))
     timestamps = frame_timestamps(source, start, duration)
@@ -428,10 +463,12 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
         if not count:
             raise UpscaleError("no frames extracted")
         if backend == "realesrgan":
-            run_realesrgan(executable, frames, upscaled, model, scale, tile)
+            run_realesrgan(executable, frames, upscaled, model, scale, tile,
+                           staging)
         else:
             stats = run_realesrgan_pytorch(frames, upscaled, model, scale, tile,
-                                           denoise_strength, weights, weights2)
+                                           denoise_strength, weights, weights2,
+                                           staging)
             device = stats["device"]
             if stats.get("peak_vram_mb"):
                 peak_vram = max(peak_vram or 0.0, stats["peak_vram_mb"])
@@ -452,9 +489,10 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
             deltas = [window / count] * count
             timing_fallback = True
         listing = work / f"chunk-{index:03d}.txt"
-        write_concat(sorted(upscaled.glob("*.png")), deltas, listing)
+        write_concat(sorted(path for path in upscaled.iterdir() if path.is_file()),
+                    deltas, listing)
         chunk_video = work / f"chunk-{index:03d}.mp4"
-        encode_chunk(upscaled, listing, chunk_video, None, info, preset)
+        encode_chunk(upscaled, listing, chunk_video, None, info, preset, encoder)
         rendered += count
         videos.append(chunk_video)
         print(f"upscale: {source.name} chunk {index + 1}/{len(chunks)} "
@@ -596,11 +634,15 @@ def upscale(args) -> dict:
                            "silently change the color space")
     work = Path(args.work).expanduser().resolve() if args.work else (
         output.parent / ".content-studio" / "upscale" / source.stem)
+    staging = getattr(args, "staging", "jpeg")
+    encoder = getattr(args, "encoder", "auto")
     if args.force:
         shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True, exist_ok=True)
     params = cache_params(source, backend, model, scale, args.tile, target,
                           start, duration, denoise_strength)
+    params["staging"] = staging
+    params["encoder"] = encoder
     manifest_path = work / "upscale.json"
     if not getattr(args, "force", False) and output.is_file() and manifest_path.is_file():
         previous = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -611,14 +653,15 @@ def upscale(args) -> dict:
     timing = {"mode": "cfr", "frames": 0, "chunks": 0}
     if backend == "lanczos":
         run_lanczos(source, output, target, start, duration,
-                    info["has_audio"], info["fps"], info)
+                    info["has_audio"], info["fps"], info, encoder=encoder)
     else:
         video_only = work / "upscaled-video.mp4"
         timing = render_ai(source, video_only, work, backend, executable, model,
                            scale, max(TILE_MIN, args.tile), start, duration, info,
                            chunk=max(0, int(getattr(args, "chunk", 0) or 0)),
                            denoise_strength=denoise_strength,
-                           weights=weights, weights2=weights2)
+                           weights=weights, weights2=weights2,
+                           staging=staging, encoder=encoder)
         if not info["has_audio"]:
             os.replace(video_only, output)
         else:
@@ -639,6 +682,9 @@ def upscale(args) -> dict:
         "scale": scale,
         "tile": args.tile if backend != "lanczos" else None,
         "denoise_strength": denoise_strength,
+        "staging": staging,
+        "encoder": (encoder if encoder != "auto" else
+                    ("nvenc" if encoder_available("hevc_nvenc") else "libx265")),
         "checkpoint": checkpoint_info(weights, weights2),
         "source_size": [info["width"], info["height"]],
         "output_size": [produced["width"], produced["height"]],
@@ -664,6 +710,126 @@ def upscale(args) -> dict:
     return manifest
 
 
+def upscale_ranges(args, draft: Path, target: tuple[int, int],
+                   restoration) -> dict:
+    """Render only the timeline-used ranges, one asset per range."""
+    processed = draft / ".content-studio" / "processed-clips"
+    files = sorted(processed.glob("*/final.mp4"))
+    entries = restoration.timeline_ranges(Path(args.timeline), files)
+    target_width, target_height = target
+    results: list[dict] = []
+    assets: list[dict] = []
+    for entry in entries:
+        source = entry["source"]
+        info = probe(source)
+        factor = min(4, max(2, int(math.ceil(max(target_width / info["width"],
+                                                target_height / info["height"])))))
+        decision = {"decision": "FIX", "reasons": ["mode_always"]}
+        preview = None
+        if getattr(args, "mode", "auto") == "auto" and args.backend != "lanczos":
+            analysis = restoration.analyze_clip(source, target)
+            if analysis["decision"] in {"SKIP", "UNSUPPORTED"}:
+                decision = analysis
+            else:
+                preview = restoration.preview_clip(
+                    source, target,
+                    preview_seconds=getattr(args, "preview_seconds", 5.0),
+                    backend=args.backend, executable=args.realesrgan,
+                    model=args.model, tile=args.tile,
+                    denoise_strength=getattr(args, "denoise_strength", None),
+                    weights=getattr(args, "weights", None),
+                    weights2=getattr(args, "weights2", None),
+                    staging=getattr(args, "staging", "jpeg"),
+                    encoder=getattr(args, "encoder", "auto"),
+                    work=source.parent / "upscale-work")
+                decision = preview["decision"]
+            if getattr(args, "review", False):
+                decision["preview"] = str(preview["report_path"]) if preview else None
+        ranges = entry["ranges"]
+        if getattr(args, "analyze_only", False) or getattr(args, "preview", False):
+            for start, end in ranges:
+                results.append({"source": str(source), "status": "analyzed",
+                                "decision": decision["decision"],
+                                "reasons": decision.get("reasons", []),
+                                "range": [start, end],
+                                "preview": (str(preview["report_path"])
+                                            if preview else None)})
+            continue
+        if decision["decision"] == "UNSUPPORTED":
+            for start, end in ranges:
+                results.append({"source": str(source), "status": "unsupported",
+                                "decision": "UNSUPPORTED",
+                                "reasons": decision.get("reasons", []),
+                                "range": [start, end]})
+            continue
+        if decision["decision"] == "REVIEW" and not getattr(args, "approve", False):
+            for start, end in ranges:
+                results.append({"source": str(source), "status": "review_pending",
+                                "decision": "REVIEW",
+                                "reasons": decision.get("reasons", []),
+                                "range": [start, end],
+                                "preview": (str(preview["report_path"])
+                                            if preview else None)})
+            continue
+        backend, model = args.backend, args.model
+        if decision["decision"] == "SKIP":
+            backend, model = "lanczos", None
+        for index, (start, end) in enumerate(ranges):
+            output = source.parent / "upscaled" / (
+                f"{source.stem}-r{index:02d}-{int(start * 1000):09d}-"
+                f"{int(end * 1000):09d}.mp4")
+            manifest = upscale(argparse.Namespace(
+                input=source, output=output, scale=factor, backend=backend,
+                realesrgan=args.realesrgan, model=model, tile=args.tile,
+                start=start, duration=end - start, target=args.target,
+                chunk=getattr(args, "chunk", 0),
+                denoise_strength=getattr(args, "denoise_strength", None),
+                weights=getattr(args, "weights", None),
+                weights2=getattr(args, "weights2", None),
+                staging=getattr(args, "staging", "jpeg"),
+                encoder=getattr(args, "encoder", "auto"),
+                allow_hdr=getattr(args, "allow_hdr", False), force=args.force,
+                work=source.parent / "upscale-work" / "ranges" / output.stem))
+            assets.append({
+                "source": str(source), "start": start, "end": end,
+                "asset": str(output), "backend": manifest["backend"],
+                "model": manifest["model"],
+                "denoise_strength": manifest["denoise_strength"],
+            })
+            results.append({"source": str(source), "status": "upscaled",
+                            "decision": decision["decision"],
+                            "reasons": decision.get("reasons", []),
+                            "range": [start, end],
+                            "asset": str(output), "output": manifest})
+    summary = {
+        "schema_version": SCHEMA_VERSION,
+        "analysis_version": ANALYSIS_VERSION,
+        "generated_at": now(),
+        "draft": str(draft),
+        "target": list(target),
+        "mode": "timeline-ranges",
+        "timeline": str(Path(args.timeline).resolve()),
+        "clips": results,
+        "upscaled": sum(1 for item in results if item["status"] == "upscaled"),
+        "review_pending": sum(1 for item in results
+                              if item["status"] == "review_pending"),
+        "unsupported": sum(1 for item in results if item["status"] == "unsupported"),
+        "timeline_updated": 0,
+    }
+    manifest_dir = draft / ".content-studio" / "upscale"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    (manifest_dir / "timeline-map.json").write_text(
+        json.dumps({"schema_version": SCHEMA_VERSION, "ranges": assets}, indent=2)
+        + "\n", encoding="utf-8")
+    if getattr(args, "write_timeline", None) and assets:
+        summary["timeline_updated"] = restoration.write_timeline_map(
+            Path(args.timeline), assets, Path(args.write_timeline))
+    (manifest_dir / "upscale-batch.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    restoration.write_batch_report(summary, manifest_dir / "upscale-review.html")
+    return summary
+
+
 def upscale_draft(args) -> dict:
     import restoration
 
@@ -671,6 +837,10 @@ def upscale_draft(args) -> dict:
     target = parse_target(args.target or "4k")
     if target is None:
         raise UpscaleError("target is required")
+    if getattr(args, "timeline_ranges", False):
+        if not getattr(args, "timeline", None):
+            raise UpscaleError("--timeline-ranges needs --timeline")
+        return upscale_ranges(args, draft, target, restoration)
     processed = draft / ".content-studio" / "processed-clips"
     if not processed.is_dir():
         raise UpscaleError(f"processed clips not found: {processed}")
@@ -724,6 +894,8 @@ def upscale_draft(args) -> dict:
                     denoise_strength=getattr(args, "denoise_strength", None),
                     weights=getattr(args, "weights", None),
                     weights2=getattr(args, "weights2", None),
+                    staging=getattr(args, "staging", "jpeg"),
+                    encoder=getattr(args, "encoder", "auto"),
                     work=source.parent / "upscale-work")
                 decision = preview["decision"]
             if getattr(args, "review", False):
@@ -758,6 +930,8 @@ def upscale_draft(args) -> dict:
             denoise_strength=getattr(args, "denoise_strength", None),
             weights=getattr(args, "weights", None),
             weights2=getattr(args, "weights2", None),
+            staging=getattr(args, "staging", "jpeg"),
+            encoder=getattr(args, "encoder", "auto"),
             allow_hdr=getattr(args, "allow_hdr", False), force=args.force,
             work=source.parent / "upscale-work"))
         backup = source.with_name("final-pre-upscale.mp4")
@@ -809,6 +983,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--target", help="target: 4k, 2160p, 1080p, or WxH")
     parser.add_argument("--timeline", type=Path,
                         help="batch: only clips referenced by this editable timeline")
+    parser.add_argument("--timeline-ranges", action="store_true",
+                        help="batch: render only the timeline's used source ranges")
+    parser.add_argument("--write-timeline", type=Path,
+                        help="write a timeline copy that points at the upscaled range assets")
     parser.add_argument("--limit", type=int, help="batch: process only the first N clips")
     parser.add_argument("--dry-run", action="store_true",
                         help="batch: report what would be upscaled")
@@ -841,6 +1019,11 @@ def build_parser() -> argparse.ArgumentParser:
                         help="realesrgan tile size; lower for limited VRAM")
     parser.add_argument("--chunk", type=int, default=0,
                         help="frames per inference chunk; 0 processes the clip in one pass")
+    parser.add_argument("--staging", choices=["jpeg", "png"], default="jpeg",
+                        help="intermediate frame format; jpeg is ~20x faster to write")
+    parser.add_argument("--encoder", choices=["auto", "libx265", "nvenc"],
+                        default="auto",
+                        help="auto uses hevc_nvenc when ffmpeg supports it")
     parser.add_argument("--allow-hdr", action="store_true",
                         help="explicitly allow the frame pipeline on HDR/DV footage")
     parser.add_argument("--start", type=float, help="start second for a test excerpt")
@@ -871,6 +1054,8 @@ def main(argv: list[str] | None = None) -> int:
                         preview_seconds=args.preview_seconds, backend=args.backend,
                         executable=args.realesrgan, model=args.model, tile=args.tile,
                         denoise_strength=args.denoise_strength, weights=args.weights,
+                        weights2=args.weights2, staging=args.staging,
+                        encoder=args.encoder,
                         work=args.work or Path(args.output).parent / "upscale-work")
                 manifest = {"analysis": analysis, "preview": preview}
             else:

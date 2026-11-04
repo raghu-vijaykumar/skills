@@ -129,6 +129,55 @@ class RestorationTest(unittest.TestCase):
             picked = restoration.timeline_sources(timeline, [used, other])
         self.assertEqual(picked, [used])
 
+    def test_timeline_ranges_merge_adjacent_usage(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            processed = root / "processed-clips"
+            used = processed / "IMG_0001.MOV" / "final.mp4"
+            other = processed / "IMG_0002.MOV" / "final.mp4"
+            for path in (used, other):
+                path.parent.mkdir(parents=True)
+                path.write_bytes(b"video")
+            timeline = root / "timeline.json"
+            timeline.write_text(json.dumps({"source_root": str(processed), "tracks": [
+                {"kind": "video", "clips": [
+                    {"id": "v0", "source": "IMG_0001.MOV", "source_in": 0.0, "source_out": 2.0},
+                    {"id": "v1", "source": "IMG_0001.MOV", "source_in": 2.02, "source_out": 4.0},
+                    {"id": "v2", "source": "IMG_0002.MOV", "source_in": 1.0, "source_out": 3.0},
+                ]}]}), encoding="utf-8")
+            entries = restoration.timeline_ranges(timeline, [used, other])
+        self.assertEqual(len(entries), 2)
+        first = next(item for item in entries if item["source"] == used)
+        self.assertEqual(first["ranges"], [(0.0, 4.0)])
+        self.assertEqual(first["clip_ids"], ["v0", "v1"])
+
+    def test_write_timeline_map_points_at_assets(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            processed = root / "processed-clips"
+            source = processed / "IMG_0001.MOV" / "final.mp4"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"video")
+            asset = source.parent / "upscaled" / "range-0.mp4"
+            asset.parent.mkdir()
+            asset.write_bytes(b"upscaled")
+            timeline = root / "timeline.json"
+            timeline.write_text(json.dumps({"source_root": str(processed), "tracks": [
+                {"kind": "video", "clips": [
+                    {"id": "v0", "source": "IMG_0001.MOV",
+                     "source_in": 1.0, "source_out": 3.0}]}]}), encoding="utf-8")
+            out = root / "timeline-upscaled.json"
+            updated = restoration.write_timeline_map(timeline, [{
+                "source": str(source), "start": 1.0, "end": 3.0,
+                "asset": str(asset), "model": "realesr-general-x4v3",
+                "backend": "pytorch", "denoise_strength": 0.5}], out)
+            data = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(updated, 1)
+        clip = data["tracks"][0]["clips"][0]
+        self.assertEqual(clip["source"], "IMG_0001.MOV/upscaled/range-0.mp4")
+        self.assertEqual(clip["enhancements"][0]["stage"], "upscale")
+        self.assertEqual(clip["enhancements"][0]["review_status"], "approved")
+
     def test_batch_report_links_the_preview(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

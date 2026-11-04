@@ -42,6 +42,10 @@ content-studio upscale --draft <draft> --target 4k --mode always
 # Restrict the batch to clips referenced by an editable timeline
 content-studio upscale --draft <draft> --target 4k --timeline .content-studio/rough-cut/edit-timeline.json
 
+# Render only the timeline's used ranges (one decision per clip, one asset per range)
+content-studio upscale --draft <draft> --target 4k --timeline .content-studio/rough-cut/edit-timeline.json --timeline-ranges --preview --review
+content-studio upscale --draft <draft> --target 4k --timeline .content-studio/rough-cut/edit-timeline.json --timeline-ranges --approve --write-timeline .content-studio/rough-cut/edit-timeline-upscaled.json
+
 # One clip, explicit render
 content-studio upscale --input <clip.mp4> --output <clip-4k.mp4> --target 4k --chunk 120
 ```
@@ -79,6 +83,46 @@ default is `0` (one pass); use `--chunk 96` or `--chunk 120` for long 4K clips t
 bound temporary storage. Chunked runs verify that every chunk's frame count
 matches before concatenating.
 
+## Timeline range rendering
+
+`--timeline-ranges` reads the video tracks of an editable timeline, merges
+adjacent `source_in`/`source_out` ranges per clip, and renders one asset per
+used range under `<clip>/upscaled/`. The decision is made once per clip from a
+5 s preview, then applied to every range of that clip, so a 10-minute video is
+not previewed 40 times.
+
+`--write-timeline <path>` writes a copy of the timeline whose used clips point
+at those assets and whose `enhancements` list gains
+`{stage: "upscale", model, backend, denoise_strength, source_range,
+review_status}`. The original timeline is never modified. The mapping is also
+recorded in `.content-studio/upscale/timeline-map.json`.
+
+## Speed and thermal limits
+
+Measured on a 96-frame / 3.2 s window at 1080p → 4K:
+
+| Stage | Time | Note |
+|---|---|---|
+| probe + extract | 1.4 s | PNG decode, one pass |
+| inference (cool) | 0.75 s/frame | `general-x4v3`, FP16, tile 256 |
+| inference (sustained) | ~2.5 s/frame | GPU reaches 93 °C, throttles to 1140/2100 MHz |
+| frame staging | 0.035 s/frame (JPEG q95) | PNG was 0.76 s/frame — 22× slower |
+| 4K encode | 3.7 s / 8.5 s (NVENC p5) | libx265 medium: 21.4 s |
+
+JPEG staging plus NVENC removed most of the non-inference overhead, but on this
+laptop-class GPU **thermals now dominate**. Rough 10-minute estimates:
+
+| Mode | Estimate |
+|---|---|
+| PyTorch general, cool bursts | ~4 h |
+| PyTorch general, sustained (measured) | ~12 h |
+| ncnn `animevideov3` | ~2–5 h |
+| Timeline ranges only (~3 min used) | minutes |
+
+If long renders matter, improve cooling/power limits first, use the lighter
+ncnn model for bulk footage, and reserve the general model for the clips the
+gate marks FIX. `--chunk 96` bounds disk but does not beat throttling.
+
 ## HDR and color
 
 - HDR HLG/PQ and Dolby Vision sources are `UNSUPPORTED` unless `--allow-hdr` is
@@ -97,7 +141,7 @@ Measured on clip 001 (1080p SDR → 4K, 5 s window, RTX 2070 Super, 8 GB):
 
 | Backend | Model | Detail vs Lanczos | Inference | Peak VRAM |
 |---|---|---|---|---|
-| PyTorch CUDA | `realesr-general-x4v3` (denoise 0.5) | **+25.7 %** | **0.89 s/frame** | 679 MB |
+| PyTorch CUDA | `realesr-general-x4v3` (denoise 0.5) | **+25.7 %** | 0.75–2.5 s/frame | 679 MB |
 | ncnn/Vulkan | `realesr-animevideov3` | +14.1 % | 0.40 s/frame | — |
 | PyTorch CUDA | `RealESRGAN_x2plus` | +9.2 % | 3.1 s/frame | 347 MB |
 | ncnn/Vulkan | `realesrgan-x4plus` | not run | 22–27 s/frame | — |

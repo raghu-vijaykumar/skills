@@ -367,8 +367,10 @@ exposure drift, or temporal flicker. REVIEW waits for `--approve`; SKIP falls ba
 to Lanczos when the delivery target still needs the resolution; UNSUPPORTED covers
 HDR/DV sources and orientation mismatches. Decisions, reasons, previews, and caches
 land under `.content-studio/upscale/`, and `final-pre-upscale.mp4` keeps the previous
-clip. See [the upscale workflow](upscale.md) for model throughput, HDR policy, VFR
-timing, and `--chunk` disk control.
+clip. Add `--timeline <path> --timeline-ranges` to render only the ranges an
+approved edit uses, and `--write-timeline <path>` to produce a timeline copy that
+points at those assets. See [the upscale workflow](upscale.md) for model throughput,
+HDR policy, VFR timing, `--chunk`, `--staging`, and `--encoder`.
 
 ## Vlog edits and assembly
 

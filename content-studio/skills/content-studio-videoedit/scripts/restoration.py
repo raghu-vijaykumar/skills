@@ -266,7 +266,8 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
                  executable: str | Path | None = None, model: str | None = None,
                  tile: int = 256, denoise_strength: float | None = None,
                  weights: str | None = None, weights2: str | None = None,
-                 work: Path | None = None) -> dict:
+                 work: Path | None = None, staging: str = "jpeg",
+                 encoder: str = "auto") -> dict:
     source = Path(source).expanduser().resolve()
     info = upscale.probe(source)
     if upscale.is_hdr(info):
@@ -296,12 +297,13 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
     lanczos_video = work / "preview-lanczos.mp4"
     ai_video = work / "preview-ai.mp4"
     upscale.run_lanczos(source, lanczos_video, target, start, seconds, False,
-                        info["fps"], info, preset="fast")
+                        info["fps"], info, preset="fast", encoder=encoder)
     timing = upscale.render_ai(source, ai_video, work / "ai", resolved,
                                executable_path, model_name, scale, tile,
                                start, seconds, info, chunk=0,
                                denoise_strength=denoise_strength, weights=weights,
-                               weights2=weights2, preset="fast")
+                               weights2=weights2, preset="fast", staging=staging,
+                               encoder=encoder)
     times = [round(seconds * fraction, 3) for fraction in (0.2, 0.5, 0.8)]
     lanczos_metrics = sample_metrics(lanczos_video, times)
     ai_metrics = sample_metrics(ai_video, times)
@@ -330,6 +332,8 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
         "scale": scale,
         "tile": tile,
         "denoise_strength": denoise_strength,
+        "staging": staging,
+        "encoder": encoder,
         "checkpoint": upscale.checkpoint_info(weights, weights2),
         "timing": timing,
         "lanczos": lanczos_metrics,
@@ -354,7 +358,7 @@ def timeline_sources(timeline_path: Path, files: list[Path]) -> list[Path]:
     timeline_path = Path(timeline_path).expanduser().resolve()
     if not timeline_path.is_file():
         raise upscale.UpscaleError(f"timeline not found: {timeline_path}")
-    data = json.loads(timeline_path.read_text(encoding="utf-8"))
+    data = json.loads(timeline_path.read_text(encoding="utf-8-sig"))
     names = set()
     for track in data.get("tracks", []):
         if track.get("kind") != "video":
@@ -370,6 +374,101 @@ def timeline_sources(timeline_path: Path, files: list[Path]) -> list[Path]:
     if not picked:
         raise upscale.UpscaleError("timeline does not reference any processed clips")
     return picked
+
+
+def merge_ranges(ranges: list[tuple[float, float]],
+                 gap: float = 0.05) -> list[tuple[float, float]]:
+    merged: list[list[float]] = []
+    for start, end in sorted(ranges):
+        if merged and start <= merged[-1][1] + gap:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    return [(round(start, 3), round(end, 3)) for start, end in merged]
+
+
+def timeline_ranges(timeline_path: Path, files: list[Path]) -> list[dict]:
+    """Group the used source ranges per processed clip from an editable timeline."""
+    timeline_path = Path(timeline_path).expanduser().resolve()
+    if not timeline_path.is_file():
+        raise upscale.UpscaleError(f"timeline not found: {timeline_path}")
+    data = json.loads(timeline_path.read_text(encoding="utf-8-sig"))
+    by_name: dict[str, Path] = {}
+    for path in files:
+        by_name[path.parent.name.casefold()] = path
+        by_name[path.parent.name.rsplit(".", 1)[0].casefold()] = path
+    entries: dict[str, dict] = {}
+    for track in data.get("tracks", []):
+        if track.get("kind") != "video":
+            continue
+        for clip in track.get("clips", []):
+            source = clip.get("source")
+            if not source:
+                continue
+            key = Path(source).name.casefold()
+            file = by_name.get(key) or by_name.get(Path(key).stem)
+            if file is None:
+                continue
+            start = float(clip.get("source_in", 0.0))
+            end = float(clip.get("source_out", 0.0))
+            if end <= start:
+                continue
+            entry = entries.setdefault(str(file), {"source": file, "ranges": [],
+                                                   "clip_ids": []})
+            entry["ranges"].append((round(start, 3), round(end, 3)))
+            if clip.get("id"):
+                entry["clip_ids"].append(clip["id"])
+    for entry in entries.values():
+        entry["ranges"] = merge_ranges(entry["ranges"])
+    return list(entries.values())
+
+
+def _source_keys(value: str) -> set[str]:
+    path = Path(value)
+    return {path.name.casefold(), path.stem.casefold(),
+            path.parent.name.casefold(), path.parent.stem.casefold()}
+
+
+def write_timeline_map(timeline_path: Path, assets: list[dict],
+                       output_path: Path) -> int:
+    """Write a timeline copy whose used ranges point at upscaled assets."""
+    timeline_path = Path(timeline_path).expanduser().resolve()
+    data = json.loads(timeline_path.read_text(encoding="utf-8-sig"))
+    root = Path(data.get("source_root") or timeline_path.parent)
+    lookup: dict[tuple[float, float], list[dict]] = {}
+    for item in assets:
+        key = (round(float(item["start"]), 3), round(float(item["end"]), 3))
+        lookup.setdefault(key, []).append(item)
+    updated = 0
+    for track in data.get("tracks", []):
+        if track.get("kind") != "video":
+            continue
+        for clip in track.get("clips", []):
+            key = (round(float(clip.get("source_in", 0.0)), 3),
+                   round(float(clip.get("source_out", 0.0)), 3))
+            clip_keys = _source_keys(str(clip.get("source", "")))
+            item = next((candidate for candidate in lookup.get(key, [])
+                         if clip_keys & _source_keys(candidate["source"])), None)
+            if not item:
+                continue
+            asset = Path(item["asset"])
+            try:
+                clip["source"] = asset.relative_to(root).as_posix()
+            except ValueError:
+                clip["source"] = str(asset)
+            clip.setdefault("enhancements", []).append({
+                "stage": "upscale",
+                "model": item.get("model"),
+                "backend": item.get("backend"),
+                "denoise_strength": item.get("denoise_strength"),
+                "source_range": [item["start"], item["end"]],
+                "review_status": "approved",
+            })
+            updated += 1
+    output_path = Path(output_path).expanduser().resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return updated
 
 
 def write_batch_report(summary: dict, path: Path) -> None:
