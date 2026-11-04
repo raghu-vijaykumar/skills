@@ -20,3 +20,5 @@ An idea is a brief, a reviewed render or export is a publication candidate, and 
 
 
 For user-supplied meme assets and reviewable vlog reaction insertions, use `content-studio-memes`. Keep the local media catalogue outside Git; never insert unapproved memes automatically.
+
+Use `content-studio-memory` before editing to retrieve local explicit preferences and after genuine human review to record decisions. Memory is never publication approval.
