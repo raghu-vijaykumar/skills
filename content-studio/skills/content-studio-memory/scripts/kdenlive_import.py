@@ -69,8 +69,22 @@ def import_mlt(path):
             cursor+=duration
         if entries:tracks.append({"playlist":playlist.get("id"),"clips":entries})
     if not tracks:raise ValueError("No supported video playlist entries found")
-    if root.findall("tractor"):
-        issues.append({"reason":"tractor_compositing_not_resolved","detail":"Playlist ordering and visibility may differ from rendered output"})
+    # Kdenlive routinely uses tractors even for basic edits. Report actual
+    # compositing complexity rather than rejecting every normal project.
+    for tractor in root.findall("tractor"):
+        active=[t.get("producer") for t in tractor.findall("track") if t.get("hide")!="video"]
+        transitions=tractor.findall("transition")
+        filters=tractor.findall("filter")
+        if transitions or filters or len(active)>2:
+            issues.append({"reason":"complex_tractor_unresolved",
+                           "tractor":tractor.get("id"),
+                           "active_tracks":active,
+                           "transitions":len(transitions),
+                           "filters":len(filters)})
+    for node in root.findall("playlist"):
+        for entry in node.findall("entry"):
+            if entry.get("producer") in {t.get("id") for t in root.findall("tractor")}:
+                issues.append({"reason":"nested_tractor_entry","playlist":node.get("id")})
     return {"schema":"content-studio.kdenlive-observations.v1","fps":fps,
             "tracks":tracks,"issues":issues,"requires_human_review":True}
 
