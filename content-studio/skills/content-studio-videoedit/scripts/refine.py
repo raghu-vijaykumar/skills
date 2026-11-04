@@ -42,8 +42,8 @@ def run(args: list[str]) -> None:
         raise RefineError((result.stderr or result.stdout)[-3000:])
 
 
-def metrics(path: Path, at: float) -> dict:
-    rgb = enhance.extract_frame(path, at, width=480)
+def metrics(path: Path, at: float, width: int = 480) -> dict:
+    rgb = enhance.extract_frame(path, at, width=width)
     luma = 0.2126 * rgb[:, :, 0] + 0.7152 * rgb[:, :, 1] + 0.0722 * rgb[:, :, 2]
     maximum = rgb.max(axis=2)
     minimum = rgb.min(axis=2)

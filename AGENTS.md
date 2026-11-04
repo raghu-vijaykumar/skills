@@ -52,6 +52,9 @@ node --test content-studio/tests/*.test.mjs content-studio/skills/content-studio
 ## Enhancement rules
 
 - Diagnosis before correction. Never enhance because a feature is enabled.
+- Selective upscaling is diagnosis-first: analyze the clip, render a short
+  Lanczos/AI preview, gate on detail/noise/flicker, and refuse HDR/DV without an
+  explicit tone-map decision.
 - Record every issue independently as `SKIP`, `FIX`, `REVIEW`, or `UNSUPPORTED`.
 - Color corrections are temporal, quality-gated, and non-destructive.
 - Strong reflections are review/unsupported until a licensed backend is

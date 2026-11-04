@@ -24,6 +24,8 @@ content.py media      extract audio, frames or a clip for segment review
 content.py order      refresh mixed-device capture order and _timeline.csv
 content.py preprocess clean vlog voice, stabilize camera clips, and review blur candidates
 content.py tune      score audio-enhancement candidates per clip before preprocessing
+content.py enhance   diagnose and selectively correct color, exposure, and glare
+content.py upscale   decide and apply selective AI upscaling
 content.py edit       trim, cut, or join vlog clips
 content.py code       git-track the sources, snapshot to Drive, restore, prune
 content.py analytics  retention and performance numbers
@@ -347,6 +349,26 @@ reprocessing audio. Only after that proof passes **and** you check playback on y
 usual device, run `--dv-approved --clip FILE` for the full clip or add
 `--dv-approved` to `--apply-review` for approved cuts. A failed check leaves the
 original and cleaned WAV in place; never treat an HLG-only result as Dolby Vision.
+
+## Selective AI upscaling
+
+Upscaling is gated by measurement, not applied to every clip:
+
+```powershell
+content-studio upscale --draft <draft> --target 4k --analyze-only --review
+content-studio upscale --draft <draft> --target 4k --preview --review --limit 5
+content-studio upscale --draft <draft> --target 4k --review
+content-studio upscale --draft <draft> --target 4k --approve
+```
+
+Each clip gets `FIX`, `REVIEW`, `SKIP`, or `UNSUPPORTED`. FIX means a 5-second
+preview beat Lanczos by at least 3% edge detail without added noise, clipping,
+exposure drift, or temporal flicker. REVIEW waits for `--approve`; SKIP falls back
+to Lanczos when the delivery target still needs the resolution; UNSUPPORTED covers
+HDR/DV sources and orientation mismatches. Decisions, reasons, previews, and caches
+land under `.content-studio/upscale/`, and `final-pre-upscale.mp4` keeps the previous
+clip. See [the upscale workflow](upscale.md) for model throughput, HDR policy, VFR
+timing, and `--chunk` disk control.
 
 ## Vlog edits and assembly
 
