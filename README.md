@@ -421,6 +421,8 @@ node <bundle>/scripts/cli.mjs benchmark `
 
 The 5-panel layout keeps 1080p panels at 1080p and 4K panels at 4K, with no crop or downscale. This is the separate `content-studio-benchmark` skill; see [the benchmark grid workflow](content-studio/skills/content-studio-benchmark/references/benchmark.md).
 
+For an existing Out of Office Mode cooking edit, `content-studio-motion-graphics` builds a timed JSON cue sheet from audio context and sparse frames. `overlay.py validate` checks cue timing; `overlay.py render` writes animated ASS graphics and a separate 1080p SDR review MP4. Ingredient labels belong at the moment of use. The source edit stays intact, including its HDR encoding. See [the motion graphics skill](content-studio/skills/content-studio-motion-graphics/SKILL.md).
+
 ### 6. Choose the music
 
 `content-studio-music` builds a shortlist from the local catalog and records an approved selection:
@@ -551,7 +553,7 @@ A draft is not finished when the render succeeds. It is finished when the packag
 
 ## Install
 
-Clone this repository, then run `node content-studio/scripts/cli.mjs install-skills --global`. The installer stores one versioned bundle at `~/.agents/content-studio/v<version>` and links its twelve skill folders directly under `~/.agents/skills`. [Codex](https://learn.chatgpt.com/docs/build-skills) and [OpenCode](https://opencode.ai/docs/skills) both discover that global path. It verifies the twelve matching skill entrypoints, refuses to replace unmanaged folders, then removes the obsolete global names `videogen`, `content-helper`, `video-idea-engine`, `hairline-create`, `learning-engineer`, and the superseded `content-studio-ideas`, `content-studio-animate`, and `content-studio-vlog`.
+Clone this repository, then run `node content-studio/scripts/cli.mjs install-skills --global`. The installer stores one versioned bundle at `~/.agents/content-studio/v<version>` and links its thirteen skill folders directly under `~/.agents/skills`. [Codex](https://learn.chatgpt.com/docs/build-skills) and [OpenCode](https://opencode.ai/docs/skills) both discover that global path. It verifies the thirteen matching skill entrypoints, refuses to replace unmanaged folders, then removes the obsolete global names `videogen`, `content-helper`, `video-idea-engine`, `hairline-create`, `learning-engineer`, and the superseded `content-studio-ideas`, `content-studio-animate`, and `content-studio-vlog`.
 
 A video project can pin a tested Git tag of this private repository in `package.json`, run `npm install`, and use `npx videogen sync-skill` to install the matching animation skill locally. `npx videogen init <directory>` starts a project and `npx videogen scaffold <id> --title "Working title"` creates a draft. The root npm package includes only `content-studio/`.
 
