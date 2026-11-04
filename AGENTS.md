@@ -51,7 +51,21 @@ node --test content-studio/tests/*.test.mjs content-studio/skills/content-studio
 
 ## Enhancement rules
 
+- Every video or audio enhancement follows a closed loop: identify a specific
+  issue in the source, record its baseline evidence and acceptance criterion,
+  compare bounded candidate fixes (including leaving the source alone), and
+  verify the exact delivered output against that criterion and side-effect gates.
 - Diagnosis before correction. Never enhance because a feature is enabled.
+  If the source has no measurable issue, record `SKIP` and preserve it.
+- Record the selected candidate, rejected alternatives, source hash, parameters,
+  before/after measurements, and links to playable or viewable evidence.
+- A preview decision is provisional. Recheck representative affected ranges in
+  the final render; a small change or a successful encode alone is not proof the
+  issue improved. If verification fails, try a bounded alternative or mark the
+  result `REVIEW`/`SKIP` instead of claiming success.
+- Human review is required for subjective changes (including creative grading)
+  and defects that objective metrics cannot establish. Label explicit overrides
+  as unverified until their final output is reviewed.
 - Selective upscaling is diagnosis-first: analyze the clip, render a short
   Lanczos/AI preview, gate on detail/noise/flicker, and refuse HDR/DV without an
   explicit tone-map decision.
