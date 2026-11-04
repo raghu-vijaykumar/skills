@@ -22,5 +22,11 @@
   "publish": {
     "platform": "youtube",
     "require_approval": true
+  },
+  "motion_graphics": {
+    "category": "travel",
+    "preset": "travel-cinematic",
+    "intensity": "subtle",
+    "review_required": true
   }
 }
