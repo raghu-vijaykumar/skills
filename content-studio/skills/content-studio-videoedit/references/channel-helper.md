@@ -265,12 +265,15 @@ camera basename under `.content-studio/processed-clips/`. It selects the regular
 mono/stereo audio track (not Apple's APAC spatial track), denoises it, detects
 speech, lowers quiet sections by 13 dB, and adjusts speech toward a consistent
 level with no more than 13 dB boost. Short gain ramps and a -1 dBFS limiter
-prevent abrupt level jumps and clipping. Pass `--speech-gain off` to skip speech
+prevent abrupt level jumps and clipping. Auto mode first tunes each new clip on
+short candidate windows, including a no-processing choice, and caches the
+profile by source hash. A clean clip keeps its source audio and skips speech
+gain. Pass `--speech-gain off` to skip speech
 detection entirely: one bounded gain restores the clip's source loudness, only the
 limiter shapes peaks, and Silero VAD is never loaded. `--denoise auto`
-uses DeepFilterNet when its `deep-filter.exe` (standalone Windows release) or
-`deepFilter` (Python package) executable is on PATH; otherwise it uses
-FFmpeg's `afftdn` filter and records that choice in `report.json`. Install the
+compares DeepFilterNet candidates when `deep-filter.exe` or `deepFilter` is on
+PATH; otherwise it compares FFmpeg `afftdn` strengths. The selected candidate
+and source/output checks are recorded in `report.json`. Install the
 speech detector with `python -m pip install silero-vad numpy`. The Python
 DeepFilterNet 0.5.6 package needs a supported environment such as Python 3.11;
 its standalone Windows executable avoids that requirement. Download
@@ -282,22 +285,22 @@ does not consider speech, which on a music or ambience clip can delete the whole
 program. Preprocess measures EBU R128 loudness before and after denoising; if the
 clip drops by more than 12 dB, it keeps the source audio with an 80 Hz high-pass,
 records `denoise.fallback: "content-loss"` with both loudness values in
-`report.json`, and still matches the source level. Pass `--profiles` to apply each
-clip's recorded tuning choice instead of the default chain; see Tune audio per clip
-below.
+`report.json`. Final audio is checked again on spread windows; failed improvement
+or fidelity checks set `audio_review_required` and leave ten-second before/after
+WAVs. Use `--no-auto-tune` to keep untuned clips unprocessed, `--denoise off` to
+skip denoise, or `--no-profiles` for an explicit unverified engine override.
 
 ### Tune audio per clip
 
-Preprocessing applies one chain to every clip, but the best denoise strength depends
-on what the clip contains. Score candidates on a few clips before committing to a
-batch:
+Auto preprocessing tunes each new clip on 12 seconds of source audio. For a
+longer review or to compare representative clips before a batch, run:
 
 ```powershell
 python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --limit 5 --sample 40
 python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --clip "003 - VID20260112101914.mp4" --force
 ```
 
-`tune` samples the beginning, middle, and end of each clip, renders every candidate
+`tune` samples spread windows of each clip, renders every candidate
 through the same denoise, level-match, and limiter chain preprocess uses, and
 measures each result against the untouched source window. The candidate grid includes
 the current default, post-filter strengths, attenuation-limited passes at 10, 20, and
@@ -311,8 +314,7 @@ over-suppressed default gets no margin protection. Profiles, metrics, and
 listenable WAVs are written under `.content-studio/analysis/tuning/`, with
 `tuning.csv` and `tuning.html` summarizing the current profiles in that folder and
 inline players for the default and chosen candidates. Listen to the WAVs before a
-batch, then pass `--profiles` to preprocess to apply each clip's recorded choice.
-Clips without a profile keep the default chain, and changing a profile rebuilds that
+batch. Preprocess applies the recorded choice by default; changing a profile rebuilds that
 clip's audio along with its final render. `--limit` samples across clip durations;
 `--sample` is the seconds measured per clip; `--discard-audio` removes the WAVs after
 measuring.

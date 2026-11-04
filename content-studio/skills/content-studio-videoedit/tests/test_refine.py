@@ -10,6 +10,26 @@ import refine
 
 
 class RefineTest(unittest.TestCase):
+    def test_delivery_verification_rejects_an_unapplied_polish(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "clip.mp4"
+            self.make_video(source)
+            timeline = root / "refined.json"
+            timeline.write_text(json.dumps({"source_root": str(root), "tracks": [
+                {"kind": "video", "clips": [{"source": "clip.mp4", "source_in": 0,
+                                              "source_out": 1, "start": 0,
+                                              "duration": 1,
+                                              "enhancements": [{"stage": "polish"}]}]}
+            ]}), encoding="utf-8")
+            report = root / "refine.json"
+            report.write_text(json.dumps({"clips": [{"source": "clip.mp4",
+                "selected": "light", "diagnosis": {"issue": "flat_area_noise"}}]}),
+                encoding="utf-8")
+            result = refine.verify_render(timeline, source, report)
+            self.assertEqual(result["status"], "review_required")
+            self.assertFalse(result["checks"][0]["noise_fixed"])
+
     def make_video(self, path):
         subprocess.run([
             "ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",

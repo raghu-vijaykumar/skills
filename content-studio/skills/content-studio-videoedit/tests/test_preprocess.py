@@ -102,7 +102,8 @@ class PreprocessTest(unittest.TestCase):
             disabled = SimpleNamespace(profiles=False, tuning_root=root)
             self.assertIsNone(preprocess.tuning_profile(disabled, Path("001 - clip.mp4")))
             missing = SimpleNamespace(profiles=True, tuning_root=root)
-            self.assertIsNone(preprocess.tuning_profile(missing, Path("002 - other.mp4")))
+            self.assertEqual(preprocess.tuning_profile(missing, Path("002 - other.mp4"))["chosen"],
+                             "none")
 
     def test_none_profile_skips_denoise_but_keeps_highpass(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

@@ -394,30 +394,46 @@ def verify_delivery(source: Path, output: Path, target: tuple[int, int],
     encode, a truncated segment, or a changed range cannot be reported as a win.
     """
     info = upscale.probe(source)
-    window = min(3.0, duration)
-    offset = start + max(0.0, min(duration * 0.4 - window / 2, duration - window))
-    output_offset = offset - start
+    window = min(1.5, duration)
+    offsets = ([start + max(0.0, (duration - window) / 2)] if duration <= 3.0
+               else [start, start + (duration - window) / 2,
+                     start + duration - window])
     verify_dir = Path(work) / "verify"
     verify_dir.mkdir(parents=True, exist_ok=True)
-    reference = verify_dir / "lanczos-reference.mp4"
-    upscale.run_lanczos(source, reference, target, offset, window, False,
-                        info["fps"], info, preset="fast", encoder=encoder)
-    times = [round(window * fraction, 3) for fraction in (0.2, 0.5, 0.8)]
-    reference_metrics = sample_metrics(reference, times)
-    delivered_metrics = sample_metrics(output, [output_offset + at for at in times])
-    with tempfile.TemporaryDirectory(prefix="verify-", dir=verify_dir) as scratch:
-        temporal = temporal_profile(reference, output, round(window * 0.3, 3),
-                                    Path(scratch),
-                                    candidate_at=output_offset + round(window * 0.3, 3))
-    outcome = decide({"lanczos": reference_metrics, "ai": delivered_metrics,
-                      "temporal": temporal})
-    accepted = outcome["decision"] == "FIX"
+    windows = []
+    for index, offset in enumerate(offsets, 1):
+        output_offset = offset - start
+        reference = verify_dir / f"lanczos-reference-{index:02d}.mp4"
+        upscale.run_lanczos(source, reference, target, offset, window, False,
+                            info["fps"], info, preset="fast", encoder=encoder)
+        times = [round(window * fraction, 3) for fraction in (0.2, 0.5, 0.8)]
+        reference_metrics = sample_metrics(reference, times)
+        delivered_metrics = sample_metrics(output,
+                                           [output_offset + at for at in times])
+        with tempfile.TemporaryDirectory(prefix="verify-", dir=verify_dir) as scratch:
+            temporal = temporal_profile(
+                reference, output, round(window * 0.3, 3), Path(scratch),
+                candidate_at=output_offset + round(window * 0.3, 3))
+        outcome = decide({"lanczos": reference_metrics, "ai": delivered_metrics,
+                          "temporal": temporal})
+        windows.append({
+            "source_start": round(offset, 3),
+            "output_start": round(output_offset, 3),
+            "duration": round(window, 3),
+            "decision": outcome,
+            "comparison": outcome["metrics"],
+            "temporal": temporal,
+            "reference_metrics": reference_metrics["summary"],
+            "delivered_metrics": delivered_metrics["summary"],
+            "reference": str(reference),
+        })
+    accepted = all(item["decision"]["decision"] == "FIX" for item in windows)
+    representative = next((item for item in windows
+                           if item["decision"]["decision"] != "FIX"), windows[0])
     return {
         "status": "verified" if accepted else "review",
-        "decision": outcome,
-        "checked_window": {"source_start": round(offset, 3),
-                           "output_start": round(output_offset, 3),
-                           "duration": round(window, 3)},
+        "decision": representative["decision"],
+        "checked_windows": windows,
         "criteria": {
             "min_detail_gain": MIN_DETAIL_GAIN,
             "max_noise_ratio": NOISE_HARD,
@@ -425,11 +441,11 @@ def verify_delivery(source: Path, output: Path, target: tuple[int, int],
             "max_sharpness_jitter": JITTER_HARD,
             "max_luma_delta": LUMA_HARD,
         },
-        "comparison": outcome["metrics"],
-        "temporal": temporal,
-        "reference_metrics": reference_metrics["summary"],
-        "delivered_metrics": delivered_metrics["summary"],
-        "reference": str(reference),
+        "comparison": representative["comparison"],
+        "temporal": representative["temporal"],
+        "reference_metrics": representative["reference_metrics"],
+        "delivered_metrics": representative["delivered_metrics"],
+        "reference": representative["reference"],
         "verified_at": upscale.now(),
     }
 

@@ -237,7 +237,8 @@ inspection.
 ## Delivery verification
 
 A passing preview is provisional. Every AI render is re-measured after encoding,
-against a fresh 3 s Lanczos reference at the delivered timestamps, with the same
+against fresh 1.5 s Lanczos references near the beginning, middle, and end of
+long clips (one centered window for clips up to 3 s), with the same
 detail/noise/flicker/jitter/luma/clipping gates. The result is stored in
 `upscale.json` as `verification.status`:
 
@@ -248,8 +249,8 @@ detail/noise/flicker/jitter/luma/clipping gates. The result is stored in
 - `unverified_override` — you forced the render with `--approve` or `--mode always`;
   it is applied but labelled for human review.
 
-`verification` also records the checked window, the criteria, the reference and
-delivered metrics, and the path to the reference clip.
+`verification` also records each checked window, its criteria, reference and
+delivered metrics, and the reference clips. Every window must pass for `verified`.
 
 ## Limitations
 

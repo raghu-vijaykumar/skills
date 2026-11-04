@@ -100,9 +100,27 @@ def choose_candidate(source: Path, start: float, duration: float,
         values = [score(b, a) for b, a in zip(before, after)]
         results.append({"candidate": name, "filters": filters,
                         "score": round(float(np.mean(values)), 5),
-                        "before": before[0], "after": after[0]})
+                        "before": {key: float(np.median([item[key] for item in before]))
+                                   for key in before[0]},
+                        "after": {key: float(np.median([item[key] for item in after]))
+                                  for key in after[0]}})
     best = max(results, key=lambda item: item["score"])
-    return {"selected": best, "alternatives": results}
+    off = next(item for item in results if item["candidate"] == "off")
+    # A sharper proxy is not a reason to polish a clean source. Require a
+    # diagnosed noise floor and a measurable reduction over doing nothing.
+    noise_before = float(np.median([item["noise_flat"] for item in before]))
+    noise_after = best["after"]["noise_flat"]
+    issue = noise_before >= 0.01
+    improved = (best["candidate"] != "off" and best["score"] - off["score"] >= 0.03
+                and noise_after <= noise_before * 0.95)
+    selected = best if issue and improved else off
+    return {"selected": selected, "alternatives": results,
+            "diagnosis": {"issue": "flat_area_noise" if issue else "none",
+                          "baseline_noise": round(noise_before, 5),
+                          "required_reduction": 0.05,
+                          "measured_reduction": round(
+                              1 - noise_after / max(noise_before, 1e-6), 5),
+                          "decision": "FIX" if selected is best and improved else "SKIP"}}
 
 
 def color_enhancements(source: Path, start: float, end: float,
@@ -141,17 +159,19 @@ def refine(args) -> dict:
               "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
               "timeline": str(timeline_path), "clips": []}
     source_colors = {}
-    for track in timeline.get("tracks", []):
-        if track.get("kind") != "video":
-            continue
-        for clip in track.get("clips", []):
-            source = (source_root / clip["source"]).resolve()
-            if source not in source_colors:
-                info = enhance.probe_video(source)
-                source_colors[source] = match.mean_color(source,
-                                                          info["duration_seconds"])
-    target = {key: float(np.median([color[key] for color in source_colors.values()]))
-              for key in ("r", "g", "b")}
+    target = None
+    if args.match:
+        for track in timeline.get("tracks", []):
+            if track.get("kind") != "video":
+                continue
+            for clip in track.get("clips", []):
+                source = (source_root / clip["source"]).resolve()
+                if source not in source_colors:
+                    info = enhance.probe_video(source)
+                    source_colors[source] = match.mean_color(
+                        source, info["duration_seconds"])
+        target = {key: float(np.median([color[key] for color in source_colors.values()]))
+                  for key in ("r", "g", "b")}
     try:
         for track in timeline.get("tracks", []):
             if track.get("kind") != "video":
@@ -175,11 +195,11 @@ def refine(args) -> dict:
                                       "filters": polish_filters,
                                       "metrics": {"before": selected["selected"]["before"],
                                                   "after": selected["selected"]["after"]}})
-                gains = match.gains_for(source_colors[source], target)
-                if any(abs(gains[key] - 1.0) > 0.005 for key in gains):
+                gains = match.gains_for(source_colors[source], target) if target else None
+                if gains and any(abs(gains[key] - 1.0) > 0.005 for key in gains):
                     items.append({"stage": "match",
                                   "source_start": start, "source_end": end,
-                                  "gains": gains,
+                                  "gains": gains, "review_status": "review_required",
                                   "filters": ["colorchannelmixer="
                                               f"rr={gains['r']}:gg={gains['g']}:bb={gains['b']}"]})
                 items.extend(color_enhancements(source, start, end, analysis_root,
@@ -192,6 +212,8 @@ def refine(args) -> dict:
                 report["clips"].append({"source": clip["source"],
                                         "source_in": start, "source_out": end,
                                         "selected": selected["selected"]["candidate"],
+                                        "diagnosis": selected["diagnosis"],
+                                        "delivery_verification": "required_after_timeline_render",
                                         "score": selected["selected"]["score"],
                                         "alternatives": selected["alternatives"],
                                         "enhancements": items})
@@ -205,19 +227,84 @@ def refine(args) -> dict:
     return report
 
 
+def verify_render(timeline_path: Path, render_path: Path,
+                  report_path: Path | None = None) -> dict:
+    """Check selected polish on the actual timeline render, then save evidence."""
+    timeline_path = Path(timeline_path).expanduser().resolve()
+    render_path = Path(render_path).expanduser().resolve()
+    report_path = (Path(report_path).expanduser().resolve() if report_path
+                   else timeline_path.parent / "refine.json")
+    timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    root = Path(timeline.get("source_root") or timeline_path.parent).resolve()
+    clips = [clip for track in timeline.get("tracks", [])
+             if track.get("kind") == "video" for clip in track.get("clips", [])]
+    if len(clips) != len(report["clips"]):
+        raise RefineError("refine report does not match the rendered timeline")
+    checks = []
+    for clip, selected in zip(clips, report["clips"]):
+        if selected["selected"] == "off" and not clip.get("enhancements"):
+            continue
+        duration = float(clip.get("duration") or
+                         float(clip["source_out"]) - float(clip["source_in"]))
+        samples = []
+        for fraction in (0.2, 0.5, 0.8):
+            source_at = float(clip["source_in"]) + duration * fraction
+            render_at = float(clip.get("start", 0)) + duration * fraction
+            samples.append({"source_at": round(source_at, 3),
+                            "render_at": round(render_at, 3),
+                            "before": metrics((root / clip["source"]).resolve(),
+                                              source_at),
+                            "after": metrics(render_path, render_at)})
+        before = {key: float(np.median([item["before"][key] for item in samples]))
+                  for key in samples[0]["before"]}
+        after = {key: float(np.median([item["after"][key] for item in samples]))
+                 for key in samples[0]["after"]}
+        diagnosis = selected.get("diagnosis", {})
+        noise_fixed = (diagnosis.get("issue") != "flat_area_noise" or
+                       after["noise_flat"] <= before["noise_flat"] * 0.95)
+        safe = all(item["after"]["clip_high"] - item["before"]["clip_high"] <= 0.02
+                   for item in samples)
+        subjective = any(item.get("stage") in {"match", "color"}
+                         for item in clip.get("enhancements", []))
+        checks.append({"source": clip["source"], "samples": samples, "before": before,
+                       "after": after, "noise_fixed": noise_fixed,
+                       "clipping_safe": safe, "subjective_review": subjective,
+                       "passed": noise_fixed and safe and not subjective})
+    result = {"status": ("skipped" if not checks else "passed"
+                         if all(item["passed"] for item in checks)
+                         else "review_required"),
+              "render": str(render_path), "checks": checks}
+    report["delivery_verification"] = result
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return result
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeline", type=Path, required=True)
-    parser.add_argument("--output-timeline", type=Path, required=True)
+    parser.add_argument("--output-timeline", type=Path)
+    parser.add_argument("--verify-render", type=Path,
+                        help="verify the rendered refined timeline against source clips")
+    parser.add_argument("--report", type=Path,
+                        help="refine.json for --verify-render (default: beside timeline)")
     parser.add_argument("--analysis-dir", type=Path)
     parser.add_argument("--auto-fix", action="store_true",
                         help="include conservative analyzer FIX color corrections without prior approval")
+    parser.add_argument("--match", action="store_true",
+                        help="propose cross-shot matching for review")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.verify_render:
+            result = verify_render(args.timeline, args.verify_render, args.report)
+            print(json.dumps(result, indent=2))
+            return 0 if result["status"] in {"passed", "skipped"} else 2
+        if not args.output_timeline:
+            raise RefineError("--output-timeline is required when selecting candidates")
         print(json.dumps(refine(args), indent=2))
         return 0
     except (RefineError, OSError, ValueError) as exc:

@@ -144,6 +144,8 @@ content-studio enhance render `
 ```
 
 They are not applied by analysis and never run unless explicitly requested.
+Their render status is `review_required`: a successful encode is not proof that
+a creative look or denoise helped. Review the generated before/after media.
 
 ## Reflections and glare
 
@@ -183,8 +185,11 @@ parameters, evidence frames, review status, and validation results.
 - Analysis is cached by source SHA-256 and `analysis_version`.
 - A changed source forces a fresh analysis.
 - Rendering refuses a source whose hash changed since analysis.
-- A correction that shifts luma, saturation, or clipping beyond the validation
-  limits is rejected and the output is deleted.
+- The final render is sampled at 20%, 50%, and 80% of each corrected scene.
+  Each diagnosed `FIX` must improve its own metric (exposure, channel balance,
+  contrast, saturation, or glare), while luma, saturation, and clipping stay
+  within safety limits. A failing candidate is deleted; `validation.json`
+  retains the reason and measurements for the next candidate or review.
 - Originals are never overwritten. `--output` must differ from the source.
 
 ## Current limitations

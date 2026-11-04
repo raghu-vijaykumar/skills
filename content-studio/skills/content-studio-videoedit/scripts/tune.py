@@ -11,6 +11,7 @@ default by more than the measurement margin. Results are written as artifacts
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import math
 import shutil
@@ -26,7 +27,7 @@ import ordering
 import preprocess
 from preprocess import SAMPLE_RATE, ProcessingError, command, pcm16, probe, streams
 
-TUNE_VERSION = 4
+TUNE_VERSION = 5
 WINDOW_FRACTIONS = (0.3, 0.7)
 ANALYSIS_HOP_SECONDS = 0.02
 BAND_LOW_HZ = 300.0
@@ -58,6 +59,14 @@ class TuneError(RuntimeError):
     pass
 
 
+def source_hash(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for block in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def candidate_grid(deepfilter_executable: str | None) -> list[dict]:
     """Return the ordered candidate set; the first entry is the current default.
 
@@ -80,13 +89,13 @@ def candidate_grid(deepfilter_executable: str | None) -> list[dict]:
             {"name": "pf-strong", "engine": "deepfilter", "post_filter": True,
              "beta": 0.05, "highpass": 0, "attenuation": None},
             {"name": "none", "engine": "none", "post_filter": False,
-             "beta": 0.0, "highpass": 80, "attenuation": None},
+             "beta": 0.0, "highpass": 0, "attenuation": None},
         ]
     return [
         {"name": "default", "engine": "ffmpeg", "nr": 12, "highpass": 80},
         {"name": "nr-light", "engine": "ffmpeg", "nr": 6, "highpass": 80},
         {"name": "nr-heavy", "engine": "ffmpeg", "nr": 18, "highpass": 80},
-        {"name": "none", "engine": "none", "nr": 0, "highpass": 80},
+        {"name": "none", "engine": "none", "nr": 0, "highpass": 0},
     ]
 
 
@@ -286,6 +295,9 @@ def choose(scored: list[dict], margin: float, source: dict | None = None) -> dic
     leave_alone = next((item for item in valid if item["name"] == "none"), None)
     best = max(valid, key=lambda item: item["score"])
     if best["name"] == BASELINE:
+        if leave_alone and not measurable_gain(best, source):
+            return {"chosen": "none",
+                    "reason": "the default did not measurably reduce noise; kept the source"}
         return {"chosen": BASELINE, "reason": "the current default scored highest"}
     if baseline_fit and best["score"] - valid_baseline["score"] <= margin:
         return {"chosen": BASELINE,
@@ -321,7 +333,7 @@ def tune_clip(source: Path, output_root: Path, candidates: list[dict], args, log
     profile_path = folder / "profile.json"
     if profile_path.exists() and not args.force:
         previous = json.loads(profile_path.read_text(encoding="utf-8"))
-        if previous.get("source_bytes") == source.stat().st_size \
+        if previous.get("source_hash") == source_hash(source) \
                 and previous.get("tune_version") == TUNE_VERSION:
             log(f"{source.name}: profile current -> {previous.get('chosen')}")
             return previous
@@ -367,6 +379,7 @@ def tune_clip(source: Path, output_root: Path, candidates: list[dict], args, log
         "clip": source.name,
         "source": str(source),
         "source_bytes": source.stat().st_size,
+        "source_hash": source_hash(source),
         "duration_seconds": round(duration, 3),
         "tune_version": TUNE_VERSION,
         "sampled_windows": [list(window) for window in windows],

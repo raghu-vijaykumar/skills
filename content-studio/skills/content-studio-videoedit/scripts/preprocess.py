@@ -18,6 +18,7 @@ import tempfile
 import wave
 from fractions import Fraction
 from pathlib import Path
+from types import SimpleNamespace
 
 from common import channel_root, select_channels
 import dedupe
@@ -43,7 +44,7 @@ MAX_LEVEL_MATCH_DB = 13.0
 CONTENT_LOSS_DB = 12.0
 # Bump when the audio chain changes so cached clips are rebuilt instead of
 # silently keeping an older render.
-ENHANCE_VERSION = 4
+ENHANCE_VERSION = 5
 
 
 class ProcessingError(RuntimeError):
@@ -240,28 +241,130 @@ def gain_envelope(samples, intervals: list[tuple[float, float]]):
 
 
 def tuning_profile(args, source: Path) -> dict | None:
-    """Return the recorded tuning decision for a clip when profiles are enabled."""
+    """Use a measured profile, generating one for new auto-mode clips."""
+    if getattr(args, "denoise", "auto") == "off":
+        return {"chosen": "none", "params": {"name": "none", "engine": "none",
+                                              "highpass": 0}}
+    if getattr(args, "denoise", "auto") != "auto":
+        return None
     root = getattr(args, "tuning_root", None)
     if not getattr(args, "profiles", False) or root is None:
         return None
     path = root / source.name.rsplit(".", 1)[0] / "profile.json"
+    import tune
+    try:
+        cached = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    except (OSError, ValueError):
+        cached = {}
+    if (getattr(args, "auto_tune", False) and source.is_file()
+            and (cached.get("source_hash") != tune.source_hash(source)
+                 or cached.get("tune_version") != tune.TUNE_VERSION)):
+        # A short candidate grid is cached by source hash; untuned clips are
+        # never silently sent through the generic denoiser.
+        candidate_args = SimpleNamespace(force=True, sample=12.0,
+                                         discard_audio=False,
+                                         margin=tune.DEFAULT_MARGIN)
+        deepfilter_executable = tune.find_deepfilter()
+        tune.tune_clip(source, root, tune.candidate_grid(deepfilter_executable),
+                       candidate_args, lambda _message: None,
+                       deepfilter_executable)
     if not path.is_file():
-        return None
+        return {"chosen": "none", "params": {"name": "none", "engine": "none",
+                                              "highpass": 0}}
     try:
         profile = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return None
+        return {"chosen": "none", "params": {"name": "none", "engine": "none",
+                                              "highpass": 0}}
+    if source.is_file() and profile.get("source_hash") != tune.source_hash(source):
+        return {"chosen": "none", "params": {"name": "none", "engine": "none",
+                                              "highpass": 0}}
     chosen = profile.get("chosen")
     params = next((item.get("params") for item in profile.get("candidates", [])
                    if item.get("name") == chosen), None)
     if not params:
-        return None
+        return {"chosen": "none", "params": {"name": "none", "engine": "none",
+                                              "highpass": 0}}
     return {"chosen": chosen, "params": params}
+
+
+def effective_speech_gain(args, profile: dict | None) -> str:
+    requested = getattr(args, "speech_gain", "auto")
+    return "off" if requested == "auto" and profile and profile["chosen"] == "none" \
+        else requested
+
+
+def verify_audio(source: Path, output: Path, work: Path,
+                 expected_fix: bool,
+                 kept_ranges: list[tuple[float, float]] | None = None) -> dict:
+    """Measure the delivered WAV on spread windows, including fidelity loss."""
+    import tune
+
+    if not expected_fix:
+        return {"status": "skipped", "reason": "no diagnosed cleanup was selected"}
+    duration = float(probe(source)["format"]["duration"])
+    if kept_ranges:
+        total = sum(end - start for start, end in kept_ranges)
+        windows = []
+        for fraction in (0.3, 0.7):
+            position = total * fraction
+            elapsed = 0.0
+            for left, right in kept_ranges:
+                span = right - left
+                if position <= elapsed + span:
+                    local = min(max(0.0, position - elapsed - 1.0), max(0.0, span - 2.0))
+                    length = min(2.0, span - local)
+                    windows.append((left + local, elapsed + local, length))
+                    break
+                elapsed += span
+    else:
+        windows = [(left, left, right - left) for left, right in
+                   tune.windows_for(duration, min(12.0, duration))]
+    measured = []
+    for index, (source_start, output_start, length) in enumerate(windows, 1):
+        before = work / f"verify-before-{index}.wav"
+        after = work / f"verify-after-{index}.wav"
+        for original, target, at in ((source, before, source_start),
+                                     (output, after, output_start)):
+            audio_stream = next((item for item in probe(original).get("streams", [])
+                                 if item.get("codec_type") == "audio"
+                                 and item.get("channels", 0) <= 2), None)
+            if audio_stream is None:
+                raise ProcessingError(f"no reviewable audio stream in {original}")
+            command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                     "-ss", f"{at:.3f}", "-t", f"{length:.3f}",
+                     "-i", str(original), "-map", f"0:{audio_stream['index']}",
+                     "-vn", "-ar", str(SAMPLE_RATE),
+                     "-ac", "2", "-c:a", "pcm_s16le", str(target)])
+        baseline = tune.analyze_window(before)
+        delivered = tune.analyze_window(after)
+        score, issues = tune.score_candidate(delivered, baseline)
+        noise_cut = baseline["noise_floor_dbfs"] - delivered["noise_floor_dbfs"]
+        snr_gain = delivered["snr_db"] - baseline["snr_db"]
+        improved = noise_cut >= tune.MIN_NOISE_CUT_DB or snr_gain >= tune.MIN_SNR_GAIN_DB
+        measured.append({"source_range": [source_start, source_start + length],
+                         "output_range": [output_start, output_start + length],
+                         "before": baseline,
+                         "after": delivered, "score": score, "issues": issues,
+                         "noise_reduction_db": round(noise_cut, 2),
+                         "snr_gain_db": round(snr_gain, 2),
+                         "passed": improved and not set(issues) & set(tune.FIDELITY_ISSUES)})
+    return {"status": "passed" if all(item["passed"] for item in measured)
+            else "review_required", "windows": measured}
+
+
+def safe_verify_audio(*args, **kwargs) -> dict:
+    """Keep an export reviewable when quality measurement cannot complete."""
+    try:
+        return verify_audio(*args, **kwargs)
+    except (ProcessingError, OSError, ValueError) as exc:
+        return {"status": "review_required", "reason": str(exc)}
 
 
 def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
                   denoise: str = "auto", speech_gain: str = "auto",
-                  profile: dict | None = None) -> Path:
+                  profile: dict | None = None,
+                  review_dir: Path | None = None) -> Path:
     import numpy as np
 
     original = work / "original.wav"
@@ -319,7 +422,7 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
                          "denoised_lufs": None if denoised_loudness is None else round(denoised_loudness, 2)}
     if engine != "none" and lost_db > CONTENT_LOSS_DB:
         command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-                 "-i", str(original), "-af", f"highpass=f={highpass or 80}", "-ac", "2",
+                 "-i", str(original), "-af", "anull", "-ac", "2",
                  "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", str(clean)])
         report["denoise_engine"] = "skipped"
         report["denoise"]["fallback"] = "content-loss"
@@ -350,6 +453,20 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
              "-f", "f32le", "-ar", str(SAMPLE_RATE), "-ac", "2", "-i", str(float_audio),
              "-af", f"alimiter=limit={LIMIT:.6f}:attack=5:release=50:level=0",
              "-c:a", "pcm_s16le", str(result)])
+    report["audio_validation"] = (verify_audio(
+        original, result, work, expected_fix=engine != "none" or speech_gain != "off")
+        if original.is_file() and result.is_file() else
+        {"status": "review_required", "reason": "output WAV unavailable for verification"})
+    if review_dir is not None and report["audio_validation"]["status"] != "skipped":
+        review_dir.mkdir(parents=True, exist_ok=True)
+        for original_path, target in ((original, review_dir / "before.wav"),
+                                      (result, review_dir / "after.wav")):
+            command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                     "-i", str(original_path), "-vn", "-t", "10", "-c:a", "pcm_s16le",
+                     str(target)])
+        report["audio_validation"]["review_audio"] = {
+            "before": str(review_dir / "before.wav"),
+            "after": str(review_dir / "after.wav")}
     return result
 
 
@@ -792,8 +909,8 @@ def final_clip(source: Path, output_root: Path, args, log,
                   "status": "processing"}
 
     requested = getattr(args, "denoise", "auto")
-    speech_gain = getattr(args, "speech_gain", "auto")
     applied = tuning_profile(args, source)
+    speech_gain = effective_speech_gain(args, applied)
     voice = folder / "enhanced-voice.wav"
     chain_matches = (report.get("tuning") == applied if applied is not None
                      else requested == "auto" or requested == report.get("denoise_engine"))
@@ -807,7 +924,11 @@ def final_clip(source: Path, output_root: Path, args, log,
             work = Path(scratch)
             if audio:
                 generated = enhance_audio(source, audio, work, report, requested,
-                                          speech_gain, applied)
+                                          speech_gain, applied,
+                                          folder / "audio-review")
+                if applied is None and report["audio_validation"]["status"] == "passed":
+                    report["audio_validation"].update(
+                        status="review_required", reason="no diagnosed tuning profile")
             else:
                 generated = silent_audio(duration, work / "silent.wav")
                 report["audio"] = {"status": "no source audio; silent stereo track added"}
@@ -842,12 +963,19 @@ def final_clip(source: Path, output_root: Path, args, log,
         actual, rendered, out_audio = editing.probe(temp)
         if not out_audio or rendered.get("width") != 1920 or rendered.get("height") != 1080:
             raise ProcessingError(f"final export failed validation: {source.name}")
+        report["final_audio_validation"] = safe_verify_audio(
+            source, temp, Path(scratch),
+            expected_fix=report.get("audio_validation", {}).get("status") != "skipped",
+            kept_ranges=kept)
         os.replace(temp, target)
 
     kept_seconds = sum(end - start for start, end in (kept or [(0.0, duration)]))
     report.update({
         "source": str(source), "source_bytes": source.stat().st_size,
-        "status": "final_ready",
+        "status": ("final_audio_review_required"
+                   if any(report.get(key, {}).get("status") == "review_required"
+                          for key in ("audio_validation", "final_audio_validation"))
+                   else "final_ready"),
         "final_output": target.name,
         "final_format": f"{size[0]}x{size[1]} BT.709 SDR 30 fps",
         "final_duration_seconds": round(actual, 3),
@@ -878,7 +1006,7 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
         if previous.get("source_bytes") == source.stat().st_size and \
                 previous.get("enhance_version", 1) == ENHANCE_VERSION and \
                 chain_matches and \
-                previous.get("speech_gain", "auto") == getattr(args, "speech_gain", "auto"):
+                previous.get("speech_gain", "auto") == effective_speech_gain(args, applied):
             # Keep the report's source pointer in sync with timeline renames.
             if previous.get("source") != str(source):
                 previous["source"] = str(source)
@@ -976,8 +1104,12 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     with tempfile.TemporaryDirectory(prefix="vlog-", dir=folder) as scratch:
         work = Path(scratch)
         if audio:
+            speech_mode = effective_speech_gain(args, applied)
             voice = enhance_audio(source, audio, work, report, args.denoise,
-                                  getattr(args, "speech_gain", "auto"), applied)
+                                  speech_mode, applied, folder / "audio-review")
+            if applied is None and report["audio_validation"]["status"] == "passed":
+                report["audio_validation"].update(
+                    status="review_required", reason="no diagnosed tuning profile")
         else:
             voice = silent_audio(duration, work / "silent.wav")
             report["audio"] = {"status": "no source audio; silent stereo track added"}
@@ -1007,8 +1139,14 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
             target = folder / ("processed.mov" if source.suffix.lower() == ".mov" else "processed.mp4")
             report["render_validation"] = safe_render(
                 source, voice_export, video, work, target, [])
+            report["final_audio_validation"] = safe_verify_audio(
+                source, target, work,
+                expected_fix=report.get("audio_validation", {}).get("status") != "skipped")
             report["processed_output"] = target.name
-            report["status"] = "ready"
+            report["status"] = ("audio_review_required"
+                                if any(report.get(key, {}).get("status") == "review_required"
+                                       for key in ("audio_validation", "final_audio_validation"))
+                                else "ready")
     write_report(folder, report)
     log(f"{source.name}: {report['status']} ({report['blur']['candidates']} blur candidates)")
 
@@ -1057,7 +1195,8 @@ def run(cfg: dict, args, log) -> int:
         return 1
     output_root.mkdir(parents=True, exist_ok=True)
     args.tuning_root = (draftlayout.internal_dir(draft) / "analysis" / "tuning"
-                        if draft is not None else None)
+                        if draft is not None else
+                        output_root.parent / ".content-studio" / "analysis" / "tuning")
     target_size = None
     if final:
         try:

@@ -480,12 +480,16 @@ def main() -> int:
     p.add_argument("--size",
                    help="final target: auto/max or WxH (default: highest source resolution)")
     p.add_argument("--force", action="store_true", help="rebuild existing analysis and exports")
-    p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg"], default="auto",
-                   help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
+    p.add_argument("--denoise", choices=["auto", "deepfilter", "ffmpeg", "off"], default="auto",
+                   help="auto uses a measured per-clip profile; explicit engines require review")
     p.add_argument("--speech-gain", choices=["auto", "off"], default="auto",
                    help="auto lifts speech over a quiet floor; off skips speech detection and only denoises")
-    p.add_argument("--profiles", action="store_true",
-                   help="apply each clip's recorded tuning profile from analysis/tuning/")
+    p.add_argument("--profiles", action="store_true", default=True,
+                   help="apply per-clip tuning profiles (default)")
+    p.add_argument("--no-profiles", dest="profiles", action="store_false",
+                   help="explicitly bypass measured profiles; output requires audio review")
+    p.add_argument("--no-auto-tune", dest="auto_tune", action="store_false",
+                   default=True, help="skip new tuning; untuned clips keep source audio")
 
     p = sub.add_parser("tune", parents=[shared],
                        help="score audio-enhancement candidates per clip before preprocessing")

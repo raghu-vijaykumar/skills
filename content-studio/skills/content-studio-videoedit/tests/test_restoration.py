@@ -152,6 +152,26 @@ class RestorationTest(unittest.TestCase):
                       {"SKIP", "REVIEW", "UNSUPPORTED"})
         self.assertIn("min_detail_gain", result["criteria"])
 
+    def test_delivery_verification_aligns_spread_output_windows(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            summary = {"summary": {"edge_sharpness": 1, "noise_flat": 1,
+                                   "luma_mean": 0.5, "clip_high": 0}}
+            decision = {"decision": "FIX", "metrics": {"sharpness_gain": 0.1}}
+            with patch.object(restoration.upscale, "probe", return_value={"fps": "30/1"}), \
+                 patch.object(restoration.upscale, "run_lanczos"), \
+                 patch.object(restoration, "sample_metrics", return_value=summary), \
+                 patch.object(restoration, "temporal_profile", return_value={}), \
+                 patch.object(restoration, "decide", return_value=decision):
+                result = restoration.verify_delivery(
+                    root / "source.mp4", root / "output.mp4", (640, 360),
+                    10.0, 4.0, "pytorch", None, "model", 2, 256,
+                    None, None, None, root / "work")
+            self.assertEqual(result["status"], "verified")
+            self.assertEqual(len(result["checked_windows"]), 3)
+            self.assertEqual([item["output_start"] for item in result["checked_windows"]],
+                             [0.0, 1.25, 2.5])
+
     def test_timeline_ranges_merge_adjacent_usage(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

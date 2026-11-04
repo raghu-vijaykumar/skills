@@ -31,15 +31,22 @@ For every video clip, `refine`:
 
 1. evaluates `off`, `light`, and `medium` polish candidates on short proxies
 2. measures edge sharpness, flat-area noise, clipping, and luma
-3. selects the highest-scoring candidate
+3. selects a polish candidate only when source noise is diagnosed and the proxy
+   reduces it by at least 5% with a score lead over `off`; otherwise selects `off`
 4. adds the selected denoise/deflicker filters to the timeline under `stage: "polish"`
-5. adds per-clip shot-matching gains under `stage: "match"`
+5. proposes per-clip shot-matching gains only with `--match`; these need review
 6. adds approved analyzer color corrections under `stage: "color"`
 7. appends sharpening last under `stage: "sharpen"`
 8. writes `refine.json` with every candidate and metric
 
 The timeline renderer consumes `clip.enhancements`, so the applied filters survive
-later timeline edits. Upscaling is deliberately excluded.
+later timeline edits. After rendering that timeline, run
+`content-studio refine --timeline <timeline-refined.json> --verify-render <master.mp4>`.
+It rechecks the diagnosed noise and clipping at 20%, 50%, and 80% of each
+delivered clip,
+writes `delivery_verification` to `refine.json`, and returns review status when
+the fix did not survive rendering or a subjective match/color change is present.
+Upscaling is deliberately excluded.
 
 Polished timeline entries look like:
 

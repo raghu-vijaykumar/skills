@@ -684,8 +684,13 @@ def render_manifest(manifest_path: Path, output: Path,
                        "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
                        "-c:a", "copy", "-movflags", "+faststart", str(temp)]
             run(cmd)
-            validation = validate_render(manifest, source, temp)
+            validation = validate_render(manifest, source, temp,
+                                         unverified_effects=bool(global_filters))
             if validation["status"] == "rejected":
+                # Keep the measurements even when the candidate is discarded.
+                validation_path = manifest_path.parent / "validation.json"
+                validation_path.write_text(json.dumps(validation, indent=2) + "\n",
+                                           encoding="utf-8")
                 temp.unlink(missing_ok=True)
                 raise EnhanceError("quality validation rejected the correction")
             os.replace(temp, output)
@@ -693,7 +698,7 @@ def render_manifest(manifest_path: Path, output: Path,
             temp.unlink(missing_ok=True)
     validation_path = manifest_path.parent / "validation.json"
     validation_path.write_text(json.dumps(validation, indent=2) + "\n", encoding="utf-8")
-    if validation["status"] == "passed":
+    if validation["status"] in {"passed", "review_required"}:
         write_before_after(source, output, manifest,
                            manifest_path.parent.parent / "previews" / "before-after" /
                            f"{source.stem}.jpg")
@@ -705,26 +710,70 @@ def render_manifest(manifest_path: Path, output: Path,
     return validation
 
 
-def validate_render(manifest: dict, source: Path, output: Path) -> dict:
+def _issue_check(issue: dict, before: dict, after: dict) -> dict | None:
+    """Check the diagnosed defect itself, not merely the absence of large shifts."""
+    issue_type = issue.get("type")
+    if issue_type == "underexposure":
+        baseline, result, gain = before["luma_mean"], after["luma_mean"], 0.005
+    elif issue_type == "color_cast":
+        spread = lambda m: max(m[f"channel_{c}"] for c in "rgb") - min(
+            m[f"channel_{c}"] for c in "rgb")
+        baseline, result, gain = spread(before), spread(after), 0.005
+        baseline, result = -baseline, -result
+    elif issue_type == "low_contrast":
+        baseline, result, gain = before["luma_std"], after["luma_std"], 0.002
+    elif issue_type == "low_saturation":
+        baseline, result, gain = before["saturation_mean"], after["saturation_mean"], 0.002
+    elif issue_type == "glare":
+        baseline, result, gain = -before["glare_fraction"], -after["glare_fraction"], 0.0005
+    else:
+        return None
+    delta = result - baseline
+    return {"issue": issue_type, "improvement": round(delta, 5),
+            "minimum": gain, "passed": delta >= gain}
+
+
+def validate_render(manifest: dict, source: Path, output: Path,
+                    unverified_effects: bool = False) -> dict:
     samples = []
+    issue_checks = []
     for scene in manifest.get("clips", [{}])[0].get("scenes", []):
         if not approved_scene(scene, True):
             continue
-        midpoint = (float(scene["start_seconds"]) + float(scene["end_seconds"])) / 2
-        before = frame_metrics(extract_frame(source, midpoint))
-        after = frame_metrics(extract_frame(output, midpoint))
-        samples.append({"scene": scene["id"], "before": before, "after": after})
+        start, end = float(scene["start_seconds"]), float(scene["end_seconds"])
+        scene_samples = []
+        for fraction in (0.2, 0.5, 0.8):
+            at = start + (end - start) * fraction
+            before = frame_metrics(extract_frame(source, at))
+            after = frame_metrics(extract_frame(output, at))
+            item = {"scene": scene["id"], "at_seconds": round(at, 3),
+                    "before": before, "after": after}
+            samples.append(item)
+            scene_samples.append(item)
+        before = aggregate([item["before"] for item in scene_samples])
+        after = aggregate([item["after"] for item in scene_samples])
+        for issue in scene.get("issues", {}).values():
+            if issue.get("action") != "FIX":
+                continue
+            check = _issue_check(issue, before, after)
+            if check:
+                issue_checks.append({"scene": scene["id"], **check})
     failures = []
     for sample in samples:
         before, after = sample["before"], sample["after"]
         if abs(after["luma_mean"] - before["luma_mean"]) > 0.20:
-            failures.append(f"{sample['scene']}: luma changed too much")
+            failures.append(f"{sample['scene']} at {sample['at_seconds']}s: luma changed too much")
         if abs(after["saturation_mean"] - before["saturation_mean"]) > 0.30:
-            failures.append(f"{sample['scene']}: saturation changed too much")
+            failures.append(f"{sample['scene']} at {sample['at_seconds']}s: saturation changed too much")
         if after["clip_high"] - before["clip_high"] > 0.05:
-            failures.append(f"{sample['scene']}: clipping increased")
-    return {"status": "rejected" if failures else "passed",
-            "failures": failures, "samples": samples}
+            failures.append(f"{sample['scene']} at {sample['at_seconds']}s: clipping increased")
+    failures.extend(f"{item['scene']}: {item['issue']} did not improve"
+                    for item in issue_checks if not item["passed"])
+    status = ("rejected" if failures else "review_required"
+              if unverified_effects or not issue_checks else "passed")
+    return {"status": status, "failures": failures, "samples": samples,
+            "issue_checks": issue_checks,
+            "review_reason": "effect has no objective issue gate" if status == "review_required" else None}
 
 
 def run_benchmark(source: Path, config_path: Path, output_root: Path,

@@ -94,9 +94,24 @@ class EnhanceTest(unittest.TestCase):
             target = root / "graded.mp4"
             validation = enhance.render_manifest(manifest_path, target,
                                                  lut=lut, denoise="light")
-            self.assertEqual(validation["status"], "passed")
+            self.assertEqual(validation["status"], "review_required")
             self.assertTrue(target.is_file())
             self.assertGreater(target.stat().st_size, 0)
+
+    def test_unchanged_render_does_not_verify_a_detected_issue(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "dark.mp4"
+            self.make_video(source, "eq=brightness=-0.2")
+            manifest = {"clips": [{"scenes": [{
+                "id": "scene-001", "start_seconds": 0.0, "end_seconds": 1.0,
+                "decision": "FIX", "corrections": ["eq=brightness=0.05"],
+                "review": {"status": "approved"},
+                "issues": {"exposure": {"type": "underexposure", "action": "FIX"}},
+            }]}]}
+            result = enhance.validate_render(manifest, source, source)
+            self.assertEqual(result["status"], "rejected")
+            self.assertFalse(result["issue_checks"][0]["passed"])
 
     def test_minor_glare_gets_region_mask_and_renders(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

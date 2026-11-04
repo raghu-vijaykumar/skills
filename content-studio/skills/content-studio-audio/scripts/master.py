@@ -2,6 +2,7 @@
 """Batch spoken-word audio mastering with FFmpeg; never changes source files."""
 import argparse
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -9,17 +10,21 @@ import sys
 from pathlib import Path
 
 EXTS = {".mp4", ".mov", ".mkv", ".m4v", ".webm", ".avi"}
-FILTER = "highpass=f=80,afftdn=nf=-28,acompressor=threshold=0.12:ratio=2:attack=15:release=180"
+TARGET_LUFS = -16.0
+TARGET_PEAK = -1.5
 
 
 def build_filter(cleanup=False, deess=False, gate=False, arnndn_model=None):
+    if not any((cleanup, deess, gate, arnndn_model)):
+        return ""
     parts = ["highpass=f=80"]
     if arnndn_model:
         escaped = str(Path(arnndn_model).expanduser().resolve()).replace("\\", "/").replace(":", "\\:")
         parts.append(f"arnndn=m='{escaped}'")
-    else:
+    elif cleanup:
         parts.append("afftdn=nf=-28")
-    parts.append("acompressor=threshold=0.12:ratio=2:attack=15:release=180")
+    if cleanup:
+        parts.append("acompressor=threshold=0.12:ratio=2:attack=15:release=180")
     if cleanup or deess:
         parts.append("deesser")
     if cleanup or gate:
@@ -53,7 +58,7 @@ def measure(path, filters):
         raise RuntimeError("No loudness measurement returned")
     return json.loads(matches[-1])
 
-def master(source, dest, force, audio_only=False, filters=FILTER):
+def master(source, dest, force, audio_only=False, filters="", review_dir=None):
     streams = probe(source)
     if not any(s["codec_type"] == "audio" for s in streams):
         return {"source": str(source), "status": "skipped_no_audio"}
@@ -62,20 +67,83 @@ def master(source, dest, force, audio_only=False, filters=FILTER):
     if not force and ((wav.exists() and audio_only) or
                       (not audio_only and (wav.exists() or video.exists()))):
         return {"source": str(source), "status": "skipped_output_exists"}
-    m = measure(source, filters)
-    second = (f"{filters},loudnorm=I=-16:LRA=11:TP=-1.5:"
-              f"measured_I={m['input_i']}:measured_LRA={m['input_lra']}:"
-              f"measured_TP={m['input_tp']}:measured_thresh={m['input_thresh']}:"
-              f"offset={m['target_offset']}:linear=true")
+    baseline = measure(source, "")
+    has_loudness = math.isfinite(float(baseline["input_i"]))
+    loudness_issue = has_loudness and abs(float(baseline["input_i"]) - TARGET_LUFS) > 1.0
+    peak_issue = has_loudness and float(baseline["input_tp"]) > TARGET_PEAK
+    needs_normalization = loudness_issue or peak_issue
+    issues = (["loudness_outside_target"] if loudness_issue else []) + \
+             (["peak_above_target"] if peak_issue else [])
+    if not has_loudness:
+        issues.append("silent_or_unmeasurable_audio")
+    if filters and has_loudness:
+        issues.append("cleanup_requested_requires_listening_review")
     wav_tmp = dest / (source.stem + ".mastered.tmp.wav")
     video_tmp = dest / (source.stem + ".mastered.tmp.mp4")
     try:
-        run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(source),
-             "-map", "0:a:0", "-vn", "-af", second, "-ar", "48000", "-ac", "2",
-             "-c:a", "pcm_s24le", str(wav_tmp)])
+        attempts = []
+        candidates = [filters] + ([""] if filters and has_loudness else [])
+        for candidate_filters in candidates:
+            wav_tmp.unlink(missing_ok=True)
+            if needs_normalization or candidate_filters:
+                m = measure(source, candidate_filters) if candidate_filters else baseline
+                second = (f"{candidate_filters + ',' if candidate_filters else ''}"
+                          f"loudnorm=I=-16:LRA=11:TP=-1.5:"
+                          f"measured_I={m['input_i']}:measured_LRA={m['input_lra']}:"
+                          f"measured_TP={m['input_tp']}:measured_thresh={m['input_thresh']}:"
+                          f"offset={m['target_offset']}:linear=true")
+            else:
+                second = "anull"
+            try:
+                run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                     "-i", str(source), "-map", "0:a:0", "-vn", "-af", second,
+                     "-ar", "48000", "-ac", "2", "-c:a", "pcm_s24le",
+                     str(wav_tmp)])
+                output_loudness = measure(wav_tmp, "")
+            except RuntimeError as exc:
+                attempts.append({"filters": candidate_filters, "status": "rejected",
+                                 "reason": str(exc)})
+                continue
+            output_i = float(output_loudness["input_i"])
+            output_tp = float(output_loudness["input_tp"])
+            validation = {"status": "passed", "target_lufs": TARGET_LUFS,
+                          "target_peak_dbtp": TARGET_PEAK,
+                          "output_lufs": output_i if math.isfinite(output_i) else None,
+                          "output_peak_dbtp": output_tp if math.isfinite(output_tp) else None}
+            if needs_normalization and (
+                    validation["output_lufs"] is None or
+                    abs(validation["output_lufs"] - TARGET_LUFS) > 1.5 or
+                    validation["output_peak_dbtp"] is None or
+                    validation["output_peak_dbtp"] > -1.0):
+                attempts.append({"filters": candidate_filters, "status": "rejected",
+                                 "reason": "missed loudness/peak gate",
+                                 "validation": validation})
+                continue
+            break
+        else:
+            raise RuntimeError("all mastering candidates failed: " +
+                               json.dumps(attempts))
+        if filters and has_loudness:
+            validation["status"] = "review_required"
+            validation["reason"] = ("cleanup candidate failed; loudness-only fallback"
+                                    if not candidate_filters else
+                                    "cleanup fidelity needs listening review")
         wav_tmp.replace(wav)
         result = {"source": str(source), "status": "ok", "audio": str(wav),
-                  "input_loudness": m, "output_loudness": measure(wav, "")}
+                  "decision": "REVIEW" if filters and has_loudness else "FIX" if needs_normalization else "SKIP",
+                  "issues": issues, "requested_filters": filters,
+                  "filters": candidate_filters, "rejected_candidates": attempts,
+                  "input_loudness": baseline, "output_loudness": output_loudness,
+                  "validation": validation}
+        if review_dir is not None and (filters or needs_normalization):
+            review_dir.mkdir(parents=True, exist_ok=True)
+            before = review_dir / "before.wav"
+            after = review_dir / "after.wav"
+            for original, target in ((source, before), (wav, after)):
+                run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                     "-i", str(original), "-vn", "-t", "10", "-ar", "48000",
+                     "-ac", "2", "-c:a", "pcm_s16le", str(target)])
+            result["review_audio"] = {"before": str(before), "after": str(after)}
         if not audio_only:
             # Re-encode video only if source codec is incompatible with MP4 stream-copy.
             codec = next((s.get("codec_name") for s in streams if s["codec_type"] == "video"), None)
@@ -144,7 +212,8 @@ def main():
             continue
         try:
             result = master(source, dest, args.force, audio_only=audio_only,
-                            filters=filters)
+                            filters=filters,
+                            review_dir=manifest.parent / "previews" / source.stem)
             if draft is not None and result.get("status") == "ok":
                 wav_path = Path(result["audio"])
                 mp3 = draft / f"{draft.name}-audio-only.mp3"

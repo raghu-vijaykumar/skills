@@ -418,7 +418,9 @@ class EditingTest(unittest.TestCase):
 
             with patch.object(editing, "normalized_segment", side_effect=fake_render), \
                  patch.object(editing, "probe",
-                              return_value=(0.8, {"width": 1920, "height": 1080}, True)):
+                              return_value=(0.8, {"width": 1920, "height": 1080}, True)), \
+                 patch.object(preprocess, "safe_verify_audio",
+                              return_value={"status": "passed"}):
                 target = preprocess.final_clip(source, output,
                                                SimpleNamespace(force=False, denoise="auto"),
                                                lambda _: None)
@@ -430,7 +432,7 @@ class EditingTest(unittest.TestCase):
             self.assertAlmostEqual(seen["ranges"][0][1], 0.2)
             self.assertAlmostEqual(seen["ranges"][1][0], 0.4)
             final_report = json.loads((folder / "report.json").read_text(encoding="utf-8"))
-            self.assertEqual(final_report["status"], "final_ready")
+            self.assertEqual(final_report["status"], "final_audio_review_required")
             self.assertEqual(final_report["final_output"], "final.mp4")
             self.assertEqual(final_report["final_cuts"], [[0.2, 0.4]])
             self.assertGreater(final_report["final_removed_seconds"], 0)
