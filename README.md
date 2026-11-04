@@ -21,6 +21,36 @@ This repository is the editable source of the `content-studio` video lifecycle b
 
 A draft is one folder under `<workspace>/<channel>/drafts/<id>`. It uses a fixed layout: raw clips in `original/`, internal working files in `.content-studio/`, and deliverables named from the draft folder: `<draft>-rough-cut.mp4`, `<draft>-preprocessed.mp4`, `<draft>-final.mp4`, and `<draft>-audio-only.mp3`, with `title.txt`, `description.txt`, and `lifecycle-checklist.json` at the root. Vlog drafts do not generate transcripts or captions. Raw media stays in that folder; the skills add plans, review artifacts, hashes, and publishing receipts around it. Remotion videos and camera-footage vlogs take different production paths, then converge on the same approval and publishing gate.
 
+### Production paths at a glance
+
+| Stage | Camera-footage vlog | Remotion animation |
+| --- | --- | --- |
+| **Setup** | `draft.json` + owner rules; raw clips in `original/` | `videogen init` once, `scaffold <id>`, `video.yaml`, scenes, theme/style |
+| **Ingest** | `order`: SHA-256 duplicates, near-duplicate review, capture order, `_timeline.csv`, renumber | Authored scenes and narration cues; no camera ingest |
+| **Cleanup** | `preprocess`: stereo extraction, DeepFilterNet/`afftdn`, optional VAD, 2-pass `vidstab`, blur review, DV proof | None; vector/text sources are clean by construction |
+| **Audio** | Default chain, optional `tune` profiles, 12 dB content-loss fallback, bounded source-level match; later `-16 LUFS` master | Narration/TTS plus music; levels set in the project; optional master pass |
+| **Story / edit** | `content-studio-autocut` rough cut → human approval → `edit-timeline.json` | Scene sequence and narration timing in `video.yaml`; evidence render |
+| **Resolution** | Diagnosis-first upscale only for 4K delivery; preview vs Lanczos, verified range assets | Resolution-independent; render at delivery size, no upscale |
+| **Color / quality** | `enhance` issues (exposure, WB, contrast, saturation, glare) → approved fixes; `polish`/`match`/`refine` | Theme/style tokens are authored; visual review only, no automatic grading |
+| **Motion** | Stabilization, deflicker, temporal gate on AI upscaling | Deterministic frames; no stabilization or flicker gate needed |
+| **Review** | Blur/DV, audio profiles, rough cut, upscale verification, full master | Evidence frames/motion, then full delivery render |
+| **Package / publish** | AI 16:9 thumbnail from frames + audio context; exact metadata from footage; hash approval; publish; archive | Thumbnail from rendered stills; metadata from the script; same approval, publish, and archive gates |
+
+### Enhancement decisions
+
+| Enhancement | Path | Trigger and gate | Evidence |
+| --- | --- | --- | --- |
+| **Stabilization** | Vlog | Two-pass `vidstab`; crop flagged when >10%; review the crop | `report.json`, review frames |
+| **Blur cuts** | Vlog | Laplacian score `< p75 × 0.28`; review-only, never auto-cut | `review.csv`, `review.html`, `blur-NNN.jpg` |
+| **Audio denoise** | Vlog | `tune` grid (full / post-filter / 10–20–30 dB attenuation / no denoise); reject clipping, speech-band `<0.75`, content loss `>12 dB`, gain `<1 dB`; penalise `>24 dB`; margin tie-break | `analysis/tuning/`, `profile.json`, candidate WAVs |
+| **Loudness** | Vlog | Match source EBU R128 within ±13 dB; denoise losing `>12 dB` falls back to source + 80 Hz HP | `report.json` (`level_match_db`, `denoise.fallback`) |
+| **AI upscale** | Vlog | 5 s Lanczos baseline; FIX needs `≥3%` detail gain; noise `1.2/1.5×`, motion `1.35/2.0×`, jitter `0.30/0.45`, luma `0.12`, no new clipping; delivered render re-verified | `preview.html`, `three-panel.jpg`, `upscale.json.verification` |
+| **Color / exposure** | Vlog | Per-issue thresholds; FIX only when confident, otherwise REVIEW/UNSUPPORTED (strong glare never auto-fixed) | `enhancement.yaml`, `reports/quality.html` |
+| **Shot match / sharpen** | Vlog | Per-clip candidate loop; sharpen last; selected filters captured in the timeline | `refine` manifest, timeline `enhancements` |
+| **HDR / Dolby Vision** | Vlog | Tone-map or refuse; DV needs `dv-proof` + `--dv-approved`; tags validated | `dv-proof.mov`, `render_validation` |
+| **Music** | Both | Human-selected track; license and exact attribution recorded | `music-selection.json`, `music-credits.txt` |
+| **Remotion motion/quality** | Remotion | Authored, frame-deterministic; judged in the evidence render, not by camera metrics | Evidence render, frame review |
+
 ```mermaid
 flowchart TD
   subgraph DISCOVER["1 · Discover and set up"]
