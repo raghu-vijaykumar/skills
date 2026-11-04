@@ -49,7 +49,7 @@ def main():
             if not path.is_relative_to(root):raise ValueError("input escapes workspace")
             if not path.is_file():raise FileNotFoundError(path)
             inputs.append([f,path.stat().st_size,path.stat().st_mtime_ns])
-        fingerprint=digest([step,inputs,config,[state["steps"][d]["fingerprint"] for d in deps]])
+        fingerprint=digest([step,inputs,config,[(str(config["video"]),Path(config["video"]).expanduser().resolve().stat().st_size,Path(config["video"]).expanduser().resolve().stat().st_mtime_ns)] if config.get("video") else [],[state["steps"][d]["fingerprint"] for d in deps]])
         old=state["steps"].get(name,{})
         outputs=[(root/f).resolve() for f in step.get("outputs",[])]
         if any(not x.is_relative_to(root) for x in outputs):raise ValueError("output escapes workspace")
