@@ -147,14 +147,16 @@ def _sharpness(frame: np.ndarray) -> float:
 
 
 def temporal_profile(lanczos: Path, candidate: Path, at: float,
-                     scratch: Path, frames: int = 8) -> dict:
+                     scratch: Path, frames: int = 8,
+                     candidate_at: float | None = None) -> dict:
     """Compare motion-normalized change between the resized and AI candidates.
 
     Lanczos carries the same camera motion as the AI pass, so the ratio of
     adjacent-frame change isolates detail that flickers instead of moving.
     """
     left = _frames(lanczos, at, frames, scratch / "temporal-lanczos")
-    right = _frames(candidate, at, frames, scratch / "temporal-ai")
+    right = _frames(candidate, at if candidate_at is None else candidate_at,
+                    frames, scratch / "temporal-ai")
     count = min(len(left), len(right))
     if count < 3:
         return {"frames": count, "motion_ratio": 1.0, "sharpness_jitter": 0.0}
@@ -188,6 +190,10 @@ def decide(preview: dict) -> dict:
     }
     hard: list[str] = []
     soft: list[str] = []
+    measured = [sharp_gain, noise_ratio, luma_delta, clip_delta,
+                temporal["motion_ratio"], temporal["sharpness_jitter"]]
+    if not all(math.isfinite(value) for value in measured):
+        soft.append("unmeasurable_metrics")
     if clip_delta > CLIP_HARD:
         hard.append("clipping")
     if luma_delta > LUMA_HARD:
@@ -376,6 +382,58 @@ def timeline_sources(timeline_path: Path, files: list[Path]) -> list[Path]:
     return picked
 
 
+def verify_delivery(source: Path, output: Path, target: tuple[int, int],
+                    start: float, duration: float, backend: str,
+                    executable: str | Path | None, model: str | None,
+                    scale: int, tile: int, denoise_strength: float | None,
+                    weights: str | None, weights2: str | None, work: Path,
+                    staging: str = "jpeg", encoder: str = "auto") -> dict:
+    """Re-measure the delivered render against a fresh Lanczos reference.
+
+    A passing preview is provisional. This samples the actual output, so a bad
+    encode, a truncated segment, or a changed range cannot be reported as a win.
+    """
+    info = upscale.probe(source)
+    window = min(3.0, duration)
+    offset = start + max(0.0, min(duration * 0.4 - window / 2, duration - window))
+    output_offset = offset - start
+    verify_dir = Path(work) / "verify"
+    verify_dir.mkdir(parents=True, exist_ok=True)
+    reference = verify_dir / "lanczos-reference.mp4"
+    upscale.run_lanczos(source, reference, target, offset, window, False,
+                        info["fps"], info, preset="fast", encoder=encoder)
+    times = [round(window * fraction, 3) for fraction in (0.2, 0.5, 0.8)]
+    reference_metrics = sample_metrics(reference, times)
+    delivered_metrics = sample_metrics(output, [output_offset + at for at in times])
+    with tempfile.TemporaryDirectory(prefix="verify-", dir=verify_dir) as scratch:
+        temporal = temporal_profile(reference, output, round(window * 0.3, 3),
+                                    Path(scratch),
+                                    candidate_at=output_offset + round(window * 0.3, 3))
+    outcome = decide({"lanczos": reference_metrics, "ai": delivered_metrics,
+                      "temporal": temporal})
+    accepted = outcome["decision"] == "FIX"
+    return {
+        "status": "verified" if accepted else "review",
+        "decision": outcome,
+        "checked_window": {"source_start": round(offset, 3),
+                           "output_start": round(output_offset, 3),
+                           "duration": round(window, 3)},
+        "criteria": {
+            "min_detail_gain": MIN_DETAIL_GAIN,
+            "max_noise_ratio": NOISE_HARD,
+            "max_motion_ratio": TEMPORAL_HARD,
+            "max_sharpness_jitter": JITTER_HARD,
+            "max_luma_delta": LUMA_HARD,
+        },
+        "comparison": outcome["metrics"],
+        "temporal": temporal,
+        "reference_metrics": reference_metrics["summary"],
+        "delivered_metrics": delivered_metrics["summary"],
+        "reference": str(reference),
+        "verified_at": upscale.now(),
+    }
+
+
 def merge_ranges(ranges: list[tuple[float, float]],
                  gap: float = 0.05) -> list[tuple[float, float]]:
     merged: list[list[float]] = []
@@ -462,7 +520,8 @@ def write_timeline_map(timeline_path: Path, assets: list[dict],
                 "backend": item.get("backend"),
                 "denoise_strength": item.get("denoise_strength"),
                 "source_range": [item["start"], item["end"]],
-                "review_status": "approved",
+                "review_status": item.get("review_status", "approved"),
+                "verification": item.get("verification"),
             })
             updated += 1
     output_path = Path(output_path).expanduser().resolve()

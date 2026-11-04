@@ -52,6 +52,12 @@ class RestorationTest(unittest.TestCase):
         self.assertEqual(result["decision"], "REVIEW")
         self.assertIn("noise_increase", result["reasons"])
 
+    def test_unmeasurable_metrics_never_report_success(self):
+        result = restoration.decide(preview(
+            ai=summary(sharp=0.09, noise=float("nan"))))
+        self.assertEqual(result["decision"], "REVIEW")
+        self.assertIn("unmeasurable_metrics", result["reasons"])
+
     def test_decision_unsupported_on_clipping(self):
         result = restoration.decide(preview(ai=summary(sharp=0.08, clip=0.03)))
         self.assertEqual(result["decision"], "UNSUPPORTED")
@@ -128,6 +134,23 @@ class RestorationTest(unittest.TestCase):
                 encoding="utf-8")
             picked = restoration.timeline_sources(timeline, [used, other])
         self.assertEqual(picked, [used])
+
+    def test_delivery_verification_rejects_a_no_op_render(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "source.mp4"
+            output = root / "output.mp4"
+            make_video(source, size="320x180", duration=1)
+            upscale.run_lanczos(source, output, (640, 360), 0.0, 1.0, False,
+                                "30/1", None, encoder="libx265")
+            result = restoration.verify_delivery(
+                source, output, (640, 360), 0.0, 1.0, "lanczos", None, None,
+                2, 256, None, None, None, root / "work", encoder="libx265")
+            self.assertTrue(Path(result["reference"]).is_file())
+        self.assertEqual(result["status"], "review")
+        self.assertIn(result["decision"]["decision"],
+                      {"SKIP", "REVIEW", "UNSUPPORTED"})
+        self.assertIn("min_detail_gain", result["criteria"])
 
     def test_timeline_ranges_merge_adjacent_usage(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

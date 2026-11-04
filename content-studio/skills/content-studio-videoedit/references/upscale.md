@@ -116,12 +116,12 @@ laptop-class GPU **thermals now dominate**. Rough 10-minute estimates:
 |---|---|
 | PyTorch general, cool bursts | ~4 h |
 | PyTorch general, sustained (measured) | ~12 h |
-| ncnn `animevideov3` | ~2–5 h |
+| ncnn `realesrgan-x4plus` | ~12 h+ (22–27 s/frame) |
 | Timeline ranges only (~3 min used) | minutes |
 
-If long renders matter, improve cooling/power limits first, use the lighter
-ncnn model for bulk footage, and reserve the general model for the clips the
-gate marks FIX. `--chunk 96` bounds disk but does not beat throttling.
+If long renders matter, improve cooling/power limits first, use the general model
+only on clips the gate marks FIX, and process fewer timeline ranges. The anime
+model is animation-only and is never auto-selected for live footage.
 
 ## HDR and color
 
@@ -142,14 +142,14 @@ Measured on clip 001 (1080p SDR → 4K, 5 s window, RTX 2070 Super, 8 GB):
 | Backend | Model | Detail vs Lanczos | Inference | Peak VRAM |
 |---|---|---|---|---|
 | PyTorch CUDA | `realesr-general-x4v3` (denoise 0.5) | **+25.7 %** | 0.75–2.5 s/frame | 679 MB |
-| ncnn/Vulkan | `realesr-animevideov3` | +14.1 % | 0.40 s/frame | — |
+| ncnn/Vulkan | `realesr-animevideov3` (animation only, never auto) | +14.1 % | 0.40 s/frame | — |
 | PyTorch CUDA | `RealESRGAN_x2plus` | +9.2 % | 3.1 s/frame | 347 MB |
-| ncnn/Vulkan | `realesrgan-x4plus` | not run | 22–27 s/frame | — |
+| ncnn/Vulkan | `realesrgan-x4plus` (default ncnn) | not run | 22–27 s/frame | — |
 
 When CUDA torch and the verified weights are present, the default backend is
-**PyTorch with `realesr-general-x4v3`**, because it measured the best detail at
-roughly the same cost as the ncnn video model. Without those, the tool falls back
-to ncnn, then Lanczos.
+**PyTorch with `realesr-general-x4v3`**. Without those, the ncnn backend defaults
+to the general `realesrgan-x4plus`, then Lanczos. The anime model is available
+only through an explicit `--model` and is never chosen for live footage.
 
 The denoise strength blends `realesr-general-x4v3.pth` with
 `realesr-general-wdn-x4v3.pth`: `0` keeps the sharper model, `1` uses the
@@ -202,6 +202,10 @@ The command auto-detects:
 3. `realesrgan-ncnn-vulkan` on `PATH`
 4. `<repo>/tmp/realesrgan/realesrgan-ncnn-vulkan.exe`
 
+The bundled ncnn models are `realesrgan-x4plus` (default, live action),
+`realesrgan-x4plus-anime` (2D), and `realesr-animevideov3` (animation only; it is
+never auto-selected for live footage).
+
 Verify the model license before commercial use. Real-ESRGAN is BSD-3-Clause and
 the ncnn/Vulkan build is MIT; keep their notices with any redistribution.
 
@@ -217,6 +221,8 @@ the ncnn/Vulkan build is MIT; keep their notices with any redistribution.
   preview/three-panel.jpg
   preview/preview-lanczos.mp4
   preview/preview-ai.mp4
+  verify/lanczos-reference.mp4  delivery-verification reference
+<clip>/upscaled/                timeline-range assets
   upscale.json                full render manifest
   chunk-*.mp4                 chunked inference when --chunk is used
 ```
@@ -224,7 +230,26 @@ the ncnn/Vulkan build is MIT; keep their notices with any redistribution.
 `upscale.json` caches on the source SHA-256 plus every render parameter. A
 second run with the same source and settings returns `"cached": true` without
 re-encoding. The batch keeps `final-pre-upscale.mp4` and only replaces
-`final.mp4` after a FIX or an explicit approval.
+`final.mp4` after a verified FIX or an explicit override. A `verification_review`
+result leaves the previous file in place and points at the unapplied asset for
+inspection.
+
+## Delivery verification
+
+A passing preview is provisional. Every AI render is re-measured after encoding,
+against a fresh 3 s Lanczos reference at the delivered timestamps, with the same
+detail/noise/flicker/jitter/luma/clipping gates. The result is stored in
+`upscale.json` as `verification.status`:
+
+- `verified` — the delivered output cleared the criterion; safe to apply.
+- `review` — the delivery did not clear it. A batch leaves `final.mp4` untouched
+  and lists the asset under `verification_review`; timeline-range assets that fail
+  are excluded from the map.
+- `unverified_override` — you forced the render with `--approve` or `--mode always`;
+  it is applied but labelled for human review.
+
+`verification` also records the checked window, the criteria, the reference and
+delivered metrics, and the path to the reference clip.
 
 ## Limitations
 

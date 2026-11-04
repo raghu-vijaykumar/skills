@@ -31,11 +31,11 @@ from PIL import Image
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".m4v", ".webm", ".avi"}
 SCHEMA_VERSION = 2
 ANALYSIS_VERSION = "1"
-DEFAULT_MODEL = {"realesrgan": "realesr-animevideov3",
+DEFAULT_MODEL = {"realesrgan": "realesrgan-x4plus",
                  "pytorch": "realesr-general-x4v3"}
 MODEL_NOTES = {
-    "realesr-animevideov3": "fast native 2x video model; animation-tuned, so the "
-                            "quality gate decides whether it helps real footage",
+    "realesr-animevideov3": "animation-only model; never auto-selected for live "
+                            "footage, keep it behind an explicit --model",
     "realesrgan-x4plus": "general photo model; measured 22-27 s/frame at 1080p on "
                          "ncnn/Vulkan because it computes 4x internally",
     "realesr-general-x4v3": "lightweight general model with denoise strength; "
@@ -666,8 +666,27 @@ def upscale(args) -> dict:
             os.replace(video_only, output)
         else:
             mux_audio(video_only, source, output, start, duration, info)
+    verification = {"status": "not_applicable", "reason": "lanczos_baseline"}
+    if backend != "lanczos":
+        try:
+            import restoration
+            verification = restoration.verify_delivery(
+                source, output, target, start, duration, backend, executable,
+                model, scale, max(TILE_MIN, args.tile), denoise_strength,
+                weights, weights2, work, staging=staging, encoder=encoder)
+            if (verification["status"] == "verified"
+                    and not getattr(args, "preflight_verified", False)):
+                verification["status"] = "review"
+                verification["reason"] = "no diagnosed preview was approved"
+        except (UpscaleError, OSError, ValueError) as exc:
+            verification = {"status": "review", "error": str(exc),
+                            "verified_at": now()}
     elapsed = time.perf_counter() - started
     produced = probe(output)
+    if [produced["width"], produced["height"]] != list(target):
+        verification = {"status": "review", "reason": "output dimensions differ",
+                        "expected": list(target),
+                        "actual": [produced["width"], produced["height"]]}
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "analysis_version": ANALYSIS_VERSION,
@@ -686,6 +705,7 @@ def upscale(args) -> dict:
         "encoder": (encoder if encoder != "auto" else
                     ("nvenc" if encoder_available("hevc_nvenc") else "libx265")),
         "checkpoint": checkpoint_info(weights, weights2),
+        "verification": verification,
         "source_size": [info["width"], info["height"]],
         "output_size": [produced["width"], produced["height"]],
         "source_pixel_format": info["pix_fmt"],
@@ -789,12 +809,30 @@ def upscale_ranges(args, draft: Path, target: tuple[int, int],
                 staging=getattr(args, "staging", "jpeg"),
                 encoder=getattr(args, "encoder", "auto"),
                 allow_hdr=getattr(args, "allow_hdr", False), force=args.force,
+                preflight_verified=preview is not None,
                 work=source.parent / "upscale-work" / "ranges" / output.stem))
+            verification = manifest.get("verification") or {}
+            review_status = "approved"
+            if verification.get("status") == "review":
+                if not getattr(args, "approve", False) \
+                        and getattr(args, "mode", "auto") != "always":
+                    results.append({"source": str(source),
+                                    "status": "verification_review",
+                                    "decision": decision["decision"],
+                                    "reasons": decision.get("reasons", []),
+                                    "range": [start, end],
+                                    "asset": str(output),
+                                    "verification": verification})
+                    continue
+                manifest["verification"]["status"] = "unverified_override"
+                review_status = "unverified_override"
             assets.append({
                 "source": str(source), "start": start, "end": end,
                 "asset": str(output), "backend": manifest["backend"],
                 "model": manifest["model"],
                 "denoise_strength": manifest["denoise_strength"],
+                "review_status": review_status,
+                "verification": verification,
             })
             results.append({"source": str(source), "status": "upscaled",
                             "decision": decision["decision"],
@@ -814,6 +852,8 @@ def upscale_ranges(args, draft: Path, target: tuple[int, int],
         "review_pending": sum(1 for item in results
                               if item["status"] == "review_pending"),
         "unsupported": sum(1 for item in results if item["status"] == "unsupported"),
+        "verification_review": sum(1 for item in results
+                                   if item["status"] == "verification_review"),
         "timeline_updated": 0,
     }
     manifest_dir = draft / ".content-studio" / "upscale"
@@ -933,7 +973,20 @@ def upscale_draft(args) -> dict:
             staging=getattr(args, "staging", "jpeg"),
             encoder=getattr(args, "encoder", "auto"),
             allow_hdr=getattr(args, "allow_hdr", False), force=args.force,
+            preflight_verified=preview is not None,
             work=source.parent / "upscale-work"))
+        verification = manifest.get("verification") or {}
+        if verification.get("status") == "review" \
+                and not getattr(args, "approve", False) \
+                and getattr(args, "mode", "auto") != "always":
+            results.append({"source": str(source), "status": "verification_review",
+                            "decision": decision["decision"],
+                            "reasons": decision.get("reasons", []),
+                            "asset": str(output),
+                            "verification": verification})
+            continue
+        if verification.get("status") == "review":
+            manifest["verification"]["status"] = "unverified_override"
         backup = source.with_name("final-pre-upscale.mp4")
         if not backup.exists():
             shutil.copy2(source, backup)
@@ -964,6 +1017,8 @@ def upscale_draft(args) -> dict:
                        if item["status"] in {"already_at_target", "orientation_mismatch"}),
         "review_pending": sum(1 for item in results
                               if item["status"] == "review_pending"),
+        "verification_review": sum(1 for item in results
+                                   if item["status"] == "verification_review"),
         "unsupported": sum(1 for item in results if item["status"] == "unsupported"),
     }
     manifest_dir = draft / ".content-studio" / "upscale"
@@ -1008,8 +1063,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="default: realesrgan when installed, otherwise lanczos")
     parser.add_argument("--realesrgan", help="path to realesrgan-ncnn-vulkan executable")
     parser.add_argument("--model",
-                        help="realesrgan-x4plus (default ncnn) or realesr-general-x4v3 "
-                             "(pytorch)")
+                        help="ncnn defaults to realesrgan-x4plus; pytorch defaults to "
+                             "realesr-general-x4v3. realesr-animevideov3 is animation-only")
     parser.add_argument("--weights", help="pytorch checkpoint path (required for pytorch)")
     parser.add_argument("--weights2",
                         help="denoise partner checkpoint for realesr-general-x4v3")

@@ -162,7 +162,7 @@ class UpscaleTest(unittest.TestCase):
 
     def test_model_defaults_follow_the_backend(self):
         self.assertEqual(upscale.resolve_model("realesrgan", None, None),
-                         "realesr-animevideov3")
+                         "realesrgan-x4plus")
         self.assertEqual(upscale.resolve_model("pytorch", None, None),
                          "realesr-general-x4v3")
         self.assertIsNone(upscale.resolve_model("lanczos", "anything", None))
@@ -219,10 +219,11 @@ class UpscaleTest(unittest.TestCase):
             self.make_video(source, size="160x90", duration=0.6)
             manifest = upscale.upscale(upscale.build_parser().parse_args([
                 "--input", str(source), "--output", str(target),
-                "--backend", "realesrgan", "--scale", "2", "--chunk", "8"]))
+                "--backend", "realesrgan", "--model", "realesrgan-x4plus",
+                "--scale", "2", "--chunk", "8"]))
             info = upscale.probe(target)
         self.assertEqual(manifest["backend"], "realesrgan")
-        self.assertEqual(manifest["model"], "realesr-animevideov3")
+        self.assertEqual(manifest["model"], "realesrgan-x4plus")
         self.assertEqual((info["width"], info["height"]), (320, 180))
         self.assertTrue(info["has_audio"])
         self.assertGreaterEqual(manifest["timing"]["frames"], 15)
