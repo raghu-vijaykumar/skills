@@ -43,3 +43,17 @@ Detects removed/added clips, trims, audio gain changes, source replacements and 
 ## AutoCut review capture (implemented, opt-in)
 
 `content-studio-autocut/scripts/review.py` now accepts `--memory-db <local-db> --category travel|cooking|daily --project <id>`. When a human explicitly approves or requests changes, it writes a corresponding event to the local database. If memory recording fails, the saved review remains valid and a warning is printed. Agent revisions do not count as human approvals.
+
+## Kdenlive import and conservative learning (initial implementation)
+
+```bash
+python content-studio/skills/content-studio-memory/scripts/kdenlive_import.py --input my-edit.kdenlive --output kdenlive-observations.json
+python content-studio/skills/content-studio-memory/scripts/compare_kdenlive.py --proposed .content-studio/rough-cut/timeline.json --edited kdenlive-observations.json --output comparison.json
+python content-studio/skills/content-studio-memory/scripts/learn.py --db "D:/ContentStudio/memory/memory.sqlite"
+```
+
+The importer parses simple MLT producer/chain resources and playlist entries, resolving source in/out ranges and reporting unsupported nested tractor compositing, timewarp, or unresolved media. The comparison reports source ranges that were shortened or removed relative to the proposal. **It does not reliably reconstruct Kdenlive's rendered composite**; multiple playlists, transitions, nested tractors and duplicate filenames require human verification. Do not use these observations as definitive proof that a clip was cut.
+
+The learning command groups repeated **explicit human feedback reasons** by category and feature; requires at least three events from at least two projects; and emits reviewable preference candidates only. It does not update preferences or infer motives from Kdenlive changes. A user must confirm any candidate before adding an explicit preference with `memory.py set`.
+
+Run tests locally using `python -m unittest discover -s content-studio/skills/content-studio-memory/tests`. Tests are committed but not verified in this environment.
