@@ -29,3 +29,17 @@ python content-studio/skills/content-studio-memory/scripts/memory.py --db "D:/Co
 4. Human approval for rendering or publishing remains mandatory. Memory never constitutes approval.
 
 The first implementation supports deterministic event capture, explicit rules, scoped retrieval, history inspection and deletion. Automatic preference induction, embeddings and Kdenlive comparison are planned separately.
+
+## Timeline revision comparison (implemented)
+
+Compare two **Content Studio** JSON timeline revisions, without changing either:
+
+```bash
+python content-studio/skills/content-studio-memory/scripts/timeline_diff.py --before path/to/timeline-v001.json --after path/to/timeline-v002.json --output path/to/diff.json
+```
+
+Detects removed/added clips, trims, audio gain changes, source replacements and reordering. Clip IDs are matched within a revision lineage, with source paths and source in/out ranges included as evidence. The output is **observational** and never automatically promotes a rule. Do not pass Kdenlive MLT directly; its parser and source reconciliation are still pending.
+
+## AutoCut review capture (implemented, opt-in)
+
+`content-studio-autocut/scripts/review.py` now accepts `--memory-db <local-db> --category travel|cooking|daily --project <id>`. When a human explicitly approves or requests changes, it writes a corresponding event to the local database. If memory recording fails, the saved review remains valid and a warning is printed. Agent revisions do not count as human approvals.
