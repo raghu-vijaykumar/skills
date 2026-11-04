@@ -1,0 +1,10 @@
+{
+  "language": "Kannada-English",
+  "tone": "conversational",
+  "voiceover_style": "first-person vlog",
+  "human_facts": [],
+  "preferences": {
+    "avoid_exaggeration": true,
+    "keep_natural_audio_where_useful": true
+  }
+}
