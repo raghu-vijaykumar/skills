@@ -43,7 +43,7 @@ MAX_LEVEL_MATCH_DB = 13.0
 CONTENT_LOSS_DB = 12.0
 # Bump when the audio chain changes so cached clips are rebuilt instead of
 # silently keeping an older render.
-ENHANCE_VERSION = 3
+ENHANCE_VERSION = 4
 
 
 class ProcessingError(RuntimeError):
@@ -239,24 +239,70 @@ def gain_envelope(samples, intervals: list[tuple[float, float]]):
     return envelope, speech_levels
 
 
+def tuning_profile(args, source: Path) -> dict | None:
+    """Return the recorded tuning decision for a clip when profiles are enabled."""
+    root = getattr(args, "tuning_root", None)
+    if not getattr(args, "profiles", False) or root is None:
+        return None
+    path = root / source.name.rsplit(".", 1)[0] / "profile.json"
+    if not path.is_file():
+        return None
+    try:
+        profile = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    chosen = profile.get("chosen")
+    params = next((item.get("params") for item in profile.get("candidates", [])
+                   if item.get("name") == chosen), None)
+    if not params:
+        return None
+    return {"chosen": chosen, "params": params}
+
+
 def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
-                  denoise: str = "auto", speech_gain: str = "auto") -> Path:
+                  denoise: str = "auto", speech_gain: str = "auto",
+                  profile: dict | None = None) -> Path:
     import numpy as np
 
     original = work / "original.wav"
     extract_audio(source, audio, original)
     available = shutil.which("deep-filter") or shutil.which("deepFilter")
-    engine = "deepfilter" if denoise == "deepfilter" or denoise == "auto" and available else "ffmpeg"
-    if engine == "deepfilter":
-        enhanced = deepfilter(original, work / "deepfilter")
+    if profile:
+        chosen = profile["params"]
+        engine = chosen.get("engine", "deepfilter")
+        highpass = int(chosen.get("highpass") or 0)
+        attenuation = chosen.get("attenuation")
+        post_filter = bool(chosen.get("post_filter", False))
+        beta = float(chosen.get("beta", 0.02))
+        nr = int(chosen.get("nr", 12))
+    else:
+        engine = "deepfilter" if denoise == "deepfilter" or denoise == "auto" and available else "ffmpeg"
+        highpass = 0 if engine == "deepfilter" else 80
+        attenuation = None
+        post_filter = False
+        beta = 0.02
+        nr = 12
+    if engine == "none":
+        enhanced = original
+    elif engine == "deepfilter":
+        enhanced = deepfilter(original, work / "deepfilter", attenuation,
+                              post_filter, beta)
     else:
         enhanced = work / "fft-denoised.wav"
         command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-                 "-i", str(original), "-af", "highpass=f=80,afftdn=nr=12:tn=1",
+                 "-i", str(original), "-af", f"afftdn=nr={nr}:tn=1",
                  "-c:a", "pcm_s16le", str(enhanced)])
-    report["denoise_engine"] = engine
+    if highpass:
+        filtered = work / "highpass.wav"
+        command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                 "-i", str(enhanced), "-af", f"highpass=f={highpass}",
+                 "-c:a", "pcm_s16le", str(filtered)])
+        enhanced = filtered
+    report["denoise_engine"] = "skipped" if engine == "none" else engine
     report["speech_gain"] = speech_gain
     report["enhance_version"] = ENHANCE_VERSION
+    if profile:
+        report["tuning"] = profile
     clean = work / "clean.wav"
     command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
              "-i", str(enhanced), "-ac", "2", "-ar", str(SAMPLE_RATE),
@@ -271,9 +317,9 @@ def enhance_audio(source: Path, audio: dict, work: Path, report: dict,
     report["denoise"] = {"engine": engine,
                          "source_lufs": None if source_loudness is None else round(source_loudness, 2),
                          "denoised_lufs": None if denoised_loudness is None else round(denoised_loudness, 2)}
-    if lost_db > CONTENT_LOSS_DB:
+    if engine != "none" and lost_db > CONTENT_LOSS_DB:
         command(["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
-                 "-i", str(original), "-af", "highpass=f=80", "-ac", "2",
+                 "-i", str(original), "-af", f"highpass=f={highpass or 80}", "-ac", "2",
                  "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", str(clean)])
         report["denoise_engine"] = "skipped"
         report["denoise"]["fallback"] = "content-loss"
@@ -715,6 +761,13 @@ def write_report(folder: Path, report: dict) -> None:
     (folder / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
+def final_is_current(args, same_source: bool, target: Path, reusable: bool,
+                     report: dict, cuts: list) -> bool:
+    """A final render is only current when its audio chain was not rebuilt."""
+    return (not getattr(args, "force", False) and same_source and target.is_file()
+            and reusable and report.get("final_cuts") == cuts)
+
+
 def final_clip(source: Path, output_root: Path, args, log,
                size: tuple[int, int] = (1920, 1080)) -> Path:
     """Render one publish-ready 16:9 SDR clip with voice enhancement and blur cuts."""
@@ -740,17 +793,21 @@ def final_clip(source: Path, output_root: Path, args, log,
 
     requested = getattr(args, "denoise", "auto")
     speech_gain = getattr(args, "speech_gain", "auto")
+    applied = tuning_profile(args, source)
     voice = folder / "enhanced-voice.wav"
+    chain_matches = (report.get("tuning") == applied if applied is not None
+                     else requested == "auto" or requested == report.get("denoise_engine"))
     reusable = (same_source and voice.is_file()
                 and not getattr(args, "force", False)
                 and report.get("enhance_version", 1) == ENHANCE_VERSION
-                and (requested == "auto" or requested == report.get("denoise_engine"))
+                and chain_matches
                 and report.get("speech_gain", "auto") == speech_gain)
     if not reusable:
         with tempfile.TemporaryDirectory(prefix="vlog-final-", dir=folder) as scratch:
             work = Path(scratch)
             if audio:
-                generated = enhance_audio(source, audio, work, report, requested, speech_gain)
+                generated = enhance_audio(source, audio, work, report, requested,
+                                          speech_gain, applied)
             else:
                 generated = silent_audio(duration, work / "silent.wav")
                 report["audio"] = {"status": "no source audio; silent stereo track added"}
@@ -769,8 +826,7 @@ def final_clip(source: Path, output_root: Path, args, log,
     kept = keep_ranges(duration, cuts) if cuts else None
     target = folder / "final.mp4"
     stored_cuts = [[round(start, 3), round(end, 3)] for start, end in cuts]
-    if (not getattr(args, "force", False) and same_source and target.is_file()
-            and report.get("final_cuts") == stored_cuts):
+    if final_is_current(args, same_source, target, reusable, report, stored_cuts):
         existing_actual, existing_video, existing_audio = editing.probe(target)
         if (existing_audio and existing_video.get("width") >= size[0]
                 and existing_video.get("height") >= size[1]):
@@ -812,11 +868,16 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     # basename gives each analysis folder a stable identity across reorderings.
     folder = ordering.analysis_folder(output_root, source.name)
     folder.mkdir(parents=True, exist_ok=True)
+    applied = tuning_profile(args, source)
     report_path = folder / "report.json"
     if report_path.exists() and not args.force and not args.apply_review and not args.dv_approved and not args.dv_proof:
         previous = json.loads(report_path.read_text(encoding="utf-8"))
+        chain_matches = (previous.get("tuning") == applied if applied is not None
+                         else getattr(args, "denoise", "auto") == "auto"
+                         or getattr(args, "denoise", "auto") == previous.get("denoise_engine"))
         if previous.get("source_bytes") == source.stat().st_size and \
                 previous.get("enhance_version", 1) == ENHANCE_VERSION and \
+                chain_matches and \
                 previous.get("speech_gain", "auto") == getattr(args, "speech_gain", "auto"):
             # Keep the report's source pointer in sync with timeline renames.
             if previous.get("source") != str(source):
@@ -916,7 +977,7 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
         work = Path(scratch)
         if audio:
             voice = enhance_audio(source, audio, work, report, args.denoise,
-                                  getattr(args, "speech_gain", "auto"))
+                                  getattr(args, "speech_gain", "auto"), applied)
         else:
             voice = silent_audio(duration, work / "silent.wav")
             report["audio"] = {"status": "no source audio; silent stereo track added"}
@@ -995,6 +1056,8 @@ def run(cfg: dict, args, log) -> int:
         log(f"preprocess: {exc}")
         return 1
     output_root.mkdir(parents=True, exist_ok=True)
+    args.tuning_root = (draftlayout.internal_dir(draft) / "analysis" / "tuning"
+                        if draft is not None else None)
     target_size = None
     if final:
         try:

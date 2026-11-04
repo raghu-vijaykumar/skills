@@ -484,6 +484,8 @@ def main() -> int:
                    help="prefer DeepFilterNet; use FFmpeg afftdn if unavailable")
     p.add_argument("--speech-gain", choices=["auto", "off"], default="auto",
                    help="auto lifts speech over a quiet floor; off skips speech detection and only denoises")
+    p.add_argument("--profiles", action="store_true",
+                   help="apply each clip's recorded tuning profile from analysis/tuning/")
 
     p = sub.add_parser("tune", parents=[shared],
                        help="score audio-enhancement candidates per clip before preprocessing")

@@ -1,4 +1,5 @@
 import csv
+import json
 import sys
 import tempfile
 import unittest
@@ -70,6 +71,80 @@ class PreprocessTest(unittest.TestCase):
                          -preprocess.MAX_LEVEL_MATCH_DB)
         self.assertAlmostEqual(preprocess.level_match_db(-22.0, -19.0), 3.0)
         self.assertEqual(preprocess.level_match_db(None, -19.0), 0.0)
+
+    def test_final_rerenders_when_the_audio_chain_changed(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            target = Path(scratch) / "final.mp4"
+            target.write_bytes(b"")
+            args = SimpleNamespace(force=False)
+            self.assertFalse(preprocess.final_is_current(
+                args, True, target, False, {"final_cuts": []}, []))
+            self.assertTrue(preprocess.final_is_current(
+                args, True, target, True, {"final_cuts": []}, []))
+            self.assertFalse(preprocess.final_is_current(
+                SimpleNamespace(force=True), True, target, True, {"final_cuts": []}, []))
+
+    def test_tuning_profile_reads_the_chosen_candidate(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch) / "analysis" / "tuning"
+            folder = root / "001 - clip"
+            folder.mkdir(parents=True)
+            params = {"name": "pf-30", "engine": "deepfilter", "post_filter": True,
+                      "beta": 0.02, "highpass": 0, "attenuation": 30}
+            (folder / "profile.json").write_text(json.dumps(
+                {"chosen": "pf-30", "candidates": [
+                    {"name": "default", "params": {"name": "default"}},
+                    {"name": "pf-30", "params": params}]}), encoding="utf-8")
+            args = SimpleNamespace(profiles=True, tuning_root=root)
+            applied = preprocess.tuning_profile(args, Path("001 - clip.mp4"))
+            self.assertEqual(applied["chosen"], "pf-30")
+            self.assertEqual(applied["params"]["attenuation"], 30)
+            disabled = SimpleNamespace(profiles=False, tuning_root=root)
+            self.assertIsNone(preprocess.tuning_profile(disabled, Path("001 - clip.mp4")))
+            missing = SimpleNamespace(profiles=True, tuning_root=root)
+            self.assertIsNone(preprocess.tuning_profile(missing, Path("002 - other.mp4")))
+
+    def test_none_profile_skips_denoise_but_keeps_highpass(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            work = Path(scratch)
+            report = {}
+            samples = np.zeros((preprocess.SAMPLE_RATE, 2), dtype=np.float32)
+            profile = {"chosen": "none",
+                       "params": {"name": "none", "engine": "none", "highpass": 80}}
+            with patch.object(preprocess, "extract_audio"), \
+                 patch.object(preprocess, "command", return_value="") as run, \
+                 patch.object(preprocess, "deepfilter",
+                              side_effect=AssertionError("denoise must not run")), \
+                 patch.object(preprocess, "pcm16",
+                              return_value=(preprocess.SAMPLE_RATE, samples)), \
+                 patch.object(preprocess, "measure_loudness", return_value=-20.0):
+                preprocess.enhance_audio(Path("in.mp4"), {"index": 1}, work, report,
+                                         "deepfilter", "off", profile)
+            self.assertEqual(report["denoise_engine"], "skipped")
+            self.assertEqual(report["tuning"]["chosen"], "none")
+            commands = [" ".join(call.args[0]) for call in run.call_args_list]
+            self.assertTrue(any("highpass=f=80" in command for command in commands))
+
+    def test_profile_passes_attenuation_to_deepfilter(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            work = Path(scratch)
+            report = {}
+            samples = np.zeros((preprocess.SAMPLE_RATE, 2), dtype=np.float32)
+            profile = {"chosen": "pf-30",
+                       "params": {"name": "pf-30", "engine": "deepfilter",
+                                  "post_filter": True, "beta": 0.02,
+                                  "highpass": 0, "attenuation": 30}}
+            with patch.object(preprocess, "extract_audio"), \
+                 patch.object(preprocess, "command", return_value=""), \
+                 patch.object(preprocess, "deepfilter",
+                              return_value=Path("enhanced.wav")) as denoise, \
+                 patch.object(preprocess, "pcm16",
+                              return_value=(preprocess.SAMPLE_RATE, samples)), \
+                 patch.object(preprocess, "measure_loudness", return_value=-20.0):
+                preprocess.enhance_audio(Path("in.mp4"), {"index": 1}, work, report,
+                                         "auto", "off", profile)
+            self.assertEqual(denoise.call_args.args[2:], (30, True, 0.02))
+            self.assertEqual(report["denoise_engine"], "deepfilter")
 
     def test_blur_candidates_are_review_only_and_use_source_times(self):
         times = [i / 10 for i in range(10)]

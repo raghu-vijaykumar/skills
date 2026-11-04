@@ -280,7 +280,9 @@ does not consider speech, which on a music or ambience clip can delete the whole
 program. Preprocess measures EBU R128 loudness before and after denoising; if the
 clip drops by more than 12 dB, it keeps the source audio with an 80 Hz high-pass,
 records `denoise.fallback: "content-loss"` with both loudness values in
-`report.json`, and still matches the source level.
+`report.json`, and still matches the source level. Pass `--profiles` to apply each
+clip's recorded tuning choice instead of the default chain; see Tune audio per clip
+below.
 
 ### Tune audio per clip
 
@@ -307,10 +309,11 @@ over-suppressed default gets no margin protection. Profiles, metrics, and
 listenable WAVs are written under `.content-studio/analysis/tuning/`, with
 `tuning.csv` and `tuning.html` summarizing the current profiles in that folder and
 inline players for the default and chosen candidates. Listen to the WAVs before a
-batch and use the profiles to decide whether that clip should be denoised at all or
-take a gentler pass; preprocess does not apply the profiles automatically.
-`--limit` samples across clip durations; `--sample` is the seconds measured per clip;
-`--discard-audio` removes the WAVs after measuring.
+batch, then pass `--profiles` to preprocess to apply each clip's recorded choice.
+Clips without a profile keep the default chain, and changing a profile rebuilds that
+clip's audio along with its final render. `--limit` samples across clip durations;
+`--sample` is the seconds measured per clip; `--discard-audio` removes the WAVs after
+measuring.
 
 The command stabilizes non-Dolby-Vision clips with two-pass `vidstab` in both the review path and `--final`, retains their
 source dimensions and SDR/HDR color tags, and flags a crop greater than 10% in the
