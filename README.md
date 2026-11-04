@@ -9,8 +9,8 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | List built-in and project-enabled editorial styles and themes |
 | [content-studio-videogen](content-studio/skills/content-studio-videogen/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
 | [content-studio-autocut](content-studio/skills/content-studio-autocut/SKILL.md) | Reviewable rough cut from raw footage with shot and speech-aware selection |
-| [content-studio-videopreprocess](content-studio/skills/content-studio-videopreprocess/SKILL.md) | Capture ordering, footage cleanup, blur and Dolby Vision review |
-| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing or manual export review and thumbnail |
+| [content-studio-videopreprocess](content-studio/skills/content-studio-videopreprocess/SKILL.md) | Capture ordering, per-clip audio tuning, cleanup, blur and Dolby Vision review |
+| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing, selective AI restoration and upscaling, export review and thumbnail |
 | [content-studio-audio](content-studio/skills/content-studio-audio/SKILL.md) | Batch audio mastering with new video and extracted WAV outputs |
 | [content-studio-music](content-studio/skills/content-studio-music/SKILL.md) | Choose and record YouTube Audio Library or Pixabay background music |
 | [content-studio-benchmark](content-studio/skills/content-studio-benchmark/SKILL.md) | Synchronized native-resolution enhancement comparison grids |
@@ -43,11 +43,16 @@ flowchart TD
   end
 
   subgraph EDITED["2B · Camera-footage production"]
-    PRE["content.py preprocess<br/>original/ → .content-studio/processed-clips · C04"]:::edited
+    PRE["content.py preprocess<br/>order · dedupe · default audio · C04"]:::edited
+    TUNE["content.py tune<br/>per-clip audio candidates and profiles"]:::edited
+    TUNEGATE{"Audio profile candidates<br/>reviewed and approved?"}:::gate
+    APPLY["content.py preprocess --profiles --force<br/>apply the measured audio chain"]:::edited
     BLUR{"Blur and Dolby Vision reviewed?"}:::gate
     CUT["content-studio-autocut rough cut<br/>.content-studio/rough-cut/ · C05"]:::edited
     CUTREVIEW{"Rough cut, frames, and audio approved?"}:::gate
-    UPSCALE["upscale --draft --target 4k<br/>4K clips · C23"]:::edited
+    UPREV["upscale --timeline-ranges --preview<br/>Lanczos vs AI · FIX / REVIEW / SKIP"]:::edited
+    UV{"Preview approved and<br/>delivered render verified?"}:::gate
+    UPSCALE["upscale --approve --write-timeline<br/>verified 4K range assets · C23"]:::edited
     EDIT["content.py edit join or cuts<br/>draft-final.mp4 · C07"]:::edited
     COLOR["enhance analyze + render<br/>color after upscale · C08"]:::edited
     AUDIO["content-studio-audio<br/>draft/audio/ · C06"]:::optional
@@ -60,7 +65,7 @@ flowchart TD
     RIGHTS["Rights, licenses, consent<br/>footage · music · fonts · faces · C14"]:::package
     ASSEMBLE["Assemble candidate package<br/>master · thumbnail · copy · credits"]:::package
     APPROVE["Hash-bound package approval<br/>cli.mjs approve · C16"]:::package
-    VERIFY{"Checklist verify pre_publish<br/>C01–C17 documented?"}:::gate
+    VERIFY{"Checklist verify pre_publish<br/>C01–C17 and C23 documented?"}:::gate
     RESOLVE["Resolve pending or deferred items"]:::optional
     PREVIEW["Publish plan preview<br/>platform · visibility · schedule · C17"]:::package
   end
@@ -93,13 +98,20 @@ flowchart TD
   RAUTHOR -.-> RPOST
 
   KIND -->|Camera footage| PRE
-  PRE --> BLUR
+  PRE --> TUNE
+  TUNE --> TUNEGATE
+  TUNEGATE -->|approved| APPLY
+  TUNEGATE -->|keep default| BLUR
+  APPLY --> BLUR
   BLUR -->|fix| PRE
   BLUR -->|approved| CUT
   CUT --> CUTREVIEW
   CUTREVIEW -->|request changes| CUT
-  CUTREVIEW -->|approved or deferred| UPSCALE
-  BLUR -.->|no rough cut| UPSCALE
+  CUTREVIEW -->|approved or deferred| UPREV
+  BLUR -.->|no rough cut| UPREV
+  UPREV --> UV
+  UV -->|verified or explicit override| UPSCALE
+  UV -->|rejected or review| UPREV
   UPSCALE --> EDIT
   EDIT --> COLOR
   AUDIO -.-> EDIT
@@ -150,7 +162,7 @@ Solid arrows are required lifecycle steps; dashed arrows are optional or bypass 
 
 When the main `content-studio` router is used, it creates `lifecycle-checklist.json` in the draft before production work. Direct specialist use remains one-off and does not create the checklist.
 
-The checklist has fixed IDs C01-C22, in a fixed order. Every item must end as:
+The checklist has fixed IDs C01-C23, in a fixed order. Every item must end as:
 
 - `done` with evidence or a note
 - `not_applicable` with a reason
@@ -212,6 +224,29 @@ Review gates:
 - **Blur:** inspect `review.csv` / `review.html` before approving cuts.
 - **Dolby Vision:** install `dovi_tool`, run `--dv-proof`, check playback on the usual device, then use `--dv-approved`. Never treat an HLG-only file as Dolby Vision.
 - **Final SDR:** `--final` intentionally drops the Dolby Vision RPU. Keep the proof path when DV must be preserved. Two-pass `vidstab` stabilization runs by default in both preprocessing paths.
+
+### 2b. Tune audio per clip (optional)
+
+A single audio chain is rarely right for every clip. `tune` measures bounded candidates against the untouched source and records a profile:
+
+```powershell
+python <bundle>/skills/content-studio-videoedit/scripts/content.py `
+  tune --channel <slug> --draft <id> --limit 5 --sample 40
+
+python <bundle>/skills/content-studio-videoedit/scripts/content.py `
+  tune --channel <slug> --draft <id> --clip "003 - clip.mp4" --force
+```
+
+It renders post-filter variants, attenuation-limited passes, and a no-denoise option through the same chain preprocess uses. A candidate is rejected if it clips, hollows the speech band, loses more than 12 dB of program loudness, or fails to cut noise or raise SNR by 1 dB. Suppression beyond 24 dB is scored down, and a candidate replaces the default only when it leads by more than `--margin`.
+
+Results land in `.content-studio/analysis/tuning/`: `tuning.csv`, `tuning.html` with inline players, and one `profile.json` plus candidate WAVs per clip. Listen before applying, then rerun preprocess with the measured profiles:
+
+```powershell
+python <bundle>/skills/content-studio-videoedit/scripts/content.py `
+  preprocess --channel <slug> --draft <id> --profiles --force
+```
+
+Clips without a profile keep the default chain. A denoise pass that removes more than 12 dB of integrated loudness falls back to the source with an 80 Hz high-pass and records `denoise.fallback: "content-loss"` in `report.json`.
 
 The per-clip `final.mp4` files are the clean input for AutoCut. AutoCut scans only the top level of its `--folder`, so stage them flat first:
 
@@ -292,15 +327,32 @@ Vlog drafts do not generate transcripts or captions. Sample 4–6 frames across 
 
 Capture 4-6 representative frames and the spoken or voiceover context. Use an image-generation model to create a **16:9 landscape AI thumbnail** that reflects the actual subject, setting, and hook. Do not use a raw frame with overlaid text as the final thumbnail unless the user explicitly asks. Show the generated image and obtain approval before writing `thumbnail.png`. The full prompt and requirements are in [the AI thumbnail workflow](content-studio/skills/content-studio-videoedit/references/thumbnail.md).
 
-### 5b. Upscale vlog clips to 4K (optional)
+### 5b. Diagnose and apply AI upscaling (optional)
 
-Upscaling is separate from color correction. It reconstructs resolution; it does not fix exposure, white balance, or motion blur. For a 4K vlog, run this before final assembly, then run color correction:
+Upscaling reconstructs resolution. It does not fix exposure, white balance, motion blur, or noise. It is diagnosis-first: a clip is only replaced when a measured preview beats ordinary Lanczos resizing.
 
 ```powershell
-node <bundle>/scripts/cli.mjs upscale --draft <draft> --target 4k
+# Diagnose and preview only
+node <bundle>/scripts/cli.mjs upscale --draft <draft> --target 4k `
+  --preview --review --limit 5
+
+# Render approved clips and only the ranges the edit uses
+node <bundle>/scripts/cli.mjs upscale --draft <draft> --target 4k `
+  --timeline <draft>/.content-studio/rough-cut/edit-timeline.json `
+  --timeline-ranges --approve `
+  --write-timeline <draft>/.content-studio/rough-cut/edit-timeline-upscaled.json
 ```
 
-The batch command skips clips already at 4K, records `upscale-batch.json`, and keeps the previous clip as `final-pre-upscale.mp4`. Use `--dry-run` or `--limit 1` first. See [the upscale workflow](content-studio/skills/content-studio-videoedit/references/upscale.md).
+The batch analyzes resolution, HDR, orientation, sharpness, and noise, then renders 5-second Lanczos and AI candidates and measures detail, noise, flicker, jitter, exposure, and clipping. Each clip becomes `FIX`, `REVIEW`, `SKIP`, or `UNSUPPORTED`; `SKIP` uses Lanczos when the delivery still needs 4K, and HDR/DV sources are refused without `--allow-hdr`.
+
+Every delivered AI render is re-measured against a fresh Lanczos reference. `upscale.json` records `verification.status` as `verified`, `review`, or `unverified_override`. Batches withhold unverified clips unless you pass `--approve` or force with `--mode always`; timeline maps exclude unverified ranges.
+
+- `--timeline-ranges` merges the used `source_in`/`source_out` ranges, renders one asset per range under `<clip>/upscaled/`, and writes `timeline-map.json`.
+- `--write-timeline` writes a copy of the timeline whose clips point at those assets and carry an `enhancements` entry. The source timeline and originals are untouched.
+- Default backend is PyTorch `realesr-general-x4v3` when CUDA and verified weights are present, otherwise ncnn `realesrgan-x4plus`. `realesr-animevideov3` is animation-only and never auto-selected.
+- `--staging jpeg` and `--encoder auto` (NVENC when available) are the fast defaults; `--chunk 96` bounds temporary disk.
+
+See [the upscale workflow](content-studio/skills/content-studio-videoedit/references/upscale.md) for gates, verification, models, throughput, HDR policy, and timeline mapping.
 
 ### 5c. Diagnose and enhance color after upscaling (optional)
 
@@ -429,7 +481,9 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | --- | --- | --- |
 | Blur / stabilization | `review.csv`, `review.html`, report crop flag | Mark cuts or accept |
 | Dolby Vision | `dv-proof.mov` | Check playback, then `--dv-approved` |
+| Audio tuning | `analysis/tuning/tuning.csv`, `tuning.html`, candidate WAVs | Listen and approve the per-clip profile |
 | AutoCut rough cut | `.content-studio/rough-cut/rough-cut.mp4`, frames, audio samples, `review-state.json`; `<draft>-rough-cut.mp4` at the root | Approve or request changes |
+| AI upscale | `upscale-review.html`, three-panel previews, `upscale.json` verification | Approve REVIEW/override rows and confirm `verified` |
 | Audio mastering | Mastered WAV/MP4 and `manifest.json` | Listen and compare |
 | Master edit | Full `<draft>-final.mp4` | Watch end to end |
 | Package | Title, description, thumbnail, music credits | Approve with note and hashes |
@@ -445,6 +499,9 @@ python <bundle>/skills/content-studio-videoedit/scripts/content.py sync --channe
 | `.content-studio/_timeline.csv` | Capture order and original names |
 | `.content-studio/processed-clips/` | Per-clip analysis, enhanced voice, cuts, `final.mp4` |
 | `.content-studio/analysis/duplicates/` | Quarantined duplicates and review |
+| `.content-studio/analysis/tuning/` | Per-clip audio profiles, metrics, candidate WAVs, `tuning.csv/html` |
+| `.content-studio/upscale/` | Upscale decisions, preview links, verification, `timeline-map.json` |
+| `.content-studio/processed-clips/<clip>/upscaled/` | Verified timeline-range 4K assets |
 | `.content-studio/rough-cut/` | Rough cut, timelines, review media |
 | `.content-studio/enhancement/` | Quality analysis, evidence, manifests, previews |
 | `<draft>-rough-cut.mp4` | Rough-cut video |
