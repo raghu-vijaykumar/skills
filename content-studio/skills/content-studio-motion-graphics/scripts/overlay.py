@@ -10,12 +10,14 @@ from pathlib import Path
 
 def probe(source: Path) -> dict:
     result = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration:stream=codec_type,color_transfer",
+        ["ffprobe", "-v", "error", "-show_entries",
+         "format=duration:stream=codec_type,width,height,pix_fmt,color_primaries,color_transfer,color_space:"
+         "stream_side_data=side_data_type,dv_profile,rpu_present_flag",
          "-of", "json", str(source)], capture_output=True, text=True, check=True)
     return json.loads(result.stdout)
 
 
-def validate(data: dict) -> tuple[Path, float, list[dict], bool]:
+def validate(data: dict) -> tuple[Path, float, list[dict], dict]:
     source = Path(data["source"]).resolve()
     if not source.is_file():
         raise ValueError(f"Source video does not exist: {source}")
@@ -24,7 +26,7 @@ def validate(data: dict) -> tuple[Path, float, list[dict], bool]:
     streams = meta.get("streams", [])
     if not any(s.get("codec_type") == "video" for s in streams) or not any(s.get("codec_type") == "audio" for s in streams):
         raise ValueError("Source needs video and audio")
-    hdr = any(s.get("color_transfer") in {"arib-std-b67", "smpte2084"} for s in streams)
+    video = next(s for s in streams if s.get("codec_type") == "video")
     events = data.get("events", [])
     if not events:
         raise ValueError("At least one event is required")
@@ -36,7 +38,41 @@ def validate(data: dict) -> tuple[Path, float, list[dict], bool]:
             raise ValueError(f"Event {index} needs ingredient or cta kind")
         if event["kind"] == "ingredient" and not all(event.get(key) for key in ("label", "action", "evidence")):
             raise ValueError(f"Ingredient event {index} needs label, action, and evidence")
-    return source, duration, events, hdr
+    return source, duration, events, video
+
+
+def has_dolby_vision(video: dict) -> bool:
+    return any(item.get("side_data_type") == "DOVI configuration record" and
+               item.get("rpu_present_flag") == 1 for item in video.get("side_data_list", []))
+
+
+def require_preview_color_decision(video: dict, allow_dv_preview: bool) -> None:
+    if has_dolby_vision(video) and not allow_dv_preview:
+        raise ValueError("Dolby Vision RPU cannot survive this re-encode; use sidecar for exact source color or --allow-dv-preview")
+
+
+def render_command(source: Path, output: Path, overlay: Path, start: float,
+                   length: float, video: dict, encoder: str) -> list[str]:
+    # Burn the graphics into the native video signal; never tone-map or resize the footage.
+    ten_bit = "10" in video.get("pix_fmt", "") or video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
+    pixel_format = "p010le" if ten_bit and encoder == "nvenc" else "yuv420p10le" if ten_bit else "yuv420p"
+    command = ["ffmpeg", "-nostdin", "-v", "warning", "-ss", str(start), "-i", str(source),
+               "-t", str(length), "-map", "0:v:0", "-map", "0:a:0", "-vf",
+               f"ass={overlay.name},format={pixel_format}"]
+    if ten_bit and encoder == "nvenc":
+        command += ["-c:v", "hevc_nvenc", "-profile:v", "main10", "-preset", "p5",
+                    "-rc", "vbr", "-cq", "18", "-b:v", "0"]
+    elif ten_bit:
+        command += ["-c:v", "libx265", "-preset", "medium", "-crf", "18"]
+    else:
+        command += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18"]
+    command += ["-pix_fmt", pixel_format]
+    for source_key, flag in (("color_primaries", "-color_primaries"),
+                             ("color_transfer", "-color_trc"), ("color_space", "-colorspace")):
+        value = video.get(source_key)
+        if value and value != "unknown":
+            command += [flag, value]
+    return command + ["-c:a", "copy", "-movflags", "+faststart", str(output)]
 
 
 def stamp(seconds: float) -> str:
@@ -109,19 +145,24 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["validate", "render"])
+    parser.add_argument("command", choices=["validate", "sidecar", "render"])
     parser.add_argument("cues", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--start", type=float, default=0)
     parser.add_argument("--duration", type=float)
+    parser.add_argument("--encoder", choices=["auto", "nvenc", "x265"], default="auto",
+                        help="10-bit video encoder; auto tries NVENC then x265")
+    parser.add_argument("--allow-dv-preview", action="store_true",
+                        help="permit a combined HLG-base preview that cannot retain Dolby Vision RPU")
     args = parser.parse_args()
     data = json.loads(args.cues.read_text(encoding="utf-8"))
-    source, total, events, hdr = validate(data)
+    source, total, events, video = validate(data)
     if args.command == "validate":
-        print(f"Valid: {len(events)} cues, {total:.2f}s source, {'HDR' if hdr else 'SDR'}")
+        dv = ", Dolby Vision RPU present" if has_dolby_vision(video) else ""
+        print(f"Valid: {len(events)} cues, {total:.2f}s source, {video.get('color_transfer', 'unknown')} transfer{dv}")
         return
     if not args.output:
-        parser.error("render requires --output")
+        parser.error(f"{args.command} requires --output")
     output = args.output.resolve()
     if output == source or output.exists():
         raise ValueError("Output must be a new path; the source and existing renders are preserved")
@@ -129,23 +170,32 @@ def main() -> None:
         raise ValueError("Invalid preview range")
     length = min(args.duration or total - args.start, total - args.start)
     output.parent.mkdir(parents=True, exist_ok=True)
+    if args.command == "sidecar":
+        if output.suffix.lower() != ".ass":
+            raise ValueError("Sidecar output needs an .ass extension")
+        output.write_text(ass(data, args.start, length), encoding="utf-8")
+        print(f"Wrote {output} (original video remains bit-for-bit untouched)")
+        return
+    require_preview_color_decision(video, args.allow_dv_preview)
     overlay = output.with_suffix(".ass")
     overlay.write_text(ass(data, args.start, length), encoding="utf-8")
-    # Render SDR review media from HDR sources; the original remains the HDR master.
-    color = ("zscale=w=1920:h=1080:t=linear:npl=100,format=gbrpf32le,"
-             "tonemap=tonemap=mobius:param=0.3:desat=0,"
-             "zscale=p=bt709:t=bt709:m=bt709,format=yuv420p," if hdr else "scale=1920:1080:flags=lanczos,")
-    filters = color + "setsar=1,ass=" + overlay.name
-    command = ["ffmpeg", "-nostdin", "-v", "warning", "-ss", str(args.start), "-i", str(source),
-               "-t", str(length), "-vf", filters, "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
-               "-pix_fmt", "yuv420p", "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
-               "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(output)]
-    with output.with_suffix(".render.log").open("w", encoding="utf-8") as log:
-        result = subprocess.run(command, cwd=output.parent, stdout=log, stderr=subprocess.STDOUT)
+    ten_bit = "10" in video.get("pix_fmt", "") or video.get("color_transfer") in {"arib-std-b67", "smpte2084"}
+    encoders = (["nvenc", "x265"] if args.encoder == "auto" and ten_bit
+                else [args.encoder if ten_bit else "x264"])
+    log_path = output.with_suffix(".render.log")
+    for attempt, encoder in enumerate(encoders):
+        command = render_command(source, output, overlay, args.start, length, video, encoder)
+        with log_path.open("a" if attempt else "w", encoding="utf-8") as log:
+            result = subprocess.run(command, cwd=output.parent, stdout=log, stderr=subprocess.STDOUT)
+        if result.returncode == 0:
+            break
+        # Only a partial file created by this invocation can be removed for a fallback retry.
+        output.unlink(missing_ok=True)
     if result.returncode:
-        tail = output.with_suffix(".render.log").read_text(errors="replace").splitlines()[-8:]
+        tail = log_path.read_text(errors="replace").splitlines()[-8:]
         raise RuntimeError("Render failed:\n" + "\n".join(tail))
-    print(f"Rendered {output} ({length:.2f}s, 1080p SDR review)")
+    color_note = "HLG base-layer preview; Dolby Vision RPU omitted" if has_dolby_vision(video) else "source color format retained"
+    print(f"Rendered {output} ({length:.2f}s, {video.get('width')}x{video.get('height')}, {color_note})")
 
 
 if __name__ == "__main__":

@@ -33,6 +33,30 @@ class OverlayTest(unittest.TestCase):
         self.assertNotIn(r"{\bord20}", rendered)
         self.assertIn("Rice(/bord20)", rendered)
 
+    def test_hlg_render_preserves_source_signal_and_audio(self):
+        video = {"width": 3840, "height": 2160, "pix_fmt": "yuv420p10le",
+                 "color_primaries": "bt2020", "color_transfer": "arib-std-b67",
+                 "color_space": "bt2020nc"}
+        command = overlay.render_command(Path("source.mp4"), Path("review.mp4"),
+                                         Path("overlay.ass"), 0, 497.7, video, "nvenc")
+        joined = " ".join(command)
+        self.assertIn("ass=overlay.ass,format=p010le", joined)
+        self.assertIn("-color_trc arib-std-b67", joined)
+        self.assertIn("-color_primaries bt2020", joined)
+        self.assertIn("-colorspace bt2020nc", joined)
+        self.assertIn("-c:a copy", joined)
+        self.assertNotIn("zscale", joined)
+        self.assertNotIn("tonemap", joined)
+        self.assertNotIn("scale=", joined)
+
+    def test_dolby_vision_requires_explicit_preview_decision(self):
+        video = {"side_data_list": [{"side_data_type": "DOVI configuration record",
+                                     "rpu_present_flag": 1}]}
+        self.assertTrue(overlay.has_dolby_vision(video))
+        with self.assertRaisesRegex(ValueError, "RPU cannot survive"):
+            overlay.require_preview_color_decision(video, False)
+        overlay.require_preview_color_decision(video, True)
+
 
 if __name__ == "__main__":
     unittest.main()

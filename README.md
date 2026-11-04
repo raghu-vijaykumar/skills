@@ -421,7 +421,7 @@ node <bundle>/scripts/cli.mjs benchmark `
 
 The 5-panel layout keeps 1080p panels at 1080p and 4K panels at 4K, with no crop or downscale. This is the separate `content-studio-benchmark` skill; see [the benchmark grid workflow](content-studio/skills/content-studio-benchmark/references/benchmark.md).
 
-For an existing Out of Office Mode cooking edit, `content-studio-motion-graphics` builds a timed JSON cue sheet from audio context and sparse frames. `overlay.py validate` checks cue timing; `overlay.py render` writes animated ASS graphics and a separate 1080p SDR review MP4. Ingredient labels belong at the moment of use. The source edit stays intact, including its HDR encoding. See [the motion graphics skill](content-studio/skills/content-studio-motion-graphics/SKILL.md).
+For an existing Out of Office Mode cooking edit, `content-studio-motion-graphics` builds a timed JSON cue sheet from audio context and sparse frames. `overlay.py sidecar` writes ASS graphics that play over the untouched original, including its HDR and Dolby Vision metadata. An optional combined MP4 is a review preview; Dolby Vision RPU does not survive that re-encode. Ingredient labels belong at the moment of use. See [the motion graphics skill](content-studio/skills/content-studio-motion-graphics/SKILL.md).
 
 ### 6. Choose the music
 
