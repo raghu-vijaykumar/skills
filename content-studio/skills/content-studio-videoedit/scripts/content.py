@@ -538,37 +538,35 @@ def main() -> int:
 
     p = sub.add_parser("enhance",
                        help="diagnose and selectively correct video quality")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("upscale", help="upscale video with Real-ESRGAN or Lanczos")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("polish", help="ordered denoise, deflicker, lens, match, sharpen")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("match", help="shot-to-shot color balance matching")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("quality", help="SSIM, PSNR, and VMAF measurement")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("refine", help="iteratively select polish settings per clip")
-    p.add_argument("rest", nargs=argparse.REMAINDER)
 
-    args = parser.parse_args()
+    args, extras = parser.parse_known_args()
+    forwarded = {"enhance", "upscale", "polish", "match", "quality", "refine"}
+    if extras and args.command not in forwarded:
+        parser.error(f"unrecognized arguments: {' '.join(extras)}")
+    rest = extras
     if args.command == "enhance":
         import enhance
-        return enhance.main(args.rest)
+        return enhance.main(rest)
     if args.command == "upscale":
         import upscale
-        return upscale.main(args.rest)
+        return upscale.main(rest)
     if args.command == "polish":
         import polish
-        return polish.main(args.rest)
+        return polish.main(rest)
     if args.command == "match":
         import match
-        return match.main(args.rest)
+        return match.main(rest)
     if args.command == "quality":
         import quality
-        return quality.main(args.rest)
+        return quality.main(rest)
     if args.command == "refine":
         import refine
-        return refine.main(args.rest)
+        return refine.main(rest)
     if args.command == "preprocess" and getattr(args, "folder", None):
         # An arbitrary folder is self-contained; no channel workspace is needed.
         folder = Path(args.folder).expanduser().resolve()
