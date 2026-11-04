@@ -16,7 +16,18 @@ def main():
     root=Path(config["workspace"]).expanduser().resolve();root.mkdir(parents=True,exist_ok=True)
     state_path=root/".content-studio/workflow/state.json"
     state=json.loads(state_path.read_text()) if state_path.exists() else {"steps":{}}
-    steps=config["steps"];names=[s["id"] for s in steps]
+    steps=config.get("steps")
+    if steps is None:
+        video=Path(config["video"]).expanduser().resolve()
+        if not video.is_file(): raise FileNotFoundError(video)
+        script=Path(__file__).resolve().parents[2]/"content-studio-understand/scripts/understand.py"
+        voiceover=config.get("voiceover",{})
+        steps=[
+            {"id":"extract_voiceover_evidence","command":[sys.executable,str(script),"--video",str(video),"--out",str(root/".content-studio/understanding")],"outputs":[".content-studio/understanding/evidence.json"],"retries":1},
+            {"id":"review_voiceover_script","depends_on":["extract_voiceover_evidence"],"approval_required":True},
+            {"id":"review_final_video","depends_on":["review_voiceover_script"],"approval_required":True}
+        ] if voiceover.get("enabled",False) else [{"id":"review_final_video","approval_required":True}]
+    names=[s["id"] for s in steps]
     if len(names)!=len(set(names)):raise ValueError("duplicate step id")
     if a.status:
         for n in names:print(n,state["steps"].get(n,{}).get("status","pending"))
@@ -38,7 +49,7 @@ def main():
             if not path.is_relative_to(root):raise ValueError("input escapes workspace")
             if not path.is_file():raise FileNotFoundError(path)
             inputs.append([f,path.stat().st_size,path.stat().st_mtime_ns])
-        fingerprint=digest([step,inputs,[state["steps"][d]["fingerprint"] for d in deps]])
+        fingerprint=digest([step,inputs,config,[state["steps"][d]["fingerprint"] for d in deps]])
         old=state["steps"].get(name,{})
         outputs=[(root/f).resolve() for f in step.get("outputs",[])]
         if any(not x.is_relative_to(root) for x in outputs):raise ValueError("output escapes workspace")
