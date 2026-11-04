@@ -24,3 +24,6 @@ Use `--license` with an accurate value (`owned`, `licensed`, `permission`, or `u
 Read the approved video timeline, narration, user-provided context and candidate reactions. Suggest only contextually appropriate memes (default maximum 1–3 per 10 minutes). Do not claim visual or emotional understanding from sparse frames alone; attach a timestamp and a reason grounded in actual scene or dialogue evidence. Propose a non-destructive insertion manifest with `meme_id`, `at_seconds`, `duration_seconds`, `mode` (`cutaway`, `pip`, `audio_stinger`), `reason`, and `status: pending_review`. Do not automatically render or publish memes. Human review must approve both rights and timing before an editable timeline is modified. Avoid interrupting dialogue or emotional moments.
 
 Preset rules live in `presets/`. The initial implementation supports catalogue management and keyword search; automated semantic detection, timeline insertion and previews are future integrations.
+
+## Editing memory integration
+Before suggesting memes, retrieve applicable explicit preferences using `content-studio-memory`; respect scoped `meme_intensity` and human-provided exclusions. After a human approves or rejects a meme proposal, record that outcome using the memory skill with `--feature meme` and the real scene context. This is a documented agent handoff, not yet an automatic code hook.
