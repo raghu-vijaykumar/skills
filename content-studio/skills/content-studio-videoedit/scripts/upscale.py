@@ -40,6 +40,10 @@ MODEL_NOTES = {
                          "ncnn/Vulkan because it computes 4x internally",
     "realesr-general-x4v3": "lightweight general model with denoise strength; "
                             "requires the PyTorch backend and verified weights",
+    "RealESRGAN_x2plus": "native 2x RRDB model; sharper and heavier than the "
+                         "compact general model",
+    "RealESRGAN_x4plus": "native 4x RRDB model; the heaviest benchmark option",
+    "RealESRNet_x4plus": "MSE-trained RRDB baseline; smoother, fewer invented edges",
 }
 NCNN_MODELS = {"realesrgan-x4plus", "realesrgan-x4plus-anime",
                "realesr-animevideov3", "realesrnet-x4plus"}
@@ -47,6 +51,31 @@ PYTORCH_MODELS = {"realesr-general-x4v3", "RealESRGAN_x2plus",
                   "RealESRGAN_x4plus", "RealESRNet_x4plus"}
 HDR_TRANSFERS = {"smpte2084", "arib-std-b67"}
 TILE_MIN = 32
+WEIGHTS_DIR = Path(__file__).resolve().parents[4] / "tmp" / "realesrgan" / "weights"
+WEIGHT_FILES = {
+    "realesr-general-x4v3": "realesr-general-x4v3.pth",
+    "realesr-general-wdn-x4v3": "realesr-general-wdn-x4v3.pth",
+    "RealESRGAN_x2plus": "RealESRGAN_x2plus.pth",
+    "RealESRGAN_x4plus": "RealESRGAN_x4plus.pth",
+    "RealESRNet_x4plus": "RealESRNet_x4plus.pth",
+}
+
+
+def bundled_weights(model: str | None) -> Path | None:
+    """A verified checkpoint under the local (gitignored) weights directory."""
+    name = WEIGHT_FILES.get(model or "")
+    if not name:
+        return None
+    path = WEIGHTS_DIR / name
+    return path if path.is_file() else None
+
+
+def cuda_available() -> bool:
+    try:
+        import torch
+    except ImportError:
+        return False
+    return bool(torch.cuda.is_available())
 
 
 class UpscaleError(RuntimeError):
@@ -115,8 +144,7 @@ def is_hdr(info: dict) -> bool:
 
 
 def pytorch_available() -> bool:
-    return bool(importlib.util.find_spec("torch")
-                and importlib.util.find_spec("realesrgan"))
+    return importlib.util.find_spec("torch") is not None
 
 
 def preferred_backend(explicit: str | None, executable: str | None) -> tuple[str, Path | None]:
@@ -127,6 +155,11 @@ def preferred_backend(explicit: str | None, executable: str | None) -> tuple[str
             raise UpscaleError(
                 "PyTorch Real-ESRGAN is not installed; install torch, realesrgan, "
                 "and basicsr, or use --backend realesrgan for the ncnn/Vulkan build")
+        return "pytorch", None
+    if explicit is None and pytorch_available() and cuda_available() \
+            and bundled_weights("realesr-general-x4v3"):
+        # The measured best default on a CUDA machine with verified weights:
+        # +25.7% detail vs +14.1% for the ncnn video model on the sample clip.
         return "pytorch", None
     candidates = [executable, os.environ.get("REALESRGAN_NCNN"),
                   shutil.which("realesrgan-ncnn-vulkan"),
@@ -280,35 +313,36 @@ def run_realesrgan(executable: Path, frames: Path, upscaled: Path,
 
 def run_realesrgan_pytorch(frames: Path, upscaled: Path, model: str, scale: int,
                            tile: int, denoise_strength: float | None,
-                           weights: str | None) -> None:
+                           weights: str | None, weights2: str | None = None) -> dict:
     """Opt-in PyTorch adapter; weights are explicit, never downloaded silently."""
     if not weights:
         raise UpscaleError("the PyTorch backend needs --weights to a verified "
                            "checkpoint; automatic downloads are intentionally disabled")
     try:
-        import cv2
         import torch
-        from basicsr.archs.rrdbnet_arch import RRDBNet
-        from realesrgan import RealESRGANer
-        from realesrgan.archs.srvgg_arch import SRVGGNetCompact
-    except ImportError as exc:  # pragma: no cover - depends on optional packages
-        raise UpscaleError("PyTorch backend requires torch, realesrgan, basicsr, "
-                           "and opencv-python") from exc
-    if "general" in model:
-        network = SRVGGNetCompact(num_in_ch=3, num_out_ch=3, num_feat=64,
-                                  upscale=4, act_type="prelu")
-    else:
-        network = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
-                          num_block=23, num_grow_ch=32, scale=4)
-    upsampler = RealESRGANer(scale=4, model_path=weights, model=network,
-                             tile=max(TILE_MIN, tile), tile_pad=10, pre_pad=0,
-                             half=torch.cuda.is_available(),
-                             dni_weight=denoise_strength)
+        import realesrgan_torch
+    except ImportError as exc:  # pragma: no cover - depends on optional torch
+        raise UpscaleError("PyTorch backend requires torch; install a CUDA build "
+                           "from https://pytorch.org") from exc
+    net, device = realesrgan_torch.load_model(model, weights, weights2,
+                                              denoise_strength)
+    if device == "cuda":
+        torch.cuda.reset_peak_memory_stats()
     upscaled.mkdir(parents=True, exist_ok=True)
+    peak = 0.0
     for path in sorted(frames.glob("*.png")):
-        image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
-        output, _ = upsampler.enhance(image, outscale=scale)
-        cv2.imwrite(str(upscaled / path.name), output)
+        image = Image.open(path).convert("RGB")
+        tensor = (torch.from_numpy(np.asarray(image, dtype=np.float32) / 255.0)
+                  .permute(2, 0, 1).unsqueeze(0))
+        output, used = realesrgan_torch.enhance(net, device, tensor, outscale=scale,
+                                                tile=tile, tile_pad=10)
+        peak = max(peak, used)
+        array = output.squeeze(0).permute(1, 2, 0).float().cpu().numpy() * 255.0
+        Image.fromarray(np.clip(array, 0, 255).round().astype(np.uint8)).save(
+            upscaled / path.name)
+    if device == "cuda":
+        peak = max(peak, torch.cuda.max_memory_allocated() / (1024 ** 2))
+    return {"device": device, "peak_vram_mb": round(peak, 1) if peak else None}
 
 
 def encode_chunk(upscaled: Path, concat: Path, output: Path,
@@ -360,7 +394,8 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
               executable: Path | None, model: str, scale: int, tile: int,
               start: float, duration: float, info: dict, chunk: int = 0,
               denoise_strength: float | None = None,
-              weights: str | None = None, preset: str = "medium") -> dict:
+              weights: str | None = None, weights2: str | None = None,
+              preset: str = "medium") -> dict:
     """Render an upscaled video track with source timestamps preserved."""
     fps = fps_value(info.get("fps"))
     timestamps = frame_timestamps(source, start, duration)
@@ -372,6 +407,8 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
     videos: list[Path] = []
     rendered = 0
     timing_fallback = False
+    device = None
+    peak_vram = None
     for index, (first, last) in enumerate(chunks):
         if timestamps:
             segment_start = start if first == 0 else timestamps[first]
@@ -393,8 +430,11 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
         if backend == "realesrgan":
             run_realesrgan(executable, frames, upscaled, model, scale, tile)
         else:
-            run_realesrgan_pytorch(frames, upscaled, model, scale, tile,
-                                   denoise_strength, weights)
+            stats = run_realesrgan_pytorch(frames, upscaled, model, scale, tile,
+                                           denoise_strength, weights, weights2)
+            device = stats["device"]
+            if stats.get("peak_vram_mb"):
+                peak_vram = max(peak_vram or 0.0, stats["peak_vram_mb"])
         produced = frame_count(upscaled)
         if produced != count:
             raise UpscaleError(f"upscaler produced {produced} frames; expected {count}")
@@ -427,7 +467,8 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
         concat_videos(videos, video, work)
     return {"frames": rendered, "chunks": len(videos),
             "timing": "uniform_fallback" if timing_fallback
-                      else ("vfr" if timestamps else "uniform")}
+                      else ("vfr" if timestamps else "uniform"),
+            "device": device, "peak_vram_mb": peak_vram}
 
 
 def compare_frame(source: Path, output: Path, source_at: float, output_at: float,
@@ -477,6 +518,19 @@ def source_hash(path: Path) -> str:
     return digest.hexdigest()
 
 
+def checkpoint_info(weights: str | None, partner: str | None = None) -> dict | None:
+    """Record the checkpoint files and hashes used by the PyTorch backend."""
+    if not weights:
+        return None
+    path = Path(weights)
+    info = {"path": path.name, "sha256": source_hash(path) if path.is_file() else None}
+    if partner:
+        other = Path(partner)
+        info["denoise_path"] = other.name
+        info["denoise_sha256"] = source_hash(other) if other.is_file() else None
+    return info
+
+
 def cache_params(source: Path, backend: str, model: str | None, scale: int,
                  tile: int, target: tuple[int, int], start: float, duration: float,
                  denoise_strength: float | None) -> dict:
@@ -523,6 +577,19 @@ def upscale(args) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     backend, executable = preferred_backend(args.backend, args.realesrgan)
     model = resolve_model(backend, args.model, executable)
+    weights = getattr(args, "weights", None)
+    weights2 = getattr(args, "weights2", None)
+    denoise_strength = getattr(args, "denoise_strength", None)
+    if backend == "pytorch":
+        weights = weights or bundled_weights(model)
+        if not weights:
+            raise UpscaleError(
+                "the PyTorch backend needs --weights to a verified checkpoint; "
+                "automatic downloads are intentionally disabled")
+        if model == "realesr-general-x4v3":
+            weights2 = weights2 or bundled_weights("realesr-general-wdn-x4v3")
+            if denoise_strength is None:
+                denoise_strength = 0.5
     if is_hdr(info) and not getattr(args, "allow_hdr", False):
         raise UpscaleError("HDR/Dolby Vision source: pass --allow-hdr after deciding "
                            "how to tone-map, otherwise the frame pipeline would "
@@ -533,7 +600,7 @@ def upscale(args) -> dict:
         shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True, exist_ok=True)
     params = cache_params(source, backend, model, scale, args.tile, target,
-                          start, duration, getattr(args, "denoise_strength", None))
+                          start, duration, denoise_strength)
     manifest_path = work / "upscale.json"
     if not getattr(args, "force", False) and output.is_file() and manifest_path.is_file():
         previous = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -550,8 +617,8 @@ def upscale(args) -> dict:
         timing = render_ai(source, video_only, work, backend, executable, model,
                            scale, max(TILE_MIN, args.tile), start, duration, info,
                            chunk=max(0, int(getattr(args, "chunk", 0) or 0)),
-                           denoise_strength=getattr(args, "denoise_strength", None),
-                           weights=getattr(args, "weights", None))
+                           denoise_strength=denoise_strength,
+                           weights=weights, weights2=weights2)
         if not info["has_audio"]:
             os.replace(video_only, output)
         else:
@@ -571,7 +638,8 @@ def upscale(args) -> dict:
         "model_note": MODEL_NOTES.get(model or ""),
         "scale": scale,
         "tile": args.tile if backend != "lanczos" else None,
-        "denoise_strength": getattr(args, "denoise_strength", None),
+        "denoise_strength": denoise_strength,
+        "checkpoint": checkpoint_info(weights, weights2),
         "source_size": [info["width"], info["height"]],
         "output_size": [produced["width"], produced["height"]],
         "source_pixel_format": info["pix_fmt"],
@@ -650,11 +718,12 @@ def upscale_draft(args) -> dict:
                 decision = analysis
             else:
                 preview = restoration.preview_clip(
-                    source, target, preview_seconds=getattr(args, "preview_seconds", 8.0),
+                    source, target, preview_seconds=getattr(args, "preview_seconds", 5.0),
                     backend=args.backend, executable=args.realesrgan,
                     model=args.model, tile=args.tile,
                     denoise_strength=getattr(args, "denoise_strength", None),
                     weights=getattr(args, "weights", None),
+                    weights2=getattr(args, "weights2", None),
                     work=source.parent / "upscale-work")
                 decision = preview["decision"]
             if getattr(args, "review", False):
@@ -688,6 +757,7 @@ def upscale_draft(args) -> dict:
             start=None, duration=None, target=args.target, chunk=getattr(args, "chunk", 0),
             denoise_strength=getattr(args, "denoise_strength", None),
             weights=getattr(args, "weights", None),
+            weights2=getattr(args, "weights2", None),
             allow_hdr=getattr(args, "allow_hdr", False), force=args.force,
             work=source.parent / "upscale-work"))
         backup = source.with_name("final-pre-upscale.mp4")
@@ -763,6 +833,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="realesrgan-x4plus (default ncnn) or realesr-general-x4v3 "
                              "(pytorch)")
     parser.add_argument("--weights", help="pytorch checkpoint path (required for pytorch)")
+    parser.add_argument("--weights2",
+                        help="denoise partner checkpoint for realesr-general-x4v3")
     parser.add_argument("--denoise-strength", type=float,
                         help="realesr-general-x4v3 denoise strength (pytorch backend)")
     parser.add_argument("--tile", type=int, default=256,

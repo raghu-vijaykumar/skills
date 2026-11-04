@@ -93,19 +93,55 @@ matches before concatenating.
 
 ## Models and measured throughput
 
-| Backend | Default | Notes |
-|---|---|---|
-| ncnn/Vulkan | `realesr-animevideov3` | native 2×/3×/4×; ~0.4 s/frame at 1080p on an RTX 2070 Super |
-| ncnn/Vulkan | `realesrgan-x4plus` (opt-in) | general photo model; **22–27 s/frame** at 1080p because it computes 4× internally |
-| PyTorch | `realesr-general-x4v3` | lightweight general model with `--denoise-strength`; needs `--weights` |
+Measured on clip 001 (1080p SDR → 4K, 5 s window, RTX 2070 Super, 8 GB):
 
-`realesr-general-x4v3` is not part of the ncnn release. On this machine the
-PyTorch stack is CPU-only, so ncnn remains the practical backend and the fast
-video model is the default. The gate decides whether it helps; the general model
-is one flag away when throughput allows.
+| Backend | Model | Detail vs Lanczos | Inference | Peak VRAM |
+|---|---|---|---|---|
+| PyTorch CUDA | `realesr-general-x4v3` (denoise 0.5) | **+25.7 %** | **0.89 s/frame** | 679 MB |
+| ncnn/Vulkan | `realesr-animevideov3` | +14.1 % | 0.40 s/frame | — |
+| PyTorch CUDA | `RealESRGAN_x2plus` | +9.2 % | 3.1 s/frame | 347 MB |
+| ncnn/Vulkan | `realesrgan-x4plus` | not run | 22–27 s/frame | — |
 
-PyTorch checkpoints are never downloaded silently. Pass `--weights <file>` and
-keep the license record beside it.
+When CUDA torch and the verified weights are present, the default backend is
+**PyTorch with `realesr-general-x4v3`**, because it measured the best detail at
+roughly the same cost as the ncnn video model. Without those, the tool falls back
+to ncnn, then Lanczos.
+
+The denoise strength blends `realesr-general-x4v3.pth` with
+`realesr-general-wdn-x4v3.pth`: `0` keeps the sharper model, `1` uses the
+denoise-trained weights, and the default is `0.5`.
+
+## Installing the PyTorch stack
+
+CUDA torch (cu128 wheels work with the 610.x driver):
+
+```powershell
+python -m pip install --index-url https://download.pytorch.org/whl/cu128 torch torchvision
+```
+
+Checkpoints are **not** downloaded automatically. Put verified files in
+`<repo>/tmp/realesrgan/weights/` (gitignored) and keep a `weights.json` beside
+them with the source URL, SHA-256, and license:
+
+```text
+realesr-general-x4v3.pth
+  https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+  sha256 8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292
+realesr-general-wdn-x4v3.pth
+  https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-wdn-x4v3.pth
+  sha256 1641f8c4464b9f097c9fdda5589273713f67cf59f3d909e0bd688f0cee269dca
+RealESRGAN_x2plus.pth
+  https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth
+  sha256 49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb
+```
+
+`upscale.json` records the checkpoint file name and SHA-256 so a render can be
+traced back to exact weights. Use `--weights`/`--weights2` to point at another
+verified pair.
+
+The upstream `realesrgan`/`basicsr` packages do not build on Python 3.13, so the
+two model definitions live in `scripts/realesrgan_torch.py` with their upstream
+licenses; only `torch`, `numpy`, and `Pillow` are required.
 
 ## Install
 

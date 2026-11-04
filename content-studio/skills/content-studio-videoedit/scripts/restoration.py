@@ -265,7 +265,8 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
                  preview_seconds: float = 8.0, backend: str | None = None,
                  executable: str | Path | None = None, model: str | None = None,
                  tile: int = 256, denoise_strength: float | None = None,
-                 weights: str | None = None, work: Path | None = None) -> dict:
+                 weights: str | None = None, weights2: str | None = None,
+                 work: Path | None = None) -> dict:
     source = Path(source).expanduser().resolve()
     info = upscale.probe(source)
     if upscale.is_hdr(info):
@@ -282,6 +283,16 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
         raise upscale.UpscaleError("no AI backend is available for a preview")
     model_name = upscale.resolve_model(resolved, model,
                                        executable_path if resolved == "realesrgan" else None)
+    weights = weights or upscale.bundled_weights(model_name)
+    if resolved == "pytorch":
+        if not weights:
+            raise upscale.UpscaleError(
+                "the PyTorch backend needs --weights to a verified checkpoint; "
+                "automatic downloads are intentionally disabled")
+        if model_name == "realesr-general-x4v3":
+            weights2 = weights2 or upscale.bundled_weights("realesr-general-wdn-x4v3")
+            if denoise_strength is None:
+                denoise_strength = 0.5
     lanczos_video = work / "preview-lanczos.mp4"
     ai_video = work / "preview-ai.mp4"
     upscale.run_lanczos(source, lanczos_video, target, start, seconds, False,
@@ -290,7 +301,7 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
                                executable_path, model_name, scale, tile,
                                start, seconds, info, chunk=0,
                                denoise_strength=denoise_strength, weights=weights,
-                               preset="fast")
+                               weights2=weights2, preset="fast")
     times = [round(seconds * fraction, 3) for fraction in (0.2, 0.5, 0.8)]
     lanczos_metrics = sample_metrics(lanczos_video, times)
     ai_metrics = sample_metrics(ai_video, times)
@@ -318,6 +329,8 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
         "model": model_name,
         "scale": scale,
         "tile": tile,
+        "denoise_strength": denoise_strength,
+        "checkpoint": upscale.checkpoint_info(weights, weights2),
         "timing": timing,
         "lanczos": lanczos_metrics,
         "ai": ai_metrics,

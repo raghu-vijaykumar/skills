@@ -9,7 +9,12 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import upscale
 
-NCNN_READY = upscale.preferred_backend(None, None)[0] == "realesrgan"
+try:
+    NCNN_READY = upscale.preferred_backend("realesrgan", None)[0] == "realesrgan"
+except upscale.UpscaleError:
+    NCNN_READY = False
+PYTORCH_READY = (upscale.pytorch_available() and upscale.cuda_available()
+                 and upscale.bundled_weights("realesr-general-x4v3") is not None)
 
 
 class UpscaleTest(unittest.TestCase):
@@ -163,6 +168,31 @@ class UpscaleTest(unittest.TestCase):
         self.assertIsNone(upscale.resolve_model("lanczos", "anything", None))
         with self.assertRaisesRegex(upscale.UpscaleError, "pytorch"):
             upscale.resolve_model("realesrgan", "realesr-general-x4v3", None)
+
+    def test_default_backend_prefers_verified_cuda_weights(self):
+        if not PYTORCH_READY:
+            self.skipTest("CUDA torch and verified weights are not installed")
+        self.assertEqual(upscale.preferred_backend(None, None)[0], "pytorch")
+
+    @unittest.skipUnless(PYTORCH_READY, "CUDA torch and verified weights are not installed")
+    def test_pytorch_render_records_device_and_checkpoint(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source = root / "input.mp4"
+            target = root / "output.mp4"
+            self.make_video(source, size="160x90", duration=0.4)
+            manifest = upscale.upscale(upscale.build_parser().parse_args([
+                "--input", str(source), "--output", str(target),
+                "--backend", "pytorch", "--model", "realesr-general-x4v3",
+                "--scale", "2"]))
+            info = upscale.probe(target)
+            self.assertEqual(manifest["backend"], "pytorch")
+            self.assertEqual(manifest["timing"]["device"], "cuda")
+            self.assertGreater(manifest["timing"]["peak_vram_mb"], 0)
+            self.assertTrue(manifest["checkpoint"]["sha256"])
+            self.assertEqual(manifest["denoise_strength"], 0.5)
+        self.assertEqual((info["width"], info["height"]), (320, 180))
+        self.assertTrue(info["has_audio"])
 
     def test_frame_deltas_extend_to_the_window_tail(self):
         deltas = upscale.frame_deltas([0.0, 0.5, 1.0], 30.0, tail=0.4)
