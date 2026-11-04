@@ -71,3 +71,17 @@ python content-studio/skills/content-studio-memory/scripts/confirm_diff.py --db 
 ```
 
 This adds observed human-confirmed events, once per report/project fingerprint. Reports with importer issues are rejected. Confirmed observations **do not become preferences** without explicit confirmation. The `learn.py` candidate generator intentionally considers only changed/rejected decisions, not generic observations. Complex Kdenlive tractor/compositing reconstruction remains unsupported; the importer explicitly reports this rather than pretending to know rendered track order.
+
+## One-command review orchestration
+
+Use `learn_from_edit.py` after the user edits a rough cut in Kdenlive:
+
+```bash
+python content-studio/skills/content-studio-memory/scripts/learn_from_edit.py --proposed .content-studio/rough-cut/timeline.json --kdenlive edited.kdenlive --output .content-studio/memory-review
+```
+
+It writes `kdenlive-observations.json`, `comparison.json` and a local `review.html`. Open the HTML, inspect the real Kdenlive project and only then run `confirm_diff.py` with a genuine human-supplied reason. No confirmation, inferred preference or edit is performed by the orchestration command.
+
+**Scope of support:** Kdenlive MLT playlists with ordinary source producers/chains, blank gaps, and simple tracks. Compositing, nested tractors, transition effects, speed ramps, and uncertain visibility remain explicitly flagged as limitations. A rendered-video or frame-level comparison is needed to validate these cases. This is not a fully general Kdenlive parser.
+
+Tests include an end-to-end synthetic MLT import → comparison → human-confirmation event path. Run `python -m unittest discover -s content-studio/skills/content-studio-memory/tests -v` locally. These tests have not been executed in the GitHub connector environment.
