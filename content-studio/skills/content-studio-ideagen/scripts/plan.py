@@ -58,6 +58,13 @@ def render(template: str, values: dict) -> str:
     return text
 
 
+def video_scaffold_args(kind: str, slug: str) -> list[str]:
+    """Start Revise Labs long videos with a native landscape canvas."""
+    if kind == "long" and slug == "revise-labs":
+        return ["--duration", "300", "--width", "1920", "--height", "1080"]
+    return []
+
+
 def draft_id(root: Path, channel: str, title: str) -> str:
     """Allocate one safe per-video folder; preserve the channel's numeric sequence."""
     ascii_title = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode("ascii")
@@ -159,6 +166,9 @@ def main() -> int:
         "kind": args.kind,
         "date": ctx["generated"],
         "band": band.get("band", "unknown"),
+        "runtime_basis": ("set from editorial depth; Shorts duration analytics are context only"
+                          if args.kind == "long" else
+                          f"compare with the {band.get('band', 'unknown')} analytics band"),
     }
     brief = render("brief.md", {
         **common,
@@ -193,7 +203,8 @@ def main() -> int:
         binary = root / "node_modules" / ".bin" / ("videogen.cmd" if sys.platform == "win32" else "videogen")
         if not binary.exists():
             raise SystemExit(f"install the pinned videogen package in {root}, then run videogen scaffold {folder_id}")
-        subprocess.run([str(binary), "scaffold", folder_id, "--title", args.name],
+        subprocess.run([str(binary), "scaffold", folder_id, "--title", args.name,
+                        *video_scaffold_args(args.kind, slug)],
                        cwd=root, check=True)
     log(f"scaffolded {draft}")
     log(f"prior: median {numbers.get('views median')} views, "

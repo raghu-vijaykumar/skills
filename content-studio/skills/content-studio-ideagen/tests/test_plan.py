@@ -11,6 +11,11 @@ spec.loader.exec_module(plan)
 
 
 class DraftIdTest(unittest.TestCase):
+    def test_long_revise_labs_scaffold_is_landscape(self):
+        self.assertEqual(plan.video_scaffold_args("long", "revise-labs"),
+                         ["--duration", "300", "--width", "1920", "--height", "1080"])
+        self.assertEqual(plan.video_scaffold_args("short", "revise-labs"), [])
+
     def test_revise_labs_allocates_next_id_from_drafts_and_archives(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
             root = Path(scratch)

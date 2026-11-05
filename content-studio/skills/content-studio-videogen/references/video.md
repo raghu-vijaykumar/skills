@@ -1,6 +1,6 @@
 # Video workflow
 
-Start a new draft with `videogen scaffold <id> --title "Working title"`. It creates a per-video Remotion entry, metadata and title scene without replacing an existing idea brief.
+Start a new draft with `videogen scaffold <id> --title "Working title"`. It creates a per-video Remotion entry, metadata and title scene without replacing an existing idea brief. Add `--width 1920 --height 1080 --duration 300` for a landscape long-form starter; the composition remains native 16:9 through rendering.
 
 The project `videogen.config.ts` names the Remotion entry point and video directory. It may provide `entryPointForVideo(id)` so each draft bundles alone. Each `<videosDir>/<id>/content/video.yaml` declares `video.compositionId`; music-only work also declares `video.durationSeconds`. Remotion is authoritative for width, height, frame rate, and duration.
 

@@ -2,7 +2,7 @@
 
 Channel: <slug>
 Kind: <kind>
-Target runtime: __ s, consistent with the `<band>` row in the dataset
+Target runtime: __ s (<runtime_basis>)
 Source of truth: <primary source url(s)>
 
 ## Promise

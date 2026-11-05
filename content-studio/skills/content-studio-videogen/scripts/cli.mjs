@@ -139,7 +139,14 @@ async function main() {
   }
   if (command === 'scaffold') {
     const config = await project();
-    const result = scaffoldDraft(config, safeId(id), {title: flag('title') ?? id, durationSeconds: Number(flag('duration') ?? 5)});
+    // Expose the scaffold's canvas options so a long-form draft starts in its
+    // authored aspect ratio instead of requiring a manual portrait rewrite.
+    const result = scaffoldDraft(config, safeId(id), {
+      title: flag('title') ?? id,
+      durationSeconds: Number(flag('duration') ?? 5),
+      width: Number(flag('width') ?? 1080),
+      height: Number(flag('height') ?? 1920),
+    });
     console.log(`Scaffolded ${result.folder} as ${result.compositionId}`);
     return;
   }

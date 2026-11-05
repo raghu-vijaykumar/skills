@@ -5,7 +5,7 @@ description: Create and review code-driven Remotion videos, including the Hairli
 
 # Content Studio Animate
 
-For one draft at a time, use `npx videogen scaffold <id> --title "Working title"` to add a new video to an existing project, then `npx videogen studio <id>`. Scaffolding preserves an existing idea brief and refuses to replace authored scenes.
+For one draft at a time, use `npx videogen scaffold <id> --title "Working title"` to add a new video to an existing project, then `npx videogen studio <id>`. For an authored 16:9 long video, pass `--width 1920 --height 1080 --duration 300` (adjust the duration after narration). Scaffolding preserves an existing idea brief and refuses to replace authored scenes.
 
 Read `videogen.config.ts`, the target content, and the project's own creative rules before editing. The package owns the generic render and validation commands; the project owns its scenes, media, and channel identity. Use `npx videogen init <directory>` for a fresh project and `npx videogen sync-skill` after installing a pinned package version.
 
