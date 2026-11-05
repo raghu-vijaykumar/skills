@@ -5,6 +5,7 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | Skill | Use |
 | --- | --- |
 | [content-studio](content-studio/skills/content-studio/SKILL.md) | Route one draft through the lifecycle |
+| [content-studio-workflow](content-studio/skills/content-studio-workflow/SKILL.md) | Resumable, checkpointed workflow from one prompt JSON |
 | [content-studio-ideagen](content-studio/skills/content-studio-ideagen/SKILL.md) | Owned analytics, public comparisons, digest, idea brief |
 | [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | List built-in and project-enabled editorial styles and themes |
 | [content-studio-videogen](content-studio/skills/content-studio-videogen/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
@@ -15,6 +16,10 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-music](content-studio/skills/content-studio-music/SKILL.md) | Choose and record YouTube Audio Library or Pixabay background music |
 | [content-studio-benchmark](content-studio/skills/content-studio-benchmark/SKILL.md) | Synchronized native-resolution enhancement comparison grids |
 | [content-studio-motion-graphics](content-studio/skills/content-studio-motion-graphics/SKILL.md) | Timed vlog overlays, graphic effects, and Remotion transitions |
+| [content-studio-understand](content-studio/skills/content-studio-understand/SKILL.md) | Frame-grounded, timestamped voiceover drafts for review |
+| [content-studio-voice](content-studio/skills/content-studio-voice/SKILL.md) | Consented personal voice profile for future narration |
+| [content-studio-memes](content-studio/skills/content-studio-memes/SKILL.md) | Private meme catalogue with reviewable vlog insertions |
+| [content-studio-memory](content-studio/skills/content-studio-memory/SKILL.md) | Local editing preferences learned from human decisions |
 | [content-studio-publish](content-studio/skills/content-studio-publish/SKILL.md) | Reviewed package approval, YouTube now/schedule, Instagram now |
 | [content-studio-archive](content-studio/skills/content-studio-archive/SKILL.md) | Independent public backup, Drive verification, monthly reconciliation |
 
@@ -556,7 +561,7 @@ A draft is not finished when the render succeeds. It is finished when the packag
 
 ## Install
 
-Clone this repository, then run `node content-studio/scripts/cli.mjs install-skills --global`. The installer stores one versioned bundle at `~/.agents/content-studio/v<version>` and links its thirteen skill folders directly under `~/.agents/skills`. [Codex](https://learn.chatgpt.com/docs/build-skills) and [OpenCode](https://opencode.ai/docs/skills) both discover that global path. It verifies the thirteen matching skill entrypoints, refuses to replace unmanaged folders, then removes the obsolete global names `videogen`, `content-helper`, `video-idea-engine`, `hairline-create`, `learning-engineer`, and the superseded `content-studio-ideas`, `content-studio-animate`, and `content-studio-vlog`.
+Clone this repository, then run `node content-studio/scripts/cli.mjs install-skills --global`. The installer stores one versioned bundle at `~/.agents/content-studio/v<version>` and links its skill folders directly under `~/.agents/skills`. [Codex](https://learn.chatgpt.com/docs/build-skills) and [OpenCode](https://opencode.ai/docs/skills) both discover that global path. It verifies the matching skill entrypoints, refuses to replace unmanaged folders, then removes the obsolete global names `videogen`, `content-helper`, `video-idea-engine`, `hairline-create`, `learning-engineer`, and the superseded `content-studio-ideas`, `content-studio-animate`, and `content-studio-vlog`.
 
 A video project can pin a tested Git tag of this private repository in `package.json`, run `npm install`, and use `npx videogen sync-skill` to install the matching animation skill locally. `npx videogen init <directory>` starts a project and `npx videogen scaffold <id> --title "Working title"` creates a draft. The root npm package includes only `content-studio/`.
 
