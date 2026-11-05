@@ -14,6 +14,7 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-audio](content-studio/skills/content-studio-audio/SKILL.md) | Batch audio mastering with new video and extracted WAV outputs |
 | [content-studio-music](content-studio/skills/content-studio-music/SKILL.md) | Choose and record YouTube Audio Library or Pixabay background music |
 | [content-studio-benchmark](content-studio/skills/content-studio-benchmark/SKILL.md) | Synchronized native-resolution enhancement comparison grids |
+| [content-studio-motion-graphics](content-studio/skills/content-studio-motion-graphics/SKILL.md) | Timed vlog overlays, graphic effects, and Remotion transitions |
 | [content-studio-publish](content-studio/skills/content-studio-publish/SKILL.md) | Reviewed package approval, YouTube now/schedule, Instagram now |
 | [content-studio-archive](content-studio/skills/content-studio-archive/SKILL.md) | Independent public backup, Drive verification, monthly reconciliation |
 
@@ -422,6 +423,8 @@ node <bundle>/scripts/cli.mjs benchmark `
 The 5-panel layout keeps 1080p panels at 1080p and 4K panels at 4K, with no crop or downscale. This is the separate `content-studio-benchmark` skill; see [the benchmark grid workflow](content-studio/skills/content-studio-benchmark/references/benchmark.md).
 
 For an existing Out of Office Mode cooking edit, `content-studio-motion-graphics` builds a timed JSON cue sheet from audio context and sparse frames. It supports staggered titles, accumulating ingredient lists, English/Kannada leaf names, ingredient-use callouts, and a reusable emoji-led like/share/subscribe prompt. `overlay.py sidecar` writes ASS graphics that play over the untouched original, including its HDR and Dolby Vision metadata. An optional combined MP4 is a review preview; Dolby Vision RPU does not survive that re-encode. See [the motion graphics skill](content-studio/skills/content-studio-motion-graphics/SKILL.md).
+
+The same skill now includes five configurable graphic effects for any finished vlog: flash, swipe, shutter, speed lines, and frame pop. A hard cut can sit under a flash, swipe, or shutter at the cue midpoint. Remotion vlogs use the matching `VlogEffect` and visual `VlogTransition` components, including crossfade, slide, wipe, and flash. See [the effects guide](content-studio/skills/content-studio-motion-graphics/references/effects.md).
 
 ### 6. Choose the music
 

@@ -66,6 +66,40 @@ class OverlayTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "must be chronological"):
                     overlay.validate(data)
 
+    def test_effect_presets_conceal_midpoint_and_scale_to_portrait(self):
+        data = {"events": [
+            {"kind": "effect", "preset": "flash", "start": 1, "end": 1.4},
+            {"kind": "effect", "preset": "swipe", "start": 2, "end": 2.6,
+             "color": "#123456", "accent": "#ABCDEF"},
+            {"kind": "effect", "preset": "shutter", "start": 3, "end": 3.6},
+            {"kind": "effect", "preset": "speed-lines", "start": 4, "end": 4.5},
+            {"kind": "effect", "preset": "frame-pop", "start": 5, "end": 5.5},
+        ]}
+        rendered = overlay.ass(data, canvas=(608, 1080))
+        self.assertIn("PlayResX: 608", rendered)
+        self.assertIn("\\move(-608,0,0,0,0,252)", rendered)
+        self.assertIn("\\move(0,0,608,0,0,252)", rendered)
+        self.assertIn("\\1c&H563412&", rendered)
+        self.assertIn("0:00:03.00,0:00:03.35", rendered)
+        self.assertIn("0:00:03.35,0:00:03.60", rendered)
+
+    def test_effect_validation_rejects_unknown_or_unsafe_cues(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "source.mp4"
+            source.touch()
+            probe = {"format": {"duration": "10"}, "streams": [
+                {"codec_type": "video"}, {"codec_type": "audio"}]}
+            event = {"kind": "effect", "preset": "wipe", "start": 1, "end": 1.4}
+            with patch.object(overlay, "probe", return_value=probe):
+                with self.assertRaisesRegex(ValueError, "unsupported preset"):
+                    overlay.validate({"source": str(source), "events": [event]})
+                event = {**event, "preset": "swipe", "color": "red"}
+                with self.assertRaisesRegex(ValueError, "invalid color"):
+                    overlay.validate({"source": str(source), "events": [event]})
+                event = {**event, "color": "#123456", "end": 1.1}
+                with self.assertRaisesRegex(ValueError, "at least 0.30"):
+                    overlay.validate({"source": str(source), "events": [event]})
+
     def test_hlg_render_preserves_source_signal_and_audio(self):
         video = {"width": 3840, "height": 2160, "pix_fmt": "yuv420p10le",
                  "color_primaries": "bt2020", "color_transfer": "arib-std-b67",
@@ -81,6 +115,23 @@ class OverlayTest(unittest.TestCase):
         self.assertNotIn("zscale", joined)
         self.assertNotIn("tonemap", joined)
         self.assertNotIn("scale=", joined)
+
+    def test_video_only_effect_keeps_a_silent_render_silent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "silent.mp4"
+            source.touch()
+            data = {"source": str(source), "events": [
+                {"kind": "effect", "preset": "frame-pop", "start": 1, "end": 1.5}]}
+            video = {"codec_type": "video", "width": 1080, "height": 1920,
+                     "pix_fmt": "yuv420p"}
+            probe = {"format": {"duration": "3"}, "streams": [video]}
+            with patch.object(overlay, "probe", return_value=probe):
+                _, _, _, checked, has_audio = overlay.validate(data)
+            self.assertFalse(has_audio)
+            command = overlay.render_command(source, Path("review.mp4"), Path("overlay.ass"),
+                                             0, 3, checked, "x264", has_audio)
+            self.assertNotIn("0:a:0", command)
+            self.assertNotIn("-c:a", command)
 
     def test_dolby_vision_requires_explicit_preview_decision(self):
         video = {"side_data_list": [{"side_data_type": "DOVI configuration record",

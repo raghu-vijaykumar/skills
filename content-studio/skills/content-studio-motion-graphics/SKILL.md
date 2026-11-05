@@ -1,13 +1,15 @@
 ---
 name: content-studio-motion-graphics
-description: Add kinetic titles, ingredient lists, bilingual callouts, and like/share/subscribe graphics to an already edited Out of Office Mode cooking video, then render a separate review copy.
+description: Add reusable timed motion graphics and transition effects to an edited video, or use matching components in a Remotion vlog. Supports cooking callouts, bilingual text, and review renders.
 ---
 
-# Out of Office Mode motion graphics
+# Motion graphics and vlog effects
 
-Read the channel rules, this skill, and the source draft before editing. Keep the source video untouched. Extract audio and inspect sparse frames or short ranges to identify actions without decoding the entire master for analysis. Use speech as context, but only label ingredients actually supported by the frame or clear narration; do not invent quantities.
+Read the channel rules and source draft before editing. Keep the source video untouched. Inspect sparse frames or short ranges to locate actions and cuts without decoding the entire master for analysis. Use speech as context, but only label ingredients actually supported by a frame or clear narration; do not invent quantities.
 
-Create a JSON cue sheet with the source path and timed events:
+For a finished vlog, create a JSON cue sheet with timed `effect` events. Choose `flash`, `swipe`, or `shutter` to conceal a known hard cut, and place that cut at the cue midpoint. Use `speed-lines` or `frame-pop` as shorter accents around action beats. All five effects can use per-cue `color` and `accent` hex colors. They add graphics over footage; they do not change the underlying shots. For Remotion vlogs, import the matching `VlogEffect` and `VlogTransition` components. Read [effects and transitions](references/effects.md) for cue examples, Remotion usage, and review checks.
+
+For cooking videos, the same JSON cue sheet supports:
 
 - `title`: a two-part label and optional Kannada subtitle. Stagger the words on separate beats. Preview the shot and place the panel in open space.
 - `ingredient_list`: 1–12 chronological `items`, each with `at` and `label`, plus optional `kannada`. Use this accumulating lower third while ingredients are introduced. Each new item briefly enlarges, then joins the persistent list. Use the later `ingredient` cue when an ingredient is actually added or cooked.
