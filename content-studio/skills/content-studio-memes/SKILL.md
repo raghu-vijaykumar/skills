@@ -4,6 +4,8 @@ description: Maintain a private local meme catalogue and propose evidence-based,
 ---
 # Content Studio Memes
 
+Before inserting or rendering memes in a draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
+
 This skill **does not download memes automatically**. The user will add meme files later. Import only user-supplied, authorized media into a local catalogue. Do not commit third-party media, generated thumbnails or the SQLite database to Git.
 
 ## Catalogue

@@ -4,9 +4,10 @@ The main `content-studio` router owns one deterministic checklist per draft:
 `draft/lifecycle-checklist.json`. It is created before production work and is
 updated at every stage.
 
-Direct use of a specialist skill is a one-off action. It does not create this
-checklist and is not blocked by it. When the router is used, the checklist is
-mandatory.
+Direct use of a specialist skill is a one-off action and does not create this
+fixed checklist. It still requires the reviewed `content-studio-workflow`
+precheck plan and its draft-specific checklist before editing. When the router
+is used, both checklists are mandatory.
 
 ## Rule
 
@@ -105,5 +106,5 @@ without a reason.
 ## One-off use
 
 If the user invokes `content-studio-videoedit`, `content-studio-audio`,
-`content-studio-autocut`, or another specialist directly, do not create this
-checklist. The specialist's own checks and review gates still apply.
+`content-studio-autocut`, or another specialist directly, run the workflow
+precheck first. The specialist's own checks and review gates still apply.

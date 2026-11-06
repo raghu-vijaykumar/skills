@@ -11,6 +11,19 @@ package name remains `@raghu-vijaykumar/videogen`.
 2. Read `README.md` for the end-to-end draft lifecycle and current draft layout.
 3. Inspect existing tests before adding parallel systems.
 
+## Mandatory precheck before Content Studio editing
+
+Before any production edit, including a direct specialist skill call, use the
+precheck in `content-studio-workflow`. Inspect the channel, draft, source media,
+system capacity, and bounded benchmarks; show the user a detailed, editable
+plan with recommended routes, time estimates, outputs, and review criteria.
+Incorporate requested changes and obtain explicit human approval of the current
+plan revision before editing. This gate is mandatory and cannot be skipped.
+Follow the checklist generated from the approved plan, record evidence for each
+step, and complete it before package approval. A changed plan requires another
+human review. Read-only diagnosis and short comparison previews may inform the
+plan; publishing still needs its separate explicit authorization.
+
 ## Draft layout
 
 ```text
@@ -23,6 +36,7 @@ drafts/<id>/
     analysis/
     rough-cut/
     audio/
+    preflight/
     tmp/
   <id>-rough-cut.mp4
   <id>-preprocessed.mp4
@@ -46,6 +60,7 @@ python -m unittest discover -s content-studio/skills/content-studio-videoedit/te
 python -m unittest discover -s content-studio/skills/content-studio-autocut/tests -p "test_*.py"
 python -m unittest discover -s content-studio/skills/content-studio-music/tests -p "test_*.py"
 python -m unittest discover -s content-studio/skills/content-studio-audio/tests -p "test_*.py"
+python -m unittest discover -s content-studio/skills/content-studio-workflow/tests -p "test_*.py"
 node --test content-studio/tests/*.test.mjs content-studio/skills/content-studio-videogen/tests/*.test.mjs
 ```
 

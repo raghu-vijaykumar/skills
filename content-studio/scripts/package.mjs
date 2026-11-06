@@ -1,5 +1,6 @@
 // One file-hash approval contract for edited and code-rendered video packages.
 import fs from 'node:fs';
+import {validatePreflight} from './preflight.mjs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {parse} from 'yaml';
@@ -123,6 +124,7 @@ export function approvePackage(draft, id, note) {
   if (!files.thumbnail) throw new Error('An approved thumbnail is required');
   validateDraftRecord(draft, files);
   validateChecklist(draft, 'pre_publish');
+  validatePreflight(draft, 'complete');
   const approval = {approvedAt: new Date().toISOString(), note: note.trim(), files: fingerprint(files)};
   fs.writeFileSync(path.join(draft, 'package-approval.json'), JSON.stringify(approval, null, 2) + '\n');
   return approval;
@@ -133,6 +135,7 @@ export function verifyPackage(draft, id) {
   const files = packageFiles(draft, id);
   validateDraftRecord(draft, files);
   validateChecklist(draft, 'pre_publish');
+  validatePreflight(draft, 'complete');
   const current = fingerprint(files);
   for (const [name, hash] of Object.entries(current)) {
     if (approved.files[name] !== hash) throw new Error(`${name} changed since package approval`);

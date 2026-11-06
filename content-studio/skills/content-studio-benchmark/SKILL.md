@@ -5,6 +5,8 @@ description: Build synchronized native-resolution benchmark grids comparing orig
 
 # Content Studio Benchmark
 
+For production comparison renders, follow the mandatory human-reviewed precheck in `content-studio-workflow` and its approved step checklist. Short bounded previews may inform that plan.
+
 Build one video that shows each enhancement checkpoint side by side without
 cropping or downscaling any panel.
 

@@ -5,6 +5,8 @@ description: Choose, review, mix, and save background music from YouTube Audio L
 
 # Content Studio Music
 
+Before mixing or selecting music for a draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
+
 Read the channel rules and the draft. Confirm the master duration, the intended mood, and whether the channel is monetized. Check for an existing `music-selection.json` before choosing.
 
 ## Choose a source

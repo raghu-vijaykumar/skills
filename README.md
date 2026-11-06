@@ -5,7 +5,7 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | Skill | Use |
 | --- | --- |
 | [content-studio](content-studio/skills/content-studio/SKILL.md) | Route one draft through the lifecycle |
-| [content-studio-workflow](content-studio/skills/content-studio-workflow/SKILL.md) | Resumable, checkpointed workflow from one prompt JSON |
+| [content-studio-workflow](content-studio/skills/content-studio-workflow/SKILL.md) | Mandatory system precheck, editable human-reviewed plan and checklist, then resumable workflow |
 | [content-studio-ideagen](content-studio/skills/content-studio-ideagen/SKILL.md) | Owned analytics, public comparisons, digest, idea brief |
 | [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | List built-in and project-enabled editorial styles and themes |
 | [content-studio-videogen](content-studio/skills/content-studio-videogen/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
@@ -24,6 +24,8 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-archive](content-studio/skills/content-studio-archive/SKILL.md) | Independent public backup, Drive verification, monthly reconciliation |
 
 ## Draft lifecycle
+
+Run the `content-studio-workflow` precheck before editing: profile the machine and sample media, show the full proposed route and timing estimates, incorporate the user's changes, and obtain explicit approval. The reviewed plan determines the step checklist. A changed plan requires another review, and package approval requires that checklist to be complete.
 
 A draft is one folder under `<workspace>/<channel>/drafts/<id>`. It uses a fixed layout: raw clips in `original/`, internal working files in `.content-studio/`, and deliverables named from the draft folder: `<draft>-rough-cut.mp4`, `<draft>-preprocessed.mp4`, `<draft>-final.mp4`, and `<draft>-audio-only.mp3`, with `title.txt`, `description.txt`, and `lifecycle-checklist.json` at the root. Vlog drafts do not generate transcripts or captions. Raw media stays in that folder; the skills add plans, review artifacts, hashes, and publishing receipts around it. Remotion videos and camera-footage vlogs take different production paths, then converge on the same approval and publishing gate.
 

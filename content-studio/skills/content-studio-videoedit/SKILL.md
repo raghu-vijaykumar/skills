@@ -5,6 +5,8 @@ description: Assemble a vlog from preprocessed clips, then review its edited exp
 
 # Content Studio Video Edit
 
+Before changing the draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
+
 This skill also owns the shared channel helper used by archive, ideagen, and preprocessing for backup, Drive sync, analytics, capture ordering, and preprocessing. Read [the channel helper](references/channel-helper.md) for those commands and their workspace conventions.
 
 Read the channel rules and draft timeline. Drafts use a canonical layout: raw `original/`, internal `.content-studio/processed-clips/` and `.content-studio/rough-cut/`, plus `<id>-rough-cut.mp4`, `<id>-preprocessed.mp4`, `<id>-final.mp4`, `<id>-audio-only.mp3`, `title.txt`, and `description.txt` at the draft root. After preprocessing, use `content-studio-autocut` when you need a reviewable rough cut; continue here for trim, cut, join, and thumbnail. For a simple edit, use `python <this-skill>/scripts/content.py edit trim --input <clip> --start 00:12 --end 00:30 --out <new-clip>` or `edit cut --input <clip> --remove 00:12-00:14 --out <new-clip>`. `edit join --channel <slug> --draft <id>` assembles ordered clips, preferring approved cuts and processed outputs, and writes `<id>-final.mp4` plus `.content-studio/rough-cut/edit-timeline.json` and `edit-timeline.html`. For a standalone draft folder outside a channel workspace, use `edit join --folder <draft>`. For a curated sequence, repeat `--input <clip>` in the desired order and set `--out`. Review every transition and the full result. Manual editing remains available for complex assembly.

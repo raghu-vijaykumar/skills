@@ -2,6 +2,7 @@
 """Minimal durable DAG runner: resume, retries, stale-input invalidation, human gates."""
 import argparse, hashlib, json, os, subprocess, sys, time
 from pathlib import Path
+from preflight import approved
 
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
@@ -23,7 +24,7 @@ def main():
         script=Path(__file__).resolve().parents[2]/"content-studio-understand/scripts/understand.py"
         voiceover=config.get("voiceover",{})
         steps=[
-            {"id":"extract_voiceover_evidence","command":[sys.executable,str(script),"--video",str(video),"--out",str(root/".content-studio/understanding")],"outputs":[".content-studio/understanding/evidence.json"],"retries":1},
+            {"id":"extract_voiceover_evidence","plan_step":"S03","command":[sys.executable,str(script),"--video",str(video),"--out",str(root/".content-studio/understanding")],"outputs":[".content-studio/understanding/evidence.json"],"retries":1},
             {"id":"review_voiceover_script","depends_on":["extract_voiceover_evidence"],"approval_required":True},
             {"id":"review_final_video","depends_on":["review_voiceover_script"],"approval_required":True}
         ] if voiceover.get("enabled",False) else [{"id":"review_final_video","approval_required":True}]
@@ -32,6 +33,13 @@ def main():
     if a.status:
         for n in names:print(n,state["steps"].get(n,{}).get("status","pending"))
         return
+    # No configured production command runs against an unreviewed or changed plan.
+    plan, plan_approval, checklist = approved(root)
+    planned_ids = {step["id"] for step in plan["steps"]}
+    plan_order = {step["id"]: index for index, step in enumerate(plan["steps"])}
+    for step in steps:
+        if step.get("command") and step.get("plan_step") not in planned_ids:
+            raise ValueError(f"workflow step {step['id']} needs a plan_step from the approved checklist")
     if a.reset_step:
         invalid={a.reset_step}
         for s in steps:
@@ -40,6 +48,12 @@ def main():
         save(state_path,state)
     for step in steps:
         name=step["id"];deps=step.get("depends_on",[])
+        if step.get("command"):
+            for index, prior in enumerate(checklist["items"][:plan_order[step["plan_step"]]]):
+                valid = (prior.get("status") == "done" and bool(prior.get("evidence"))) or (
+                    prior.get("status") == "not_applicable" and not plan["steps"][index].get("required") and bool(prior.get("reason")))
+                if not valid:
+                    raise ValueError(f"Complete approved plan step {prior['id']} before running {name}")
         if any(d not in names for d in deps):raise ValueError("unknown dependency for "+name)
         if any(state["steps"].get(d,{}).get("status")!="done" for d in deps):
             print("WAIT dependencies:",name);save(state_path,state);return
@@ -49,7 +63,7 @@ def main():
             if not path.is_relative_to(root):raise ValueError("input escapes workspace")
             if not path.is_file():raise FileNotFoundError(path)
             inputs.append([f,path.stat().st_size,path.stat().st_mtime_ns])
-        fingerprint=digest([step,inputs,config,[(str(config["video"]),Path(config["video"]).expanduser().resolve().stat().st_size,Path(config["video"]).expanduser().resolve().stat().st_mtime_ns)] if config.get("video") else [],[state["steps"][d]["fingerprint"] for d in deps]])
+        fingerprint=digest([step,inputs,config,plan_approval["plan_sha256"],[(str(config["video"]),Path(config["video"]).expanduser().resolve().stat().st_size,Path(config["video"]).expanduser().resolve().stat().st_mtime_ns)] if config.get("video") else [],[state["steps"][d]["fingerprint"] for d in deps]])
         old=state["steps"].get(name,{})
         outputs=[(root/f).resolve() for f in step.get("outputs",[])]
         if any(not x.is_relative_to(root) for x in outputs):raise ValueError("output escapes workspace")

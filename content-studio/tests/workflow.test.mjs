@@ -3,12 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {test} from 'node:test';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {approvePackage, sha256, verifyPackage, validateSrt, validateChecklist} from '../scripts/package.mjs';
 import {transcriptionSegments, toSrt, transcribeDraft, isSpeechText} from '../scripts/transcribe.mjs';
 import {sourceRevision} from '../scripts/source-revision.mjs';
+import {validatePreflight} from '../scripts/preflight.mjs';
 import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-videogen/dist/hairline.js';
 
 const root = path.join(os.tmpdir(), 'content-studio-tests');
@@ -24,6 +26,7 @@ function fixture(kind='edited') {
   fs.writeFileSync(path.join(draft,'thumbnail.png'),'thumbnail');
   fs.writeFileSync(path.join(draft,'creative.json'),JSON.stringify({themeId:'neutral',styleId:'hairline',format:'long',renderer:kind==='remotion'?'remotion':'manual',choices:['mechanism hook']}));
   fs.writeFileSync(path.join(draft,'draft.json'),JSON.stringify({production:{kind}}));
+  writePreflight(draft);
   if(kind==='edited') {
     fs.writeFileSync(path.join(draft,'transcript.json'),JSON.stringify({masterSha256:sha256(path.join(draft,'video.mp4')),segments:[{startMs:0,endMs:1000,text:'Hello'}]}));
     fs.writeFileSync(path.join(draft,'captions.srt'),'1\n00:00:00,000 --> 00:00:01,000\nHello\n');
@@ -32,6 +35,16 @@ function fixture(kind='edited') {
     fs.writeFileSync(path.join(draft,'content','video.yaml'),'video:\n  compositionId: Test\n');
   }
   return {workspace,channel,draft};
+}
+function writePreflight(draft, {complete=true}={}) {
+  const base=path.join(draft,'.content-studio','preflight');
+  fs.mkdirSync(base,{recursive:true});
+  const plan={schema_version:1,kind:'edited',goal:'Reviewed test package',inputs:['test source'],deliverables:['master'],
+    system_profile:{machine:{cpu_logical:1}},steps:[{id:'S01',title:'Review sources and rights',route:'inspect',output:'notes',acceptance:'reviewed',required:true}]};
+  const digest=createHash('sha256').update(JSON.stringify(plan)).digest('hex');
+  fs.writeFileSync(path.join(base,'plan.json'),JSON.stringify(plan));
+  fs.writeFileSync(path.join(base,'approval.json'),JSON.stringify({plan_sha256:digest,review_note:'User reviewed'}));
+  fs.writeFileSync(path.join(base,'checklist.json'),JSON.stringify({plan_sha256:digest,items:[{id:'S01',status:complete?'done':'pending',evidence:complete?['reviewed source']:[],reason:''}]}));
 }
 function cleanup(workspace) {
   const resolved=path.resolve(workspace);
@@ -61,6 +74,21 @@ test('main lifecycle checklist blocks approval until every item is covered',()=>
     writeChecklist(draft);
     approvePackage(draft,'001-test','Reviewed with checklist');
     assert.equal(validateChecklist(draft,'pre_publish').items.length,17);
+  } finally {cleanup(workspace);}
+});
+
+test('production plan approval and checklist block stale or unfinished packages',()=>{
+  const {workspace,draft}=fixture();
+  try {
+    writePreflight(draft,{complete:false});
+    assert.throws(()=>approvePackage(draft,'001-test','Reviewed'),/Preflight checklist incomplete: S01/);
+    writePreflight(draft);
+    assert.equal(validatePreflight(draft,'complete').checklist.items[0].status,'done');
+    const file=path.join(draft,'.content-studio','preflight','plan.json');
+    const changed=JSON.parse(fs.readFileSync(file,'utf8'));
+    changed.goal='Changed after review';
+    fs.writeFileSync(file,JSON.stringify(changed));
+    assert.throws(()=>approvePackage(draft,'001-test','Reviewed'),/stale/);
   } finally {cleanup(workspace);}
 });
 

@@ -5,6 +5,8 @@ description: Add reusable timed motion graphics and transition effects to an edi
 
 # Motion graphics and vlog effects
 
+Before changing the draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
+
 Read the channel rules and source draft before editing. Keep the source video untouched. Inspect sparse frames or short ranges to locate actions and cuts without decoding the entire master for analysis. Use speech as context, but only label ingredients actually supported by a frame or clear narration; do not invent quantities.
 
 For a finished vlog, create a JSON cue sheet with timed `effect` events. Choose `flash`, `swipe`, or `shutter` to conceal a known hard cut, and place that cut at the cue midpoint. Use `speed-lines` or `frame-pop` as shorter accents around action beats. All five effects can use per-cue `color` and `accent` hex colors. They add graphics over footage; they do not change the underlying shots. For Remotion vlogs, import the matching `VlogEffect` and `VlogTransition` components. Read [effects and transitions](references/effects.md) for cue examples, Remotion usage, and review checks.
