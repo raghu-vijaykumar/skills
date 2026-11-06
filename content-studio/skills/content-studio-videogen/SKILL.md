@@ -17,7 +17,7 @@ For carousel or post work, use `npx videogen content-check <id>` and `npx videog
 
 Use `npx videogen source fetch <url> --slug <name>` to cache external article media under the configured `sourceCacheDir`. Use `npx videogen probe <render.mp4> <seconds> --design 1080x1920` for objective frame measurements, then inspect the actual frame visually. These tools take their paths and palette from the project config.
 
-Use `content-studio-styles` to list built-in and project-enabled treatments. Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. A passing automated gate does not replace rendered-frame review.
+Use `content-studio-styles` to list built-in and project-enabled treatments. Read [video workflow](references/video.md) for video creation and review, [post workflow](references/posts.md) for multi-format packages, and [themes](references/themes.md) when registering or changing a theme or style. Rapid Take is the video-only satirical news style: 2–5 second beats, real source shots, meme punctuation, and 195–215 wpm narration. Tech Dispatch is carousel/post only. Read [Rapid Take](references/rapid-take.md) before authoring that treatment. A passing automated gate does not replace rendered-frame review.
 
 For a vlog composition, the package provides `VlogEffect` and `VlogTransition` at `@raghu-vijaykumar/videogen/runtime/vlogEffects`. Read the [motion-graphics effects guide](../content-studio-motion-graphics/references/effects.md) for presets, timing, and audio responsibilities; render a short pilot before applying a transition throughout an edit.
 
