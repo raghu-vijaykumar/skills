@@ -24,7 +24,7 @@ Use `branch-education` or `engineering-cutaway` for component-level 3D technical
 blender -b --python content-studio/skills/content-studio-style-engine/scripts/engineering_blender.py -- content-studio/skills/content-studio-style-engine/examples/illustrative-cpu-assembly.json preview.mp4
 ```
 
-For imported geometry, supply a component with `asset` (relative to the scene JSON), `name`, `position`, and `explode_offset`; GLB, glTF, and FBX are supported. Each imported asset is parented to a transform controller, enabling assembly/explosion while preserving the mesh hierarchy. Imported material opacity and highlighting are not yet implemented. The imported asset's own scale and coordinate origin determine its appearance. Review the rendered video before publication. Do not describe the sample geometry as a real CPU interior.
+For imported geometry, supply a component with `asset` (relative to the scene JSON), `name`, `position`, and `explode_offset`; GLB, glTF, and FBX are supported. Each imported asset is parented to a transform controller, enabling assembly/explosion while preserving the mesh hierarchy. Timeline-driven imported material opacity and highlighting are supported through `timeline` events (subject to the imported mesh's Principled BSDF materials). The imported asset's own scale and coordinate origin determine its appearance. Review the rendered video before publication. Do not describe the sample geometry as a real CPU interior.
 
 ## Rules
 
@@ -43,3 +43,7 @@ python content-studio/skills/content-studio-style-engine/scripts/style_engine.py
 python content-studio/skills/content-studio-style-engine/scripts/style_engine.py plan scenes.json --style auto --output style-plan.json
 python content-studio/skills/content-studio-style-engine/scripts/storyboard.py style-plan.json --output storyboard.html\npython -m unittest discover -s content-studio/skills/content-studio-style-engine/tests
 ```
+
+### Timeline events
+
+Supply a `timeline` array in the Blender scene JSON. Component events use `{"time_seconds":2,"component":"Logic die (illustrative)","highlight":true,"opacity":0.5}`; camera events use `{"type":"camera","time_seconds":3,"position":[6,-9,6],"target":[0,0,0.5],"scale":8}`. Times are seconds from the scene start. For narration alignment, use externally generated cue timestamps; automatic speech alignment is not implemented. The example CPU assembly demonstrates these events. Blender renders and visual fidelity still require local verification.
