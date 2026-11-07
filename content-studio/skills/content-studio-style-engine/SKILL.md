@@ -110,3 +110,15 @@ The canonical `content-studio-autocut/scripts/timeline.py` renderer now reads `t
 `content-studio-autocut/scripts/native_looks.py` is now imported by the canonical timeline renderer. Approved `creative_look` enhancements can specify either `preset` or a root-relative `.cube` LUT path plus `fade` in seconds; the renderer constructs per-clip FFmpeg blend graphs with fade-in/fade-out. Original footage is unchanged. The renderer keeps existing non-look enhancements in the graph.
 
 This integration has **not been run against real media**. The native timeline still does not apply profile-based transitions, motion graphics, or caption styling. For caption placement and loudness, use the separate `style_render.py` post-export command. Review the final video and source-time alignment before production use.
+
+## Native title motion and transitions
+
+The canonical `content-studio-autocut/scripts/timeline.py` renderer now imports `style_motion.py`. The `style_profile` and optional per-clip `style` select `motion_intensity`, `font_family`, `palette`, `caption_position`, `safe_margin_percent`, and `transition`.
+
+An explicit, approved clip-relative motion cue can be attached to a video clip:
+
+```json
+{"motion_graphics":[{"type":"title","text":"Dubai Day 3","start":1,"end":4,"review_status":"approved"}]}
+```
+
+The renderer draws a fading title overlay with the profile typography and placement. It does not invent titles or auto-generate overlays. `soft-cut` uses a brief fade-to-black at clip boundaries; `straight-cut` and `match-cut` remain hard cuts. This is **not** optical match-cut detection or a cross-dissolve between neighboring clips. The title renderer uses FFmpeg's `drawtext` filter and requires a build with drawtext/font support. Source audio is unaffected by video fades. Real-media tests and visual review are deferred.
