@@ -76,3 +76,14 @@ python content-studio/skills/content-studio-style-engine/scripts/looks.py --mode
 The looks file uses `{"ranges":[{"start":3,"end":8,"preset":"warm-golden","fade":0.5},{"start":12,"end":18,"lut":"my-look.cube","fade":0.7}]}`. Times are in the final video timeline. LUT paths resolve relative to the looks JSON. Each range uses exactly one `preset` or `lut`, and non-overlapping ranges are required. Fade is applied at the beginning and end of each range. `compare` previews are limited to 30 seconds. Preserve the original input and require human review before using the output.
 
 **Integration boundary:** The timeline command writes editable annotations but the existing Content Studio timeline renderer has **not yet been taught to consume** the new `creative_look` enhancement entries. For now, `render` is the supported path for applying looks to an exported master. Do not claim that editing the annotated timeline automatically changes the final render. Blender, FFmpeg and timeline integration have not been executed end-to-end.
+
+## Style consistency engine
+
+Use `scripts/style_consistency.py` to preserve channel identity across hybrid scenes while allowing purposeful per-scene editorial variations. Profiles: `travel-vlog`, `daily-vlog`, `technical-explainer`. Each specifies palette, font family, caption position, safe margins, transition, motion intensity, default look, loudness target, and maximum visual styles per video. Override only deliberate channel-level preferences with a JSON object.
+
+```bash
+python content-studio/skills/content-studio-style-engine/scripts/style_consistency.py --profile travel-vlog --kind scenes --input style-plan.json --output consistent-plan.json --report consistency-report.json
+python content-studio/skills/content-studio-style-engine/scripts/style_consistency.py --profile travel-vlog --kind timeline --input edit-timeline.json --output styled-timeline.json
+```
+
+This stage audits explicit scene-level differences, adds `presentation` metadata to scenes and `style` metadata to video clips, and retains original files. The report flags identity drift and excessive style variety for review. **The existing video renderer does not yet consume these annotations automatically**; this is a planning and metadata consistency layer, not a claim of pixel-level or audio-level enforcement. Actual typography, grading, motion, and loudness still require downstream renderer integration and human review.
