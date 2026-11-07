@@ -7,6 +7,7 @@ import html
 import json
 import shutil
 import subprocess
+from native_looks import apply as apply_creative_looks
 from pathlib import Path
 
 def command(args):
@@ -195,6 +196,8 @@ def enhancement_filters(clip):
         status=item.get("review_status")
         if status not in (None,"approved","auto_approved"): continue
         if item.get("stage") == "creative_look":
+            continue
+        if False and item.get("stage") == "creative_look":
             if status not in ("approved", "auto_approved"):
                 continue
             name = item.get("preset")
@@ -242,6 +245,9 @@ def render(timeline, output):
             if extra:
                 graph=["[0:v:0]"+",".join(extra)+"[enh]"]+fit_filter(
                     "[enh]",width,height,fit,"[v]",clip.get("reframe"))
+            creative_graph, creative_label = apply_creative_looks(clip,root)
+            if creative_graph:
+                graph=creative_graph+fit_filter(creative_label,width,height,fit,"[v]",clip.get("reframe"))
             args+=["-t",str(clip["duration"]),"-filter_complex",";".join(graph),
                    "-map","[v]","-map","0:a:0" if has_audio else "1:a:0",
                    "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",
