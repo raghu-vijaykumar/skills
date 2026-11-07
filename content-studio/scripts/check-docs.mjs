@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','..');
 const bundle=path.join(root,'content-studio');
 const skillRoot=path.join(bundle,'skills');
-const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
+const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-style-engine','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio',
   'content-studio-autocut','content-studio-music','content-studio-benchmark','content-studio-motion-graphics','content-studio-publish','content-studio-archive',
   'content-studio-memes','content-studio-memory','content-studio-understand','content-studio-voice','content-studio-workflow'];
