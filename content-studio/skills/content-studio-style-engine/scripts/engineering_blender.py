@@ -10,6 +10,7 @@ from pathlib import Path
 
 import bpy
 from mathutils import Vector
+from model_assets import load_component
 
 def material(name, color, alpha=1.0, metallic=0.2):
     mat = bpy.data.materials.new(name)
@@ -47,7 +48,7 @@ def animate_location(obj, start, end, frames):
             for kp in fc.keyframe_points:
                 kp.interpolation = "BEZIER"
 
-def make_scene(spec):
+def make_scene(spec, spec_dir=Path(".")):
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     fps = int(spec.get("fps", 24))
@@ -74,7 +75,7 @@ def make_scene(spec):
         if name in names:
             raise ValueError("Duplicate component name")
         names.add(name)
-        dims = [float(v) for v in item["dimensions"]]
+        dims = [float(v) for v in item.get("dimensions", [1, 1, 1])]
         pos = [float(v) for v in item["position"]]
         if len(dims) != 3 or len(pos) != 3 or any(not 0.01 <= d <= 20 for d in dims):
             raise ValueError("Invalid component dimensions/position")
@@ -84,8 +85,10 @@ def make_scene(spec):
         alpha = float(item.get("opacity", 1))
         if not 0.05 <= alpha <= 1:
             raise ValueError("Invalid opacity")
-        obj = cube(name, pos, dims, material(name + "_mat", rgba, alpha, float(item.get("metallic", 0.2))))
-        if item.get("highlight"):
+        obj = load_component(item["asset"], name, spec_dir)[0] if "asset" in item else cube(name, pos, dims, material(name + "_mat", rgba, alpha, float(item.get("metallic", 0.2))))
+        if "asset" in item:
+            obj.location = pos
+        if item.get("highlight") and obj.type == "MESH":
             obj.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Emission Color"].default_value = (0.08, 0.55, 0.8, 1)
             obj.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 0.5
         offset = Vector(item.get("explode_offset", [0, 0, 0]))
@@ -118,7 +121,7 @@ def main():
     if len(args) != 2:
         raise SystemExit("Usage: blender -b --python engineering_blender.py -- spec.json output.mp4")
     spec = json.loads(Path(args[0]).read_text(encoding="utf-8"))
-    scene = make_scene(spec)
+    scene = make_scene(spec, Path(args[0]).resolve().parent)
     target = Path(args[1]).resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     scene.render.image_settings.file_format = "FFMPEG"
