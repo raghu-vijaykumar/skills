@@ -16,7 +16,8 @@ STYLES = {
     "travel-scrapbook": {"label": "Travel scrapbook", "keywords": ["travel", "vlog", "trip", "beach", "hotel", "journey"], "techniques": ["postcard", "photo-parallax", "travel-route"], "renderer": "remotion"},
 }
 ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "fireship": "rapid-tech", "vox": "editorial-map", "lemmino": "cinematic-3d", "johnny-harris": "documentary", "branch-education": "engineering-cutaway", "brancheducation": "engineering-cutaway"}
-EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}\n# Node presence is only a prerequisite; Remotion package/project availability is not validated.
+EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
+# Node presence is only a prerequisite; Remotion package/project availability is not validated.
 
 def resolve(name):
     name = ALIASES.get(name, name)
