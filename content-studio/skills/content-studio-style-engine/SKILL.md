@@ -104,3 +104,9 @@ The profile's **color, caption placement/font and loudness** now have a concrete
 The canonical `content-studio-autocut/scripts/timeline.py` renderer now reads `timeline.style_profile.look` and optional `clip.style.look` to apply a built-in grade during per-clip FFmpeg rendering. Approved `clip.enhancements[]` entries with `stage: "creative_look"`, `preset`, `source_start`, and `source_end` are also consumed; unapproved looks are ignored. Explicit approved looks take precedence over the clip's default profile grade. The renderer includes style data in its cache hash.
 
 **Scope:** Native renderer currently supports built-in EQ looks only. Imported LUTs, feathered per-section transitions, profile-based typography, transition effects, and motion graphics are not yet consumed by this native renderer. Use `looks.py render` for LUTs and feathered looks, or `style_render.py` for post-export subtitle styling and optional audio normalization. Rendering behavior and timestamp alignment are untested and require local validation before production use.
+
+## Native creative-look adapter (additional support)
+
+`content-studio-autocut/scripts/native_looks.py` is now imported by the canonical timeline renderer. Approved `creative_look` enhancements can specify either `preset` or a root-relative `.cube` LUT path plus `fade` in seconds; the renderer constructs per-clip FFmpeg blend graphs with fade-in/fade-out. Original footage is unchanged. The renderer keeps existing non-look enhancements in the graph.
+
+This integration has **not been run against real media**. The native timeline still does not apply profile-based transitions, motion graphics, or caption styling. For caption placement and loudness, use the separate `style_render.py` post-export command. Review the final video and source-time alignment before production use.
