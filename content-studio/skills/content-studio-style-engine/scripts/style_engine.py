@@ -15,7 +15,7 @@ STYLES = {
     "travel-scrapbook": {"label": "Travel scrapbook", "keywords": ["travel", "vlog", "trip", "beach", "hotel", "journey"], "techniques": ["postcard", "photo-parallax", "travel-route"], "renderer": "remotion"},
 }
 ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "fireship": "rapid-tech", "vox": "editorial-map", "lemmino": "cinematic-3d", "johnny-harris": "documentary"}
-EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
+EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}\n# Node presence is only a prerequisite; Remotion package/project availability is not validated.
 
 def resolve(name):
     name = ALIASES.get(name, name)
@@ -51,7 +51,7 @@ def plan(data, selected="auto"):
             "id": scene["id"], "duration_seconds": duration, "style": style,
             "label": definition["label"], "techniques": definition["techniques"],
             "renderer": renderer, "renderer_detected": available,
-            "status": "ready_for_review" if available else "needs_renderer",
+            "status": "planned_not_rendered" if available else "needs_renderer",
             "evidence": scene.get("evidence", []), "visual_intent": scene.get("visual_intent", ""),
         })
         if not available:
