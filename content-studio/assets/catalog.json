@@ -1,0 +1,28 @@
+{
+  "schema": "content-studio.asset-catalog.v1",
+  "assets": [
+    {
+      "id": "like-share-subscribe",
+      "category": "call-to-action",
+      "title": "Like • Share • Subscribe",
+      "tags": [
+        "like",
+        "share",
+        "subscribe",
+        "bell",
+        "cta",
+        "youtube"
+      ],
+      "source": "overlays/like-share-subscribe/OverlayComposition.tsx",
+      "manifest": "overlays/like-share-subscribe/asset.json",
+      "duration_seconds": 4,
+      "aspect_ratios": [
+        "16:9",
+        "9:16"
+      ],
+      "placement": "bottom-center",
+      "rendered_files": {},
+      "approval_required": true
+    }
+  ]
+}
