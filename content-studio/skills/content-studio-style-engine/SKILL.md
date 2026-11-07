@@ -47,3 +47,14 @@ python content-studio/skills/content-studio-style-engine/scripts/storyboard.py s
 ### Timeline events
 
 Supply a `timeline` array in the Blender scene JSON. Component events use `{"time_seconds":2,"component":"Logic die (illustrative)","highlight":true,"opacity":0.5}`; camera events use `{"type":"camera","time_seconds":3,"position":[6,-9,6],"target":[0,0,0.5],"scale":8}`. Times are seconds from the scene start. For narration alignment, use externally generated cue timestamps; automatic speech alignment is not implemented. The example CPU assembly demonstrates these events. Blender renders and visual fidelity still require local verification.
+
+## Selective video filter presets
+
+Use `scripts/video_filters.py` for optional creator-neutral, Instagram-like color looks on **only selected time ranges** of an existing SDR video. Available presets: `warm-golden`, `cool-cinematic`, `vintage-fade`, `vibrant-travel`, `soft-portrait`, `mono-noir`, `clean-natural`. These are approximate FFmpeg color grades, not copies of proprietary Instagram filters. Example:
+
+```bash
+python content-studio/skills/content-studio-style-engine/scripts/video_filters.py list
+python content-studio/skills/content-studio-style-engine/scripts/video_filters.py render --input input.mp4 --ranges content-studio/skills/content-studio-style-engine/examples/video-filter-ranges.json --output filtered.mp4
+```
+
+The ranges file uses `{"ranges":[{"start":3.5,"end":8.2,"preset":"warm-golden"}]}` with seconds relative to the input video's timeline. Ranges cannot overlap. Unselected video portions retain their original color values through the filter graph, although the entire video is re-encoded to H.264 SDR and may have minor compression differences. Audio is stream-copied when compatible with MP4. No automatic HDR/Dolby Vision handling, color-space conversion, crossfade between looks, or LUT import yet. Preview before accepting a grade; don't automatically apply filters to all scenes. This filter step should run after correction/shot matching, not as a replacement for them.
