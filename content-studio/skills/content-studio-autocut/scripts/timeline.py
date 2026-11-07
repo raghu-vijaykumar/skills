@@ -161,6 +161,28 @@ def fit_filter(label, width, height, fit, out, reframe=None):
         ]
     raise ValueError("Unknown fit mode: "+fit)
 
+STYLE_LOOKS = {
+    "warm-golden": (1.06, 0.015, 1.16, 1.04),
+    "cool-cinematic": (1.13, -0.015, 0.82, 0.97),
+    "vintage-fade": (0.88, 0.035, 0.72, 1.08),
+    "vibrant-travel": (1.08, 0.01, 1.30, 1.02),
+    "soft-portrait": (0.95, 0.02, 0.94, 1.05),
+    "mono-noir": (1.22, -0.025, 0, 0.94),
+    "clean-natural": (1.02, 0, 1.04, 1.0),
+}
+
+def style_filters(clip, timeline):
+    """Resolve per-clip creative look, falling back to channel style profile."""
+    profile = timeline.get("style_profile") or {}
+    style = clip.get("style") or {}
+    name = style.get("look", profile.get("look"))
+    if not name:
+        return []
+    if name not in STYLE_LOOKS:
+        raise ValueError("Unknown timeline style look: " + str(name))
+    contrast, brightness, saturation, gamma = STYLE_LOOKS[name]
+    return [f"eq=contrast={contrast}:brightness={brightness}:saturation={saturation}:gamma={gamma}"]
+
 def enhancement_filters(clip):
     """Translate source-time enhancements into clip-relative FFmpeg filters."""
     filters=[]
@@ -194,6 +216,8 @@ def render(timeline, output):
         settings={k:clip[k] for k in ("source","source_in","source_out","audio_gain_db")}
         if clip.get("reframe"): settings["reframe"]=clip["reframe"]
         if clip.get("enhancements"): settings["enhancements"]=clip["enhancements"]
+        if timeline.get("style_profile"): settings["style_profile"]=timeline["style_profile"]
+        if clip.get("style"): settings["style"]=clip["style"]
         settings.update(fps=timeline["fps"],width=width,height=height,fit=fit,
                         mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
         digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
@@ -205,7 +229,7 @@ def render(timeline, output):
             args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
             if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
             graph=fit_filter("[0:v:0]",width,height,fit,"[v]",clip.get("reframe"))
-            extra=enhancement_filters(clip)
+            extra=enhancement_filters(clip)+style_filters(clip,timeline)
             if extra:
                 graph=["[0:v:0]"+",".join(extra)+"[enh]"]+fit_filter(
                     "[enh]",width,height,fit,"[v]",clip.get("reframe"))
