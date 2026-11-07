@@ -13,7 +13,7 @@ Use this skill when the user asks for a recognizable visual storytelling treatme
 2. Run `python scripts/style_engine.py list` to inspect supported treatments and renderer dependencies.
 3. Prepare a JSON input containing `topic`, `format`, and `scenes` with `id`, `narration`, `duration_seconds`, optional `style`, `visual_intent`, and `evidence`.
 4. Run `python scripts/style_engine.py plan input.json --output style-plan.json [--style auto]`. The plan selects treatments per scene, maps techniques to renderer requirements, and emits warnings for uninstalled renderers.
-5. Review the plan with the user before generating assets. Do not claim a render was produced by this planning skill. Existing Remotion/Manim/Blender or motion-graphics pipelines must render the approved plan; unsupported effects are marked `needs_renderer`.
+5. Generate a static review storyboard with `python scripts/storyboard.py style-plan.json --output storyboard.html`. This is a visualization of the plan, not video frames. Review the plan with the user before generating assets. Do not claim a render was produced by this planning skill. Existing Remotion/Manim/Blender or motion-graphics pipelines must render the approved plan; unsupported effects are marked `needs_renderer`.
 6. Produce short representative review clips, inspect first/middle/last frames and transitions, gather approvals, then create the editable timeline. Keep originals unchanged.
 
 ## Rules
@@ -31,5 +31,5 @@ Use this skill when the user asks for a recognizable visual storytelling treatme
 ```bash
 python content-studio/skills/content-studio-style-engine/scripts/style_engine.py list
 python content-studio/skills/content-studio-style-engine/scripts/style_engine.py plan scenes.json --style auto --output style-plan.json
-python -m unittest discover -s content-studio/skills/content-studio-style-engine/tests
+python content-studio/skills/content-studio-style-engine/scripts/storyboard.py style-plan.json --output storyboard.html\npython -m unittest discover -s content-studio/skills/content-studio-style-engine/tests
 ```
