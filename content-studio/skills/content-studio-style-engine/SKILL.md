@@ -62,3 +62,17 @@ The ranges file uses `{"ranges":[{"start":3.5,"end":8.2,"preset":"warm-golden"}]
 ### Review a short color-filter preview
 
 Use `--preview-start 3 --preview-duration 5` with the `video_filters.py render` command to export only a 5-second segment. The filter ranges remain referenced to the original input timeline. The tool rejects detected PQ/HLG or BT.2020 sources rather than silently treating HDR as SDR. Compare the preview with the source before approving a full-length export. The filter stage currently operates on a finished MP4, not the editable Content Studio timeline.
+
+## Editable looks, LUTs and before/after previews
+
+The `scripts/looks.py` CLI supports three modes: `timeline` annotates a **copy** of an existing Content Studio timeline JSON with `creative_look` enhancements and source/timeline timestamps; `render` applies graded looks to a finished SDR video; `compare` renders a short side-by-side original-versus-graded MP4.
+
+```bash
+python content-studio/skills/content-studio-style-engine/scripts/looks.py --mode timeline --input edit-timeline.json --looks looks.json --output edit-timeline-with-looks.json
+python content-studio/skills/content-studio-style-engine/scripts/looks.py --mode render --input master.mp4 --looks looks.json --output graded.mp4
+python content-studio/skills/content-studio-style-engine/scripts/looks.py --mode compare --input master.mp4 --looks looks.json --output comparison.mp4 --start 4 --duration 5
+```
+
+The looks file uses `{"ranges":[{"start":3,"end":8,"preset":"warm-golden","fade":0.5},{"start":12,"end":18,"lut":"my-look.cube","fade":0.7}]}`. Times are in the final video timeline. LUT paths resolve relative to the looks JSON. Each range uses exactly one `preset` or `lut`, and non-overlapping ranges are required. Fade is applied at the beginning and end of each range. `compare` previews are limited to 30 seconds. Preserve the original input and require human review before using the output.
+
+**Integration boundary:** The timeline command writes editable annotations but the existing Content Studio timeline renderer has **not yet been taught to consume** the new `creative_look` enhancement entries. For now, `render` is the supported path for applying looks to an exported master. Do not claim that editing the annotated timeline automatically changes the final render. Blender, FFmpeg and timeline integration have not been executed end-to-end.
