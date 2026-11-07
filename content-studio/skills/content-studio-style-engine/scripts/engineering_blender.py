@@ -11,6 +11,7 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 from model_assets import load_component
+from engineering_timeline import apply_events
 
 def material(name, color, alpha=1.0, metallic=0.2):
     mat = bpy.data.materials.new(name)
@@ -70,6 +71,7 @@ def make_scene(spec, spec_dir=Path(".")):
     if not isinstance(components, list) or not 1 <= len(components) <= 80:
         raise ValueError("Supply 1-80 explicitly authored components")
     names = set()
+    component_objects = {}
     for i, item in enumerate(components):
         name = str(item["name"])
         if name in names:
@@ -88,6 +90,7 @@ def make_scene(spec, spec_dir=Path(".")):
         obj = load_component(item["asset"], name, spec_dir)[0] if "asset" in item else cube(name, pos, dims, material(name + "_mat", rgba, alpha, float(item.get("metallic", 0.2))))
         if "asset" in item:
             obj.location = pos
+        component_objects[name] = obj
         if item.get("highlight") and obj.type == "MESH":
             obj.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Emission Color"].default_value = (0.08, 0.55, 0.8, 1)
             obj.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 0.5
@@ -114,6 +117,7 @@ def make_scene(spec, spec_dir=Path(".")):
         light.energy = power
         light.shape = "DISK"
         light.size = size
+    apply_events(spec, component_objects, camera, fps, frames)
     return scene
 
 def main():
