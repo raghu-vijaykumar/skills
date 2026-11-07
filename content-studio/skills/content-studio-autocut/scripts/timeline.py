@@ -8,6 +8,7 @@ import json
 import shutil
 import subprocess
 from native_looks import apply as apply_creative_looks
+from style_motion import motion_filters, transition_filters
 from pathlib import Path
 
 def command(args):
@@ -206,6 +207,9 @@ def enhancement_filters(clip):
     return filters
 
 
+def join_filters(values):
+    return ",".join(values)
+
 def render(timeline, output):
     root=Path(timeline["source_root"]).resolve()
     video=validate(timeline,root)
@@ -221,6 +225,7 @@ def render(timeline, output):
         if clip.get("enhancements"): settings["enhancements"]=clip["enhancements"]
         if timeline.get("style_profile"): settings["style_profile"]=timeline["style_profile"]
         if clip.get("style"): settings["style"]=clip["style"]
+        if clip.get("motion_graphics"): settings["motion_graphics"]=clip["motion_graphics"]
         settings.update(fps=timeline["fps"],width=width,height=height,fit=fit,
                         mtime=src.stat().st_mtime_ns,size=src.stat().st_size)
         digest=hashlib.sha256(json.dumps(settings,sort_keys=True).encode()).hexdigest()[:20]
@@ -231,17 +236,18 @@ def render(timeline, output):
             has_audio=bool(audio.stdout.strip())
             args=["ffmpeg","-y","-v","error","-ss",str(clip["source_in"]),"-i",str(src)]
             if not has_audio: args+=["-f","lavfi","-i","anullsrc=r=48000:cl=stereo"]
-            graph=fit_filter("[0:v:0]",width,height,fit,"[v]",clip.get("reframe"))
             extra=enhancement_filters(clip)+style_filters(clip,timeline)
+            graph=[]
+            label="[0:v:0]"
             if extra:
-                graph=["[0:v:0]"+",".join(extra)+"[enh]"]+fit_filter(
-                    "[enh]",width,height,fit,"[v]",clip.get("reframe"))
-            creative_graph, creative_label = apply_creative_looks(clip,root)
-            if creative_graph:
-                if extra:
-                    graph=["[0:v:0]"+",".join(extra)+"[enh]"]
-                    creative_graph, creative_label=apply_creative_looks(clip,root,"[enh]")
-                graph+=creative_graph+fit_filter(creative_label,width,height,fit,"[v]",clip.get("reframe"))
+                graph.append(label+","+join_filters(extra)+"[enh]")
+                label="[enh]"
+            creative_graph, creative_label=apply_creative_looks(clip,root,label)
+            graph.extend(creative_graph)
+            label=creative_label
+            graph.extend(fit_filter(label,width,height,fit,"[fitted]",clip.get("reframe")))
+            final_filters=motion_filters(clip,timeline)+transition_filters(clip,timeline)
+            graph.append("[fitted]"+(",".join(final_filters) if final_filters else "null")+"[v]")
             args+=["-t",str(clip["duration"]),"-filter_complex",";".join(graph),
                    "-map","[v]","-map","0:a:0" if has_audio else "1:a:0",
                    "-r",str(timeline["fps"]),"-c:v","libx264","-preset","veryfast","-crf","20",
