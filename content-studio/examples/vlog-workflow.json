@@ -6,6 +6,11 @@
     "language": "Kannada-English",
     "tone": "natural conversational",
     "context": "We visited Burj Khalifa at sunrise, Miracle Garden and the Dubai Fountain. Include personal experiences I provide, never invent details.",
+    "frame_interval_seconds": 5,
+    "grid_columns": 5,
+    "grid_rows": 4,
+    "frame_width": 480,
+    "contact_sheets": true,
     "use_original_dialogue": true,
     "voice": "my-voice-when-configured",
     "require_script_approval": true

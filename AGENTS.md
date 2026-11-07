@@ -61,6 +61,7 @@ python -m unittest discover -s content-studio/skills/content-studio-autocut/test
 python -m unittest discover -s content-studio/skills/content-studio-music/tests -p "test_*.py"
 python -m unittest discover -s content-studio/skills/content-studio-audio/tests -p "test_*.py"
 python -m unittest discover -s content-studio/skills/content-studio-workflow/tests -p "test_*.py"
+python -m unittest discover -s content-studio/skills/content-studio-understand/tests -p "test_*.py"
 node --test content-studio/tests/*.test.mjs content-studio/skills/content-studio-videogen/tests/*.test.mjs
 ```
 

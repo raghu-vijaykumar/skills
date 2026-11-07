@@ -6,7 +6,7 @@ description: Bootstrap a consented personal voice profile from user-supplied sam
 
 Before changing production material, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
-This skill is the **voice cloning bootstrap**, not an installed synthesis model. It enrolls and validates voice samples locally, normalizes them to 24 kHz mono WAV, and writes a profile manifest. It does not download models, clone speech, or produce voiceover yet.
+This skill is the **voice cloning bootstrap**, not an installed synthesis model. It enrolls and validates voice samples locally, normalizes them to 24 kHz mono WAV, and writes a profile manifest. It does not download models, clone speech, or produce voiceover yet. It also does not write scripts; use `content-studio-understand` for evidence-linked narration, then return here after the script and timing are approved.
 
 ## Enroll (after the user supplies samples)
 

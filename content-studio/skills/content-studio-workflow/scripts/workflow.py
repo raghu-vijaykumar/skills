@@ -23,8 +23,20 @@ def main():
         if not video.is_file(): raise FileNotFoundError(video)
         script=Path(__file__).resolve().parents[2]/"content-studio-understand/scripts/understand.py"
         voiceover=config.get("voiceover",{})
+        interval=float(voiceover.get("frame_interval_seconds",5))
+        columns=int(voiceover.get("grid_columns",5))
+        rows=int(voiceover.get("grid_rows",4))
+        width=int(voiceover.get("frame_width",480))
+        command=[sys.executable,str(script),"--video",str(video),"--out",str(root/".content-studio/understanding"),"--interval",str(interval),"--grid-cols",str(columns),"--grid-rows",str(rows),"--frame-width",str(width)]
+        context_file=voiceover.get("context_file")
+        if context_file:
+            context_path=(root/context_file).resolve()
+            if not context_path.is_relative_to(root):raise ValueError("context_file escapes workspace")
+            if not context_path.is_file():raise FileNotFoundError(context_path)
+            command += ["--context",str(context_path)]
+        if not voiceover.get("contact_sheets",True):command.append("--no-grid")
         steps=[
-            {"id":"extract_voiceover_evidence","plan_step":"S03","command":[sys.executable,str(script),"--video",str(video),"--out",str(root/".content-studio/understanding")],"outputs":[".content-studio/understanding/evidence.json"],"retries":1},
+            {"id":"extract_voiceover_evidence","plan_step":"S03","command":command,"outputs":[".content-studio/understanding/evidence.json"],"retries":1},
             {"id":"review_voiceover_script","depends_on":["extract_voiceover_evidence"],"approval_required":True},
             {"id":"review_final_video","depends_on":["review_voiceover_script"],"approval_required":True}
         ] if voiceover.get("enabled",False) else [{"id":"review_final_video","approval_required":True}]
