@@ -98,3 +98,9 @@ python content-studio/skills/content-studio-style-engine/scripts/style_render.py
 ```
 
 The profile's **color, caption placement/font and loudness** now have a concrete post-export FFmpeg rendering path. Transition and motion intensity preferences still require native timeline/motion-graphics renderer adapters, and this does not yet integrate into the default `edit join` command. This is a single-pass color look, not per-shot color matching. Captions are optional and should not be generated for vlogs unless requested. The audio target is a one-pass approximation and requires listening/measurement review. Runtime testing is deferred.
+
+## Native timeline rendering adapter
+
+The canonical `content-studio-autocut/scripts/timeline.py` renderer now reads `timeline.style_profile.look` and optional `clip.style.look` to apply a built-in grade during per-clip FFmpeg rendering. Approved `clip.enhancements[]` entries with `stage: "creative_look"`, `preset`, `source_start`, and `source_end` are also consumed; unapproved looks are ignored. Explicit approved looks take precedence over the clip's default profile grade. The renderer includes style data in its cache hash.
+
+**Scope:** Native renderer currently supports built-in EQ looks only. Imported LUTs, feathered per-section transitions, profile-based typography, transition effects, and motion graphics are not yet consumed by this native renderer. Use `looks.py render` for LUTs and feathered looks, or `style_render.py` for post-export subtitle styling and optional audio normalization. Rendering behavior and timestamp alignment are untested and require local validation before production use.
