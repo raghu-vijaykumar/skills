@@ -45,12 +45,26 @@ def filters(ranges):
         ]))
     return ",".join(parts)
 
+def ensure_sdr(source):
+    if not shutil.which("ffprobe"):
+        raise RuntimeError("ffprobe is required for HDR safety check")
+    result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0",
+                             "-show_entries", "stream=color_transfer,color_primaries",
+                             "-of", "json", str(source)], capture_output=True, text=True, check=True)
+    streams = json.loads(result.stdout).get("streams", [])
+    if not streams:
+        raise ValueError("No video stream found")
+    stream = streams[0]
+    if stream.get("color_transfer") in ("smpte2084", "arib-std-b67") or stream.get("color_primaries") == "bt2020":
+        raise ValueError("HDR/HLG source unsupported: tone-map to SDR first")
+
 def render(input_path, output_path, ranges, ffmpeg="ffmpeg", crf=18, preset="medium", preview=None):
     source, target = Path(input_path).resolve(), Path(output_path).resolve()
     if not source.is_file() or source == target:
         raise ValueError("Input must exist and output must be a different file")
     if not shutil.which(ffmpeg):
         raise RuntimeError("FFmpeg not found")
+    ensure_sdr(source)
     if not 0 <= crf <= 51:
         raise ValueError("CRF must be 0..51")
     if preview is not None and (preview[0] < 0 or not 0 < preview[1] <= 30):
