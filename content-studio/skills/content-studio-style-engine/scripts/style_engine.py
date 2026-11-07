@@ -11,10 +11,11 @@ STYLES = {
     "rapid-tech": {"label": "Rapid technical explainer", "keywords": ["code", "software", "api", "programming", "developer", "cloud"], "techniques": ["code-highlight", "kinetic-type", "rapid-cut"], "renderer": "remotion"},
     "editorial-map": {"label": "Editorial geography explainer", "keywords": ["map", "country", "geography", "history", "route", "border"], "techniques": ["route-trace", "map-camera", "data-overlay"], "renderer": "remotion"},
     "cinematic-3d": {"label": "Cinematic 3D reconstruction", "keywords": ["machine", "hardware", "engineering", "mechanism", "3d"], "techniques": ["cutaway", "orbit-camera", "dramatic-light"], "renderer": "blender"},
+    "engineering-cutaway": {"label": "3D engineering cutaway explainer", "keywords": ["processor", "chip", "engine", "circuit", "electronics", "inside", "assembly", "architecture", "mechanical"], "techniques": ["layered-exploded-view", "transparent-shell", "component-isolation", "cross-section", "assembly-sequence", "camera-dolly"], "renderer": "blender"},
     "documentary": {"label": "Evidence-led documentary", "keywords": ["investigation", "documentary", "evidence", "archive", "interview"], "techniques": ["archival-composite", "timeline", "source-callout"], "renderer": "remotion"},
     "travel-scrapbook": {"label": "Travel scrapbook", "keywords": ["travel", "vlog", "trip", "beach", "hotel", "journey"], "techniques": ["postcard", "photo-parallax", "travel-route"], "renderer": "remotion"},
 }
-ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "fireship": "rapid-tech", "vox": "editorial-map", "lemmino": "cinematic-3d", "johnny-harris": "documentary"}
+ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "fireship": "rapid-tech", "vox": "editorial-map", "lemmino": "cinematic-3d", "johnny-harris": "documentary", "branch-education": "engineering-cutaway", "brancheducation": "engineering-cutaway"}
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}\n# Node presence is only a prerequisite; Remotion package/project availability is not validated.
 
 def resolve(name):
