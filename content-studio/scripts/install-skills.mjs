@@ -9,7 +9,7 @@ const sourceBundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
-const names = ['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
+const names = ['content-studio','content-studio-ideagen','content-studio-styles','content-studio-style-engine','content-studio-videogen',
   'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio','content-studio-autocut','content-studio-music',
   'content-studio-benchmark','content-studio-motion-graphics','content-studio-publish','content-studio-archive',
   'content-studio-memes','content-studio-memory','content-studio-understand','content-studio-voice','content-studio-workflow'];
