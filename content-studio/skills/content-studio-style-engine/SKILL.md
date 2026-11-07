@@ -58,3 +58,7 @@ python content-studio/skills/content-studio-style-engine/scripts/video_filters.p
 ```
 
 The ranges file uses `{"ranges":[{"start":3.5,"end":8.2,"preset":"warm-golden"}]}` with seconds relative to the input video's timeline. Ranges cannot overlap. Unselected video portions retain their original color values through the filter graph, although the entire video is re-encoded to H.264 SDR and may have minor compression differences. Audio is stream-copied when compatible with MP4. No automatic HDR/Dolby Vision handling, color-space conversion, crossfade between looks, or LUT import yet. Preview before accepting a grade; don't automatically apply filters to all scenes. This filter step should run after correction/shot matching, not as a replacement for them.
+
+### Review a short color-filter preview
+
+Use `--preview-start 3 --preview-duration 5` with the `video_filters.py render` command to export only a 5-second segment. The filter ranges remain referenced to the original input timeline. The tool rejects detected PQ/HLG or BT.2020 sources rather than silently treating HDR as SDR. Compare the preview with the source before approving a full-length export. The filter stage currently operates on a finished MP4, not the editable Content Studio timeline.
