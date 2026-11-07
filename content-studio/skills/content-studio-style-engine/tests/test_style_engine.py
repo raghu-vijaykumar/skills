@@ -11,6 +11,13 @@ class StyleEngineTests(unittest.TestCase):
     def test_alias(self):
         self.assertEqual(engine.resolve("3blue1brown"), "math-visual")
 
+    def test_branch_education(self):
+        self.assertEqual(engine.resolve("branch-education"), "engineering-cutaway")
+        self.assertEqual(engine.recommend("processor chip circuit"), "engineering-cutaway")
+        result = engine.plan({"scenes": [{"id": "cpu", "duration_seconds": 10, "style": "branch-education"}]})
+        self.assertEqual(result["scenes"][0]["renderer"], "blender")
+        self.assertIn("cross-section", result["scenes"][0]["techniques"])
+
     def test_recommend(self):
         self.assertEqual(engine.recommend("gradient vector equation"), "math-visual")
 
