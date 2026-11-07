@@ -176,7 +176,7 @@ def style_filters(clip, timeline):
     profile = timeline.get("style_profile") or {}
     style = clip.get("style") or {}
     name = style.get("look", profile.get("look"))
-    if not name:
+    if not name or any(e.get("stage") == "creative_look" and e.get("review_status") in ("approved", "auto_approved") for e in (clip.get("enhancements") or [])):
         return []
     if name not in STYLE_LOOKS:
         raise ValueError("Unknown timeline style look: " + str(name))
@@ -194,6 +194,15 @@ def enhancement_filters(clip):
         if end<=start: continue
         status=item.get("review_status")
         if status not in (None,"approved","auto_approved"): continue
+        if item.get("stage") == "creative_look":
+            if status not in ("approved", "auto_approved"):
+                continue
+            name = item.get("preset")
+            if name not in STYLE_LOOKS:
+                raise ValueError("Unsupported creative look in timeline: " + str(name))
+            c, b, sat, gamma = STYLE_LOOKS[name]
+            filters.append(f"eq=contrast={c}:brightness={b}:saturation={sat}:gamma={gamma}:enable='between(t,{start:.3f},{end:.3f})'")
+            continue
         if item.get("stage") in {"polish", "match", "sharpen"}:
             filters.extend(value for value in (item.get("filters") or []) if value)
             continue
