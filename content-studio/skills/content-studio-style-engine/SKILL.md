@@ -16,6 +16,10 @@ Use this skill when the user asks for a recognizable visual storytelling treatme
 5. Generate a static review storyboard with `python scripts/storyboard.py style-plan.json --output storyboard.html`. This is a visualization of the plan, not video frames. Review the plan with the user before generating assets. Do not claim a render was produced by this planning skill. Existing Remotion/Manim/Blender or motion-graphics pipelines must render the approved plan; unsupported effects are marked `needs_renderer`.
 6. Produce short representative review clips, inspect first/middle/last frames and transitions, gather approvals, then create the editable timeline. Keep originals unchanged.
 
+## Engineering cutaway preset
+
+Use `branch-education` or `engineering-cutaway` for component-level 3D technical explanations. Plan Blender scenes with exploded assemblies, selective transparency, isolated components, cross sections, and camera dollies. Require a physically meaningful component hierarchy and approved source references or modeled assets. Preserve spatial relationships and scale; never imply that a generic box or invented interior is a faithful engineering model. This preset is a planning contract until Blender scene generation is integrated.
+
 ## Rules
 
 - A creator name is shorthand for general techniques, not a request to copy proprietary character designs, distinctive branding, narration, or original artwork.
