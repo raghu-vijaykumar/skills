@@ -87,3 +87,14 @@ python content-studio/skills/content-studio-style-engine/scripts/style_consisten
 ```
 
 This stage audits explicit scene-level differences, adds `presentation` metadata to scenes and `style` metadata to video clips, and retains original files. The report flags identity drift and excessive style variety for review. **The existing video renderer does not yet consume these annotations automatically**; this is a planning and metadata consistency layer, not a claim of pixel-level or audio-level enforcement. Actual typography, grading, motion, and loudness still require downstream renderer integration and human review.
+
+## Applying an approved profile to the exported video
+
+`scripts/style_render.py` applies the profile's built-in color look to an SDR master; optionally burns in SRT/ASS captions with the profile's font, placement, and safe margin, and performs one-pass EBU R128 loudness normalization. The input master is never overwritten.
+
+```bash
+python content-studio/skills/content-studio-style-engine/scripts/style_render.py --input master.mp4 --output styled.mp4 --profile travel-vlog
+python content-studio/skills/content-studio-style-engine/scripts/style_render.py --input master.mp4 --output styled-captioned.mp4 --profile technical-explainer --captions captions.srt --master-audio
+```
+
+The profile's **color, caption placement/font and loudness** now have a concrete post-export FFmpeg rendering path. Transition and motion intensity preferences still require native timeline/motion-graphics renderer adapters, and this does not yet integrate into the default `edit join` command. This is a single-pass color look, not per-shot color matching. Captions are optional and should not be generated for vlogs unless requested. The audio target is a one-pass approximation and requires listening/measurement review. Runtime testing is deferred.
