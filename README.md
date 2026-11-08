@@ -17,7 +17,7 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio-benchmark](content-studio/skills/content-studio-benchmark/SKILL.md) | Synchronized native-resolution enhancement comparison grids |
 | [content-studio-motion-graphics](content-studio/skills/content-studio-motion-graphics/SKILL.md) | Timed vlog overlays, graphic effects, and Remotion transitions |
 | [content-studio-understand](content-studio/skills/content-studio-understand/SKILL.md) | Timestamped contact sheets, frame evidence, and voiceover drafts for review |
-| [content-studio-voice](content-studio/skills/content-studio-voice/SKILL.md) | Consented personal voice profile for future narration |
+| [content-studio-voice](content-studio/skills/content-studio-voice/SKILL.md) | Consented voice profile and cloned IndicF5 narration |
 | [content-studio-memes](content-studio/skills/content-studio-memes/SKILL.md) | Private meme catalogue with reviewable vlog insertions |
 | [content-studio-memory](content-studio/skills/content-studio-memory/SKILL.md) | Local editing preferences learned from human decisions |
 | [content-studio-publish](content-studio/skills/content-studio-publish/SKILL.md) | Reviewed package approval, YouTube now/schedule, Instagram now |

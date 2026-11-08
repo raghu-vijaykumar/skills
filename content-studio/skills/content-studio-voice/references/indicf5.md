@@ -43,19 +43,43 @@ released weights directly:
   decode reference audio with SoundFile and return a tensor instead of
   installing another codec stack.
 
+## Skill commands
+
+```bash
+# Render every section; resumable by text hash and render settings.
+python content-studio/skills/content-studio-voice/scripts/voice.py \
+  --workspace "/path/to/draft" synthesize \
+  --profile my-voice --script narration.json \
+  --model-dir "/path/to/IndicF5" \
+  --reference "/private/voice/reference.wav" \
+  --reference-text "exact transcript of the reference clip" \
+  --nfe-step 32
+
+# Fit the rendered sections to the master and build a review preview.
+python content-studio/skills/content-studio-voice/scripts/voice.py \
+  --workspace "/path/to/draft" assemble \
+  --script narration.json --video "/path/to/master.mp4" --preview
+```
+
+The script JSON contains ordered `segments` with `id`, `start`, `end`, and
+`text`. Outputs live under `<workspace>/.content-studio/voice/narration/`.
+Synthesis refuses to run without an affirmed consent note. `assemble` needs
+only FFmpeg; `synthesize` needs the IndicF5 environment.
+
 ## Pipeline
 
 1. Enroll the speaker with `scripts/voice.py` and an explicit consent note.
 2. Write the narration as timestamped sections. Keep the creator's source text,
    the TTS text, and the section start/end together.
-3. Synthesize each section independently. Key a resumable manifest by text hash
-   and render parameters so interrupted runs can continue.
+3. Synthesize each section with `voice.py synthesize`. The manifest is keyed by
+   text hash and render parameters, so interrupted runs can continue.
 4. Round-trip transcribe the first sample and spot-check later sections. A
    clone that does not transcribe back to the input is not approved.
-5. Fit each section to the timeline with at most 12% `atempo`. Report every
-   overrun; do not silently speed up or trim the script.
-6. Loudness-normalize the assembled track to `-16 LUFS`, true peak `-1.5 dBTP`.
-7. Render a 1080p review preview and require a human listening review before
+5. Fit each section with `voice.py assemble`, which applies at most 12%
+   `atempo` and reports every overrun; do not silently speed up or trim the
+   script.
+6. `assemble` loudness-normalizes the track to `-16 LUFS`, true peak `-1.5 dBTP`.
+7. Render the 1080p review preview and require a human listening review before
    the production mux or publication.
 
 ## Quality gates

@@ -25,5 +25,22 @@ class VoiceBootstrapTests(unittest.TestCase):
             run.return_value.returncode=0
             run.return_value.stdout=json.dumps({"streams":[{"sample_rate":"48000"}],"format":{"duration":"42.25"}})
             self.assertEqual(voice.probe("ok.wav"),42.25)
+    def test_require_consent_accepts_affirmed_profile(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            (root/"sample-000.wav").write_bytes(b"x")
+            (root/"profile.json").write_text(json.dumps({"consent":{"affirmed":True},"samples":[{"file":"sample-000.wav"}]}),encoding="utf-8")
+            data=voice.require_consent(root)
+            self.assertTrue(data["consent"]["affirmed"])
+    def test_require_consent_rejects_unaffirmed_profile(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            (root/"profile.json").write_text(json.dumps({"consent":{"affirmed":False},"samples":[]}),encoding="utf-8")
+            with self.assertRaises(SystemExit):voice.require_consent(root)
+    def test_require_consent_rejects_missing_sample(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            (root/"profile.json").write_text(json.dumps({"consent":{"affirmed":True},"samples":[{"file":"gone.wav"}]}),encoding="utf-8")
+            with self.assertRaises(SystemExit):voice.require_consent(root)
 
 if __name__=="__main__":unittest.main()
