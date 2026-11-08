@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "name": "raghu",
+  "language": "en",
+  "samples": [
+    {
+      "file": "sample-000.wav",
+      "sha256": "937a6a9a2072332c249de9e9db2a92a528ab40c67c492152d25ca083258f8e4f",
+      "duration_seconds": 382.14,
+      "source_name": "dictation-2026-11-07T06-37-33.wav"
+    },
+    {
+      "file": "sample-001.wav",
+      "sha256": "360d6bd7504625a66e4bd4278b0a05c53b16080264e3269cd186bf300710b22a",
+      "duration_seconds": 171.12,
+      "source_name": "dictation-2026-11-08T08-16-33.wav"
+    },
+    {
+      "file": "sample-002.wav",
+      "sha256": "9e0ba2d59b4bac6d58127901da9ae222977a76f86346d37f32ba8494f331a42a",
+      "duration_seconds": 167.76,
+      "source_name": "dictation-2026-11-08T08-20-34.wav"
+    }
+  ],
+  "total_duration_seconds": 721.02,
+  "consent": {
+    "affirmed": true,
+    "note": "I am Raghu, the speaker in these three recordings, and I authorize cloning my voice for my own vlogs and narration.",
+    "recorded_at": "2026-11-08T10:55:07.414341+00:00"
+  },
+  "backend": {
+    "name": "IndicF5",
+    "configured": false,
+    "defaults": {
+      "nfe_step": 32,
+      "cfg_strength": 2.0,
+      "speed": 1.0
+    }
+  },
+  "synthesis_ready": true
+}
