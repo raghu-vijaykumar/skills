@@ -53,6 +53,24 @@ cross-dissolve. The numbered catalog covers them: fade-out maps to
 cross-dissolve to `cross-fade`, and pan to the `push-*` family. A jump cut is a
 hard cut, not a rendered transition, so it needs no entry here.
 
+## Per-transition scripts
+
+Each transition ID has a fixed entrypoint at `scripts/<id with hyphens replaced
+by underscores>.py`; `transitions.py scripts` prints the mapping. Each script
+fills in its own `id` when a cue omits it and rejects a cue that names a
+different transition. Point sheets go to the point renderer; a sheet with an
+`inputs` array goes to the join renderer. `--mode` overrides the detection and
+`--plan` resolves without rendering.
+
+```bash
+python .../scripts/fade_through_black.py cues.json --input master.mp4 --output out.mp4
+python .../scripts/push_left.py cues.json --output joined.mp4
+```
+
+Catalog-only transitions have a script that exits with an explicit refusal.
+The shared `transitions.py apply` and `transitions.py join` commands remain the
+way to mix several different transition IDs in one cue sheet.
+
 ## Point vs join
 
 `apply` writes a time-preserving effect on one master. A fade is a coloured

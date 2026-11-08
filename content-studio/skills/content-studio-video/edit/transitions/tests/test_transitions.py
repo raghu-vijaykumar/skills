@@ -205,6 +205,75 @@ class TimelineAnnotationTests(unittest.TestCase):
         self.assertEqual(timeline["clips"][1].get("point_transitions", []), [])
 
 
+class FixedScriptTests(unittest.TestCase):
+    def test_every_catalog_entry_has_a_script(self):
+        scripts = SOURCE.parent
+        for item in transitions.load_catalog()["transitions"]:
+            path = scripts / (item["id"].replace("-", "_") + ".py")
+            self.assertTrue(path.is_file(), f"missing {path}")
+            text = path.read_text(encoding="utf-8")
+            self.assertIn(f'TRANSITION_ID = "{item["id"]}"', text)
+
+    def test_fixed_cues_injects_id_without_mutating_source(self):
+        data = {"transitions": [{"at": 5.0, "duration": 0.6}]}
+        result = transitions.fixed_cues(data, "fade-through-black")
+        self.assertEqual(result["transitions"][0]["id"], "fade-through-black")
+        self.assertNotIn("id", data["transitions"][0])
+
+    def test_fixed_cues_rejects_other_id(self):
+        with self.assertRaises(ValueError):
+            transitions.fixed_cues(
+                {"transitions": [{"at": 5.0, "id": "glitch"}]},
+                "fade-through-black",
+            )
+
+    def test_fixed_runner_refuses_catalog_only(self):
+        buffer = io.StringIO()
+        with contextlib.redirect_stderr(buffer):
+            code = transitions.run_fixed_transition("collage", ["cues.json"])
+        self.assertEqual(code, 2)
+        self.assertIn("catalog-only", buffer.getvalue())
+
+    def test_fixed_runner_plans_with_injected_id(self):
+        with tempfile.TemporaryDirectory() as folder:
+            cues = Path(folder) / "cues.json"
+            cues.write_text(json.dumps({"transitions": [
+                {"at": 5.0, "duration": 0.8}
+            ]}), encoding="utf-8")
+            buffer = io.StringIO()
+            with contextlib.redirect_stdout(buffer):
+                code = transitions.run_fixed_transition(
+                    "fade-through-black", [str(cues), "--plan"]
+                )
+            self.assertEqual(code, 0)
+            result = json.loads(buffer.getvalue())
+            self.assertEqual(result["transitions"][0]["id"], "fade-through-black")
+
+    def test_fixed_runner_rejects_wrong_mode(self):
+        with tempfile.TemporaryDirectory() as folder:
+            cues = Path(folder) / "cues.json"
+            cues.write_text(json.dumps({"transitions": [
+                {"at": 5.0, "duration": 0.6}
+            ]}), encoding="utf-8")
+            buffer = io.StringIO()
+            with contextlib.redirect_stderr(buffer):
+                code = transitions.run_fixed_transition(
+                    "push-left", [str(cues), "--plan"]
+                )
+            self.assertEqual(code, 1)
+            self.assertIn("join mode", buffer.getvalue())
+
+    def test_script_command_lists_all(self):
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            code = transitions.main(["scripts"])
+        self.assertEqual(code, 0)
+        lines = [line for line in buffer.getvalue().splitlines() if line.strip()]
+        self.assertEqual(len(lines), 29)
+        self.assertIn("fade-through-black", buffer.getvalue())
+        self.assertIn("scripts/fade_through_black.py", buffer.getvalue())
+
+
 class CliTests(unittest.TestCase):
     def test_list_json(self):
         buffer = io.StringIO()

@@ -24,9 +24,38 @@ The catalog covers the 20 sections and 29 variants in the [Clipchamp transitions
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list --mode point
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list --fidelity catalog-only --json
+python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py scripts
 ```
 
 `catalog-only` transitions (collage, page turn, liquid streaks/drops, fire, heart, spin, zoom-out) have no renderer here. The tool refuses them with an explicit error; it never emits a placeholder. Use a motion-graphics asset for those instead.
+
+## Per-transition scripts
+
+Every catalog transition has its own entrypoint under `scripts/`. The filename
+replaces hyphens with underscores; `transitions.py scripts` prints the exact
+mapping.
+
+```bash
+# Point: one master, duration unchanged.
+python content-studio/skills/content-studio-video/edit/transitions/scripts/fade_through_black.py cues.json --input master.mp4 --output out.mp4
+
+# Join: ordered clips, duration change reported.
+python content-studio/skills/content-studio-video/edit/transitions/scripts/push_left.py cues.json --output joined.mp4
+
+# Dual-mode transition: choose the route explicitly when needed.
+python content-studio/skills/content-studio-video/edit/transitions/scripts/cross_blur.py cues.json --output joined.mp4 --mode join
+```
+
+Each script fixes its transition ID. A cue may omit `id`; the script fills it
+in. A cue that names a different transition is rejected, so `push_left.py`
+cannot silently render a wipe. Use `--plan` to resolve timings without
+rendering.
+
+Catalog-only transitions still have a script, but running it exits with an
+explicit refusal instead of emitting a placeholder.
+
+The shared `transitions.py apply` and `transitions.py join` commands remain
+available when one cue sheet combines several different transition IDs.
 
 ## Apply point transitions
 

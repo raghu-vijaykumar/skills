@@ -627,6 +627,129 @@ def plan(
     }
 
 
+def transition_script(transition_id: str) -> str:
+    """Return the fixed entrypoint path for a transition ID."""
+    return "scripts/" + transition_id.replace("-", "_") + ".py"
+
+
+def fixed_cues(data: object, transition_id: str) -> object:
+    """Copy a cue sheet, filling in the fixed transition ID.
+
+    A cue may omit ``id``. A cue that names a different transition is rejected
+    so a fixed entrypoint can never silently render another effect.
+    """
+    result = json.loads(json.dumps(data))
+    cues = result.get("transitions") if isinstance(result, dict) else result
+    if not isinstance(cues, list) or not cues:
+        raise ValueError("Cue sheet needs a non-empty transitions array")
+    for index, cue in enumerate(cues):
+        if not isinstance(cue, dict):
+            raise ValueError(f"transition {index}: must be an object")
+        existing = cue.get("id")
+        if existing is not None and existing != transition_id:
+            raise ValueError(
+                f"transition {index}: this script renders only {transition_id}, "
+                f"not {existing!r}"
+            )
+        cue["id"] = transition_id
+    return result
+
+
+def run_fixed_transition(transition_id: str, argv: list[str] | None = None) -> int:
+    """Run one transition's fixed entrypoint.
+
+    Point cues go to ``apply``; a cue sheet with an ``inputs`` array goes to
+    ``join``. Use ``--mode`` to override and ``--plan`` to resolve without
+    rendering.
+    """
+    entry = catalog_index().get(transition_id)
+    if not entry:
+        print(f"error: unknown transition {transition_id!r}", file=sys.stderr)
+        return 2
+    modes = entry.get("modes", [])
+    if entry.get("fidelity") == "catalog-only" or not modes:
+        print(
+            f"error: {transition_id} is catalog-only and has no bundled renderer; "
+            "use a motion-graphics asset instead",
+            file=sys.stderr,
+        )
+        return 2
+    parser = argparse.ArgumentParser(
+        description=f"Apply the {entry['name']} transition ({transition_id})."
+    )
+    parser.add_argument("cues")
+    parser.add_argument("--input", help="Master video for point mode")
+    parser.add_argument("--output", help="New output video")
+    parser.add_argument("--mode", choices=["auto", "point", "join"], default="auto")
+    parser.add_argument("--preview-start", type=float)
+    parser.add_argument("--preview-duration", type=float)
+    parser.add_argument("--size", help="WxH canvas for join mode")
+    parser.add_argument("--fps", type=float)
+    parser.add_argument("--audio", choices=["auto", "none"], default="auto")
+    parser.add_argument("--plan", action="store_true", help="Resolve without rendering")
+    args = parser.parse_args(argv)
+
+    try:
+        data = fixed_cues(
+            json.loads(Path(args.cues).read_text(encoding="utf-8-sig")),
+            transition_id,
+        )
+    except (OSError, ValueError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+
+    mode = args.mode
+    if mode == "auto":
+        mode = "join" if isinstance(data, dict) and data.get("inputs") else "point"
+    if mode not in modes:
+        print(
+            f"error: {transition_id} supports {', '.join(modes)} mode, not {mode}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.plan:
+        try:
+            result = plan(data, args.input)
+        except (ValueError, RuntimeError) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 1 if result.get("issues") else 0
+
+    if not args.output:
+        print("error: --output is required unless --plan is used", file=sys.stderr)
+        return 1
+    try:
+        if mode == "join":
+            size = None
+            if args.size:
+                width, height = args.size.lower().split("x", 1)
+                size = (int(width), int(height))
+            result = render_join(
+                data, args.output, size=size, fps=args.fps, audio=args.audio
+            )
+        else:
+            if not args.input:
+                print(
+                    "error: --input is required for a point transition",
+                    file=sys.stderr,
+                )
+                return 1
+            result = render_point(
+                args.input,
+                args.output,
+                data,
+                preview_start=args.preview_start,
+                preview_duration=args.preview_duration,
+            )
+    except (ValueError, RuntimeError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 0
+
+
 def _print_catalog(items: list[dict]) -> None:
     header = f"{'id':24} {'modes':12} {'fidelity':12} name"
     print(header)
@@ -645,6 +768,9 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("list", help="List the transition catalog")
     p.add_argument("--mode", choices=["point", "join"])
     p.add_argument("--fidelity", choices=["native", "approximate", "catalog-only"])
+    p.add_argument("--json", action="store_true")
+
+    p = sub.add_parser("scripts", help="List the per-transition script entrypoints")
     p.add_argument("--json", action="store_true")
 
     p = sub.add_parser("validate", help="Validate a cue sheet")
@@ -677,6 +803,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--output", required=True)
 
     args = parser.parse_args(argv)
+
+    if args.command == "scripts":
+        items = [
+            {"id": item["id"], "script": transition_script(item["id"])}
+            for item in load_catalog()["transitions"]
+        ]
+        if args.json:
+            print(json.dumps(items, indent=2, ensure_ascii=False))
+        else:
+            for item in items:
+                print(f"{item['id']:24} {item['script']}")
+        return 0
 
     if args.command == "list":
         items = list_transitions(args.mode, args.fidelity)
