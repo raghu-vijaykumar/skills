@@ -1,7 +1,22 @@
 # Content Studio bundle
 
-Before editing, `content-studio-workflow` profiles the current system and representative media, presents an editable production plan with route and timing estimates, and waits for explicit human approval. Its approved steps become a checklist that must be completed before package approval.
+Current skill entrypoints live in [skills](skills/); [PROPOSED_FOLDER_STRUCTURE.md](PROPOSED_FOLDER_STRUCTURE.md) describes a future layout and workflow. The proposed folders and scripts do not exist yet.
 
-`skills/` contains the installed entrypoints, each owning its own tooling. `skills/content-studio-videogen/` holds the reusable Remotion runtime and CLI. `skills/content-studio-videoedit/` holds the shared channel helper for backup, Drive sync, analytics, vlog ordering, per-clip audio tuning, preprocessing, selective AI restoration and upscaling, editing, color-look rendering, and quality analysis. `skills/content-studio-audio/` masters audio in a folder of videos. `skills/content-studio-autocut/` builds a reviewable rough cut from raw footage. `skills/content-studio-music/` chooses and records background music. `skills/content-studio-benchmark/` builds synchronized enhancement comparison grids. `skills/content-studio-motion-graphics/` renders timed overlays over edited footage. `skills/content-studio-understand/` builds timestamped contact sheets and drafts evidence-linked voiceover from verified frames, `skills/content-studio-voice/` bootstraps a consented voice profile and renders cloned IndicF5 narration, `skills/content-studio-memes/` curates reviewable meme insertions, `skills/content-studio-memory/` learns local editing preferences, and `skills/content-studio-workflow/` runs checkpointed workflows. `skills/content-studio-styles/hairline-source/` preserves upstream attribution and design material. `scripts/` provides installation, local transcription, the music library helper, and a common publication package gate. `assets/music/` holds the local-only YouTube Audio Library and Pixabay catalog; see [assets/music/README.md](assets/music/README.md).
+## Gates
 
-Edit this folder in the skills repository, release one tag, then install that exact version in content projects. Do not edit global installed copies.
+Before any production edit, use [content-studio-workflow](skills/content-studio-workflow/SKILL.md) to inspect the source and system, name methods and outputs, estimate time, and obtain approval of an editable plan. Record evidence against its checklist. Changed plans require fresh approval; publishing needs separate authorization. Preserve originals and review the exact delivered master.
+
+## Proposed camera-footage default
+
+1. Raw video folder → approved ordering, deduplication, and source cleanup → hand off individual prepared clips for **manual editing**.
+2. User supplies the rendered edit → optional evidence-linked [voice script](skills/content-studio-understand/SKILL.md), approved [voice](skills/content-studio-voice/SKILL.md), and mix.
+3. If warranted, compare and upscale the **completed edit after voice**. Then render requested [code-generated overlays](skills/content-studio-motion-graphics/SKILL.md) on named scenes at delivery resolution.
+4. Review final picture and audio, approve the package, then [publish](skills/content-studio-publish/SKILL.md) only on explicit request. [Archive](skills/content-studio-archive/SKILL.md) is independent.
+
+[AutoCut](skills/content-studio-autocut/SKILL.md) is experimental and runs only on explicit request in the proposal. The current [router](skills/content-studio/SKILL.md), [preprocessor](skills/content-studio-videopreprocess/SKILL.md), and [upscale tool](skills/content-studio-videoedit/SKILL.md) still contain older routes; the proposed default and integrated voice mix are not yet implemented. [Prompt templates](prompts/) are examples and need review against the approved plan; `full-vlog.md` currently enables AutoCut by default.
+
+## Other production
+
+For code-driven video, use [styles](skills/content-studio-styles/SKILL.md) and [videogen](skills/content-studio-videogen/SKILL.md) to plan scenes, render bounded evidence, review, and render the full delivery. [Music](skills/content-studio-music/SKILL.md), [audio](skills/content-studio-audio/SKILL.md), [benchmark](skills/content-studio-benchmark/SKILL.md), [memes](skills/content-studio-memes/SKILL.md), and [memory](skills/content-studio-memory/SKILL.md) are specialist tools, not automatic steps.
+
+Edit this repository as the source of truth, tag a tested version, and install that version in content projects. Keep drafts, media, analytics, voice samples, and secrets outside the bundle.
