@@ -10,7 +10,7 @@ Before any production edit, including a direct specialist call, run the [workflo
 | --- | --- |
 | Raw camera folder | Order, deduplicate, diagnose, and prepare **individual clips** for the user's manual edit. Preserve originals; blur is review evidence, not an automatic cut. |
 | User's edited render | Inspect the actual edit and its scene times; start a new plan for requested continuation. |
-| Narration request | Draft and review an evidence-linked script, create approved voice, listen, and mix it onto the edited video. Cloning requires consent. |
+| Narration request | Draft an evidence-linked script, audit long scenes for repetition, add relevant sourced facts or ambience, and obtain text/timing review. Then create approved voice, listen, and mix it onto the edited video. Cloning requires consent. |
 | Resolution increase | Compare unchanged, Lanczos, and eligible AI samples on the **completed edit**; upscale only when justified and approved. HDR/DV requires an explicit preservation or tone-map route. |
 | Scene overlays | Render requested code graphics at delivery resolution **after any upscale**; review the exact output. |
 | Publication request | Review master, metadata, thumbnail, rights, and package; publish only with separate explicit authorization. |

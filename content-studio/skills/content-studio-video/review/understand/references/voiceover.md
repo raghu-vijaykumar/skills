@@ -11,6 +11,31 @@
   visible or ask the creator.
 - Do not invent history, statistics, dialogue, or an event that happened between
   two samples.
+- Research place and product facts that would improve a long scene. Prefer the
+  venue, transport operator, public authority, or another primary source. Put
+  the source URL in the segment `notes`; date-sensitive facts need a current
+  check. Distinguish a general fact about a place from something the travelers
+  personally saw, bought, said, or did.
+
+## Scene variety pass
+
+- Map the edited master into locations and meaningful beats before drafting.
+  Inspect closer frames or audio when a long stretch has too little evidence.
+- For each multi-cue location, read adjacent cues together. Keep one clear
+  visual anchor, then vary the remaining beats with the creator's experience,
+  a verified place/craft/history/transport fact, or a useful visit detail.
+  Remove repeated descriptions of colours, crowds, walking, or displays.
+- Pick facts because they illuminate the footage or the trip, not to fill a
+  quota. Avoid two facts that make the same point. Do not claim that a general
+  market product or service appears in a particular shot unless the evidence
+  supports it.
+- If another relevant fact would feel forced, use a shorter line and give the
+  original ambience, action, or dialogue space. Record intentional open time
+  in the cue `direction` or `notes` so the later voice mix preserves it.
+- Make a final read-through across scene boundaries for repeated ideas,
+  invented first-person reactions, source accuracy, natural language, and
+  conversational timing. Report replaced cues and remaining review flags to
+  the creator before synthesis.
 
 ## Context file
 

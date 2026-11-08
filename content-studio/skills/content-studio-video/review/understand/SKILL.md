@@ -35,6 +35,8 @@ Use `context.json` for human-supplied names, itinerary, language, tone, pronunci
 
 Write `voiceover.json` with `{id,start,end,text,evidence_frame_ids,needs_review,direction,notes}` segments. Keep the text in the requested language mix; read [voiceover guidance](references/voiceover.md) before writing.
 
+Before presenting a draft, audit each location across adjacent cues. Replace repeated descriptions of the same movement, displays, or shopping with a distinct creator moment or a useful, verified fact about the place, craft, history, transport, or visit. Source facts outside the footage and creator context from a reliable primary source; record the URL in the cue's `notes`. A place fact must not imply the travelers saw, bought, or did something unsupported by the edit. When no relevant fact improves a long shot, shorten the narration and leave room for its original sound. Include the changed cues and any open fact checks in the review notes.
+
 ```bash
 python content-studio/skills/content-studio-understand/scripts/voiceover.py \
   --input /path/to/understanding/voiceover.json \
