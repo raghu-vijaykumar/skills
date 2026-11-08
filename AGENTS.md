@@ -59,6 +59,24 @@ then code-generated scene overlays at delivery resolution. Vlog drafts do not
 generate transcripts or captions by default. Metadata must be derived from
 sampled frames and audio context, never placeholders.
 
+## Timeline-first final rendering
+
+The target for new edited-video features is an editable, versioned timeline as
+the source of truth. Record approved cuts and every timed enhancement, audio
+operation, graphic, and transition there before final rendering. Resolve times
+against the final picture edit, including shifts caused by cuts and transition
+overlaps. The final renderer must consume and validate every approved operation
+and encode each delivered video frame and audio sample only once. Bounded
+comparison previews and temporary caches are allowed; do not require a full
+intermediate video or audio master for each enhancement. Reject an unsupported
+timeline operation before rendering rather than silently ignoring it or
+substituting a separate full-master pass.
+
+This is a development requirement, not a claim about the current runtime.
+The existing specialist renderers and native timeline renderer do not yet
+provide a unified final render. Keep that limitation explicit in plans and
+user-facing descriptions until end-to-end tests demonstrate the new path.
+
 ## Commands
 
 ```powershell
