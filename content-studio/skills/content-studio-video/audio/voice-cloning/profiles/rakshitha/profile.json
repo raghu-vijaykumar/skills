@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "name": "rakshitha",
+  "language": "kn-en",
+  "samples": [
+    {
+      "file": "sample-000.wav",
+      "sha256": "b92fb40265aa26f850cf3d0f61fb838b0a4d77d74b05f80cb2ad74eb3571cb65",
+      "duration_seconds": 8.39,
+      "source_name": "capture-0013.wav"
+    },
+    {
+      "file": "sample-001.wav",
+      "sha256": "baeec964c58099e4bc55762c718cc9d88d14335bdb94ac4258cda6253941566a",
+      "duration_seconds": 21.59,
+      "source_name": "capture-0014.wav"
+    },
+    {
+      "file": "sample-002.wav",
+      "sha256": "27cbe295555e040790e5ebfdc91b9a05586bbdad929746f0b0db36567504f8b5",
+      "duration_seconds": 30.67,
+      "source_name": "capture-0015.wav"
+    },
+    {
+      "file": "sample-003.wav",
+      "sha256": "84ae971723512a79bdab7fda57c9d2500370a9540aad2d8a516469c04d4c7b75",
+      "duration_seconds": 34.88,
+      "source_name": "capture-0016.wav"
+    },
+    {
+      "file": "sample-004.wav",
+      "sha256": "24810b12732d89fc31f0b54099ee166192e70007a614849f760c6b4fe57e8960",
+      "duration_seconds": 30.06,
+      "source_name": "capture-0017.wav"
+    }
+  ],
+  "total_duration_seconds": 125.59,
+  "consent": {
+    "affirmed": true,
+    "note": "Owner supplied these recordings and explicitly requested voiceover generation in their own voice on 2026-11-07.",
+    "recorded_at": "2026-11-07T08:09:37.007104+00:00"
+  },
+  "backend": {
+    "name": "IndicF5",
+    "configured": true,
+    "defaults": {
+      "nfe_step": 32,
+      "cfg_strength": 2.0,
+      "speed": 1.0
+    }
+  },
+  "synthesis_ready": true,
+  "repository": {
+    "path": "content-studio/skills/content-studio-video/audio/voice-cloning/profiles/rakshitha",
+    "stored_at": "2026-11-08",
+    "note": "Owner asked to keep this consented profile with the Content Studio skills."
+  }
+}
