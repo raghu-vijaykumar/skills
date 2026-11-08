@@ -1,0 +1,19 @@
+{
+  "id": "like-share-subscribe",
+  "kind": "animated-overlay",
+  "duration_seconds": 4,
+  "fps": 30,
+  "aspect_ratios": [
+    "16:9",
+    "9:16"
+  ],
+  "source": "OverlayComposition.tsx",
+  "component": "LikeShareSubscribe",
+  "formats": [
+    "prores4444-alpha",
+    "webm-vp9-alpha"
+  ],
+  "audio": false,
+  "review_required": true,
+  "render_status": "not-rendered"
+}
