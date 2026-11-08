@@ -2,7 +2,7 @@
 
 ## Production plan
 
-Existing preflight `plan.json` and human `approval.json` remain the first gate. The timeline records the plan SHA-256 used to construct it.
+Existing preflight `plan.json` and human `approval.json` remain the first gate. Each timeline revision snapshots the exact plan, approval, and checklist bytes; the timeline records its plan SHA-256. A revised plan needs new preflight approval before it can create a timeline successor.
 
 ## Timeline revision
 
@@ -11,11 +11,11 @@ Existing preflight `plan.json` and human `approval.json` remain the first gate. 
 - Audio tracks referencing source audio, recorded/synthesized voice, music, or sound effects, with timing and gains.
 - Operations with stable ID, method ID, target track/clip, timeline start/end, parameters, review status, and explicit stage order.
 - Derived `resolved_duration` and cue positions are calculated, not accepted as unverified input.
-- Revision is immutable; a change writes a new revision with its parent's fingerprint.
+- Revision is immutable; a change writes a new revision with its parent's fingerprint and its own plan snapshot.
 
 ## Approval
 
-Human review note and fingerprint covering exact plan bytes, timeline bytes, every input asset hash, render settings, and renderer capability version. Missing or changed data invalidates approval. The agent cannot infer approval from a generated preview.
+Human review note and fingerprint covering exact plan, preflight approval, checklist and timeline bytes, every input asset hash, render settings, and renderer capability version. Missing or changed data invalidates approval. The agent cannot infer approval from a generated preview.
 
 ## Render record
 

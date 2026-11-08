@@ -25,12 +25,15 @@ python content-studio/skills/content-studio-video/timeline/scripts/timeline.py i
 ```
 
 `init` records the whole supplied export as one picture clip. Edit the
-timeline through `revise --timeline <old.json> --changes <changes.json> --out
-<new.json> --output <new-final.mp4>`. The changes file replaces complete
+timeline through `revise --timeline <old.json> --plan <current-approved-plan.json>
+--changes <changes.json> --out <new.json> --output <new-final.mp4>`. The changes file replaces complete
 top-level arrays such as `picture`, `operations`, or `audio`; the old
 revision remains intact. Every referenced source, voice file, font, and ASS
 sidecar needs a lowercase SHA-256 hash. `timeline.py hash --file <asset>`
 prints it. Paths to those assets are relative to `source_root`.
+Each revision snapshots the approved plan, its approval, and checklist beside
+the timeline file. A changed plan needs its own human preflight approval before
+`revise` can use it; prior revisions keep their plan snapshots.
 
 Operation times are seconds on the resolved output timeline, after cuts and
 transition overlaps. Each operation and audio cue has a stable `id`, a

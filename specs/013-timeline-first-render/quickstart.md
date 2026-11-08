@@ -26,6 +26,7 @@ the relevant complete top-level arrays and call `revise`:
 ```powershell
 python content-studio/skills/content-studio-video/timeline/scripts/timeline.py revise `
   --timeline <draft>/.content-studio/timeline/timeline-v001.json `
+  --plan <draft>/.content-studio/preflight/plan.json `
   --changes <draft>/.content-studio/timeline/changes.json `
   --out <draft>/.content-studio/timeline/timeline-v002.json `
   --output <draft>/<id>-final-v002.mp4
@@ -37,6 +38,9 @@ Use `timeline.py hash --file <asset>` to obtain a source, voice, font,
 or motion-graphics sidecar SHA-256. Paths in the timeline are relative to its
 `source_root`. The [timeline contract](contracts/timeline.md) specifies
 timing and approval fields.
+`init` and `revise` snapshot the approved preflight plan, approval, and
+checklist beside each timeline revision. If the plan changes for a revision,
+obtain new human plan approval before running `revise`.
 
 ## Preview, human approval, final render
 
@@ -71,7 +75,7 @@ uses the same sequence with a new output path and human approval.
 
 ## Current validation and limits
 
-On 2026-11-08, 22 focused synthetic-media tests passed for cuts, range effects,
+On 2026-11-08, 23 focused synthetic-media tests passed for cuts, range effects,
 geometry, voice placement, transitions, ASS graphics, approval staleness,
 HDR refusal, and exact-output checks. The source-prep test, five workflow tests,
 134 legacy clip-edit tests (three skipped), and 45 JavaScript tests (one skipped)

@@ -136,6 +136,20 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                 "--output", str(self.root / "cli-final-v001.mp4"),
                 "--timeline", str(initial), "--fps", "10",
                 "--width", "160", "--height", "90"]), 0)
+        first_plan = Path(model.load(initial)["plan_file"])
+        self.assertEqual(first_plan.read_bytes(), self.plan.read_bytes())
+        # The live preflight may change for a revision; the older approved
+        # timeline keeps its exact plan and checklist for later audit.
+        revised_plan = json.loads(self.plan.read_text(encoding="utf-8"))
+        revised_plan["goal"] = "revised edit"
+        self.plan.write_text(json.dumps(revised_plan), encoding="utf-8")
+        digest = model.sha256_file(self.plan)
+        self.plan.with_name("approval.json").write_text(json.dumps({
+            "plan_sha256": digest, "review_note": "Approved revised fixture plan",
+            "actor": "human"}), encoding="utf-8")
+        self.plan.with_name("checklist.json").write_text(json.dumps({
+            "plan_sha256": digest, "items": [{"id": "S01"}]}), encoding="utf-8")
+        self.assertEqual(model.validate(model.load(initial))["duration"], 3)
         changes.write_text(json.dumps({"operations": [{
             "id": "draft-look", "method": "color-eq",
             "start": 0.2, "end": 0.5, "brightness": 0.02,
@@ -143,11 +157,15 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         }]}), encoding="utf-8")
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(cli.main([
-                "revise", "--timeline", str(initial),
+                "revise", "--timeline", str(initial), "--plan", str(self.plan),
                 "--changes", str(changes), "--out", str(revised),
                 "--output", str(self.root / "cli-final-v002.mp4")]), 0)
         self.assertEqual(model.load(initial)["revision"], 1)
         self.assertEqual(model.load(revised)["revision"], 2)
+        self.assertNotEqual(model.load(initial)["plan_sha256"],
+                            model.load(revised)["plan_sha256"])
+        self.assertEqual(Path(model.load(revised)["plan_file"]).read_bytes(),
+                         self.plan.read_bytes())
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(cli.main(["validate", "--timeline", str(revised)]), 0)
 

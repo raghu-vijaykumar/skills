@@ -42,6 +42,23 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
+def snapshot_preflight(plan: Path, timeline_path: Path) -> Path:
+    """Keep the approved plan bytes beside one immutable timeline revision."""
+    if plan.name != "plan.json":
+        raise ValueError("Preflight source must be plan.json")
+    sources = [plan, plan.with_name("approval.json"),
+               plan.with_name("checklist.json")]
+    if not all(path.is_file() for path in sources):
+        raise ValueError("Approved preflight plan, approval, or checklist is missing")
+    snapshot = timeline_path.resolve().with_suffix(".preflight")
+    if snapshot.exists():
+        raise ValueError(f"Preflight snapshot already exists: {snapshot}")
+    snapshot.mkdir(parents=True)
+    for source in sources:
+        (snapshot / source.name).write_bytes(source.read_bytes())
+    return snapshot / "plan.json"
+
+
 def asset_path(root: Path, relative: str) -> Path:
     if not isinstance(relative, str) or not relative or Path(relative).is_absolute():
         raise ValueError(f"Asset path must be relative to source_root: {relative!r}")

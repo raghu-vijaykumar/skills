@@ -94,6 +94,14 @@ class TimelineModelTests(unittest.TestCase):
             changed = approval.fingerprint(self.path, self.timeline)
         self.assertNotEqual(original, changed)
 
+    def test_changed_plan_review_bytes_invalidate_approval(self):
+        original = approval.fingerprint(self.path, self.timeline)
+        approval_path = self.plan.with_name("approval.json")
+        changed = json.loads(approval_path.read_text())
+        changed["review_note"] = "revised human note"
+        approval_path.write_text(json.dumps(changed))
+        self.assertNotEqual(original, approval.fingerprint(self.path, self.timeline))
+
     def test_replaced_voice_invalidates_fingerprint(self):
         self.timeline["audio"] = [{
             "id": "voice", "kind": "voice", "source": "voice.wav",

@@ -8,7 +8,8 @@ from pathlib import Path
 
 from approval import capability_sha256, fingerprint, require_human_approval
 from compiler import compile_graph, media_info, preview, render
-from model import load, make_initial, revise, sha256_file, validate, write_new
+from model import (load, make_initial, revise, sha256_file,
+                   snapshot_preflight, validate, write_new)
 from verify import verify_output
 
 
@@ -53,6 +54,8 @@ def main(argv: list[str] | None = None) -> int:
             action.add_argument("--duration", type=float, required=True)
     change = commands.add_parser("revise", help="Write an immutable successor")
     change.add_argument("--timeline", type=Path, required=True)
+    change.add_argument("--plan", type=Path, required=True,
+                        help="Current human-approved edited-render preflight plan")
     change.add_argument("--changes", type=Path, required=True)
     change.add_argument("--out", type=Path, required=True)
     change.add_argument("--output", type=Path, required=True)
@@ -67,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
             result = {"file": str(args.file.resolve()),
                       "sha256": sha256_file(args.file)}
         elif args.action == "init":
+            if args.timeline.exists():
+                raise ValueError("Timeline revision already exists")
             timeline = make_initial(args.plan, args.source, args.output,
                                     fps=args.fps, width=args.width,
                                     height=args.height)
@@ -76,15 +81,24 @@ def main(argv: list[str] | None = None) -> int:
             timeline["picture"][0]["source_out"] = round(info["duration"], 6)
             resolved = validate(timeline)
             compile_graph(timeline, resolved)
+            timeline["plan_file"] = str(snapshot_preflight(args.plan, args.timeline))
+            resolved = validate(timeline)
             write_new(args.timeline, timeline)
             result = {"timeline": str(args.timeline), **summary(resolved)}
         elif args.action == "revise":
+            if args.out.exists():
+                raise ValueError("Timeline revision already exists")
             old = load(args.timeline)
             validate(old, require_review=False)
             changes = load(args.changes)
             timeline = revise(old, changes, new_output=str(args.output))
+            # Every revision goes through the current approved plan again.
+            timeline["plan_file"] = str(args.plan.resolve())
+            timeline["plan_sha256"] = sha256_file(args.plan)
             resolved = validate(timeline, require_review=False)
             compile_graph(timeline, resolved)
+            timeline["plan_file"] = str(snapshot_preflight(args.plan, args.out))
+            resolved = validate(timeline, require_review=False)
             write_new(args.out, timeline)
             result = {"timeline": str(args.out), **summary(resolved)}
         elif args.action == "verify":

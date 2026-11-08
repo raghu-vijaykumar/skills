@@ -29,7 +29,10 @@ def capability_sha256() -> str:
 def fingerprint(timeline_path: Path, timeline: dict) -> str:
     """A file-byte and asset digest makes edits and replacements stale."""
     result = validate(timeline)
-    parts = [timeline_path.read_bytes(), Path(timeline["plan_file"]).read_bytes(),
+    plan = Path(timeline["plan_file"])
+    parts = [timeline_path.read_bytes(), plan.read_bytes(),
+             plan.with_name("approval.json").read_bytes(),
+             plan.with_name("checklist.json").read_bytes(),
              bytes.fromhex(capability_sha256())]
     for clip in result["clips"]:
         parts.append(clip["path"].as_posix().encode())
