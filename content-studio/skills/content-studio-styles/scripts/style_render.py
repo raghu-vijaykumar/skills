@@ -4,10 +4,14 @@ import argparse
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
-from style_consistency import profile_for
-from video_filters import PRESETS, ensure_sdr
-from look_timeline import graph
+
+BUNDLE_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(BUNDLE_ROOT / "skills" / "content-studio-videoedit" / "scripts"))
+
+from filters import PRESETS, ensure_sdr, look_graph  # noqa: E402
+from style_consistency import profile_for  # noqa: E402
 
 def build_look(profile, duration):
     return [{"start": 0, "end": duration, "preset": profile["look"], "fade": 0}]
@@ -28,7 +32,7 @@ def render(source, target, profile, captions=None, apply_audio=False):
     if profile["look"] not in PRESETS:
         raise ValueError("Unsupported built-in look in profile")
     duration = duration_of(source)
-    vf = graph(build_look(profile, duration), PRESETS)
+    vf = look_graph(build_look(profile, duration), PRESETS)
     if captions:
         cap = Path(captions).resolve()
         if not cap.is_file() or cap.suffix.lower() not in (".srt", ".ass"):

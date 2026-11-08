@@ -542,6 +542,7 @@ def main() -> int:
 
     p = sub.add_parser("enhance",
                        help="diagnose and selectively correct video quality")
+    p = sub.add_parser("filters", help="apply color looks to selected video ranges")
     p = sub.add_parser("upscale", help="upscale video with Real-ESRGAN or Lanczos")
     p = sub.add_parser("polish", help="ordered denoise, deflicker, lens, match, sharpen")
     p = sub.add_parser("match", help="shot-to-shot color balance matching")
@@ -549,13 +550,16 @@ def main() -> int:
     p = sub.add_parser("refine", help="iteratively select polish settings per clip")
 
     args, extras = parser.parse_known_args()
-    forwarded = {"enhance", "upscale", "polish", "match", "quality", "refine"}
+    forwarded = {"enhance", "filters", "upscale", "polish", "match", "quality", "refine"}
     if extras and args.command not in forwarded:
         parser.error(f"unrecognized arguments: {' '.join(extras)}")
     rest = extras
     if args.command == "enhance":
         import enhance
         return enhance.main(rest)
+    if args.command == "filters":
+        import filters
+        return filters.main(rest)
     if args.command == "upscale":
         import upscale
         return upscale.main(rest)

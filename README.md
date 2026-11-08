@@ -7,11 +7,11 @@ This repository is the editable source of the `content-studio` video lifecycle b
 | [content-studio](content-studio/skills/content-studio/SKILL.md) | Route one draft through the lifecycle |
 | [content-studio-workflow](content-studio/skills/content-studio-workflow/SKILL.md) | Mandatory system precheck, editable human-reviewed plan and checklist, then resumable workflow |
 | [content-studio-ideagen](content-studio/skills/content-studio-ideagen/SKILL.md) | Owned analytics, public comparisons, digest, idea brief |
-| [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | List built-in and project-enabled editorial styles and themes |
+| [content-studio-styles](content-studio/skills/content-studio-styles/SKILL.md) | Style catalog plus scene-aware treatment planning, look timelines, and consistency checks |
 | [content-studio-videogen](content-studio/skills/content-studio-videogen/SKILL.md) | Narrated Remotion videos, themes, Hairline style, render review |
 | [content-studio-autocut](content-studio/skills/content-studio-autocut/SKILL.md) | Reviewable rough cut from raw footage with shot and speech-aware selection |
 | [content-studio-videopreprocess](content-studio/skills/content-studio-videopreprocess/SKILL.md) | Capture ordering, per-clip audio tuning, cleanup, blur and Dolby Vision review |
-| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing, selective AI restoration and upscaling, export review and thumbnail |
+| [content-studio-videoedit](content-studio/skills/content-studio-videoedit/SKILL.md) | Clip editing, color-look rendering, selective AI restoration and upscaling, export review and thumbnail |
 | [content-studio-audio](content-studio/skills/content-studio-audio/SKILL.md) | Batch audio mastering with new video and extracted WAV outputs |
 | [content-studio-music](content-studio/skills/content-studio-music/SKILL.md) | Choose and record YouTube Audio Library or Pixabay background music |
 | [content-studio-benchmark](content-studio/skills/content-studio-benchmark/SKILL.md) | Synchronized native-resolution enhancement comparison grids |
