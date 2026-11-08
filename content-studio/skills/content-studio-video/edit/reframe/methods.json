@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "subjects",
+      "script": "scripts/subjects.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "saliency",
+      "script": "scripts/saliency.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "center",
+      "script": "scripts/center.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

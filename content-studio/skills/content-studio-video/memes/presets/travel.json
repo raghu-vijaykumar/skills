@@ -1,0 +1,20 @@
+{
+  "category": "travel",
+  "max_per_10_minutes": 3,
+  "modes": [
+    "cutaway",
+    "pip",
+    "audio_stinger"
+  ],
+  "triggers": [
+    "surprise",
+    "unexpected_cost",
+    "funny_reaction",
+    "expectation_vs_reality"
+  ],
+  "avoid": [
+    "important_dialogue",
+    "sensitive_moment"
+  ],
+  "approval_required": true
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "measure",
+      "script": "scripts/measure.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

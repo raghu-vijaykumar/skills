@@ -10,6 +10,11 @@ videogen-test-*/
 tmp/
 content-studio/assets/music/local/
 
-content-studio/skills/content-studio-videoedit/tests/tmp*/
+content-studio/skills/content-studio-video/edit/clip-edit/tests/tmp*/
 
 .tmp*
+
+# Pretrained weights are downloaded on request and never committed.
+*.ckpt
+*.safetensors
+*.onnx

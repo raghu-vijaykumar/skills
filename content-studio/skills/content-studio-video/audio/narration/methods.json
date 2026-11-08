@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "mix-into-video",
+      "script": "scripts/mix_into_video.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

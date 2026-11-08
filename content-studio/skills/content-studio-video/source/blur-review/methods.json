@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "approved-cuts",
+      "script": "scripts/apply_approved_cuts.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

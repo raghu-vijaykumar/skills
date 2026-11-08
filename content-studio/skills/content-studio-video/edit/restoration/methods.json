@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "denoise-light",
+      "script": "scripts/denoise_light.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "denoise-medium",
+      "script": "scripts/denoise_medium.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "denoise-nlmeans",
+      "script": "scripts/denoise_nlmeans.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "deflicker",
+      "script": "scripts/deflicker.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "lens",
+      "script": "scripts/lens.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "sharpen-light",
+      "script": "scripts/sharpen_light.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "sharpen-medium",
+      "script": "scripts/sharpen_medium.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "refine",
+      "script": "scripts/refine.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "deblur",
+      "status": "unsupported",
+      "review": "No working backend"
+    }
+  ]
+}

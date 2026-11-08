@@ -1,0 +1,20 @@
+import React from 'react';
+export type LinkState = 'active' | 'success' | 'failed' | 'disconnected';
+export type LinkDirection = 'right' | 'left' | 'both' | 'none';
+type Props = {
+    x: number;
+    y: number;
+    width: number;
+    height?: number;
+    source?: string;
+    target?: string;
+    direction?: LinkDirection;
+    label?: string;
+    state?: LinkState;
+    progress?: number;
+    animated?: boolean;
+    active?: boolean;
+    failed?: boolean;
+};
+export declare function Link({ x, y, width, height, direction, label, state, progress, animated, active, failed, }: Props): React.JSX.Element;
+export {};

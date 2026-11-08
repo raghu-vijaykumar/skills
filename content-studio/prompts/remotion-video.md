@@ -1,54 +1,13 @@
-# Remotion Video — Content Studio Prompt
+# Remotion video — Content Studio prompt
 
-Create a complete, visually rich Remotion video from `<topic-or-script>` using relevant Content Studio skills. Use Revise Labs–quality technical storytelling: actual visual explanations, 2.5D/3D where appropriate, clear camera choreography, and **no generic boxes**.
+Topic or approved script: `<topic-or-script>`
+Format, language, duration, and style preference: `<preferences or ask if essential>`
+Requested scope: `<full video or named scenes>`
 
-## Video settings
-- Topic / script: `<topic-or-script>`
-- Format: 16:9 landscape (change to 9:16 for Shorts)
-- Target duration: 5–10 minutes (change for Shorts)
-- Language: English
-- Visual style: Premium dark technical / 2.5D
-- Resolution: 1920×1080 (or 1080×1920 for Shorts)
-- Frame rate: 30 fps
+Build an editable Remotion video with the installed Content Studio videogen skill. Start with the mandatory `content-studio-workflow` precheck: inspect the project and machine, choose a supported style, and show the exact skill/method scripts, render route, outputs, estimates, fallbacks, and review criteria. Obtain approval of the current plan before production; revise and reapprove it if a method changes.
 
-## Skills configuration
-- Topic research / fact checking: YES
-- Script writing: YES
-- Storyboard and shot list: YES
-- Narration / TTS: YES
-- Voice cloning: NO
-- Existing footage / B-roll: NO
-- Remotion scene generation: YES
-- 2.5D / 3D engineering visuals: YES
-- Blender asset rendering: YES (only when necessary)
-- Mathematical / data visualizations: YES (when relevant)
-- ReviseGuy 2D character: YES
-- Generic boxes / static slides: NO
-- Animated typography: YES (selectively)
-- Camera choreography: YES
-- Smooth scene transitions: YES
-- Sound effects: YES (selectively)
-- Background music: YES
-- Voice ducking: YES
-- Captions: YES
-- Color / style consistency: YES
-- Memes: NO
-- Asset reuse / caching: YES
-- Scene-level preview renders: YES
-- Human review checkpoints: YES
-- Final render: YES (after approval)
-- Thumbnail and publishing metadata: YES
+Research and verify claims as needed. Plan each narration beat with a concrete visual, state change, camera framing, and evidence source. Use existing design tokens and supported components; avoid decorative boxes, long static scenes, and fake 3D. Preview a hero element alone, inspect small mechanisms in deliberate detail shots, and verify each visual inside its narrated scene. Check timing, typography, safe margins, transition clarity, and source attribution at delivery size.
 
-## Rules
-- Execute enabled skills in dependency order; skip disabled skills.
-- Prefer meaningful animated explanations over decorative motion.
-- Show actual components, mechanisms, spatial relationships, and cause/effect; avoid generic rectangles, repetitive text cards, and fake 3D.
-- Keep narration tightly synchronized to visible actions; do not allow long static scenes.
-- Maintain consistent design language, aspect ratio, readable text, safe margins, and timing.
-- Reuse existing characters/assets where available. Do not invent source footage, measurements, or citations.
-- Produce a script, storyboard, shot-level plan, scene previews, audio preview, editable Remotion project, and final MP4.
-- Request approval for script, major visual decisions, and final export. Flag unsupported skills instead of silently skipping.
-- Do not overwrite originals or existing approved assets.
+Use Blender or external assets only when the actual approved geometry, license, and backend are present. Do not assume a ReviseGuy asset, realistic cutaway, captions, cloned voice, or music is available or requested. If an optional capability is unavailable, mark it unsupported and propose a supported visual route. Preserve authored source and existing approved assets.
 
-## Workflow
-Research → Script → Storyboard → Asset Plan → Narration → Remotion Scenes → Preview → Review → Polish → Final Render.
+Review the script, storyboard, representative scene renders, narration mix, and final master at human checkpoints. Export only after the approved plan and relevant gates pass. Metadata, thumbnail, and publication are separate requested stages.

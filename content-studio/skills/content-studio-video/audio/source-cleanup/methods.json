@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "deepfilter",
+      "script": "scripts/deepfilter.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "afftdn",
+      "script": "scripts/afftdn.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "keep-source",
+      "script": "scripts/keep_source.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

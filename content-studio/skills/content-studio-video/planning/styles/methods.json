@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "list",
+      "script": "scripts/list.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "plan",
+      "script": "scripts/style_engine.py",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "storyboard",
+      "script": "scripts/storyboard.py",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

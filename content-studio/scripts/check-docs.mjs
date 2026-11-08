@@ -2,35 +2,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {discoverSkills} from './skill-discovery.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','..');
 const bundle=path.join(root,'content-studio');
 const skillRoot=path.join(bundle,'skills');
-const names=['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
-  'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio',
-  'content-studio-autocut','content-studio-music','content-studio-benchmark','content-studio-motion-graphics','content-studio-publish','content-studio-archive',
-  'content-studio-memes','content-studio-memory','content-studio-understand','content-studio-voice','content-studio-workflow'];
-const files=[path.join(root,'README.md'),path.join(bundle,'README.md')];
-for(const name of names) {
-  const folder=path.join(skillRoot,name);
-  const entry=path.join(folder,'SKILL.md');
-  if(!fs.existsSync(entry)) throw new Error(`Missing skill: ${name}`);
-  const text=fs.readFileSync(entry,'utf8');
-  if(!text.startsWith(`---\nname: ${name}\n`) && !text.startsWith(`---\r\nname: ${name}\r\n`))
-    throw new Error(`Skill frontmatter mismatch: ${name}`);
+const files=[path.join(root,'README.md'),path.join(root,'AGENTS.md'),
+  path.join(bundle,'README.md'),path.join(bundle,'PROPOSED_FOLDER_STRUCTURE.md'),
+  ...fs.readdirSync(path.join(bundle,'prompts')).filter((file)=>file.endsWith('.md')).map((file)=>path.join(bundle,'prompts',file))];
+const entries=discoverSkills(skillRoot);
+for(const {folder,entry} of entries) {
   files.push(entry);
+  const localReadme=path.join(folder,'README.md');
+  if(fs.existsSync(localReadme)) files.push(localReadme);
   const references=path.join(folder,'references');
   if(fs.existsSync(references)) files.push(...fs.readdirSync(references).filter((file)=>file.endsWith('.md')).map((file)=>path.join(references,file)));
 }
-const discovered=[];
-function walk(folder) {
-  for(const item of fs.readdirSync(folder,{withFileTypes:true})) {
-    const file=path.join(folder,item.name);
-    if(item.isDirectory()) walk(file);
-    else if(item.name==='SKILL.md') discovered.push(file);
-  }
-}
-walk(bundle);
-if(discovered.length!==names.length) throw new Error(`Expected ${names.length} discoverable skills, found ${discovered.length}`);
 let links=0;
 for(const file of files) {
   const text=fs.readFileSync(file,'utf8');
@@ -42,4 +28,4 @@ for(const file of files) {
     links++;
   }
 }
-console.log(`Docs: ${files.length} maintained files, ${links} local links, ${names.length} unique skills`);
+console.log(`Docs: ${files.length} maintained files, ${links} local links, ${entries.length} unique skills`);

@@ -1,0 +1,20 @@
+import './RippleGrid.css';
+declare const RippleGrid: ({ fixedTime, fadeTiles, enableRainbow, gridColor, rippleIntensity, gridSize, gridThickness, fadeDistance, vignetteStrength, glowIntensity, opacity, gridRotation, mouseInteraction, mouseInteractionRadius, width, height }: {
+    enableRainbow?: boolean | undefined;
+    fadeDistance?: number | undefined;
+    fadeTiles?: number | undefined;
+    fixedTime?: number | undefined;
+    glowIntensity?: number | undefined;
+    gridColor?: string | undefined;
+    gridRotation?: number | undefined;
+    gridSize?: number | undefined;
+    gridThickness?: number | undefined;
+    height: any;
+    mouseInteraction?: boolean | undefined;
+    mouseInteractionRadius?: number | undefined;
+    opacity?: number | undefined;
+    rippleIntensity?: number | undefined;
+    vignetteStrength?: number | undefined;
+    width: any;
+}) => import("react").JSX.Element;
+export default RippleGrid;

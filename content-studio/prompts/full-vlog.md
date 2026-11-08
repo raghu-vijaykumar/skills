@@ -1,53 +1,21 @@
-# Full Vlog — Content Studio Prompt
+# Camera-footage vlog — Content Studio prompt
 
-Create a complete YouTube travel vlog from `<input-folder>` using available Content Studio skills.
+Input: `<raw-video-folder-or-manual-render>`
+Requested stage: `<prepare clips | write voice script | generate and mix voice | assess upscale | add scene overlays | final review>`
+Channel/draft and creative preferences: `<optional>`
 
-## Video settings
-- Language: Kannada + English
-- Style: Premium cinematic travel vlog
-- Style profile: travel-vlog
-- Target duration: 10–15 minutes
-- Resolution: 4K (only if source supports it)
+If the input is a raw video folder and no stage is specified, **prepare clips only**. Stop and hand the individual clips to me for manual editing. If the input is a rendered edit and no stage is specified, inspect it and propose the next available stages without changing it.
 
-## Skills configuration
-- Footage analysis: YES
-- AI rough cut: YES
-- Scene ordering / storytelling: YES
-- Voice-over generation: YES
-- Voice cloning: YES
-- Mute existing vlog voice: YES
-- Preserve ambient sounds: YES
-- Audio cleanup: YES
-- Audio mastering: YES
-- Silence / filler removal: YES
-- Color correction: YES
-- Color matching: YES
-- AI video enhancement: YES (only when needed)
-- Style consistency engine: YES
-- Cinematic LUTs: YES (selectively)
-- Motion graphics: YES
-- Animated location titles: YES
-- Maps / route animations: YES
-- Memes: YES (only when relevant)
-- Background music: YES
-- Audio ducking: YES
-- Subtitles: NO
-- Intro / outro: YES
-- Automatic thumbnail: YES
-- YouTube title / description: YES
-- Editable timeline: YES
-- Human review checkpoints: YES
-- Final rendering: YES (after approval)
+Before any production edit, run `content-studio-workflow` precheck. Inspect the source, draft, and system; show an editable plan with the exact installed operation skill, method ID, script and arguments, inputs, outputs, estimate, fallback, and review criterion. Incorporate my changes and obtain approval of the current plan revision. A changed method or stage requires fresh approval. Check each requested method's `methods.json` before promising it.
 
-## Rules
-- Execute enabled skills in dependency order; skip disabled skills.
-- Do not invent events, dialogue, locations, or unseen footage.
-- Keep original footage unchanged.
-- Generate reviewable previews, frames, audio samples, and intermediate artifacts.
-- Obtain approval for the voice-over script, cloned voice, creative edits, and final export.
-- Muting existing vlog speech must not automatically remove desired ambient audio; separate where technically possible and flag imperfect separation for review.
-- If a skill is missing or incomplete, report it rather than silently skipping it.
-- Respect the YES/NO switches; don't override them without approval.
+## Stage rules
 
-## Workflow
-Analyze → Plan → Rough Cut → Voice-over → Audio → Visual Enhancements → Motion Graphics → Review → Final Export.
+- **Prepare clips:** Order and deduplicate sources; diagnose audio, blur, stabilization, and HDR/Dolby Vision. Apply only approved source fixes. Preserve original footage, keep blur spans as review evidence, and hand off `drafts/<id>/.content-studio/processed-clips/` plus `.content-studio/_timeline.csv`. Do not make a joined master, story edit, narration, overlay, or upscale from a raw-folder request.
+- **Manual edit:** I choose shots, trims, transitions, and story outside Content Studio. Record the supplied render's path and hash; use its timeline for all later work.
+- **Voice script:** Analyze frames and audio from that render. Use verified evidence and my context for names, events, and opinions. Write a timed script and report uncertain claims; stop for text and timing approval.
+- **Voice:** Generate only from an approved script. Clone a voice only with my explicit request, consented samples, and a listening check. Preserve original dialogue and ambience unless I approve a specific mix change. Produce review audio and a separately reviewed voiced video with the narration mix script.
+- **Upscale:** Only after any requested voice mix, assess the completed edited video. Compare untouched, Lanczos, and available AI previews on bounded ranges; estimate full runtime and check noise, flicker, detail, HDR/DV, and exact-output side effects. Skip if there is no worthwhile gain. Never batch-upscale the raw clips.
+- **Scene overlays:** Only for scenes I identify. Verify cue times against the voiced/upscaled edit, preview each motion type, and render code-generated graphics at delivery resolution **after** upscale. Do not upscale the graphics.
+- **Final review:** Inspect affected ranges and the full picture and audio, then prepare only the requested package items. Publication and archive are separate requests.
+
+AutoCut is experimental and runs only if I explicitly request it. Do not mute speech, remove filler, add music, memes, captions, a thumbnail, or publish by default. If a method or backend is unavailable, report the gap and offer a supported route; do not claim an output was made.

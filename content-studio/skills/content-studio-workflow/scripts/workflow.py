@@ -21,7 +21,7 @@ def main():
     if steps is None:
         video=Path(config["video"]).expanduser().resolve()
         if not video.is_file(): raise FileNotFoundError(video)
-        script=Path(__file__).resolve().parents[2]/"content-studio-understand/scripts/understand.py"
+        script=Path(__file__).resolve().parents[2]/"content-studio-video/review/understand/scripts/understand.py"
         voiceover=config.get("voiceover",{})
         interval=float(voiceover.get("frame_interval_seconds",5))
         columns=int(voiceover.get("grid_columns",5))
@@ -48,10 +48,13 @@ def main():
     # No configured production command runs against an unreviewed or changed plan.
     plan, plan_approval, checklist = approved(root)
     planned_ids = {step["id"] for step in plan["steps"]}
+    planned_steps = {step["id"]: step for step in plan["steps"]}
     plan_order = {step["id"]: index for index, step in enumerate(plan["steps"])}
     for step in steps:
         if step.get("command") and step.get("plan_step") not in planned_ids:
             raise ValueError(f"workflow step {step['id']} needs a plan_step from the approved checklist")
+        if step.get("command") and step["command"] != planned_steps[step["plan_step"]].get("command"):
+            raise ValueError(f"workflow step {step['id']} command differs from the approved plan; review the exact method and arguments")
     if a.reset_step:
         invalid={a.reset_step}
         for s in steps:

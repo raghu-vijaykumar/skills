@@ -1,54 +1,13 @@
-# Animated Video — Content Studio Prompt
+# Animated explainer — Content Studio prompt
 
-Create a complete animated explainer from `<topic-or-script>` using available Content Studio skills. Select the best animation renderer per scene (Remotion, Blender, programmatic diagrams, or compositing), rather than forcing everything into Remotion.
+Topic or approved script: `<topic-or-script>`
+Format, duration, language, and channel: `<preferences or ask if essential>`
+Requested scope: `<full video or named scenes>`
 
-## Video settings
-- Topic / script: `<topic-or-script>`
-- Format: 16:9 (change to 9:16 for Shorts)
-- Target duration: 5–10 minutes (adjust for Shorts)
-- Language: English
-- Style: Premium technical explainer, coherent 2.5D/3D visual language
-- Resolution: 1920×1080 (or 1080×1920)
-- FPS: 30
+Create a source-backed, editable animated explainer using currently installed Content Studio skills. Before production, run `content-studio-workflow` precheck and show an editable plan naming each chosen skill, method script, input, output, estimate, fallback, and review criterion. Obtain approval of the current plan revision; re-plan if the route changes.
 
-## Skills configuration
-- Topic research and fact checking: YES
-- Script generation: YES
-- Storyboard / shot planning: YES
-- Narration / TTS: YES
-- Voice cloning: NO
-- Remotion animation: YES
-- Blender 3D animation: YES (only when needed)
-- 2D / vector animation: YES
-- 2.5D parallax / camera motion: YES
-- Realistic engineering cutaways / exploded views: YES (when relevant)
-- Mathematical visualizations: YES (when relevant)
-- ReviseGuy 2D character: YES
-- Stock footage / B-roll: NO
-- Generic boxes / static slides: NO
-- Animated typography: YES (selectively)
-- Scene transitions: YES
-- Sound effects: YES
-- Background music: YES
-- Audio ducking and mastering: YES
-- Captions: YES
-- Memes: NO
-- Asset reuse and caching: YES
-- Scene preview renders: YES
-- Human review checkpoints: YES
-- Editable project and scene source: YES
-- Final MP4 export: YES (after approval)
-- Thumbnail / title / description: YES
+Use idea research where needed, then choose a supported style and visual representation for each teaching beat. Write or verify the script, storyboard, narration cues, and scene plan. Explain mechanisms and state changes with deliberate composition and detail shots; change representation when it makes a beat clearer. Preview hero elements alone, then verify them in the narrated scene and final render.
 
-## Rules
-- Treat YES/NO as explicit skill switches. Skip NO skills; flag unsupported YES skills.
-- Use animations to explain mechanisms and cause/effect, not decorate narration.
-- Avoid generic boxes, repetitive text cards, flat placeholder graphics, fake 3D, and long static scenes.
-- Use accurate components and spatial relationships; cite or flag uncertain technical facts.
-- Synchronize every shot with narration; maintain consistent typography, colors, safe margins, and visual quality.
-- Keep source projects and original assets editable and unchanged.
-- Generate script, storyboard, assets, scene previews, narration samples, review manifests, and final output.
-- Ask for approval of the script, key visual decisions, and final export. Do not silently skip review.
+Route ordinary code-driven scenes through the current videogen/Remotion skill. Use Blender engineering cutaways only when approved source geometry and a working renderer exist. Do not promise faithful hardware geometry, a character asset, 3D model, stock footage, captions, or cloned voice without checking availability and obtaining any needed consent. Prefer a supported 2D or 2.5D explanation when a requested asset or renderer is absent. Do not invent measurements, citations, footage, or component relationships.
 
-## Workflow
-Research → Script → Storyboard → Visual/Renderer Plan → Assets → Narration → Animate → Scene Previews → Review → Polish → Final Render.
+Present the script and key visual decisions for review, render bounded scene evidence at delivery size, revise from actual rendered frames and motion, then render and review the full narrated master. Keep scene source and assets editable. Prepare thumbnail and metadata only when requested; publishing needs a separate explicit request.

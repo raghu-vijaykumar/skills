@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "capture-order",
+      "script": "scripts/order.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    }
+  ]
+}

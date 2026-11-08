@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "preset",
+      "script": "scripts/preset.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "shot-match",
+      "script": "scripts/shot_match.py",
+      "status": "supported",
+      "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "lut",
+      "status": "unsupported",
+      "review": "No working backend"
+    }
+  ]
+}

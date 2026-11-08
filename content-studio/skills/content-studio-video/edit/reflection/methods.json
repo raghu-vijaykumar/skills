@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "detect",
+      "script": "scripts/detect.py",
+      "status": "supported",
+      "review": "Inspect evidence overlays and the decision before any fix"
+    },
+    {
+      "id": "fix",
+      "script": "scripts/fix.py",
+      "status": "supported",
+      "review": "Minor glare/veil only; compare with source and verify exact output"
+    },
+    {
+      "id": "preview",
+      "script": "scripts/preview.py",
+      "status": "supported",
+      "review": "Bounded comparison only; review_required, not removal proof"
+    },
+    {
+      "id": "benchmark",
+      "script": "scripts/benchmark.py",
+      "status": "supported",
+      "review": "Benchmark a licensed external backend on this clip"
+    },
+    {
+      "id": "ai",
+      "script": "scripts/ai.py",
+      "status": "supported",
+      "review": "Pretrained DSRNet pass; partial attenuation only, always review_required, never automatic"
+    },
+    {
+      "id": "generative-removal",
+      "status": "unsupported",
+      "review": "No generative reflection-separation backend is bundled"
+    }
+  ]
+}

@@ -1,22 +1,14 @@
 # Content Studio bundle
 
-Current skill entrypoints live in [skills](skills/); [PROPOSED_FOLDER_STRUCTURE.md](PROPOSED_FOLDER_STRUCTURE.md) describes a future layout and workflow. The proposed folders and scripts do not exist yet.
+The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. The top-level `content-studio-*` names are compatibility routes.
 
-## Gates
+## Stage routes
 
-Before any production edit, use [content-studio-workflow](skills/content-studio-workflow/SKILL.md) to inspect the source and system, name methods and outputs, estimate time, and obtain approval of an editable plan. Record evidence against its checklist. Changed plans require fresh approval; publishing needs separate authorization. Preserve originals and review the exact delivered master.
+1. Run the [workflow precheck](skills/content-studio-workflow/SKILL.md) before a production edit, including a direct leaf call. Review an editable plan with exact method, script command and arguments, inputs, outputs, estimate, fallback, and acceptance criterion. Approval binds to the plan bytes; record checklist evidence.
+2. For a raw camera folder, [prepare individual clips](skills/content-studio-video/source/preprocess/SKILL.md) for the user's manual edit. Diagnose before correcting, preserve originals and Dolby Vision, and flag blur for review. Stop after the clip handoff.
+3. When the user supplies a rendered edit, [inspect it](skills/content-studio-video/review/understand/SKILL.md). On request, draft and approve an evidence-linked script, [mix voice](skills/content-studio-video/audio/narration/SKILL.md), compare and [upscale the completed edit](skills/content-studio-video/edit/upscale/SKILL.md) when justified, then add [scene overlays](skills/content-studio-video/edit/motion-graphics/SKILL.md) at delivery resolution.
+4. [Review the exact master](skills/content-studio-video/review/final-render/SKILL.md) and package. [Publish](skills/content-studio-video/delivery/publish/SKILL.md) only after a separate explicit request; [archive](skills/content-studio-video/delivery/archive/SKILL.md) runs independently.
 
-## Proposed camera-footage default
+[AutoCut](skills/content-studio-video/edit/autocut/SKILL.md) is experimental and explicit-request-only. [Reflection diagnosis](skills/content-studio-video/edit/reflection/SKILL.md) fixes only minor glare/veil and keeps content-rich reflections REVIEW/UNSUPPORTED; its optional DSRNet `ai` pass attenuates a predicted reflection layer as review-only evidence and never reconstructs occluded content. [Voice cloning](skills/content-studio-video/audio/voice-cloning/SKILL.md) requires consent and listening review. [Styles](skills/content-studio-video/planning/styles/SKILL.md) and [animation](skills/content-studio-video/animation/SKILL.md) support code-driven video, carousel, and posts. [Memory](skills/content-studio-video/memory/SKILL.md) persists only confirmed preferences in a private local SQLite database shared across chats; its absence is shown in the plan.
 
-1. Raw video folder → approved ordering, deduplication, and source cleanup → hand off individual prepared clips for **manual editing**.
-2. User supplies the rendered edit → optional evidence-linked [voice script](skills/content-studio-understand/SKILL.md), approved [voice](skills/content-studio-voice/SKILL.md), and mix.
-3. If warranted, compare and upscale the **completed edit after voice**. Then render requested [code-generated overlays](skills/content-studio-motion-graphics/SKILL.md) on named scenes at delivery resolution.
-4. Review final picture and audio, approve the package, then [publish](skills/content-studio-publish/SKILL.md) only on explicit request. [Archive](skills/content-studio-archive/SKILL.md) is independent.
-
-[AutoCut](skills/content-studio-autocut/SKILL.md) is experimental and runs only on explicit request in the proposal. The current [router](skills/content-studio/SKILL.md), [preprocessor](skills/content-studio-videopreprocess/SKILL.md), and [upscale tool](skills/content-studio-videoedit/SKILL.md) still contain older routes; the proposed default and integrated voice mix are not yet implemented. [Prompt templates](prompts/) are examples and need review against the approved plan; `full-vlog.md` currently enables AutoCut by default.
-
-## Other production
-
-For code-driven video, use [styles](skills/content-studio-styles/SKILL.md) and [videogen](skills/content-studio-videogen/SKILL.md) to plan scenes, render bounded evidence, review, and render the full delivery. [Music](skills/content-studio-music/SKILL.md), [audio](skills/content-studio-audio/SKILL.md), [benchmark](skills/content-studio-benchmark/SKILL.md), [memes](skills/content-studio-memes/SKILL.md), and [memory](skills/content-studio-memory/SKILL.md) are specialist tools, not automatic steps.
-
-Edit this repository as the source of truth, tag a tested version, and install that version in content projects. Keep drafts, media, analytics, voice samples, and secrets outside the bundle.
+The [prompt templates](prompts/) are stage-specific starting points. Adapt them to the approved plan. Keep drafts, source media, generated audio, model weights, analytics, and secrets outside this bundle.

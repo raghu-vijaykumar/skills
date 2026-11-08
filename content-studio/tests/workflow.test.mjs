@@ -11,7 +11,7 @@ import {approvePackage, sha256, verifyPackage, validateSrt, validateChecklist} f
 import {transcriptionSegments, toSrt, transcribeDraft, isSpeechText} from '../scripts/transcribe.mjs';
 import {sourceRevision} from '../scripts/source-revision.mjs';
 import {validatePreflight} from '../scripts/preflight.mjs';
-import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-videogen/dist/hairline.js';
+import {HairlineStage, HairlineCacheFigure} from '../skills/content-studio-video/animation/videogen/dist/hairline.js';
 
 const root = path.join(os.tmpdir(), 'content-studio-tests');
 fs.mkdirSync(root, {recursive:true});

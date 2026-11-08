@@ -11,35 +11,35 @@
     "content-studio/"
   ],
   "bin": {
-    "videogen": "./content-studio/skills/content-studio-videogen/scripts/cli.mjs",
+    "videogen": "./content-studio/skills/content-studio-video/animation/videogen/scripts/cli.mjs",
     "content-studio": "./content-studio/scripts/cli.mjs"
   },
   "exports": {
     ".": {
-      "types": "./content-studio/skills/content-studio-videogen/dist/project.d.ts",
-      "default": "./content-studio/skills/content-studio-videogen/dist/project.js"
+      "types": "./content-studio/skills/content-studio-video/animation/videogen/dist/project.d.ts",
+      "default": "./content-studio/skills/content-studio-video/animation/videogen/dist/project.js"
     },
-    "./cli": "./content-studio/skills/content-studio-videogen/scripts/cli.mjs",
-    "./content-package": "./content-studio/skills/content-studio-videogen/scripts/content-package.mjs",
-    "./gate/*": "./content-studio/skills/content-studio-videogen/dist/gates/check-*.mjs",
+    "./cli": "./content-studio/skills/content-studio-video/animation/videogen/scripts/cli.mjs",
+    "./content-package": "./content-studio/skills/content-studio-video/animation/videogen/scripts/content-package.mjs",
+    "./gate/*": "./content-studio/skills/content-studio-video/animation/videogen/dist/gates/check-*.mjs",
     "./runtime/design/contentStyles": {
-      "types": "./content-studio/skills/content-studio-videogen/dist/design/contentStyles.d.mts",
-      "default": "./content-studio/skills/content-studio-videogen/dist/design/contentStyles.mjs"
+      "types": "./content-studio/skills/content-studio-video/animation/videogen/dist/design/contentStyles.d.mts",
+      "default": "./content-studio/skills/content-studio-video/animation/videogen/dist/design/contentStyles.mjs"
     },
     "./runtime/*": {
-      "types": "./content-studio/skills/content-studio-videogen/dist/*.d.ts",
-      "default": "./content-studio/skills/content-studio-videogen/dist/*.js"
+      "types": "./content-studio/skills/content-studio-video/animation/videogen/dist/*.d.ts",
+      "default": "./content-studio/skills/content-studio-video/animation/videogen/dist/*.js"
     },
-    "./skill": "./content-studio/skills/content-studio-videogen/SKILL.md",
+    "./skill": "./content-studio/skills/content-studio-video/animation/videogen/SKILL.md",
     "./runtime/hairline": {
-      "types": "./content-studio/skills/content-studio-videogen/dist/hairline.d.ts",
-      "default": "./content-studio/skills/content-studio-videogen/dist/hairline.js"
+      "types": "./content-studio/skills/content-studio-video/animation/videogen/dist/hairline.d.ts",
+      "default": "./content-studio/skills/content-studio-video/animation/videogen/dist/hairline.js"
     }
   },
   "scripts": {
-    "build": "tsc -p content-studio/skills/content-studio-videogen/tsconfig.json && node content-studio/skills/content-studio-videogen/scripts/copy-static.mjs && node content-studio/skills/content-studio-videogen/scripts/transpile-gates.mjs",
+    "build": "tsc -p content-studio/skills/content-studio-video/animation/videogen/tsconfig.json && node content-studio/skills/content-studio-video/animation/videogen/scripts/copy-static.mjs && node content-studio/skills/content-studio-video/animation/videogen/scripts/transpile-gates.mjs",
     "check:docs": "node content-studio/scripts/check-docs.mjs",
-    "test": "npm run build && node content-studio/skills/content-studio-videogen/dist/gates/check-animation-core.mjs && node --test content-studio/skills/content-studio-videogen/tests/*.test.mjs content-studio/tests/*.test.mjs",
+    "test": "npm run build && node content-studio/skills/content-studio-video/animation/videogen/dist/gates/check-animation-core.mjs && node --test content-studio/skills/content-studio-video/animation/videogen/tests/*.test.mjs content-studio/tests/*.test.mjs",
     "prepare": "npm run build"
   },
   "dependencies": {

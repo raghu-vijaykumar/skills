@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "rough-cut",
+      "script": "scripts/autocut.py",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

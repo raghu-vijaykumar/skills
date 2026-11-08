@@ -1,8 +1,8 @@
 {
-  "video": "/path/to/approved-final.mp4",
+  "video": "/path/to/user-manual-edit.mp4",
   "workspace": "/path/to/vlog-draft",
   "voiceover": {
-    "enabled": true,
+    "enabled": false,
     "language": "Kannada-English",
     "tone": "natural conversational",
     "context": "We visited Burj Khalifa at sunrise, Miracle Garden and the Dubai Fountain. Include personal experiences I provide, never invent details.",

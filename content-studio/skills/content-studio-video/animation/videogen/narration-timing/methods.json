@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "narration",
+      "script": "scripts/narration.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "verify-narration",
+      "script": "scripts/verify-narration.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

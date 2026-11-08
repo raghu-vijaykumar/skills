@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "content-check",
+      "script": "scripts/content-check.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "content-render",
+      "script": "scripts/content-render.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

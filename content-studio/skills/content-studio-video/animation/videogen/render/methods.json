@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "preview-range",
+      "script": "scripts/preview-range.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "delivery",
+      "script": "scripts/delivery.mjs",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

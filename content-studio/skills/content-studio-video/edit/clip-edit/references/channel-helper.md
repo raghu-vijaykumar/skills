@@ -1,0 +1,507 @@
+# Channel helper
+
+Manage a YouTube channel workspace: keep one editable folder per draft, back up
+public uploads and their exact title, description, thumbnail and source to Git
+and Drive, sync media through rclone, and collect analytics for new video ideas.
+Also supports private backups, intro prepending, local pruning and segment
+extraction when configured.
+
+The commands below use `scripts/content.py`. Run them from the
+`content-studio-videoedit` skill folder, or prefix the script with that skill's
+absolute path from another lifecycle skill.
+
+One workspace per channel, one command family:
+
+```
+content.py backup     download uploads, reconcile source, verify Drive and push Git
+content.py reconcile backfill exact metadata from local YouTube backups
+content.py sync       push drafts/assets up, or pull drafts down
+content.py draft      scaffold or list a draft folder; --id separates code ID from title
+content.py intro      prepend the channel intro to a draft video
+content.py prune      delete old published videos locally (Drive untouched)
+content.py insights   build the analytics dataset that a model turns into ideas
+content.py media      extract audio, frames or a clip for segment review
+content.py order      refresh mixed-device capture order and _timeline.csv
+content.py preprocess clean vlog voice, stabilize camera clips, and review blur candidates
+content.py tune      score audio-enhancement candidates per clip before preprocessing
+content.py enhance   diagnose and selectively correct color, exposure, and glare
+content.py upscale   decide and apply selective AI upscaling
+content.py edit       trim, cut, or join vlog clips
+content.py code       git-track the sources, snapshot to Drive, restore, prune
+content.py analytics  retention and performance numbers
+content.py list       channels, local roots, draft counts
+content.py doctor     check yt-dlp, ffmpeg, node, rclone, remotes
+```
+
+## Workspace layout
+
+Everything for a channel lives under `<workspace>/<slug>` (default
+`C:\workspace\content\<slug>`) and that directory is the rclone source. Several
+channels share one workspace, each with its own slug, Drive folder and git repo:
+
+```
+out-of-office/
+  long/2026-10-24 - Title [VIDEOID]/      published long-form
+        video.mp4  thumbnail.jpg  title.txt  description.txt  metadata.json
+        content/video.yaml  video.tsx  source-provenance.json  ... authored source
+  shorts/2026-02-17 - Title [VIDEOID]/    published shorts
+  drafts/Ahara mela/                      work in progress
+        original/            raw camera files (auto-migrated from the draft root)
+        .content-studio/     internal working files
+              processed-clips/<clip>/  analysis, enhanced voice, cuts, final.mp4
+              analysis/duplicates/     quarantined duplicates and review
+              rough-cut/               rough cut, timelines, review media
+              _timeline.csv            capture order
+        <id>-rough-cut.mp4    rough-cut video
+        <id>-preprocessed.mp4 full preprocessed video
+        <id>-final.mp4        final full video
+        <id>-audio-only.mp3   extracted mastered audio
+        thumbnail.png
+        title.txt  description.txt
+        entry.tsx  video.tsx  content/ ...  code-generated video source
+        draft.json           manifest
+  assets/intro.mp4                        the intro clip used by `intro`
+  archive.txt                             yt-dlp ledger, so pruned videos never re-download
+  analytics/<videoId>/                    metrics.json, retention.csv, retention.svg
+  .snapshots/*.bundle                     git snapshots already uploaded to Drive
+  backup-report.json                      last run summary (never uploaded)
+```
+
+For a compact channel workspace, create `analysis/` first. Analytics,
+source cache, staging, and Git bundle snapshots then live beneath it; existing
+channels without `analysis/` keep the layout above. Channel-authored code and
+shared assets can remain in `code/` and `assets/`.
+
+## Config
+
+`<skill>/config.json` is versioned with the skill. `config.local.json` (gitignored)
+is merged over it for machine-specific values.
+
+```json
+{
+  "workspace": "C:\\workspace\\content",
+  "remoteRoot": "gdrive:YouTubeBackups",
+  "browser": "brave",
+  "browserDebugPort": 9223,
+  "quality": "best",
+  "transfers": 2,
+  "includePrivate": true,
+  "channels": {
+    "out-of-office": {
+      "name": "Out of Office Mode",
+      "channelId": "UC-jjjJYPl8rlR029Aag5ZKw",
+      "driveFolder": "gdrive:YouTubeBackups/out-of-office",
+      "includePrivate": true,
+      "intro": "assets/intro.mp4",
+      "analytics": {
+        "provider": "api",
+        "credentials": "~/.config/content-helper/client_secret.json"
+      }
+    }
+  }
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `workspace` | parent of every channel folder; the only directory rclone reads from |
+| `driveFolder` | exact rclone destination per channel; subfolders `long`, `shorts`, `drafts`, `assets` are created under it |
+| `url` / `channelId` | `/channel/UC…`, `/@handle` or a bare id; a url is resolved on demand |
+| `quality` | `best` or a height cap such as `1080` |
+| `includePrivate` | also capture scheduled, private and unlisted uploads |
+| `intro` | intro clip path, relative to the channel root |
+| `analytics.provider` | `api` (retention curves) or `studio` (browser harvest) |
+
+## Sync model
+
+Drive is the durable copy; the local folder is a working subset.
+
+- `sync` pushes `drafts`, `assets`, and external source media normally, and pushes
+  `long`/`shorts` immutably. Backup verifies each completed folder on Drive.
+- `sync --pull` copies `drafts` and `assets` **down** without deleting anything locally.
+- No command ever deletes or truncates anything on Drive.
+
+## Freeing local space
+
+```powershell
+python scripts/content.py prune --channel out-of-office --count 5 --dry-run
+python scripts/content.py prune --channel out-of-office --count 5
+```
+
+Removes the 5 oldest published/scheduled videos from the local `long/` folder (add
+`--include-shorts`, or `--newest` to take the most recent instead). Each folder is
+verified against Drive with `rclone check` first; if the Drive copy is incomplete the
+folder is kept. `archive.txt` entries stay, so the next `backup` will not re-download
+what was pruned.
+
+## Intro
+
+```powershell
+python scripts/content.py intro --channel out-of-office --draft "Ahara mela"
+python scripts/content.py intro --channel out-of-office --all --force
+```
+
+Prepends `assets/intro.mp4`, scaling/cropping it to the draft's frame and frame rate,
+adding silent audio when either clip lacks it, re-encoding with x264 crf 18. The
+un-introed cut is preserved as `video/before-intro.mp4`; `.intro.json`
+records the hashes so a second run is a no-op unless `--force`.
+
+## Analytics
+
+```powershell
+python scripts/content.py analytics --channel out-of-office --last 5
+python scripts/content.py analytics --channel out-of-office --video VIDEOID
+python scripts/content.py analytics --channel out-of-office --provider studio --last 3
+```
+
+Writes `analytics/report.md`, plus `metrics.json`, `retention.csv` and `retention.svg`
+per video.
+
+- `api` needs an OAuth **Desktop app** client with the YouTube Analytics API enabled,
+  saved at `analytics.credentials`. First run opens a browser for consent and caches a
+  refresh token at `~/.config/content-helper/token-<slug>.json`.
+- `studio` reuses the browser debug session and harvests the JSON Studio loads for the
+  Content tab: retention values, views, average view duration and
+  `shortsFeedImpressionsVtr`. No OAuth setup, but undocumented and it may break.
+- Analytics reads local `metadata.json`, so pruned videos are not in the report.
+
+The report is numbers only: per-video retention at 25/50/75%, the largest measured drop,
+the same-format median, VTR when available. The API exposes no retention curve for
+Shorts, so those rows carry views, average view duration, average percentage and VTR.
+
+## Insights dataset
+
+```powershell
+python scripts/content.py insights --channel revise-labs
+python scripts/content.py insights --channel revise-labs --refresh --vtr-count 20
+```
+
+Collects every video into `analytics/dataset.csv` and `analytics/insights.json` and
+prints `analytics/insights.md`. Metrics are cached per video for 12 hours; VTR is cached
+per short, so repeat runs only fetch what is missing. `--vtr-count 0` skips the browser
+pass and reuses cached VTR.
+
+`insights.json` is the intended input for a model:
+
+```
+channel, generated,
+numbers           totals, medians, counts, subscribers per 1k views
+correlations      r(VTR, views), r(average %, views)
+duration_bands    n, median views, median average %, median VTR per band
+upload_days       n and median views per weekday
+topic_lanes       per title keyword: n, median views, median average %, median VTR, best video
+videos[]          id, kind, title, dates, duration, views, watch minutes, avg view seconds,
+                  avg %, VTR, subs/likes/comments/shares, retention at 25/50/75,
+                  biggest drop position and size, title pattern, title length
+```
+
+The script deliberately stops at measurement: it does not generate titles, ideas or
+advice. Interpretation belongs to the model that consumes `insights.json`.
+
+## Media extraction
+
+Pull the exact bytes needed to study a segment:
+
+```powershell
+python scripts/content.py media segment --channel revise-labs --video VIDEOID --start 0:00 --end 0:12 --count 6
+python scripts/content.py media frames  --channel revise-labs --draft "Ahara mela" --at 0:00,0:03,0:07
+python scripts/content.py media audio   --channel revise-labs --draft "Ahara mela" --start 0:30 --end 1:10
+python scripts/content.py media clip    --channel revise-labs --video VIDEOID --start 1:05 --end 1:25
+```
+
+- targets: `--video ID` (published folder), `--draft NAME` (draft `<id>-final.mp4`) or
+  `--path FILE`
+- times accept `SS`, `MM:SS` or `HH:MM:SS`; without `--start/--end` the whole file is used
+- `segment` writes all three: `audio-*.wav` (16 kHz mono, transcription friendly),
+  `frame-*.png` (evenly spaced, or the exact `--at` timestamps) and `clip-*.mp4`
+  (re-encoded for frame accuracy; `--copy` stream-copies instead)
+- output defaults to `<channel>/analysis/<target>/`, override with `--out`
+
+## Vlog clip preprocessing
+
+Preview the capture order, then preprocess camera clips:
+
+```powershell
+python scripts/content.py order --channel out-of-office --draft dubai-abudhai-day-4 --dry-run
+python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --clip IMG_1514.MP4
+python scripts/content.py preprocess --channel out-of-office --draft dubai-abudhai-day-4 --apply-review
+python scripts/content.py preprocess --folder "C:\path\to\clips" --utc-offset +00:00
+```
+
+`--folder` adopts the canonical draft layout: it moves camera clips into
+`original/`, writes `_timeline.csv` under `.content-studio/`, quarantines
+duplicates under `.content-studio/analysis/duplicates/`, and defaults output to
+`.content-studio/processed-clips/`. It does not require a channel config.
+Use `--clip FILE` to process one clip from that folder. `--folder`, `--draft`, and
+`--path` are mutually exclusive.
+
+`order` writes an eight-column `.content-studio/_timeline.csv` and prefixes
+`original/` camera names with capture-order numbers. It keeps old timeline
+timestamps, including estimated ones, when a new clip appears; newly added files
+trigger a renumber before preprocessing or draft joining. The `--dry-run` flag
+previews renames without changing files. If the camera timezone cannot be
+inferred from prior timeline rows or metadata, pass `--utc-offset +04:00` (or the
+location's actual offset) to `order`, `preprocess`, or `edit join`. Only
+`original/` camera filenames change; video bytes are not edited.
+
+Preprocessing migrates a legacy draft first: root clips move into `original/`,
+`processed-clips/` moves under `.content-studio/`, `video.mp4` becomes
+`video.mp4` becomes `<id>-final.mp4`, `video/` and `rough-cut/` move under `.content-studio/`,
+`audio-mastered/` becomes `.content-studio/audio/`, and a legacy preprocess join becomes
+`<id>-preprocessed.mp4`. Existing files are
+never overwritten; collisions keep both names.
+
+Preprocessing detects duplicates by content before numbering. SHA-256 matches are
+moved to `.content-studio/analysis/duplicates/`; the earliest timeline entry (or
+filename) is kept, and the extras are recorded in `report.json`. Near-duplicate
+shots with comparable duration and aspect and similar sampled 16x16 grayscale frames
+are listed in `.content-studio/analysis/duplicates/review.csv`. Set `remove=yes`
+for a row and rerun preprocess to quarantine it. Duplicate files are moved, never
+deleted, and `--clip` accepts a quarantined name and resolves it to the kept clip.
+Repeat scans reuse `cache.json` keyed by file size and modification time.
+
+Preprocessing leaves video bytes untouched and writes one folder per original
+camera basename under `.content-studio/processed-clips/`. It selects the regular
+mono/stereo audio track (not Apple's APAC spatial track), denoises it, detects
+speech, lowers quiet sections by 13 dB, and adjusts speech toward a consistent
+level with no more than 13 dB boost. Short gain ramps and a -1 dBFS limiter
+prevent abrupt level jumps and clipping. Auto mode first tunes each new clip on
+short candidate windows, including a no-processing choice, and caches the
+profile by source hash. A clean clip keeps its source audio and skips speech
+gain. Pass `--speech-gain off` to skip speech
+detection entirely: one bounded gain restores the clip's source loudness, only the
+limiter shapes peaks, and Silero VAD is never loaded. `--denoise auto`
+compares DeepFilterNet candidates when `deep-filter.exe` or `deepFilter` is on
+PATH; otherwise it compares FFmpeg `afftdn` strengths. The selected candidate
+and source/output checks are recorded in `report.json`. Install the
+speech detector with `python -m pip install silero-vad numpy`. The Python
+DeepFilterNet 0.5.6 package needs a supported environment such as Python 3.11;
+its standalone Windows executable avoids that requirement. Download
+`deep-filter-0.5.6-x86_64-pc-windows-msvc.exe` from the
+[official release](https://github.com/Rikorose/DeepFilterNet/releases/tag/v0.5.6),
+name it `deep-filter.exe`, and put its folder on PATH. `--denoise deepfilter` requires
+one of these executables explicitly. A speech denoiser removes everything the model
+does not consider speech, which on a music or ambience clip can delete the whole
+program. Preprocess measures EBU R128 loudness before and after denoising; if the
+clip drops by more than 12 dB, it keeps the source audio with an 80 Hz high-pass,
+records `denoise.fallback: "content-loss"` with both loudness values in
+`report.json`. Final audio is checked again on spread windows; failed improvement
+or fidelity checks set `audio_review_required` and leave ten-second before/after
+WAVs. Use `--no-auto-tune` to keep untuned clips unprocessed, `--denoise off` to
+skip denoise, or `--no-profiles` for an explicit unverified engine override.
+
+### Tune audio per clip
+
+Auto preprocessing tunes each new clip on 12 seconds of source audio. For a
+longer review or to compare representative clips before a batch, run:
+
+```powershell
+python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --limit 5 --sample 40
+python scripts/content.py tune --channel out-of-office --draft dubai-abudhai-day-4 --clip "003 - VID20260112101914.mp4" --force
+```
+
+`tune` samples spread windows of each clip, renders every candidate
+through the same denoise, level-match, and limiter chain preprocess uses, and
+measures each result against the untouched source window. The candidate grid includes
+the current default, post-filter strengths, attenuation-limited passes at 10, 20, and
+30 dB that keep music and ambience, and a no-denoise option. A candidate cannot be
+chosen if it clips, hollows the speech band, or loses more than 12 dB of program
+loudness; it must remove at least 1 dB of noise or raise SNR by 1 dB; suppression
+beyond 24 dB is scored down because a speech denoiser that removes the whole bed
+sounds gated; and it only replaces a healthy default when it leads by more than
+`--margin` points, which keeps measurement noise from flipping the choice. An
+over-suppressed default gets no margin protection. Profiles, metrics, and
+listenable WAVs are written under `.content-studio/analysis/tuning/`, with
+`tuning.csv` and `tuning.html` summarizing the current profiles in that folder and
+inline players for the default and chosen candidates. Listen to the WAVs before a
+batch. Preprocess applies the recorded choice by default; changing a profile rebuilds that
+clip's audio along with its final render. `--limit` samples across clip durations;
+`--sample` is the seconds measured per clip; `--discard-audio` removes the WAVs after
+measuring.
+
+The command stabilizes non-Dolby-Vision clips with two-pass `vidstab` in both the review path and `--final`, retains their
+source dimensions and SDR/HDR color tags, and flags a crop greater than 10% in the
+report. `review.html` shows suspected blurry spans; edit the accompanying `review.csv`
+and set `remove=yes` only for spans you want cut. `--apply-review` creates a separate
+`cut.mp4` or `cut.mov` and never edits the camera clip or the first processed export.
+Use `--force` to rebuild analysis, or `--path FILE --out DIR` for a standalone clip.
+
+Add `--final` when you want a publishable video instead of review artifacts:
+
+```powershell
+python scripts/content.py preprocess --folder "C:\path\to\clips" --final --utc-offset +00:00
+```
+
+Final mode reuses the existing `enhanced-voice.wav` when the source size is unchanged,
+automatically treats every detected blur span as a cut, and writes `final.mp4` in each
+clip folder. Folder and draft runs then concatenate those exports into
+`<id>-preprocessed.mp4`. Every clip is fitted to
+the highest source resolution, BT.709 SDR at 30 fps with stereo AAC; the whole frame is kept and padded
+where the aspect differs. Dolby Vision RPU is deliberately dropped in this path, so use
+the `--dv-proof` / `--dv-approved` flow when DV must be preserved. `--final` cannot be
+combined with `--apply-review`, `--dv-proof`, or `--dv-approved`.
+
+Dolby Vision requires [dovi_tool](https://github.com/quietvoid/dovi_tool/releases)
+on PATH for an RPU proof. The command first keeps the original Dolby Vision video
+and exports `enhanced-voice.wav`; it only keeps a
+voice-only remux if its Dolby Vision RPU survives probing. When `dovi_tool` is
+available, a three-second `dv-proof.mov` is attempted and checked for frame count,
+RPU, and HLG color tags. Run `--dv-proof` after installing the tool to retry without
+reprocessing audio. Only after that proof passes **and** you check playback on your
+usual device, run `--dv-approved --clip FILE` for the full clip or add
+`--dv-approved` to `--apply-review` for approved cuts. A failed check leaves the
+original and cleaned WAV in place; never treat an HLG-only result as Dolby Vision.
+
+## Selective AI upscaling
+
+Upscaling is gated by measurement, not applied to every clip:
+
+```powershell
+content-studio upscale --draft <draft> --target 4k --analyze-only --review
+content-studio upscale --draft <draft> --target 4k --preview --review --limit 5
+content-studio upscale --draft <draft> --target 4k --review
+content-studio upscale --draft <draft> --target 4k --approve
+```
+
+Each clip gets `FIX`, `REVIEW`, `SKIP`, or `UNSUPPORTED`. FIX means a 5-second
+preview beat Lanczos by at least 3% edge detail without added noise, clipping,
+exposure drift, or temporal flicker. REVIEW waits for `--approve`; SKIP falls back
+to Lanczos when the delivery target still needs the resolution; UNSUPPORTED covers
+HDR/DV sources and orientation mismatches. Decisions, reasons, previews, and caches
+land under `.content-studio/upscale/`, and `final-pre-upscale.mp4` keeps the previous
+clip. Add `--timeline <path> --timeline-ranges` to render only the ranges an
+approved edit uses, and `--write-timeline <path>` to produce a timeline copy that
+points at those assets. See [the upscale workflow](upscale.md) for model throughput,
+HDR policy, VFR timing, `--chunk`, `--staging`, and `--encoder`.
+
+## Vlog edits and assembly
+
+```powershell
+python scripts/content.py edit trim --input clip.mp4 --start 00:12 --end 00:30 --out clip-trim.mp4
+python scripts/content.py edit cut --input clip.mp4 --remove 00:12-00:14 --remove 01:02-01:05 --out clip-cut.mp4
+python scripts/content.py edit join --channel out-of-office --draft dubai-abudhai-day-4
+python scripts/content.py edit join --folder "C:\path\to\draft"
+python scripts/content.py edit join --input clip-trim.mp4 --input clip-cut.mp4 --out joined.mp4
+```
+
+Trim keeps the given range; cut removes the listed ranges. Both re-encode video and
+audio for frame accuracy, validate duration, and require a new output filename. SDR
+clips keep their camera color tags; HLG clips remain 10-bit HLG. Dolby Vision cuts
+require `--sdr`, which explicitly tone maps the HLG/PQ base layer to BT.709 SDR.
+
+Draft join uses `.content-studio/_timeline.csv` order and prefers approved `cut.*`,
+then `processed.*`, then voice-only video or original footage with the enhanced voice
+sidecar when available. It creates `<id>-final.mp4` and writes
+`.content-studio/rough-cut/edit-timeline.json` plus `edit-timeline.html`. Each clip is normalized to
+the highest source resolution, BT.709 SDR at 30 fps with stereo AAC before joining. Mixed resolutions use the largest canvas and upscale smaller clips, never downscaling the largest. The full frame is kept
+with padding where needed; HDR is tone mapped. The explicit repeated `--input` form
+joins only the files named, in that order. Review the result, especially clip
+transitions, audio sync, and color, before using it as a final edit.
+
+For mixed portrait/landscape footage, filter the join by target orientation:
+
+```powershell
+python scripts/content.py edit join --channel out-of-office --draft <id> --orientation landscape
+python scripts/content.py edit join --channel out-of-office --draft <id> --orientation landscape --include-mismatched --fit blur
+```
+
+`--orientation` keeps only matching clips. `--include-mismatched` keeps all clips;
+`--allow <filename>` adds one specific exception. `--fit blur` is the default and
+centers a mismatched clip over a blurred copy of the same footage; `--fit pad`
+uses black bars and `--fit crop` fills the frame by cropping. `preprocess --final`
+uses the same default; override it with `--fit pad` or `--fit crop`. AutoCut
+exposes the same flags when it builds its timeline.
+
+## Music selection
+
+Use [content-studio-music](../../../audio/music/SKILL.md) to shortlist and
+approve background music from YouTube Audio Library or Pixabay Music. Tracks are
+cataloged locally under [assets/music](../../../../../assets/music/README.md); the MP3s
+stay in the gitignored `local/` folder because neither license allows
+redistribution in this public repository. The manifest, credits, and selection
+record are committed.
+
+```powershell
+node content-studio/scripts/music-library.mjs init
+node content-studio/scripts/music-library.mjs open
+node content-studio/scripts/music-library.mjs open --source pixabay
+node content-studio/scripts/music-library.mjs add "C:\path\track.mp3" --category cinematic --title "Track" --artist "Artist" --license youtube-audio-library
+python ../../content-studio-music/scripts/music.py review --channel out-of-office --draft <id> --category cinematic --count 5
+python ../../content-studio-music/scripts/music.py select --channel out-of-office --draft <id> --track "Track"
+```
+
+Download manually from the selected source, then use `add` or `scan`. Use
+`--license pixabay` for Pixabay and `--license youtube-audio-library-cc-by
+--attribution "..."` when a track requires credit. Neither script scrapes or
+downloads from the source sites. The approved selection is written to
+`music-selection.json`; `music-credits.txt` holds the exact description credit.
+
+## From dataset to the next video
+
+`insights.json` is the input for [content-studio-ideagen](../../../planning/ideagen/SKILL.md): research
+sweep, scored idea selection, packaging before production, and a measurement loop that feeds
+the next run.
+
+```powershell
+python ../../content-studio-ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
+```
+
+That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` and
+`measurement.md`, pre-filled with the channel's medians, strongest lane and best duration
+band.
+
+## Published source handoff
+
+Use one channel repository at `C:\workspace\content\<slug>`. The channel's Git
+remote holds source files, `title.txt`, `description.txt`, and the downloaded
+`thumbnail.jpg`. Binary video, generated media, and raw YouTube `metadata.json`
+are ignored by Git and copied to the channel's configured Drive folder.
+
+For a generated video, edit and commit `drafts/<id>/` with its `entry.tsx`,
+`video.tsx`, content metadata, research, and authored thumbnail. Publish with the
+`videogen` skill; it records the returned YouTube ID in `draft.json` before
+attempting the thumbnail. Scheduled or private uploads stay in drafts.
+
+Once YouTube shows the upload publicly, run:
+
+```powershell
+python scripts/content.py backup --channel revise-labs
+```
+
+The command downloads the public YouTube copy, writes its exact title and
+description beside the downloaded thumbnail, joins the draft by **YouTube ID**,
+copies its source without replacing the downloaded MP4, copies all assets to
+Drive with rclone, verifies the public folder on Drive, then removes the draft.
+It selectively commits and pushes that video's Git files. A failed Drive check
+or missing Git remote keeps the draft; a failed Git push retains the local
+commit and the verified archive, and must be reported.
+
+For older already-downloaded uploads, `content.py reconcile --channel revise-labs`
+backfills exact public text without fetching or closing drafts. Historical
+source copied from another repository must carry provenance that says whether
+its exact uploaded revision was verified. Never fill a missing-source folder
+with guessed code. `content.py code snapshot` separately sends a Git bundle to
+Drive for full repository recovery.
+
+## Backup, private and scheduled uploads
+
+For Revise Labs, set `includePrivate: false`: an upload is closed out of drafts only after the public YouTube backup exists. Other channels may opt into private/scheduled backup, but that never counts as a public draft handoff.
+
+Public channel tabs never list scheduled or private videos, and Chromium cookie
+databases cannot be read by yt-dlp (`Failed to decrypt with DPAPI`). The backup runs a
+Studio pass instead: it relaunches the configured browser with a debug port, reads the
+Studio *Videos* and *Shorts* tables, exports session cookies over the DevTools protocol,
+downloads only ids missing from `archive.txt`, then closes the browser. The browser is
+briefly closed during this pass.
+
+## Prerequisites
+
+```powershell
+python -m pip install --user yt-dlp yt-dlp-ejs websocket-client
+winget install Gyan.FFmpeg
+winget install OpenJS.NodeJS
+winget install Rclone.Rclone
+rclone config create gdrive drive scope=drive
+```
+
+`content.py doctor` reports which of these are missing.

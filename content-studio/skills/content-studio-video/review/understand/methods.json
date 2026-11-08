@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "inspect",
+      "script": "scripts/understand.py",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "voiceover",
+      "script": "scripts/voiceover.py",
+      "status": "supported",
+      "review": "Inspect the exact output and compare it with the approved plan"
+    }
+  ]
+}

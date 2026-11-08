@@ -4,15 +4,12 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
+import {discoverSkills} from './skill-discovery.mjs';
 
 const sourceBundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
-const names = ['content-studio','content-studio-ideagen','content-studio-styles','content-studio-videogen',
-  'content-studio-videopreprocess','content-studio-videoedit','content-studio-audio','content-studio-autocut','content-studio-music',
-  'content-studio-benchmark','content-studio-motion-graphics','content-studio-publish','content-studio-archive',
-  'content-studio-memes','content-studio-memory','content-studio-understand','content-studio-voice','content-studio-workflow'];
 function run(executable, args) {
   const result = spawnSync(executable, args, {encoding:'utf8', maxBuffer:16*1024*1024});
   if (result.error || result.status !== 0)
@@ -44,16 +41,15 @@ export function installSkills({global = false, target = null, dependencies = tru
       // npm excludes package-lock.json from packed dependencies; use pinned package.json there.
       npmRun([hasLock ? 'ci' : 'install','--prefix',release,'--ignore-scripts']);
       npmRun(['run','build','--prefix',release]);
-      npmRun(['ci','--prefix',path.join(release,'content-studio','skills','content-studio-ideagen','digest')]);
+      npmRun(['ci','--prefix',path.join(release,'content-studio','skills','content-studio-video','planning','ideagen','digest')]);
     }
     fs.writeFileSync(marker, `${version}\n`);
   } else if (fs.readFileSync(marker,'utf8').trim() !== version) {
     throw new Error(`Unmanaged release folder: ${release}`);
   }
-  for (const name of names) {
+  const entries = discoverSkills(path.join(release, 'content-studio', 'skills'));
+  for (const {name, folder: source} of entries) {
     const destination = path.join(skills,name);
-    const source = path.join(release,'content-studio','skills',name);
-    if (!fs.existsSync(path.join(source,'SKILL.md'))) throw new Error(`Missing skill: ${name}`);
     if (fs.existsSync(destination)) {
       const info = fs.lstatSync(destination);
       if (!info.isSymbolicLink()) throw new Error(`Refusing to replace unmanaged skill: ${destination}`);
@@ -65,9 +61,8 @@ export function installSkills({global = false, target = null, dependencies = tru
     fs.symlinkSync(source,destination,process.platform === 'win32' ? 'junction' : 'dir');
   }
   // Both Codex and OpenCode discover these direct children of ~/.agents/skills.
-  for (const name of names) {
+  for (const {name, folder: expected} of entries) {
     const installed = path.join(skills, name);
-    const expected = path.join(release, 'content-studio', 'skills', name);
     const actual = fs.realpathSync(installed);
     if (actual.toLowerCase() !== fs.realpathSync(expected).toLowerCase())
       throw new Error(`Skill discovery points at the wrong version: ${name}`);
@@ -100,5 +95,5 @@ export function installSkills({global = false, target = null, dependencies = tru
       }
     }
   }
-  return {version,release,skills:names.map((name) => path.join(skills,name)),removed};
+  return {version,release,skills:entries.map(({name}) => path.join(skills,name)),removed};
 }

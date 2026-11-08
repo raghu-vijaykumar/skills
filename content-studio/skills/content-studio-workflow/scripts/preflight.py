@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import platform
@@ -35,6 +36,24 @@ def read_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"Expected a JSON object in {path}")
     return value
+
+
+def confirmed_preferences(scope: str, project: str) -> dict:
+    """Show saved explicit preferences in every new plan without creating a database."""
+    script = Path(__file__).resolve().parents[2] / "content-studio-video" / "memory" / "scripts" / "memory.py"
+    spec = importlib.util.spec_from_file_location("content_studio_editing_memory", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    database = module.default_db_path()
+    if not database.is_file():
+        return {"database": str(database), "database_exists": False, "scope": scope,
+                "project": project or None, "preferences": {}}
+    connection = module.connect(database)
+    try:
+        result = module.retrieve(connection, scope, project)
+    finally:
+        connection.close()
+    return {"database": str(database), "database_exists": True, **result}
 
 
 def plan_hash(plan_file: Path) -> str:
@@ -137,7 +156,7 @@ def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
                 report["estimates"]["ai_upscale_hours"] = round(frames * ai_seconds_per_frame / 3600, 2)
                 report["estimates"]["basis"] = "supplied representative AI seconds per frame; sustained throughput may differ"
                 if report["estimates"]["ai_upscale_hours"] >= 2:
-                    report["recommendations"].append("AI upscale is a multi-hour route on the supplied pilot: limit it to verified FIX ranges, benchmark sustained throughput, and review storage/thermal headroom before a long render.")
+                    report["recommendations"].append("AI upscale is a multi-hour route on the supplied pilot: defer it until the completed edited video, benchmark sustained throughput, and review storage/thermal headroom before a long render.")
             else:
                 report["estimates"]["ai_upscale_hours"] = None
                 report["estimates"]["basis"] = "run a short AI pilot on this machine before estimating full duration"
@@ -148,7 +167,7 @@ def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
         if media["hdr_or_dv"]:
             report["recommendations"].append("HDR/Dolby Vision: preserve source; decide tone mapping before any upscale or color render.")
         elif (media["width"] or 0) < 3840:
-            report["recommendations"].append("If delivery needs 4K, compare a short Lanczos and live-action AI preview; use AI only for verified gains on used timeline ranges.")
+            report["recommendations"].append("If the completed edited video needs 4K, compare short Lanczos and live-action AI previews on that master; do not upscale the raw clips.")
         else:
             report["recommendations"].append("Source is already 4K width; diagnose detail before proposing upscale.")
     else:
@@ -158,8 +177,23 @@ def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
     return report
 
 
-def default_steps(kind: str) -> list[dict]:
-    production = "Preprocess and review source clips; build a rough cut" if kind == "edited" else "Author scenes and narration-timed visuals"
+def default_steps(kind: str, stage: str | None = None) -> list[dict]:
+    if kind == "edited" and stage != "edited-render":
+        # Raw footage is an individual-clip handoff; later work gets a new plan.
+        return [
+            {"id": "S01", "title": "Review sources and rights", "route": "Inspect camera files, channel rules, originals, capacity, and allowed changes", "estimated_time": "Estimate after intake", "output": "source and rights notes", "acceptance": "Sources and constraints recorded", "required": True},
+            {"id": "S02", "title": "Order and diagnose clips", "route": "Inspect capture times and duplicates; measure audio, blur, motion, and HDR/DV before choosing methods", "estimated_time": "Estimate after source sample", "output": "capture order and per-clip issue report", "acceptance": "Each issue has evidence and a SKIP/FIX/REVIEW/UNSUPPORTED decision", "required": True},
+            {"id": "S03", "title": "Prepare individual clips", "route": "Run only approved source methods; no AutoCut, automatic blur removal, joined master, narration, or upscale", "estimated_time": "Estimate from source duration and bounded pilot", "output": ".content-studio/processed-clips/ and _timeline.csv", "acceptance": "Originals retained and each prepared clip verified", "required": True},
+            {"id": "S04", "title": "Review exact final render", "route": "Check each delivered prepared clip and audio, then stop for the user's manual edit", "estimated_time": "Sample all clips and inspect affected ranges", "output": "prepared clips and review record", "acceptance": "Handoff matches the approved source-preparation plan", "required": True},
+        ]
+    if kind == "edited":
+        return [
+            {"id": "S01", "title": "Review sources and rights", "route": "Inspect the supplied manual render, source hash, channel rules, and requested post-edit stages", "estimated_time": "Estimate after intake", "output": "render and rights notes", "acceptance": "Manual render and constraints recorded", "required": True},
+            {"id": "S02", "title": "Plan requested post-edit operations", "route": "Name exact voice, full-edit upscale, and scene-overlay method scripts only when requested; order voice then upscale then code graphics", "estimated_time": "Estimate from bounded samples", "output": "approved stage and method choices", "acceptance": "Inputs, outputs, fallback, and review criteria are explicit", "required": True},
+            {"id": "S03", "title": "Execute approved post-edit operations", "route": "Run the selected methods with script and voice review stops; add detailed checklist steps before approval", "estimated_time": "Estimate from the selected method pilots", "output": "separate voiced, upscaled, or overlaid candidates", "acceptance": "Each selected output matches the reviewed method", "required": True},
+            {"id": "S04", "title": "Review exact final render", "route": "Watch affected ranges and full delivered picture and audio", "estimated_time": "At least full runtime plus inspection", "output": "reviewed master and evidence", "acceptance": "Delivered master matches approval and has no unchecked side effects", "required": True},
+        ]
+    production = "Author scenes and narration-timed visuals"
     return [
         {"id": "S01", "title": "Review sources and rights", "route": "Inspect source, channel rules, existing work and approvals", "estimated_time": "Estimate after intake", "output": "source and rights notes", "acceptance": "Source and usage constraints recorded", "required": True},
         {"id": "S02", "title": "Approve story and visual treatment", "route": "Set teaching beats, framing, style, deliverables and human review points", "estimated_time": "Estimate after outline", "output": "approved brief or outline", "acceptance": "Creative direction agreed", "required": True},
@@ -185,6 +219,9 @@ def validate_plan(plan: dict) -> None:
             raise ValueError("Every step needs id, title, route, estimated_time, output and acceptance")
         if step["id"] in ids:
             raise ValueError(f"Duplicate step ID: {step['id']}")
+        if "command" in step and (not isinstance(step["command"], list) or not step["command"] or
+                                  not all(isinstance(arg, str) and arg for arg in step["command"])):
+            raise ValueError(f"Step {step['id']} command must be a nonempty argv array")
         ids.add(step["id"])
     for title in ("Review sources and rights", "Review exact final render"):
         if not any(step["title"] == title and step.get("required") is True for step in plan["steps"]):
@@ -217,6 +254,10 @@ def main(argv: list[str] | None = None) -> int:
     profile_parser.add_argument("--ai-seconds-per-frame", type=float)
     init = sub.add_parser("init")
     init.add_argument("--kind", required=True, choices=("edited", "remotion"))
+    init.add_argument("--stage", choices=("source-prep", "edited-render"),
+                      help="edited kind: raw-folder handoff (default) or supplied-render continuation")
+    init.add_argument("--category", choices=("global", "travel", "cooking", "daily"), default="global")
+    init.add_argument("--project", default="")
     init.add_argument("--goal", required=True)
     init.add_argument("--input", action="append", required=True, dest="inputs")
     init.add_argument("--deliverable", action="append", required=True, dest="deliverables")
@@ -249,9 +290,15 @@ def main(argv: list[str] | None = None) -> int:
         if plan_file.exists():
             raise ValueError(f"Plan exists: {plan_file}; edit it and request another review")
         system = read_json(system_file)
-        plan = {"schema_version": 1, "kind": args.kind, "goal": args.goal.strip(),
+        if args.kind == "remotion" and args.stage:
+            raise ValueError("--stage applies only to edited plans")
+        plan = {"schema_version": 1, "kind": args.kind,
+                "stage": args.stage or ("source-prep" if args.kind == "edited" else "remotion"),
+                "goal": args.goal.strip(),
                 "inputs": args.inputs, "deliverables": args.deliverables,
-                "system_profile": system, "steps": default_steps(args.kind),
+                "system_profile": system,
+                "editing_memory": confirmed_preferences(args.category, args.project),
+                "steps": default_steps(args.kind, args.stage),
                 "notes": "Edit routes, steps, estimates and review criteria before asking for approval."}
         validate_plan(plan)
         write_json(plan_file, plan)

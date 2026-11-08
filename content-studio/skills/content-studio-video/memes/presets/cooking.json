@@ -1,0 +1,20 @@
+{
+  "category": "cooking",
+  "max_per_10_minutes": 3,
+  "modes": [
+    "cutaway",
+    "pip",
+    "audio_stinger"
+  ],
+  "triggers": [
+    "cooking_fail",
+    "spicy_reaction",
+    "surprise",
+    "success"
+  ],
+  "avoid": [
+    "critical_instruction",
+    "ingredient_quantity"
+  ],
+  "approval_required": true
+}

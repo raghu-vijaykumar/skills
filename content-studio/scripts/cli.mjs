@@ -6,8 +6,8 @@ import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {approvePackage, itemFromDraft, verifyPackage} from './package.mjs';
 import {transcribeDraft, probeMaster} from './transcribe.mjs';
-import {publishYoutube} from '../skills/content-studio-videogen/scripts/publish-youtube.mjs';
-import {publishInstagram} from '../skills/content-studio-videogen/scripts/publish-instagram.mjs';
+import {publishYoutube} from '../skills/content-studio-video/animation/videogen/scripts/publish-youtube.mjs';
+import {publishInstagram} from '../skills/content-studio-video/animation/videogen/scripts/publish-instagram.mjs';
 import {installSkills} from './install-skills.mjs';
 
 const bundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,7 +32,7 @@ function readJsonFile(file) {
 function channel() {
   const slug = option('channel');
   if (!slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('--channel needs a configured slug');
-  const configFile = option('config') ?? path.join(bundle, 'skills', 'content-studio-videoedit', 'config.json');
+  const configFile = option('config') ?? path.join(bundle, 'skills', 'content-studio-video', 'edit', 'clip-edit', 'config.json');
   const config = readJsonFile(configFile);
   const override = path.join(path.dirname(configFile), 'config.local.json');
   if (fs.existsSync(override)) merge(config, readJsonFile(override));
@@ -54,31 +54,31 @@ function publishingConfig(root, entry) {
 function remotionCheck(root, id) {
   const project = path.join(root, 'videogen.config.ts');
   if (!fs.existsSync(project)) throw new Error('Remotion draft needs videogen.config.ts');
-  const cli = path.join(bundle, 'skills', 'content-studio-videogen', 'scripts', 'cli.mjs');
+  const cli = path.join(bundle, 'skills', 'content-studio-video', 'animation', 'videogen', 'scripts', 'cli.mjs');
   const result = spawnSync(process.execPath, [cli, 'check', id], {cwd: root, encoding: 'utf8'});
   if (result.status !== 0) throw new Error(`Remotion check failed: ${(result.stderr || result.stdout).trim().split(/\r?\n/).slice(-8).join('\n')}`);
 }
 async function main() {
   if (command === 'enhance') {
-    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', 'enhance.py');
+    const script = path.join(bundle, 'skills', 'content-studio-video', 'edit', 'clip-edit', 'scripts', 'enhance.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
     process.exitCode = result.status ?? 1;
     return;
   }
   if (command === 'upscale') {
-    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', 'upscale.py');
+    const script = path.join(bundle, 'skills', 'content-studio-video', 'edit', 'clip-edit', 'scripts', 'upscale.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
     process.exitCode = result.status ?? 1;
     return;
   }
   if (command === 'polish' || command === 'match' || command === 'quality' || command === 'refine') {
-    const script = path.join(bundle, 'skills', 'content-studio-videoedit', 'scripts', `${command}.py`);
+    const script = path.join(bundle, 'skills', 'content-studio-video', 'edit', 'clip-edit', 'scripts', `${command}.py`);
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
     process.exitCode = result.status ?? 1;
     return;
   }
   if (command === 'benchmark') {
-    const script = path.join(bundle, 'skills', 'content-studio-benchmark', 'scripts', 'benchmark.py');
+    const script = path.join(bundle, 'skills', 'content-studio-video', 'review', 'benchmark', 'scripts', 'benchmark.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
     process.exitCode = result.status ?? 1;
     return;

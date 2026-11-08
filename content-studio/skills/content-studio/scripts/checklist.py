@@ -15,7 +15,7 @@ from pathlib import Path
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(BUNDLE_ROOT / "skills" / "content-studio-videoedit" / "scripts"))
+sys.path.insert(0, str(BUNDLE_ROOT / "skills" / "content-studio-video" / "edit" / "clip-edit" / "scripts"))
 
 from common import DEFAULT_CONFIG, channel_root, load_config, select_channels  # noqa: E402
 

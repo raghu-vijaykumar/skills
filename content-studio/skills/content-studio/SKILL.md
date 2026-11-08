@@ -1,26 +1,18 @@
 ---
 name: content-studio
-description: Route a video idea through animation or vlog production, review, publishing, and backup. Use when starting or resuming the full content lifecycle.
+description: Route a Content Studio idea or supplied media through approved production, review, publication, and archive.
 ---
 
 # Content Studio
 
-Start with `content-studio-workflow` precheck for every production request, including a direct specialist edit. Profile the current machine and source, present the editable route and full step checklist, incorporate requested changes, and wait for explicit human approval of the current plan before editing. Complete the plan checklist before package approval.
+Start every production request, including a direct specialist request, with the mandatory [workflow precheck](../content-studio-workflow/SKILL.md). Inspect the channel, draft, source media, and system; present an editable plan with exact skill, method script, inputs, outputs, estimate, fallback, and review criterion. Obtain explicit approval of the current revision before editing, then record checklist evidence. Changed plans require reapproval.
 
-Choose the channel and one draft folder. Read that channel's owner rules and current draft before changing it. For prompt-driven resumable runs use `content-studio-workflow` with a validated workflow JSON; its approval gates are separate from and do not replace the lifecycle checklist. For sparse-frame analysis of a reviewed master and evidence-based narration use `content-studio-understand`; for consented personal voice synthesis after samples and a backend are configured use `content-studio-voice`. For new ideas use `content-studio-ideagen`; choose a treatment with `content-studio-styles`; for Remotion video use `content-studio-videogen`; for raw camera clips use `content-studio-videopreprocess` to deduplicate, order, and clean them, then `content-studio-autocut` for a reviewable rough cut, then use `content-studio-videoedit` for assembly or a supplied final export. Use `content-studio-motion-graphics` for ingredient callouts or social prompts over an existing Out of Office Mode cooking edit. Use `content-studio-audio` to master audio in a folder of videos. Use `content.py enhance analyze` for diagnosis-first color/quality review before changing footage; it skips clean clips and routes reflections to review or unsupported. Use `content-studio-benchmark` for synchronized comparison grids of original, preprocessed, upscaled, and color-corrected panels. Choose background music with `content-studio-music` before publishing. Route a reviewed final export to `content-studio-publish`. Use `content-studio-archive` for an independent backup and Drive sync. Each specialist owns its checks; do not skip human review.
+For a raw camera folder, route to [video source preprocessing](../content-studio-video/source/preprocess/SKILL.md) and stop after handing off individual prepared clips and capture order for the user's manual edit. [AutoCut](../content-studio-video/edit/autocut/SKILL.md) is experimental and runs only on explicit request. Do not automatically join clips or remove blur spans.
 
-When this router is used, create or resume the deterministic checklist before production work:
+When the user supplies a rendered manual edit, record its path and hash. Run only requested post-edit stages: [understand](../content-studio-video/review/understand/SKILL.md) for an evidence-linked voice script, [narration](../content-studio-video/audio/narration/SKILL.md) for approved voice and mix, [upscale](../content-studio-video/edit/upscale/SKILL.md) on the completed edit if justified, then [motion graphics](../content-studio-video/edit/motion-graphics/SKILL.md) on named scenes at delivery resolution. Review the exact master before a package can be approved.
 
-```powershell
-python <this-skill>/scripts/checklist.py `
-  --channel <slug> --draft <id> --kind edited init
-```
+For code-driven video, route through [styles](../content-studio-video/planning/styles/SKILL.md) and [videogen](../content-studio-video/animation/videogen/SKILL.md). [Ideagen](../content-studio-video/planning/ideagen/SKILL.md), [music](../content-studio-video/audio/music/SKILL.md), [memory](../content-studio-video/memory/SKILL.md), and other nested operation skills are independently callable when relevant.
 
-Use `--kind remotion` for code-driven videos. Update the checklist at every stage. Each item must end `done` with evidence or a note, or `not_applicable` with a reason; post-publish items may remain `deferred` with a reason until after publishing. Before approval and publishing run `verify --phase pre_publish`; before closing the draft run `verify --phase all`. The package gate rejects a main-lifecycle draft with pending or under-documented items. A direct specialist invocation is a one-off action and does not create this checklist. Read [the lifecycle checklist](references/lifecycle-checklist.md).
+Create or resume the lifecycle checklist with `python <this-skill>/scripts/checklist.py --channel <slug> --draft <id> --kind edited init` (use `remotion` for code-driven work). Record evidence per item, run `verify --phase pre_publish` before package approval and `verify --phase all` before closing. A direct specialist call follows the precheck but need not initialize the full lifecycle checklist. Read [the fixed lifecycle items](references/lifecycle-checklist.md).
 
-An idea is a brief, a reviewed render or export is a publication candidate, and a public YouTube backup is a separate archival state. Keep channel data and media in its content repository, not in this skill bundle. A draft follows one layout: `original/` for raw camera files, `.content-studio/` for per-clip working files and rough-cut review media, plus root `<id>-rough-cut.mp4`, `<id>-preprocessed.mp4`, `<id>-final.mp4`, and `<id>-audio-only.mp3`, with `title.txt`, `description.txt`, and `lifecycle-checklist.json` at the draft root. Vlog drafts do not generate transcripts or captions. A monthly archive run is user initiated.
-
-
-For user-supplied meme assets and reviewable vlog reaction insertions, use `content-studio-memes`. Keep the local media catalogue outside Git; never insert unapproved memes automatically.
-
-Use `content-studio-memory` before editing to retrieve local explicit preferences and after genuine human review to record decisions. Memory is never publication approval.
+[Publication](../content-studio-video/delivery/publish/SKILL.md) requires approved package hashes and a separate explicit user request. [Archive](../content-studio-video/delivery/archive/SKILL.md) is independent. Keep drafts, media, analytics, private voice assets, and credentials outside this skill bundle.
