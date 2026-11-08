@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "source": "https://clipchamp.com/en/blog/video-transitions-transform-video-editing/",
+  "retrieved": "2026-11-08",
+  "defaults": {
+    "duration": 0.6,
+    "min_duration": 0.15,
+    "max_duration": 3.0,
+    "gap": 0.05
+  },
+  "transitions": [
+    {
+      "id": "burn",
+      "name": "Burn",
+      "article": 1,
+      "family": "stylized",
+      "modes": ["point"],
+      "fidelity": "approximate",
+      "default_duration": 0.7,
+      "point": {"type": "fade", "color": "0xFF5A1F"},
+      "notes": "Warm orange dip. It does not render the Clipchamp fire asset."
+    },
+    {
+      "id": "horizontal-banding",
+      "name": "Horizontal banding",
+      "article": 2,
+      "family": "stylized",
+      "modes": ["join"],
+      "fidelity": "approximate",
+      "default_duration": 0.5,
+      "xfade": "hlwind",
+      "notes": "Horizontal slice motion. It does not reproduce the retro scanline asset."
+    },
+    {
+      "id": "diagonal-soft-wipe",
+      "name": "Diagonal soft wipe",
+      "article": 3,
+      "family": "wipe",
+      "modes": ["join"],
+      "fidelity": "approximate",
+      "default_duration": 0.6,
+      "xfade": "diagtl",
+      "notes": "Diagonal wipe from the top-left. FFmpeg edges are hard, not feathered."
+    },
+    {
+      "id": "blinds",
+      "name": "Blinds",
+      "article": 4,
+      "family": "wipe",
+      "modes": ["join"],
+      "fidelity": "approximate",
+      "default_duration": 0.6,
+      "xfade": "hlslice",
+      "notes": "Horizontal slices approximate the blinds reveal."
+    },
+    {
+      "id": "bloom",
+      "name": "Bloom",
+      "article": 5,
+      "family": "zoom",
+      "modes": ["join"],
+      "fidelity": "approximate",
+      "default_duration": 0.7,
+      "xfade": "zoomin",
+      "notes": "Zoom approximation. It does not add the lens flare."
+    },
+    {
+      "id": "collage",
+      "name": "Collage",
+      "article": 6,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.8,
+      "notes": "Needs a multi-panel motion-graphics asset; no FFmpeg renderer here."
+    },
+    {
+      "id": "pixelate",
+      "name": "Pixelate",
+      "article": 7,
+      "family": "stylized",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "pixelize",
+      "notes": "Native FFmpeg pixelize transition."
+    },
+    {
+      "id": "exchange",
+      "name": "Exchange",
+      "article": 8,
+      "family": "slide",
+      "modes": ["join"],
+      "fidelity": "approximate",
+      "default_duration": 0.7,
+      "xfade": "slideleft",
+      "notes": "Slide approximation. It does not zoom the outgoing frame out."
+    },
+    {
+      "id": "page-turn",
+      "name": "Page turn",
+      "article": 9,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.8,
+      "notes": "3D page fold needs a motion-graphics renderer."
+    },
+    {
+      "id": "reveal",
+      "name": "Reveal",
+      "article": 10,
+      "family": "wipe",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "revealleft",
+      "notes": "Native reveal. Swap to revealright, revealup, or revealdown in the catalog if needed."
+    },
+    {
+      "id": "liquid-streaks",
+      "name": "Liquid streaks",
+      "article": 11,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.7,
+      "notes": "Needs the liquid motion asset; no FFmpeg renderer here."
+    },
+    {
+      "id": "liquid-drops",
+      "name": "Liquid drops",
+      "article": 11,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.7,
+      "notes": "Needs the liquid motion asset; no FFmpeg renderer here."
+    },
+    {
+      "id": "fade-through-black",
+      "name": "Fade through black",
+      "article": 12,
+      "family": "fade",
+      "modes": ["point", "join"],
+      "fidelity": "native",
+      "default_duration": 0.8,
+      "point": {"type": "fade", "color": "black"},
+      "xfade": "fadeblack",
+      "notes": "Time-preserving dip to black on a master, or a native boundary fade."
+    },
+    {
+      "id": "fade-through-white",
+      "name": "Fade through white",
+      "article": 12,
+      "family": "fade",
+      "modes": ["point", "join"],
+      "fidelity": "native",
+      "default_duration": 0.8,
+      "point": {"type": "fade", "color": "white"},
+      "xfade": "fadewhite",
+      "notes": "Time-preserving dip to white on a master, or a native boundary fade."
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "article": 13,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.7,
+      "notes": "Needs a fire motion asset; no FFmpeg renderer here."
+    },
+    {
+      "id": "glitch",
+      "name": "Glitch",
+      "article": 14,
+      "family": "glitch",
+      "modes": ["point"],
+      "fidelity": "approximate",
+      "default_duration": 0.4,
+      "point": {"type": "glitch", "shift": 10, "noise": 20},
+      "notes": "RGB shift and noise over the cue. It is not a full glitch asset."
+    },
+    {
+      "id": "glitch-reveal",
+      "name": "Glitch reveal",
+      "article": 14,
+      "family": "glitch",
+      "modes": ["point"],
+      "fidelity": "approximate",
+      "default_duration": 0.5,
+      "point": {"type": "glitch", "shift": 22, "noise": 30, "contrast": 1.15},
+      "notes": "Stronger RGB shift and contrast. It is not a full glitch asset."
+    },
+    {
+      "id": "zoom-in",
+      "name": "Zoom in",
+      "article": 15,
+      "family": "zoom",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "zoomin",
+      "notes": "Native FFmpeg zoom-in transition."
+    },
+    {
+      "id": "zoom-out",
+      "name": "Zoom out",
+      "article": 15,
+      "family": "zoom",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.6,
+      "notes": "No native xfade zoom-out. Use zoom-in on the outgoing side or a motion-graphics asset."
+    },
+    {
+      "id": "spin",
+      "name": "Spin",
+      "article": 16,
+      "family": "spin",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.6,
+      "notes": "A 180-degree spin needs a motion-graphics renderer."
+    },
+    {
+      "id": "heart",
+      "name": "Heart",
+      "article": 17,
+      "family": "stylized",
+      "modes": [],
+      "fidelity": "catalog-only",
+      "default_duration": 0.7,
+      "notes": "Needs a heart motion asset; no FFmpeg renderer here."
+    },
+    {
+      "id": "wipe-right",
+      "name": "Wipe right",
+      "article": 18,
+      "family": "wipe",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.5,
+      "xfade": "wiperight",
+      "notes": "Native FFmpeg wipe to the right."
+    },
+    {
+      "id": "wipe-left",
+      "name": "Wipe left",
+      "article": 18,
+      "family": "wipe",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.5,
+      "xfade": "wipeleft",
+      "notes": "Native FFmpeg wipe to the left."
+    },
+    {
+      "id": "cross-blur",
+      "name": "Cross blur",
+      "article": 19,
+      "family": "blur",
+      "modes": ["point", "join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "point": {"type": "blur", "sigma": 18},
+      "xfade": "hblur",
+      "notes": "Time-preserving blur on a master, or a native boundary blur."
+    },
+    {
+      "id": "cross-fade",
+      "name": "Cross fade",
+      "article": 19,
+      "family": "dissolve",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "fade",
+      "notes": "Native dissolve between two clips."
+    },
+    {
+      "id": "push-left",
+      "name": "Push left",
+      "article": 20,
+      "family": "push",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "slideleft",
+      "notes": "Native push to the left."
+    },
+    {
+      "id": "push-right",
+      "name": "Push right",
+      "article": 20,
+      "family": "push",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "slideright",
+      "notes": "Native push to the right."
+    },
+    {
+      "id": "push-up",
+      "name": "Push up",
+      "article": 20,
+      "family": "push",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "slideup",
+      "notes": "Native push upward."
+    },
+    {
+      "id": "push-down",
+      "name": "Push down",
+      "article": 20,
+      "family": "push",
+      "modes": ["join"],
+      "fidelity": "native",
+      "default_duration": 0.6,
+      "xfade": "slidedown",
+      "notes": "Native push downward."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "apply-at-point",
+      "script": "scripts/apply.py",
+      "status": "supported",
+      "review": "Preview the affected range; confirm narration stays in sync and the total duration is unchanged"
+    },
+    {
+      "id": "join-clips",
+      "script": "scripts/join.py",
+      "status": "supported",
+      "review": "Review every boundary, audio crossfade, and the reported duration change"
+    }
+  ]
+}
