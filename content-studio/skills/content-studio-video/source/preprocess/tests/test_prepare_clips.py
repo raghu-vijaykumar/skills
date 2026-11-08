@@ -1,5 +1,6 @@
 """Verify the raw-folder default stops at an individual-clip handoff."""
 
+import json
 import shutil
 import subprocess
 import sys
@@ -33,8 +34,25 @@ class PrepareClipsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, (result.stdout + result.stderr)[-1400:])
             self.assertEqual(len(list((folder / "original").glob("*.mp4"))), 2)
             self.assertTrue((folder / ".content-studio" / "_timeline.csv").is_file())
-            processed = list((folder / ".content-studio" / "processed-clips").rglob("processed.*"))
-            self.assertEqual(len([item for item in processed if item.suffix in {".mp4", ".mov"}]), 2)
+            review = folder / ".content-studio" / "analysis" / "source-review"
+            reports = list(review.rglob("report.json"))
+            self.assertEqual(len(reports), 2)
+            for report in reports:
+                data = json.loads(report.read_text(encoding="utf-8"))
+                self.assertEqual(data["status"], "analysis_only")
+                self.assertEqual(data["delivery_timeline"]["status"],
+                                 "pending_human_selection")
+                self.assertTrue((report.parent / "review.csv").is_file())
+            chosen = reports[0].parent / "review.csv"
+            chosen.write_text(chosen.read_text(encoding="utf-8") + "# reviewed\n",
+                              encoding="utf-8")
+            repeated = subprocess.run([sys.executable, str(SCRIPT), "--folder", str(folder),
+                                       "--utc-offset", "+00:00"],
+                                      capture_output=True, text=True, timeout=120)
+            self.assertEqual(repeated.returncode, 0, repeated.stderr[-500:])
+            self.assertIn("# reviewed", chosen.read_text(encoding="utf-8"))
+            self.assertFalse([item for item in review.rglob("*.mp4") if item.is_file()])
+            self.assertFalse(list((folder / ".content-studio" / "processed-clips").rglob("processed.*")))
             self.assertFalse(list(folder.glob("*-preprocessed.mp4")))
             self.assertFalse(list(folder.glob("*-rough-cut.mp4")))
             self.assertFalse(list(folder.glob("*-final.mp4")))

@@ -179,19 +179,23 @@ def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
 
 def default_steps(kind: str, stage: str | None = None) -> list[dict]:
     if kind == "edited" and stage != "edited-render":
-        # Raw footage is an individual-clip handoff; later work gets a new plan.
+        # Raw footage yields evidence and originals for manual editing;
+        # permanent changes belong to the later approved delivery timeline.
         return [
             {"id": "S01", "title": "Review sources and rights", "route": "Inspect camera files, channel rules, originals, capacity, and allowed changes", "estimated_time": "Estimate after intake", "output": "source and rights notes", "acceptance": "Sources and constraints recorded", "required": True},
             {"id": "S02", "title": "Order and diagnose clips", "route": "Inspect capture times and duplicates; measure audio, blur, motion, and HDR/DV before choosing methods", "estimated_time": "Estimate after source sample", "output": "capture order and per-clip issue report", "acceptance": "Each issue has evidence and a SKIP/FIX/REVIEW/UNSUPPORTED decision", "required": True},
-            {"id": "S03", "title": "Prepare individual clips", "route": "Run only approved source methods; no AutoCut, automatic blur removal, joined master, narration, or upscale", "estimated_time": "Estimate from source duration and bounded pilot", "output": ".content-studio/processed-clips/ and _timeline.csv", "acceptance": "Originals retained and each prepared clip verified", "required": True},
-            {"id": "S04", "title": "Review exact final render", "route": "Check each delivered prepared clip and audio, then stop for the user's manual edit", "estimated_time": "Sample all clips and inspect affected ranges", "output": "prepared clips and review record", "acceptance": "Handoff matches the approved source-preparation plan", "required": True},
+            {"id": "S03", "title": "Prepare source review", "route": "Order originals and run analysis-only blur/media review; record proposed permanent changes for the later delivery timeline, without enhanced clip masters", "estimated_time": "Estimate from source duration and bounded analysis pilot", "output": ".content-studio/analysis/source-review/ and _timeline.csv", "acceptance": "Originals retained; no permanent picture or audio change rendered", "required": True},
+            {"id": "S04", "title": "Review source handoff", "route": "Check source review evidence and stop for the user's manual edit; later edits need a new delivery plan and timeline", "estimated_time": "Sample each source and inspect flagged ranges", "output": "source review and manual-edit handoff", "acceptance": "Proposed changes are reviewable and remain unapplied", "required": True},
         ]
     if kind == "edited":
+        # The approved plan is followed by a separately reviewed timeline.
         return [
             {"id": "S01", "title": "Review sources and rights", "route": "Inspect the supplied manual render, source hash, channel rules, and requested post-edit stages", "estimated_time": "Estimate after intake", "output": "render and rights notes", "acceptance": "Manual render and constraints recorded", "required": True},
-            {"id": "S02", "title": "Plan requested post-edit operations", "route": "Name exact voice, full-edit upscale, and scene-overlay method scripts only when requested; order voice then upscale then code graphics", "estimated_time": "Estimate from bounded samples", "output": "approved stage and method choices", "acceptance": "Inputs, outputs, fallback, and review criteria are explicit", "required": True},
-            {"id": "S03", "title": "Execute approved post-edit operations", "route": "Run the selected methods with script and voice review stops; add detailed checklist steps before approval", "estimated_time": "Estimate from the selected method pilots", "output": "separate voiced, upscaled, or overlaid candidates", "acceptance": "Each selected output matches the reviewed method", "required": True},
-            {"id": "S04", "title": "Review exact final render", "route": "Watch affected ranges and full delivered picture and audio", "estimated_time": "At least full runtime plus inspection", "output": "reviewed master and evidence", "acceptance": "Delivered master matches approval and has no unchecked side effects", "required": True},
+            {"id": "S02", "title": "Plan requested operations", "route": "Name requested picture, voice, music, audio, transition, and graphic methods; benchmark bounded candidates and select only timeline-ready adapters", "estimated_time": "Estimate from bounded samples", "output": "approved methods, costs, fallbacks, and review criteria", "acceptance": "Every method has timeline support or is marked unsupported before export", "required": True},
+            {"id": "S03", "title": "Create delivery timeline", "route": "Record source ranges, approved cuts, timed picture and audio operations, voice assets, transitions, graphics, and output settings in an immutable timeline revision", "estimated_time": "Estimate from edit and cue count", "output": ".content-studio/timeline/timeline-v001.json and review summary", "acceptance": "Resolved duration, timing, asset hashes, and supported methods validate", "required": True},
+            {"id": "S04", "title": "Review and approve timeline", "route": "Show the exact revision, voice and effect previews, timing and output settings; obtain separate human approval of its fingerprint", "estimated_time": "At least affected ranges plus voice listening", "output": "human timeline approval record", "acceptance": "Approval matches the plan, timeline, assets, and render settings", "required": True},
+            {"id": "S05", "title": "Render approved timeline once", "route": "Compile all supported approved picture and audio operations into one delivery export; refuse unsupported operations before encode", "estimated_time": "Estimate from used frames, inference pilot, and one encode", "output": "final master and render record", "acceptance": "One delivery encode with all approved operations and no full intermediate master", "required": True},
+            {"id": "S06", "title": "Review exact final render", "route": "Watch affected ranges and full delivered picture and audio; check timing, sync, quality, and side effects", "estimated_time": "At least full runtime plus inspection", "output": "reviewed master and evidence", "acceptance": "Delivered master matches approval and has no unchecked side effects", "required": True},
         ]
     production = "Author scenes and narration-timed visuals"
     return [
@@ -223,7 +227,9 @@ def validate_plan(plan: dict) -> None:
                                   not all(isinstance(arg, str) and arg for arg in step["command"])):
             raise ValueError(f"Step {step['id']} command must be a nonempty argv array")
         ids.add(step["id"])
-    for title in ("Review sources and rights", "Review exact final render"):
+    required_review = ("Review source handoff" if plan.get("stage") == "source-prep"
+                       else "Review exact final render")
+    for title in ("Review sources and rights", required_review):
         if not any(step["title"] == title and step.get("required") is True for step in plan["steps"]):
             raise ValueError(f"Required review step missing: {title}")
 

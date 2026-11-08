@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "timeline-delivery", "script": "scripts/timeline.py", "status": "supported", "review": "Exact human-approved revision required"},
+    {"id": "crop", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect framing on affected frames"},
+    {"id": "lens-correction", "script": "scripts/timeline.py", "status": "supported", "review": "Use calibrated parameters and inspect geometry"},
+    {"id": "denoise-light", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect temporal side effects"},
+    {"id": "denoise-medium", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect temporal side effects"},
+    {"id": "deflicker", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect exposure stability"},
+    {"id": "upscale-lanczos", "script": "scripts/timeline.py", "status": "supported", "review": "Compare detail and artifacts"},
+    {"id": "color-eq", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect temporal color and clipping"},
+    {"id": "sharpen-light", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect halos"},
+    {"id": "sharpen-medium", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect halos"},
+    {"id": "title", "script": "scripts/timeline.py", "status": "supported", "review": "Review text, font, position, and occlusion"},
+    {"id": "highpass", "script": "scripts/timeline.py", "status": "supported", "review": "Listen to processed audio"},
+    {"id": "audio-denoise", "script": "scripts/timeline.py", "status": "supported", "review": "Listen for speech damage"},
+    {"id": "compress", "script": "scripts/timeline.py", "status": "supported", "review": "Listen for pumping"},
+    {"id": "loudnorm", "script": "scripts/timeline.py", "status": "supported", "review": "Measure final loudness and true peak"},
+    {"id": "cross-fade", "script": "scripts/timeline.py", "status": "supported", "review": "Review picture/audio overlap and duration"},
+    {"id": "fade-through-black", "script": "scripts/timeline.py", "status": "supported", "review": "Review affected transition"},
+    {"id": "fade-through-white", "script": "scripts/timeline.py", "status": "supported", "review": "Review affected transition"},
+    {"id": "cross-blur", "script": "scripts/timeline.py", "status": "supported", "review": "Review affected transition"},
+    {"id": "wipe-left", "script": "scripts/timeline.py", "status": "supported", "review": "Review picture/audio overlap and duration"},
+    {"id": "wipe-right", "script": "scripts/timeline.py", "status": "supported", "review": "Review picture/audio overlap and duration"},
+    {"id": "push-left", "script": "scripts/timeline.py", "status": "supported", "review": "Review picture/audio overlap and duration"},
+    {"id": "push-right", "script": "scripts/timeline.py", "status": "supported", "review": "Review picture/audio overlap and duration"},
+    {"id": "upscale-real-esrgan", "status": "unsupported", "review": "Frame-cache adapter and final-output gate pending"},
+    {"id": "upscale-pytorch", "status": "unsupported", "review": "Frame-cache adapter and final-output gate pending"},
+    {"id": "motion-graphics-ass", "script": "scripts/timeline.py", "status": "supported", "review": "Review sidecar timing, typography, and exact output"},
+    {"id": "hdr-dolby-vision", "status": "unsupported", "review": "Preservation route pending"}
+  ]
+}

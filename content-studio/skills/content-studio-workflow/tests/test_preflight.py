@@ -47,7 +47,8 @@ class PreflightTest(unittest.TestCase):
             initial = preflight.read_json(plan_file)
             self.assertEqual(initial["stage"], "source-prep")
             self.assertEqual(len(initial["steps"]), 4)
-            self.assertIn("no AutoCut", initial["steps"][2]["route"])
+            self.assertIn("analysis-only", initial["steps"][2]["route"])
+            self.assertIn("no permanent", initial["steps"][2]["acceptance"])
             self.assertIn("manual edit", initial["steps"][3]["route"])
             self.assertEqual(call("review"), 0)
             with self.assertRaisesRegex(ValueError, "approval.*missing"):
@@ -116,9 +117,11 @@ class PreflightTest(unittest.TestCase):
             self.assertIn("differs from the approved plan", result.stderr)
             self.assertFalse(sentinel.exists())
 
-    def test_supplied_render_plan_orders_voice_upscale_and_graphics(self):
+    def test_supplied_render_plan_requires_timeline_approval_and_one_render(self):
         steps = preflight.default_steps("edited", "edited-render")
-        self.assertIn("voice then upscale then code graphics", steps[1]["route"])
+        self.assertIn("timeline-ready adapters", steps[1]["route"])
+        self.assertEqual(steps[3]["title"], "Review and approve timeline")
+        self.assertEqual(steps[4]["title"], "Render approved timeline once")
         self.assertEqual(steps[-1]["title"], "Review exact final render")
 
     def test_new_plan_reads_same_confirmed_memory_database(self):

@@ -461,6 +461,8 @@ def main() -> int:
 
     p = sub.add_parser("preprocess", parents=[shared],
                        help="quarantine duplicates, clean voice, and prepare clip review")
+    p.add_argument("--analysis-only", action="store_true",
+                   help="order and inspect originals without exporting enhanced clips")
     p.add_argument("--draft", help="draft folder with camera clips in original/")
     p.add_argument("--folder", help="any folder of camera clips; deduplicate, order, and process it in place")
     p.add_argument("--path", help="process one explicit camera clip")

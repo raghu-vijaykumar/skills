@@ -7,6 +7,7 @@ property, not something inferred from a 10-bit HDR encode.
 from __future__ import annotations
 
 import csv
+import hashlib
 import html
 import json
 import math
@@ -996,6 +997,41 @@ def process_clip(source: Path, output_root: Path, args, log) -> None:
     # basename gives each analysis folder a stable identity across reorderings.
     folder = ordering.analysis_folder(output_root, source.name)
     folder.mkdir(parents=True, exist_ok=True)
+    if getattr(args, "analysis_only", False):
+        # Source preparation records decisions for the delivery timeline;
+        # it must not bake cleanup or a blur cut into a new full-length clip.
+        info = probe(source)
+        video, audio = streams(info)
+        duration = float(info["format"]["duration"])
+        digest = hashlib.sha256()
+        with source.open("rb") as stream:
+            for block in iter(lambda: stream.read(1 << 20), b""):
+                digest.update(block)
+        report_path = folder / "report.json"
+        if report_path.is_file() and not args.force:
+            previous = json.loads(report_path.read_text(encoding="utf-8"))
+            if previous.get("source_sha256") != digest.hexdigest():
+                raise ProcessingError("source changed since review; use --force to rebuild")
+            if (folder / "review.csv").is_file():
+                log(f"{source.name}: source review unchanged")
+                return
+        report = {
+            "source": str(source), "source_sha256": digest.hexdigest(),
+            "duration_seconds": duration, "status": "analysis_only",
+            "video": {"width": video.get("width"), "height": video.get("height"),
+                      "pixel_format": video.get("pix_fmt"),
+                      "color_transfer": video.get("color_transfer"),
+                      "dolby_vision_profile": (dolby_info(video) or {}).get("dv_profile")},
+            "audio": {"present": bool(audio), "codec": audio.get("codec_name") if audio else None},
+            "delivery_timeline": {
+                "source": str(source), "source_sha256": digest.hexdigest(),
+                "operations": [], "status": "pending_human_selection",
+            },
+        }
+        write_review(source, video, duration, folder, report)
+        write_report(folder, report)
+        log(f"{source.name}: analysis only ({report['blur']['candidates']} blur candidates)")
+        return
     applied = tuning_profile(args, source)
     report_path = folder / "report.json"
     if report_path.exists() and not args.force and not args.apply_review and not args.dv_approved and not args.dv_proof:
@@ -1156,6 +1192,10 @@ def run(cfg: dict, args, log) -> int:
     folder = getattr(args, "folder", None)
     final = getattr(args, "final", False)
     try:
+        if getattr(args, "analysis_only", False) and any(
+                getattr(args, option, False) for option in
+                ("final", "apply_review", "dv_proof", "dv_approved")):
+            raise ProcessingError("--analysis-only cannot render or apply review decisions")
         if final and (getattr(args, "apply_review", False) or getattr(args, "dv_proof", False)
                       or getattr(args, "dv_approved", False)):
             raise ProcessingError("--final cannot be combined with --apply-review, "
@@ -1189,6 +1229,12 @@ def run(cfg: dict, args, log) -> int:
             # expensive batch, so numbered filenames always reflect capture time.
             ordering.ensure_current(draft, log, utc_offset=args.utc_offset)
         sources, output_root = source_files(args, duplicates, log, draft)
+        if getattr(args, "analysis_only", False):
+            # Reports live under analysis, so a later manual editor cannot
+            # mistake this handoff for a set of enhanced source masters.
+            output_root = ((draftlayout.internal_dir(draft) if draft is not None
+                            else sources[0].parent / ".content-studio")
+                           / "analysis" / "source-review")
     except (ProcessingError, dedupe.DedupeError, ordering.OrderError,
             OSError, ValueError) as exc:
         log(f"preprocess: {exc}")

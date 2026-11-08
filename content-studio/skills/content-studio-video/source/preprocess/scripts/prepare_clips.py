@@ -8,4 +8,6 @@ sys.path.insert(0, str(ROOT / "shared"))
 from dispatch import run_python  # noqa: E402
 
 if __name__ == "__main__":
-    raise SystemExit(run_python(__file__, "edit/clip-edit/scripts/content.py", ("preprocess",), ("--final", "--apply-review")))
+    raise SystemExit(run_python(__file__, "edit/clip-edit/scripts/content.py",
+                                ("preprocess", "--analysis-only"),
+                                ("--final", "--apply-review", "--dv-proof", "--dv-approved")))

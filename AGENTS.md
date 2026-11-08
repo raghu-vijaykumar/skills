@@ -41,6 +41,7 @@ drafts/<id>/
     upscale/
     motion-graphics/
     preflight/
+    timeline/                        # versioned edit, approval, and render records
     tmp/
   <id>-manual-edit.mp4                # or the user's supplied render path
   <id>-final.mp4
@@ -52,10 +53,11 @@ drafts/<id>/
   draft.json
 ```
 
-For a raw video folder, prepare individual clips and stop for the user's manual
-edit. AutoCut is experimental and explicit-request-only. After the user supplies
-a rendered edit, requested voice runs first, then justified full-edit upscale,
-then code-generated scene overlays at delivery resolution. Vlog drafts do not
+For a raw video folder, order and diagnose originals, then stop for the user's
+manual edit. Permanent source changes remain proposed timeline decisions;
+source-prep does not export enhanced full-length clips. AutoCut is experimental
+and explicit-request-only. After the user supplies a rendered edit, plan voice,
+upscale, and overlays on one delivery timeline before final rendering. Vlog drafts do not
 generate transcripts or captions by default. Metadata must be derived from
 sampled frames and audio context, never placeholders.
 
