@@ -1,0 +1,13 @@
+$ python .../memory.py set --key meme_intensity --value low --scope travel
+{"scope": "travel", "project": null, "preferences": {"meme_intensity": {"value": "low", "scope": "travel", "source": "explicit"}}}
+
+$ python .../memory.py record --feature meme --decision rejected --scope travel --project synthetic-demo --reason "Illustrative review record"
+{"event_id": 1}
+
+$ python .../memory.py retrieve --scope travel --project synthetic-demo
+{"scope": "travel", "project": "synthetic-demo", "preferences": {"meme_intensity": {"value": "low", "scope": "travel", "source": "explicit"}}}
+
+$ python .../memory.py events --scope travel
+[{"id": 1, "project": "synthetic-demo", "scope": "travel", "feature": "meme", "decision": "rejected", "actor": "human", "reason": "Illustrative review record"}]
+
+Database: isolated temporary SQLite file; no private memory database is committed.
