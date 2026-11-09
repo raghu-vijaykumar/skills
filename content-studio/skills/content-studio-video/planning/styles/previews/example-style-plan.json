@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "topic": "How neural networks learn",
+  "format": "youtube-short",
+  "scenes": [
+    {
+      "id": "hook",
+      "duration_seconds": 8,
+      "style": "vector-science",
+      "label": "Illustrated science storytelling",
+      "techniques": [
+        "layered-vector",
+        "parallax",
+        "shape-morph"
+      ],
+      "renderer": "remotion",
+      "renderer_detected": true,
+      "status": "planned_not_rendered",
+      "evidence": [],
+      "visual_intent": "Illustrated neuron layers connecting"
+    },
+    {
+      "id": "gradient",
+      "duration_seconds": 25,
+      "style": "math-visual",
+      "label": "Mathematical visualization",
+      "techniques": [
+        "animated-equations",
+        "geometric-transform",
+        "graph-animation"
+      ],
+      "renderer": "manim",
+      "renderer_detected": false,
+      "status": "needs_renderer",
+      "evidence": [],
+      "visual_intent": "Gradient vector on loss curve"
+    },
+    {
+      "id": "takeaway",
+      "duration_seconds": 8,
+      "style": "rapid-tech",
+      "label": "Rapid technical explainer",
+      "techniques": [
+        "code-highlight",
+        "kinetic-type",
+        "rapid-cut"
+      ],
+      "renderer": "remotion",
+      "renderer_detected": true,
+      "status": "planned_not_rendered",
+      "evidence": [],
+      "visual_intent": "Animated prediction comparison"
+    }
+  ],
+  "warnings": [
+    "manim executable not detected; scene gradient cannot be rendered by this planner"
+  ],
+  "review_required": true
+}
