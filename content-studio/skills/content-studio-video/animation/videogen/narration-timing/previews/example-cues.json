@@ -1,0 +1,8 @@
+{
+  "illustrative": true,
+  "segments": [
+    {"id": "n01", "start": 0.0, "end": 2.4, "text": "Synthetic cue one."},
+    {"id": "n02", "start": 2.7, "end": 5.1, "text": "Synthetic cue two."}
+  ],
+  "note": "Input shape for narration.mjs; not a render or an approved script."
+}
