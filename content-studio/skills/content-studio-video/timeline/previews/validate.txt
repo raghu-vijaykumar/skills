@@ -1,0 +1,17 @@
+{
+  "duration": 8.0,
+  "picture": [
+    {
+      "id": "p0001",
+      "source": "source.mp4",
+      "timeline_start": 0.0,
+      "timeline_end": 8.0,
+      "source_in": 0.0,
+      "source_out": 8.0
+    }
+  ],
+  "operations": [],
+  "audio": [],
+  "transitions": [],
+  "output": "<synthetic-scratch>/out/timeline/final.mp4"
+}
