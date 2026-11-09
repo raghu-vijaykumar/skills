@@ -1,11 +1,27 @@
 # Transition capability matrix
 
-This is the visual catalog for the [video transitions skill](SKILL.md). The
-[preset catalog](presets/transitions.json) defines the IDs, modes, defaults,
-and fidelity labels; every row below has a working renderer. The GIFs are
+This is the visual catalog and capability matrix for the [video transitions skill](SKILL.md).
+The [preset catalog](presets/transitions.json) defines IDs, modes, defaults, and
+fidelity labels; every named transition below has a working renderer. GIFs are
 generated from those renderers using synthetic A/B cards. They show motion and
-direction, but are small, silent SDR previews rather than delivery-quality
-examples.
+direction, but are silent, small SDR previews rather than delivery-quality examples.
+
+**Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Previews are synthetic and illustrative, not delivery masters.
+
+## Capability matrix
+
+| Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
+| --- | --- | --- | --- | --- | --- |
+| `apply-at-point` | Supported | Master + cue sheet → new master with duration unchanged | Yes | [Gallery](#named-transitions-and-previews) | Point-capable IDs only; HDR/HLG refused; preserve source and cue sheet. |
+| `join-clips` | Supported | Ordered clips + boundary cues → joined master + reported duration change | Yes | [Gallery](#named-transitions-and-previews) | Two-shot transitions only; must be shorter than both neighbours; audio crossfade reported. |
+
+## Named transitions and previews
+
+The gallery covers the 20 sections and 29 variants in the Clipchamp article. Every
+entry is labelled `native`, `approximate`, or catalog-only; the eight custom joins
+are code-generated approximations. `Point` preserves duration on one master;
+`Join` overlaps two real clips and shortens the result. Both routes are available
+in the approved delivery timeline for supported SDR projects.
 
 **Modes:** `Point` applies an effect around an editable time on one master and
 preserves its duration. `Join` overlaps two real clips at an editable boundary,
@@ -67,3 +83,8 @@ Use `--only cross-blur page-turn` to rebuild selected previews, or
 checked-in files. The script creates temporary synthetic source clips, invokes
 the real point/join renderers, and exports looping 240 × 135 GIFs. It does not
 read or alter a draft video.
+
+## Evidence note
+
+The committed GIFs are regenerated from synthetic A/B cards by
+`scripts/build_catalog_gifs.py`. No private footage or full masters are included.

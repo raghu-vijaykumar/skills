@@ -1,4 +1,20 @@
-# Content Studio AutoCut
+# AutoCut capability matrix
+
+## Capability matrix
+
+**Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Previews are synthetic and illustrative, not delivery masters.
+
+| Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
+| --- | --- | --- | --- | --- | --- |
+| `rough-cut` | Supported | Flat folder of prepared clips + optional transcripts/annotations → rough-cut MP4 + edit decisions + timeline + review media | Specialist only | [Real rough-cut GIF](previews/rough-cut.gif) and [edit decisions](previews/example-edit-decisions.json) | Experimental and explicit-request-only; heuristic selection without transcripts/annotations; no automatic approval or publish. |
+
+**Evidence:** the GIF is a real 6-second rough cut from two synthetic clips with
+scene detection; no transcript, vision model, or semantic annotation was supplied.
+See [reproduction notes](previews/reproduce.md). The guidance below is retained.
+
+
+
+Detailed AutoCut guidance follows the matrix and remains the operating guide.
 
 Run:
 

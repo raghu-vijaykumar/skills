@@ -1,0 +1,7 @@
+{
+  "illustrative": true,
+  "boxes": [
+    {"source": "synthetic-source.mp4", "start": 0.0, "end": 3.0, "box": [0.35, 0.15, 0.60, 0.85]}
+  ],
+  "note": "Input shape for subjects.py; review the crop before use."
+}

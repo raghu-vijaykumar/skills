@@ -1,0 +1,31 @@
+{
+  "memory_preferences_applied": {},
+  "style": "travel-vlog",
+  "target_seconds": 6.0,
+  "actual_seconds": 6.0,
+  "orientation": "any",
+  "size": "640x360",
+  "fit": "blur",
+  "skipped_sources": [],
+  "reframe_mode": null,
+  "reframe": [],
+  "semantic_analysis": "not performed",
+  "transcription_enabled": false,
+  "scene_detection_enabled": true,
+  "segments": [
+    {
+      "source": "clip-a.mp4",
+      "start": 0.0,
+      "end": 6.0,
+      "score": 0.45,
+      "reason": "scene change candidate (not semantically ranked)",
+      "text": ""
+    }
+  ],
+  "review_assets": [
+    {
+      "frame": "review/frames/shot-0000.jpg",
+      "audio": "review/audio/shot-0000.mp3"
+    }
+  ]
+}
