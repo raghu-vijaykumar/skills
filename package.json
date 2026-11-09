@@ -39,6 +39,7 @@
   "scripts": {
     "build": "tsc -p content-studio/skills/content-studio-video/animation/videogen/tsconfig.json && node content-studio/skills/content-studio-video/animation/videogen/scripts/copy-static.mjs && node content-studio/skills/content-studio-video/animation/videogen/scripts/transpile-gates.mjs",
     "check:docs": "node content-studio/scripts/check-docs.mjs",
+    "check:capabilities": "node content-studio/scripts/check-capability-matrices.mjs",
     "test": "npm run build && node content-studio/skills/content-studio-video/animation/videogen/dist/gates/check-animation-core.mjs && node --test content-studio/skills/content-studio-video/animation/videogen/tests/*.test.mjs content-studio/tests/*.test.mjs",
     "prepare": "npm run build"
   },
