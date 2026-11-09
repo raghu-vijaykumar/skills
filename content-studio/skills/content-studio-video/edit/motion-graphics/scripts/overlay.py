@@ -61,6 +61,10 @@ def validate(data: dict) -> tuple[Path, float, list[dict], dict, bool]:
             items = event.get("items", [])
             if not 1 <= len(items) <= 12:
                 raise ValueError(f"Ingredient list {index} needs 1–12 items")
+            # The heading is editable without changing existing cue sheets.
+            heading = str(event.get("heading", "INGREDIENTS  /  ONE BY ONE")).strip()
+            if not 1 <= len(heading) <= 48:
+                raise ValueError(f"Ingredient list {index} needs a short heading")
             if any(not item.get("label") or not start <= float(item.get("at", -1)) < end for item in items):
                 raise ValueError(f"Ingredient list {index} has an untimed item")
             if [float(item["at"]) for item in items] != sorted(float(item["at"]) for item in items):
@@ -280,7 +284,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             upper = "m 18 0 l 1810 0 l 1828 18 l 1828 121 l 1810 139 l 18 139 l 0 121 l 0 18 l 18 0"
             lower = "m 18 0 l 1810 0 l 1828 18 l 1828 71 l 1810 89 l 18 89 l 0 71 l 0 18 l 18 0"
             rows.append(line(0, start, end, "{" + motion(x, y, -1850) + "\\1c&H003F3F12&\\alpha&H34&\\p1}" + upper + "{\\p0}"))
-            rows.append(line(1, start, end, "{" + motion(x + 24, y + 15, -1826) + "\\fs33\\1c&H006BD6FF&}" + "INGREDIENTS  /  ONE BY ONE"))
+            rows.append(line(1, start, end, "{" + motion(x + 24, y + 15, -1826) + "\\fs33\\1c&H006BD6FF&}" +
+                             clean(event.get("heading", "INGREDIENTS  /  ONE BY ONE"))))
             items = event["items"]
             if len(items) > 6:
                 lower_start = max(0, float(items[6]["at"]) - offset)

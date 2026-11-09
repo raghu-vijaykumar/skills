@@ -12,6 +12,18 @@
       "script": "scripts/overlay.py",
       "status": "supported",
       "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "cta-stock",
+      "script": "scripts/cta_stock.py",
+      "status": "supported",
+      "review": "Review alpha, motion states, placement, and source independence at UHD"
+    },
+    {
+      "id": "hdr-compose",
+      "script": "scripts/hdr_compose.py",
+      "status": "supported",
+      "review": "Review bounded previews, exact manifest approval, and the HLG-base master"
     }
   ]
 }

@@ -86,6 +86,15 @@ class OverlayTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "must be chronological"):
                     overlay.validate(data)
 
+    def test_ingredient_heading_can_be_changed_without_changing_default(self):
+        event = {"kind": "ingredient_list", "start": 2, "end": 5,
+                 "items": [{"at": 2, "label": "Rice"}], "heading": "INGREDIENTS"}
+        rendered = overlay.ass({"events": [event]})
+        self.assertIn("}INGREDIENTS\n", rendered)
+        self.assertNotIn("ONE BY ONE", rendered)
+        del event["heading"]
+        self.assertIn("INGREDIENTS  /  ONE BY ONE", overlay.ass({"events": [event]}))
+
     def test_effect_presets_conceal_midpoint_and_scale_to_portrait(self):
         data = {"events": [
             {"kind": "effect", "preset": "flash", "start": 1, "end": 1.4},
