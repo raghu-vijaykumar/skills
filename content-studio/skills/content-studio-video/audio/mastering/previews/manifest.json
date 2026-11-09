@@ -1,0 +1,49 @@
+[
+  {
+    "source": "<synthetic-scratch>\\src\\speechvid\\speech.mp4",
+    "status": "ok",
+    "audio": "<synthetic-scratch>\\out\\master-speech\\speech.mastered.wav",
+    "decision": "FIX",
+    "issues": [
+      "loudness_outside_target"
+    ],
+    "requested_filters": "",
+    "filters": "",
+    "rejected_candidates": [],
+    "input_loudness": {
+      "input_i": "-21.76",
+      "input_tp": "-8.97",
+      "input_lra": "2.00",
+      "input_thresh": "-31.90",
+      "output_i": "-15.89",
+      "output_tp": "-2.94",
+      "output_lra": "1.90",
+      "output_thresh": "-26.13",
+      "normalization_type": "dynamic",
+      "target_offset": "-0.11"
+    },
+    "output_loudness": {
+      "input_i": "-16.01",
+      "input_tp": "-3.21",
+      "input_lra": "2.00",
+      "input_thresh": "-26.18",
+      "output_i": "-15.88",
+      "output_tp": "-2.93",
+      "output_lra": "1.90",
+      "output_thresh": "-26.12",
+      "normalization_type": "dynamic",
+      "target_offset": "-0.12"
+    },
+    "validation": {
+      "status": "passed",
+      "target_lufs": -16.0,
+      "target_peak_dbtp": -1.5,
+      "output_lufs": -16.01,
+      "output_peak_dbtp": -3.21
+    },
+    "review_audio": {
+      "before": "<synthetic-scratch>\\out\\master-speech\\previews\\speech\\before.wav",
+      "after": "<synthetic-scratch>\\out\\master-speech\\previews\\speech\\after.wav"
+    }
+  }
+]
