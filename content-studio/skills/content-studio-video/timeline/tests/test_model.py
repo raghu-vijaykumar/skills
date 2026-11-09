@@ -122,6 +122,35 @@ class TimelineModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "lacks human review"):
             model.validate(self.timeline)
 
+    def test_custom_join_requires_two_clips_and_bounded_overlap(self):
+        self.timeline["picture"].append({
+            "id": "p0002", "source": self.source.name,
+            "sha256": model.sha256_file(self.source),
+            "source_in": 0, "source_out": 1.0,
+        })
+        cue = {"after": "p0001", "id": "heart", "duration": 0.5,
+               "review_status": "approved"}
+        self.timeline["transitions"] = [cue]
+        self.assertAlmostEqual(model.validate(self.timeline)["duration"], 4.5)
+        cue["duration"] = 0.1
+        with self.assertRaisesRegex(ValueError, "transition.duration"):
+            model.validate(self.timeline)
+        cue["duration"] = 3.1
+        with self.assertRaisesRegex(ValueError, "transition.duration"):
+            model.validate(self.timeline)
+        cue["duration"] = 0.5
+        cue["review_status"] = "pending_review"
+        with self.assertRaisesRegex(ValueError, "lacks human review"):
+            model.validate(self.timeline)
+
+    def test_custom_join_is_not_a_point_operation(self):
+        self.timeline["operations"] = [{
+            "id": "heart", "method": "heart", "start": 1, "end": 2,
+            "review_status": "approved",
+        }]
+        with self.assertRaisesRegex(ValueError, "Unsupported timeline method"):
+            model.validate(self.timeline)
+
     def test_unsafe_source_and_unsupported_method_are_refused(self):
         self.timeline["picture"][0]["source"] = "../other.mp4"
         with self.assertRaisesRegex(ValueError, "Missing or unsafe"):
@@ -141,6 +170,20 @@ class TimelineModelTests(unittest.TestCase):
             self.assertEqual(cli.main(["hash", "--file", str(self.voice)]), 0)
         self.assertEqual(json.loads(output.getvalue())["sha256"],
                          model.sha256_file(self.voice))
+
+    def test_renderer_recipe_change_invalidates_timeline_fingerprint(self):
+        before = approval.fingerprint(self.path, self.timeline)
+        original_read = Path.read_bytes
+        for changed_name in ("xfade_effects.py", "transitions.json"):
+            with self.subTest(changed_name=changed_name):
+                def altered(path):
+                    content = original_read(path)
+                    return (content + b"changed recipe" if path.name == changed_name
+                            else content)
+
+                with patch.object(Path, "read_bytes", altered):
+                    after = approval.fingerprint(self.path, self.timeline)
+                self.assertNotEqual(before, after)
 
 
 if __name__ == "__main__":

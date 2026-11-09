@@ -415,6 +415,40 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                 self.assertTrue(Path(record["output"]).is_file())
                 self.assertAlmostEqual(record["duration"], 2.5, delta=.15)
 
+    def test_custom_join_and_point_effect_share_one_approved_export(self):
+        source_hash = model.sha256_file(self.source)
+        self.timeline["transitions"][0]["id"] = "page-turn"
+        self.timeline["operations"] = [{
+            "id": "glitch-beat", "method": "glitch-reveal",
+            "start": .4, "end": .8, "review_status": "approved",
+        }]
+        self.timeline["audio"] = []
+        self.timeline_path.write_text(json.dumps(self.timeline), encoding="utf-8")
+        approved = self._approved()
+        real_run = subprocess.run
+        encodes = []
+
+        def count_ffmpeg(command, *args, **kwargs):
+            if command[0] == "ffmpeg":
+                encodes.append(command)
+            return real_run(command, *args, **kwargs)
+
+        with patch.object(compiler.subprocess, "run", side_effect=count_ffmpeg):
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(cli.main([
+                    "render", "--timeline", str(self.timeline_path),
+                    "--approval", str(approved)]), 0)
+        self.assertEqual(len(encodes), 1)
+        record_path = self.output.with_suffix(".mp4.render.json")
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        self.assertEqual(record["video_encoder_invocations"], 1)
+        self.assertEqual(record["audio_encoder_invocations"], 1)
+        self.assertEqual(record["operations"], ["glitch-beat"])
+        self.assertAlmostEqual(record["duration"], 2.2, delta=.15)
+        self.assertEqual(model.sha256_file(self.source), source_hash)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(cli.main(["verify", "--record", str(record_path)]), 0)
+
     def test_full_source_audio_can_be_copied_without_encoding(self):
         self.timeline["picture"] = [{
             "id": "whole", "source": self.source.name,

@@ -95,3 +95,12 @@ window therefore changes the transition speed without shifting frames or
 touching source audio. Its `blur_sigma` can be set from 1 to 80 to make the
 effect readable at delivery size (default 10). Show a bounded preview after
 changing times or strength.
+
+The timeline now accepts all specialist transition IDs: six time-preserving
+point effects in `operations` and 26 two-shot clip joins in `transitions`.
+Every point range and join overlap is editable from 0.15 to 3 seconds. The
+eight custom joins—collage, page turn, liquid streaks, liquid drops, fire,
+zoom-out, spin, and heart—are labelled approximations in the transition
+catalog. They need two actual clips; a continuous master cannot stand in for
+a two-shot transition. The shared custom recipes and catalog are included in
+the approval capability hash, so a recipe change needs a new human approval.

@@ -16,10 +16,27 @@ PICTURE_METHODS = {
 }
 GRAPHIC_METHODS = {"title", "motion-graphics-ass"}
 AUDIO_METHODS = {"highpass", "audio-denoise", "compress", "loudnorm"}
-JOIN_TRANSITIONS = {"cross-fade": "fade", "fade-through-black": "fadeblack",
-                    "wipe-left": "wipeleft", "wipe-right": "wiperight",
-                    "push-left": "slideleft", "push-right": "slideright"}
-POINT_TRANSITIONS = {"fade-through-black", "fade-through-white", "cross-blur"}
+# Keep the single-export join vocabulary aligned with the specialist catalog.
+# Native variants map to FFmpeg xfade; eight authored expressions use custom.
+JOIN_TRANSITIONS = {
+    "horizontal-banding": "hlwind", "diagonal-soft-wipe": "diagtl",
+    "blinds": "hlslice", "bloom": "zoomin", "pixelate": "pixelize",
+    "exchange": "slideleft", "reveal": "revealleft",
+    "cross-fade": "fade", "fade-through-black": "fadeblack",
+    "fade-through-white": "fadewhite", "zoom-in": "zoomin",
+    "cross-blur": "hblur",
+    "wipe-left": "wipeleft", "wipe-right": "wiperight",
+    "push-left": "slideleft", "push-right": "slideright",
+    "push-up": "slideup", "push-down": "slidedown",
+    "collage": "custom", "page-turn": "custom",
+    "liquid-streaks": "custom", "liquid-drops": "custom",
+    "fire": "custom", "zoom-out": "custom",
+    "spin": "custom", "heart": "custom",
+}
+POINT_TRANSITIONS = {
+    "burn", "fade-through-black", "fade-through-white",
+    "cross-blur", "glitch", "glitch-reveal",
+}
 VIDEO_PRESETS = {"medium", "fast", "veryfast"}
 
 
@@ -189,7 +206,9 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             raise ValueError(f"Unsupported join transition: {cue.get('id')}")
         if require_review and cue.get("review_status") != "approved":
             raise ValueError(f"Transition after {after} lacks human review")
-        duration = _number(cue.get("duration"), "transition.duration", minimum=0.001)
+        duration = _number(cue.get("duration"), "transition.duration", minimum=0.15)
+        if duration > 3:
+            raise ValueError("transition.duration must be <= 3 seconds")
         by_after[after] = {**cue, "duration": duration}
     cursor = 0.0
     for clip in resolved:
@@ -221,6 +240,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         end = _number(item.get("end"), f"{op_id}.end")
         if not start < end <= duration + 1e-6:
             raise ValueError(f"Operation {op_id} is outside the resolved timeline")
+        if kind in POINT_TRANSITIONS and not .15 <= end - start <= 3:
+            raise ValueError(f"Point transition {op_id} must last 0.15-3 seconds")
         if kind in PICTURE_METHODS:
             affected = [c for c in resolved if start < c["end"] and end > c["start"]]
             if not affected:

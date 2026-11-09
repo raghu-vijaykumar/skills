@@ -5,11 +5,14 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
 from model import AUDIO_METHODS, GRAPHIC_METHODS, PICTURE_METHODS, POINT_TRANSITIONS
 from model import asset_path, sha256_file
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "shared"))
+from xfade_effects import CUSTOM_JOIN_IDS, xfade_options  # noqa: E402
 
 
 def probe(path: Path) -> dict:
@@ -42,7 +45,8 @@ def _text(value: str) -> str:
             .replace(",", "\\,").replace("[", "\\[").replace("]", "\\]"))
 
 
-def _picture_filters(active: list[dict], width: int, height: int, fps: float) -> list[str]:
+def _picture_filters(active: list[dict], width: int, height: int, fps: float,
+                     pixel_format: str = "yuv420p") -> list[str]:
     filters: list[str] = []
     selected_upscale = any(item["method"] == "upscale-lanczos" for item in active)
     for item in active:
@@ -79,7 +83,7 @@ def _picture_filters(active: list[dict], width: int, height: int, fps: float) ->
         f"scale={width}:{height}:force_original_aspect_ratio=decrease:"
         f"flags={'lanczos' if selected_upscale else 'bicubic'}",
         f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2",
-        "setsar=1", f"fps={_fmt(fps)}", "settb=AVTB", "format=yuv420p",
+        "setsar=1", f"fps={_fmt(fps)}", "settb=AVTB", f"format={pixel_format}",
     ])
     return filters
 
@@ -154,6 +158,9 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
     width, height, fps = resolved["width"], resolved["height"], resolved["fps"]
     duration = resolved["duration"]
     copy_audio = resolved["audio_policy"] == "copy_source"
+    custom_join = any(cue["id"] in CUSTOM_JOIN_IDS
+                      for cue in resolved["transitions"].values())
+    join_format = "yuv444p" if custom_join else "yuv420p"
     graph: list[str] = []
     inputs: list[str] = []
     info: list[dict] = []
@@ -225,7 +232,7 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                 f"trim=start={_fmt(clip['source_in'] + left)}:"
                 f"end={_fmt(clip['source_in'] + right)}",
                 "setpts=PTS-STARTPTS",
-            ] + _picture_filters(active, width, height, fps)
+            ] + _picture_filters(active, width, height, fps, join_format)
             label = f"v{i}s{segment}"
             origin = f"raw{i}s{segment}" if count > 1 else f"{i}:v:0"
             graph.append(f"[{origin}]" + ",".join(filters) + f"[{label}]")
@@ -255,8 +262,8 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             overlap = cue["duration"]
             offset = current_length - overlap
             from model import JOIN_TRANSITIONS
-            graph.append(f"[{current_v}][vc{i}]xfade=transition="
-                         f"{JOIN_TRANSITIONS[cue['id']]}:duration={_fmt(overlap)}:"
+            options = xfade_options(cue["id"], JOIN_TRANSITIONS[cue["id"]])
+            graph.append(f"[{current_v}][vc{i}]xfade={options}:duration={_fmt(overlap)}:"
                          f"offset={_fmt(offset)}[{target_v}]")
             graph.append(f"[{current_a}][ac{i}]acrossfade=d={_fmt(overlap)}:"
                          f"c1=tri:c2=tri[{target_a}]")
@@ -294,8 +301,22 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             graph.append(f"[{current_v}]sendcmd=c='{commands}',"
                          f"{blur}=sigma=0:enable='between(t,{_fmt(start)},{_fmt(end)})'"
                          f"[{target}]")
-        else:
-            color = "white" if method == "fade-through-white" else "black"
+        elif method in {"glitch", "glitch-reveal"}:
+            # Match the specialist's RGB-offset/noise approximation, scoped to
+            # this editable point range so surrounding frames pass through.
+            shift, noise, contrast = ((10, 20, 1.0) if method == "glitch"
+                                      else (22, 30, 1.15))
+            enable = f"enable='between(t,{_fmt(start)},{_fmt(end)})'"
+            filters = [f"rgbashift=rh={shift}:bh=-{shift}:{enable}",
+                       f"noise=alls={noise}:allf=t+u:{enable}"]
+            if contrast != 1.0:
+                filters.append(f"eq=contrast={contrast:g}:{enable}")
+            graph.append(f"[{current_v}]" + ",".join(filters) + f"[{target}]")
+        elif method in {"fade-through-black", "fade-through-white", "burn"}:
+            # Burn is the catalog's warm dip, not a fire simulation.
+            color = {"fade-through-black": "black",
+                     "fade-through-white": "white",
+                     "burn": "0xFF5A1F"}[method]
             half = (end - start) / 2
             middle = start + half
             graph.append(f"color=c={color}:s={width}x{height}:r={_fmt(fps)}:"
@@ -305,8 +326,13 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                          f"[overlay{index}]")
             graph.append(f"[{current_v}][overlay{index}]overlay=0:0:"
                          f"shortest=1[{target}]")
+        else:
+            raise ValueError(f"Missing point transition adapter: {method}")
         current_v = target
-    graph.append(f"[{current_v}]null[vfinal]")
+    # Custom joins use full-size chroma for coordinate sampling, then return
+    # to the delivery pixel format before the single encoder sees the frame.
+    graph.append(f"[{current_v}]"
+                 f"{'format=yuv420p' if custom_join else 'null'}[vfinal]")
     audio_labels = [current_a]
     for i, cue in enumerate(resolved["audio"]):
         index = len(clips) + i

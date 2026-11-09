@@ -18,16 +18,16 @@ Wipes, pushes, slides, and spins need two shots. Do not fake them by splitting o
 
 ## Catalog
 
-The catalog covers the 20 sections and 29 variants in the [Clipchamp transitions article](https://clipchamp.com/en/blog/video-transitions-transform-video-editing/). Every entry is labelled `native`, `approximate`, or `catalog-only`.
+The catalog covers the 20 sections and 29 variants in the [Clipchamp transitions article](https://clipchamp.com/en/blog/video-transitions-transform-video-editing/). Every entry is labelled `native` or `approximate`. The eight effects that previously had no renderer now use original code-driven approximations at real clip joins. They do not reproduce Clipchamp motion assets.
 
 ```bash
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list --mode point
-python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list --fidelity catalog-only --json
+python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py list --fidelity approximate --json
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py scripts
 ```
 
-`catalog-only` transitions (collage, page turn, liquid streaks/drops, fire, heart, spin, zoom-out) have no renderer here. The tool refuses them with an explicit error; it never emits a placeholder. Use a motion-graphics asset for those instead.
+All 29 variants have a renderer. Collage, page turn, liquid streaks/drops, fire, heart, spin, and zoom-out are custom two-shot approximations. Preview them at delivery size before approval; page turn is a shaded two-dimensional fold and fire is a warm flame-shaped edge, not simulated physical materials.
 
 ## Per-transition scripts
 
@@ -51,8 +51,9 @@ in. A cue that names a different transition is rejected, so `push_left.py`
 cannot silently render a wipe. Use `--plan` to resolve timings without
 rendering.
 
-Catalog-only transitions still have a script, but running it exits with an
-explicit refusal instead of emitting a placeholder.
+The eight custom clip-join effects also have fixed entrypoints. For example,
+`page_turn.py cues.json --output joined.mp4` requires two real input clips in
+the cue sheet and reports the overlap-shortened duration.
 
 The shared `transitions.py apply` and `transitions.py join` commands remain
 available when one cue sheet combines several different transition IDs.
@@ -99,13 +100,24 @@ python content-studio/skills/content-studio-video/edit/transitions/scripts/join.
 
 `join` normalizes every clip to the largest canvas and the first clip's frame rate, cross-fades audio when every clip has it, and reports `output_seconds` and `duration_change_seconds`. A transition must be shorter than both neighbouring clips.
 
+For the editable one-render delivery path, place the same ID and `duration`
+in the delivery timeline's `transitions` array after the outgoing picture ID.
+All specialist point and join IDs are now available there. The eight custom
+effects use full-resolution chroma while sampling transformed frames, then
+return to the delivery pixel format before the final encode. They do not create
+an intermediate master. A changed transition recipe invalidates the prior
+timeline fingerprint and needs renewed human approval.
+
 ## Annotate an edit timeline
 
 ```bash
 python content-studio/skills/content-studio-video/edit/transitions/scripts/transitions.py annotate edit-timeline.json --cues cues.json --output edit-timeline-transitions.json
 ```
 
-This writes a copy with `point_transitions` on the matching clip. The native timeline renderer does not consume those annotations yet; use `apply` for a supported render.
+This writes a legacy copy with `point_transitions` on the matching clip. The
+delivery timeline does not consume those annotations; record point effects in
+its `operations` array with editable `start` and `end`, then revise and approve
+that timeline before final rendering.
 
 ## Choose well
 
@@ -118,6 +130,7 @@ This writes a copy with `point_transitions` on the matching clip. The native tim
 ## Review gates
 
 - Preview the exact affected range, not a still. Check entrance, midpoint, and exit at delivery size.
+- Benchmark a bounded custom join at the intended resolution; per-pixel recipes can be much slower than native `xfade`.
 - For `apply`, confirm the total duration is unchanged and narration is still in sync.
 - For `join`, confirm every boundary, the audio crossfade, and the reported duration change.
 - Reject a transition that hides a face, food, landmark, or on-screen text, or that draws more attention than the shot.
@@ -126,7 +139,7 @@ This writes a copy with `point_transitions` on the matching clip. The native tim
 
 ## Boundaries
 
-- No motion assets are generated. Catalog-only effects require a separate renderer.
+- Custom effects are code-generated approximations; no external motion assets are generated.
 - No automatic transition detection or auto-placement. Every cue is explicit and reviewable.
 - No audio effects or transition sound design; audio is only cross-faded on `join`.
 - The skill does not publish; publication remains a separate approved request.

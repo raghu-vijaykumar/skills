@@ -8,8 +8,8 @@ Two routes are deliberately separate:
 * ``join`` cross-fades or wipes between ordered clips. The overlap shortens the
   result, so the duration change is reported instead of hidden.
 
-Catalog-only Clipchamp transitions are listed but refused with an explicit
-error; this script never fabricates a renderer for a missing asset.
+Every current catalog entry has a renderer. Eight asset-style names use
+explicitly labelled code-generated approximations at real clip joins.
 """
 
 from __future__ import annotations
@@ -25,6 +25,8 @@ from pathlib import Path
 SKILL = Path(__file__).resolve().parents[1]
 CATALOG = SKILL / "presets" / "transitions.json"
 SAMPLE_RATE = 48000
+sys.path.insert(0, str(SKILL.parents[1] / "shared"))
+from xfade_effects import CUSTOM_JOIN_IDS, xfade_options  # noqa: E402
 
 
 def load_catalog(path: str | Path | None = None) -> dict:
@@ -321,6 +323,9 @@ def validate_join(
         if entry.get("fidelity") == "catalog-only":
             issues.append(f"boundary after={after}: {transition_id} is catalog-only")
             continue
+        if entry.get("xfade") == "custom" and transition_id not in CUSTOM_JOIN_IDS:
+            issues.append(f"boundary after={after}: {transition_id} has no custom renderer")
+            continue
         try:
             duration = _number(
                 cue.get("duration", entry.get("default_duration", 0.6)),
@@ -353,11 +358,15 @@ def join_graph(
     fps: float,
 ) -> tuple[str, str, float]:
     parts: list[str] = []
+    # Spatial custom recipes sample Y/U/V at arbitrary coordinates. Full-size
+    # planar chroma keeps those coordinates consistent on all three planes.
+    custom = any(cue["xfade"] == "custom" for cue in resolved)
+    pixel_format = "yuv444p" if custom else "yuv420p"
     for index, _item in enumerate(media):
         parts.append(
             f"[{index}:v]scale={width}:{height}:force_original_aspect_ratio=decrease,"
             f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps={fps},"
-            f"settb=AVTB,format=yuv420p[v{index}]"
+            f"settb=AVTB,format={pixel_format}[v{index}]"
         )
     length = float(media[0]["duration"])
     previous = "v0"
@@ -367,12 +376,14 @@ def join_graph(
             raise ValueError(f"transition after={cue['after']} is longer than a clip")
         offset = length - duration
         label = f"x{index}"
-        parts.append(
-            f"[{previous}][v{index}]xfade=transition={cue['xfade']}:"
-            f"duration={duration:.6f}:offset={offset:.6f}[{label}]"
-        )
+        options = xfade_options(cue["id"], cue["xfade"])
+        parts.append(f"[{previous}][v{index}]xfade={options}:"
+                     f"duration={duration:.6f}:offset={offset:.6f}[{label}]")
         length = length + float(media[index]["duration"]) - duration
         previous = label
+    if custom:
+        parts.append(f"[{previous}]format=yuv420p[deliveryv]")
+        previous = "deliveryv"
     return ";".join(parts), previous, length
 
 

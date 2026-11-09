@@ -22,6 +22,19 @@ class CapabilityRegistryTests(unittest.TestCase):
                  if entry["id"] == "upscale-real-esrgan")["status"],
             "unsupported")
 
+    def test_transition_catalog_and_single_render_cover_same_methods(self):
+        catalog = json.loads((FOLDER.parent / "edit" / "transitions" /
+                              "presets" / "transitions.json").read_text())
+        for entry in catalog["transitions"]:
+            with self.subTest(entry=entry["id"]):
+                if "join" in entry["modes"]:
+                    self.assertEqual(model.JOIN_TRANSITIONS[entry["id"]],
+                                     entry["xfade"])
+                if "point" in entry["modes"]:
+                    self.assertIn(entry["id"], model.POINT_TRANSITIONS)
+        self.assertFalse([entry for entry in catalog["transitions"]
+                          if entry["fidelity"] == "catalog-only"])
+
 
 if __name__ == "__main__":
     unittest.main()

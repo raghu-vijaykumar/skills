@@ -69,10 +69,11 @@
       "name": "Collage",
       "article": 6,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.8,
-      "notes": "Needs a multi-panel motion-graphics asset; no FFmpeg renderer here."
+      "xfade": "custom",
+      "notes": "Four staggered panels reveal the next shot; an original approximation, not a collage asset."
     },
     {
       "id": "pixelate",
@@ -101,10 +102,11 @@
       "name": "Page turn",
       "article": 9,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.8,
-      "notes": "3D page fold needs a motion-graphics renderer."
+      "xfade": "custom",
+      "notes": "Slanted shaded 2D fold; it does not reproduce a physical 3D page curl."
     },
     {
       "id": "reveal",
@@ -122,20 +124,22 @@
       "name": "Liquid streaks",
       "article": 11,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.7,
-      "notes": "Needs the liquid motion asset; no FFmpeg renderer here."
+      "xfade": "custom",
+      "notes": "Two-frequency wavy fluid edge; it does not use a filmed liquid asset."
     },
     {
       "id": "liquid-drops",
       "name": "Liquid drops",
       "article": 11,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.7,
-      "notes": "Needs the liquid motion asset; no FFmpeg renderer here."
+      "xfade": "custom",
+      "notes": "Three expanding rippled pools reveal the next shot; a code-generated approximation."
     },
     {
       "id": "fade-through-black",
@@ -166,10 +170,11 @@
       "name": "Fire",
       "article": 13,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.7,
-      "notes": "Needs a fire motion asset; no FFmpeg renderer here."
+      "xfade": "custom",
+      "notes": "Warm irregular rising flame-shaped edge; it does not contain filmed fire."
     },
     {
       "id": "glitch",
@@ -209,30 +214,33 @@
       "name": "Zoom out",
       "article": 15,
       "family": "zoom",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.6,
-      "notes": "No native xfade zoom-out. Use zoom-in on the outgoing side or a motion-graphics asset."
+      "xfade": "custom",
+      "notes": "Outgoing shot shrinks into the incoming shot; custom rather than native xfade."
     },
     {
       "id": "spin",
       "name": "Spin",
       "article": 16,
       "family": "spin",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.6,
-      "notes": "A 180-degree spin needs a motion-graphics renderer."
+      "xfade": "custom",
+      "notes": "Outgoing shot rotates 180 degrees while receding; a two-dimensional approximation."
     },
     {
       "id": "heart",
       "name": "Heart",
       "article": 17,
       "family": "stylized",
-      "modes": [],
-      "fidelity": "catalog-only",
+      "modes": ["join"],
+      "fidelity": "approximate",
       "default_duration": 0.7,
-      "notes": "Needs a heart motion asset; no FFmpeg renderer here."
+      "xfade": "custom",
+      "notes": "Heart-shaped reveal grows from the frame center; a code-generated approximation."
     },
     {
       "id": "wipe-right",

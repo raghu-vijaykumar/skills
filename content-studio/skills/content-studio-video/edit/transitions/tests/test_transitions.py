@@ -3,9 +3,12 @@ import contextlib
 import importlib.util
 import io
 import json
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[1] / "scripts" / "transitions.py"
 spec = importlib.util.spec_from_file_location("transitions", SOURCE)
@@ -45,11 +48,19 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("push-down", ids)
         self.assertNotIn("glitch", ids)
 
-    def test_catalog_only_entries_are_explicit(self):
-        items = transitions.list_transitions(fidelity="catalog-only")
-        self.assertEqual(len(items), 8)
+    def test_former_catalog_only_entries_have_distinct_custom_recipes(self):
+        items = [item for item in transitions.load_catalog()["transitions"]
+                 if item.get("xfade") == "custom"]
+        self.assertEqual({item["id"] for item in items}, transitions.CUSTOM_JOIN_IDS)
+        self.assertEqual(transitions.list_transitions(fidelity="catalog-only"), [])
+        expressions = {
+            transitions.xfade_options(item["id"], item["xfade"])
+            for item in items
+        }
+        self.assertEqual(len(expressions), 8)
         for item in items:
-            self.assertEqual(item["modes"], [])
+            self.assertEqual(item["modes"], ["join"])
+            self.assertEqual(item["fidelity"], "approximate")
 
 
 class PointValidationTests(unittest.TestCase):
@@ -69,11 +80,11 @@ class PointValidationTests(unittest.TestCase):
         )
         self.assertTrue(any("unknown transition" in issue for issue in issues))
 
-    def test_catalog_only_rejected(self):
+    def test_join_only_custom_effect_rejected_as_point(self):
         issues, _ = transitions.validate_cues(
             {"transitions": [{"at": 5, "id": "page-turn"}]}
         )
-        self.assertTrue(any("catalog-only" in issue or "not available" in issue for issue in issues))
+        self.assertTrue(any("not available" in issue for issue in issues))
 
     def test_wrong_mode_rejected(self):
         issues, _ = transitions.validate_cues(
@@ -174,7 +185,8 @@ class JoinValidationTests(unittest.TestCase):
 
     def test_join_graph_offsets(self):
         media = [{"duration": 10.0}, {"duration": 8.0}]
-        resolved = [{"after": 0, "duration": 0.5, "xfade": "fade"}]
+        resolved = [{"after": 0, "id": "cross-fade", "duration": 0.5,
+                     "xfade": "fade"}]
         graph, label, total = transitions.join_graph(media, resolved, 1920, 1080, 30)
         self.assertIn("offset=9.500000", graph)
         self.assertIn("xfade=transition=fade", graph)
@@ -227,12 +239,17 @@ class FixedScriptTests(unittest.TestCase):
                 "fade-through-black",
             )
 
-    def test_fixed_runner_refuses_catalog_only(self):
-        buffer = io.StringIO()
-        with contextlib.redirect_stderr(buffer):
-            code = transitions.run_fixed_transition("collage", ["cues.json"])
-        self.assertEqual(code, 2)
-        self.assertIn("catalog-only", buffer.getvalue())
+    def test_fixed_runner_accepts_custom_join_mode(self):
+        with tempfile.TemporaryDirectory() as folder:
+            cues = Path(folder) / "cues.json"
+            cues.write_text(json.dumps({"inputs": ["a.mp4", "b.mp4"],
+                                        "transitions": [{"after": 0, "duration": 0.8}]}))
+            with patch.object(transitions, "plan", return_value={
+                "mode": "join", "issues": [], "transitions": ["collage"]
+            }):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(transitions.run_fixed_transition(
+                        "collage", [str(cues), "--plan"]), 0)
 
     def test_fixed_runner_plans_with_injected_id(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -307,6 +324,41 @@ class CliTests(unittest.TestCase):
             with contextlib.redirect_stdout(buffer):
                 code = transitions.main(["validate", str(cues)])
             self.assertEqual(code, 1)
+
+
+@unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
+                     "FFmpeg and FFprobe required")
+class CustomJoinRenderTests(unittest.TestCase):
+    def test_all_eight_custom_joins_decode_and_crossfade_audio(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            inputs = []
+            for index, (color, tone) in enumerate((("red", 440), ("blue", 660))):
+                source = root / f"source-{index}.mp4"
+                result = subprocess.run([
+                    "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                    "-f", "lavfi", "-i", f"color={color}:s=64x64:r=10:d=1.2",
+                    "-f", "lavfi", "-i", f"sine=frequency={tone}:duration=1.2",
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-shortest", str(source),
+                ], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                inputs.append(source)
+            originals = [source.read_bytes() for source in inputs]
+            for effect in sorted(transitions.CUSTOM_JOIN_IDS):
+                with self.subTest(effect=effect):
+                    output = root / f"{effect}.mp4"
+                    result = transitions.render_join({
+                        "inputs": [str(source) for source in inputs],
+                        "transitions": [{"after": 0, "id": effect,
+                                         "duration": 0.4}],
+                    }, output, size=(64, 64), fps=10)
+                    self.assertEqual(result["audio"], "crossfade")
+                    self.assertAlmostEqual(result["output_seconds"], 2.0)
+                    delivered = transitions.probe_media(output)
+                    self.assertTrue(delivered["has_audio"])
+                    self.assertAlmostEqual(delivered["duration"], 2.0, delta=.15)
+            self.assertEqual([source.read_bytes() for source in inputs], originals)
 
 
 if __name__ == "__main__":

@@ -45,6 +45,12 @@ specialist effects. Validate its method coverage before approving a timeline;
 unsupported entries stop before final export. Revisions need a new timeline
 fingerprint and human approval.
 
+All 29 catalogued transition variants now have specialist renderers, including
+eight clearly labelled custom approximations. All six point and 26 clip-join
+transition IDs are also available on the editable delivery timeline. The
+custom joins require two real shots; their duration and audio overlap are
+resolved before approval and included in the single final export.
+
 ## Other routes and installation
 
 [Styles](content-studio/skills/content-studio-video/planning/styles/SKILL.md) chooses among built-in and project-enabled treatments; [animation](content-studio/skills/content-studio-video/animation/SKILL.md) authors and renders code-driven video, carousel, and post content. [Audio](content-studio/skills/content-studio-video/audio/SKILL.md), [review](content-studio/skills/content-studio-video/review/SKILL.md), and [editing memory](content-studio/skills/content-studio-video/memory/SKILL.md) can be called directly through the same precheck. Saved confirmed preferences use a private local database shared across chats, outside Git.

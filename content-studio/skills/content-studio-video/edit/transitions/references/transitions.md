@@ -11,7 +11,7 @@ approximation exists.
 | --- | --- |
 | `native` | A direct FFmpeg `fade` or `xfade` mapping with the intended motion. |
 | `approximate` | A rendered effect that is visibly related but not identical to the Clipchamp asset. |
-| `catalog-only` | No renderer here. The tool refuses it instead of emitting a placeholder. |
+| `catalog-only` | Reserved for a future entry without a renderer; none of the current 29 entries has this label. |
 
 ## Catalog
 
@@ -22,22 +22,22 @@ approximation exists.
 | 3 | `diagonal-soft-wipe` | Diagonal soft wipe | join | approximate | `diagtl` |
 | 4 | `blinds` | Blinds | join | approximate | `hlslice` |
 | 5 | `bloom` | Bloom | join | approximate | `zoomin` |
-| 6 | `collage` | Collage | - | catalog-only | - |
+| 6 | `collage` | Collage | join | approximate | custom staggered panels |
 | 7 | `pixelate` | Pixelate | join | native | `pixelize` |
 | 8 | `exchange` | Exchange | join | approximate | `slideleft` |
-| 9 | `page-turn` | Page turn | - | catalog-only | - |
+| 9 | `page-turn` | Page turn | join | approximate | custom shaded 2D fold |
 | 10 | `reveal` | Reveal | join | native | `revealleft` |
-| 11 | `liquid-streaks` | Liquid streaks | - | catalog-only | - |
-| 11 | `liquid-drops` | Liquid drops | - | catalog-only | - |
+| 11 | `liquid-streaks` | Liquid streaks | join | approximate | custom wavy edge |
+| 11 | `liquid-drops` | Liquid drops | join | approximate | custom expanding pools |
 | 12 | `fade-through-black` | Fade through black | point, join | native | `fade` / `fadeblack` |
 | 12 | `fade-through-white` | Fade through white | point, join | native | `fade` / `fadewhite` |
-| 13 | `fire` | Fire | - | catalog-only | - |
+| 13 | `fire` | Fire | join | approximate | custom warm flame-shaped edge |
 | 14 | `glitch` | Glitch | point | approximate | RGB shift + noise |
 | 14 | `glitch-reveal` | Glitch reveal | point | approximate | RGB shift + noise + contrast |
 | 15 | `zoom-in` | Zoom in | join | native | `zoomin` |
-| 15 | `zoom-out` | Zoom out | - | catalog-only | - |
-| 16 | `spin` | Spin | - | catalog-only | - |
-| 17 | `heart` | Heart | - | catalog-only | - |
+| 15 | `zoom-out` | Zoom out | join | approximate | custom outgoing shrink |
+| 16 | `spin` | Spin | join | approximate | custom rotating outgoing frame |
+| 17 | `heart` | Heart | join | approximate | custom growing heart mask |
 | 18 | `wipe-right` | Wipe right | join | native | `wiperight` |
 | 18 | `wipe-left` | Wipe left | join | native | `wipeleft` |
 | 19 | `cross-blur` | Cross blur | point, join | native | `gblur` / `hblur` |
@@ -67,9 +67,9 @@ python .../scripts/fade_through_black.py cues.json --input master.mp4 --output o
 python .../scripts/push_left.py cues.json --output joined.mp4
 ```
 
-Catalog-only transitions have a script that exits with an explicit refusal.
-The shared `transitions.py apply` and `transitions.py join` commands remain the
-way to mix several different transition IDs in one cue sheet.
+The eight custom effects have the same fixed-entrypoint contract and require a
+two-input join sheet. The shared `transitions.py apply` and
+`transitions.py join` commands remain the way to mix IDs in one cue sheet.
 
 ## Point vs join
 
@@ -82,6 +82,13 @@ and `eq`. The output keeps the input duration and audio can be stream-copied.
 transition duration, so the result is shorter by the sum of the durations. The
 command prints `output_seconds` and `duration_change_seconds`; never hide that
 change.
+
+Custom joins use original per-pixel expressions over both clips. They are
+rendered directly in the join graph, including the delivery timeline's single
+final export. The results approximate the named visual ideas; no proprietary
+or filmed motion asset is present. Normalize source color to SDR before using
+these effects. Review entrance, midpoint, and exit frames and motion at the
+intended delivery size.
 
 ## Cue semantics
 
@@ -120,7 +127,9 @@ edit already has a sound design.
 
 ## Limits
 
-- Catalog-only effects need a motion-graphics asset; this skill does not invent one.
+- The custom eight are code-generated approximations, so a project seeking a
+  physical page curl, filmed fire, or liquid footage still needs a separately
+  sourced asset and its own reviewed render route.
 - No automatic cut detection or auto-placement.
 - HDR/HLG and BT.2020 are refused; tone-map to SDR first. Dolby Vision is unsupported.
 - The native timeline renderer does not consume `point_transitions` annotations yet.
