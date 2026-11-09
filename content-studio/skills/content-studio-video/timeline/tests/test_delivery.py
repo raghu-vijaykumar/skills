@@ -198,6 +198,15 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                           "--approval", str(approval_path)])
         self.assertFalse(self.output.exists())
 
+    def test_checklist_evidence_can_progress_after_timeline_approval(self):
+        approved = self._approved()
+        checklist = self.plan.with_name("checklist.json")
+        contents = json.loads(checklist.read_text(encoding="utf-8"))
+        contents["items"][0].update({"status": "done", "evidence": ["source reviewed"]})
+        checklist.write_text(json.dumps(contents), encoding="utf-8")
+        self.assertEqual(approval.require_human_approval(
+            self.timeline_path, self.timeline, approved)["actor"], "human")
+
     def test_preview_allows_pending_review_without_final_approval(self):
         self.timeline["operations"][0]["review_status"] = "pending_review"
         self.timeline["audio"][0]["review_status"] = "pending_review"

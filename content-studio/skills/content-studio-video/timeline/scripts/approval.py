@@ -30,9 +30,11 @@ def fingerprint(timeline_path: Path, timeline: dict) -> str:
     """A file-byte and asset digest makes edits and replacements stale."""
     result = validate(timeline)
     plan = Path(timeline["plan_file"])
+    # Checklist evidence is intentionally mutable as approved steps finish.
+    # validate() checks its plan binding and step IDs without making later
+    # evidence updates invalidate a human-approved timeline and final render.
     parts = [timeline_path.read_bytes(), plan.read_bytes(),
              plan.with_name("approval.json").read_bytes(),
-             plan.with_name("checklist.json").read_bytes(),
              bytes.fromhex(capability_sha256())]
     for clip in result["clips"]:
         parts.append(clip["path"].as_posix().encode())

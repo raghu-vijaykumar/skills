@@ -77,6 +77,10 @@ full-master scripts when an operation is unavailable in this route.
 The current route is SDR only. AI upscale, HDR/Dolby Vision, and methods marked
 `unsupported` in `methods.json` require further adapters and evidence.
 
+The approval fingerprint binds the timeline, approved plan, source assets, and
+renderer capability. Preflight checklist evidence may continue to be recorded
+after timeline approval; its matching plan hash and step IDs are still checked.
+
 For a full length, uncut source with no audio edits, set `audio_policy` to
 `copy_source` in a timeline revision. This copies the source audio packets into
 the one final export without an audio encoder; validation rejects cuts, joins,
