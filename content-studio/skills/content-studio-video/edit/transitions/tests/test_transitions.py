@@ -3,6 +3,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -61,6 +62,43 @@ class CatalogTests(unittest.TestCase):
         for item in items:
             self.assertEqual(item["modes"], ["join"])
             self.assertEqual(item["fidelity"], "approximate")
+
+    def test_animated_readme_covers_every_renderable_transition(self):
+        # Keep the human-facing capability matrix in sync with the runtime catalog.
+        skill = SOURCE.parents[1]
+        readme = (skill / "README.md").read_text(encoding="utf-8")
+        rows = {}
+        for line in readme.splitlines():
+            match = re.match(r"^\| \[`([a-z-]+)`\]\(scripts/([a-z_]+)\.py\) \|", line)
+            if match:
+                effect = match.group(1)
+                self.assertNotIn(effect, rows)
+                rows[effect] = line.split("|")[2:-1]
+                self.assertEqual(match.group(2), effect.replace("-", "_"))
+        catalog = transitions.load_catalog()["transitions"]
+        self.assertEqual(set(rows), {item["id"] for item in catalog})
+        for item in catalog:
+            effect = item["id"]
+            cells = [cell.strip() for cell in rows[effect]]
+            self.assertEqual(cells[0] == "Yes", "point" in item["modes"])
+            self.assertEqual(cells[1] == "Yes", "join" in item["modes"])
+            self.assertEqual(cells[2], "Yes")
+            self.assertEqual(cells[3].lower(), item["fidelity"])
+            self.assertIn(f"(previews/{effect}.gif)", cells[5])
+            gif = skill / "previews" / f"{effect}.gif"
+            self.assertTrue(gif.is_file(), effect)
+            self.assertTrue(gif.read_bytes().startswith((b"GIF87a", b"GIF89a")), effect)
+            self.assertLess(gif.stat().st_size, 512 * 1024, effect)
+            if shutil.which("ffprobe"):
+                probe = subprocess.run(
+                    ["ffprobe", "-v", "error", "-select_streams", "v:0",
+                     "-count_frames", "-show_entries",
+                     "stream=width,height,nb_read_frames", "-of", "json", str(gif)],
+                    text=True, capture_output=True, check=True,
+                )
+                stream = json.loads(probe.stdout)["streams"][0]
+                self.assertEqual((stream["width"], stream["height"]), (240, 135))
+                self.assertGreaterEqual(int(stream["nb_read_frames"]), 10, effect)
 
 
 class PointValidationTests(unittest.TestCase):
