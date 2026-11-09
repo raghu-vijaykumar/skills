@@ -20,6 +20,7 @@ JOIN_TRANSITIONS = {"cross-fade": "fade", "fade-through-black": "fadeblack",
                     "wipe-left": "wipeleft", "wipe-right": "wiperight",
                     "push-left": "slideleft", "push-right": "slideright"}
 POINT_TRANSITIONS = {"fade-through-black", "fade-through-white", "cross-blur"}
+VIDEO_PRESETS = {"medium", "fast", "veryfast"}
 
 
 def sha256_file(path: Path) -> str:
@@ -95,6 +96,7 @@ def make_initial(plan: Path, source: Path, output: Path, *, fps: int,
         "output": str(output),
         "fps": fps, "width": width, "height": height,
         "color_policy": "sdr",
+        "audio_policy": "mix", "video_preset": "medium",
         "picture": [{"id": "p0001", "source": source.name,
                      "sha256": sha256_file(source), "source_in": 0}],
         "transitions": [], "operations": [], "audio": [],
@@ -142,6 +144,12 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         raise ValueError("Output dimensions must be positive even integers")
     if timeline.get("color_policy") != "sdr":
         raise ValueError("Only reviewed SDR output is currently supported")
+    audio_policy = timeline.get("audio_policy", "mix")
+    if audio_policy not in {"mix", "copy_source"}:
+        raise ValueError("Unsupported audio_policy")
+    video_preset = timeline.get("video_preset", "medium")
+    if video_preset not in VIDEO_PRESETS:
+        raise ValueError("Unsupported video_preset")
     output = Path(timeline["output"]).resolve()
 
     picture = timeline.get("picture")
@@ -274,6 +282,13 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         gain = _number(cue.get("gain", 1), f"{cue_id}.gain")
         if gain > 2:
             raise ValueError("Audio cue gain must be <= 2")
+    if audio_policy == "copy_source":
+        # Stream copy is valid only when the picture edit cannot shift source audio.
+        if (len(resolved) != 1 or resolved[0]["source_in"] != 0
+                or transitions or audio
+                or any(item["method"] in AUDIO_METHODS for item in operations)
+                or float(resolved[0].get("audio_gain", 1)) != 1):
+            raise ValueError("copy_source requires one uncut clip and no audio edits")
     input_paths = [c["path"] for c in resolved]
     input_paths += [asset_path(root, c["source"]) for c in audio]
     input_paths += [asset_path(root, o["font_source"]) for o in operations if o["method"] == "title"]
@@ -282,13 +297,14 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         raise ValueError("Output cannot overwrite an input")
     return {"clips": resolved, "transitions": by_after, "operations": operations,
             "audio": audio, "duration": duration, "fps": fps, "width": width,
-            "height": height, "root": root, "output": output}
+            "height": height, "root": root, "output": output,
+            "audio_policy": audio_policy, "video_preset": video_preset}
 
 
 def revise(timeline: dict, changes: dict, *, new_output: str) -> dict:
     """A revision is a copy; the old bytes remain eligible for audit."""
     allowed = {"picture", "transitions", "operations", "audio", "fps",
-               "width", "height", "color_policy"}
+               "width", "height", "color_policy", "audio_policy", "video_preset"}
     if not isinstance(changes, dict) or not changes or set(changes) - allowed:
         raise ValueError("Revision changes contain unsupported fields")
     updated = copy.deepcopy(timeline)

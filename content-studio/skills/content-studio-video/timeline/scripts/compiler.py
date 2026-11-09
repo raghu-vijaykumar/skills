@@ -153,6 +153,7 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
     clips = resolved["clips"]
     width, height, fps = resolved["width"], resolved["height"], resolved["fps"]
     duration = resolved["duration"]
+    copy_audio = resolved["audio_policy"] == "copy_source"
     graph: list[str] = []
     inputs: list[str] = []
     info: list[dict] = []
@@ -182,6 +183,12 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                         f"source dimensions in the output canvas")
         info.append(metadata)
         inputs.extend(["-i", str(clip["path"])])
+    if copy_audio:
+        # Preserve source packets only for a full length, unshifted source.
+        source_info = info[0]
+        if (not source_info["audio"]
+                or abs(source_info["duration"] - duration) > .08):
+            raise ValueError("copy_source needs full length source audio")
     for cue in resolved["audio"]:
         source = asset_path(resolved["root"], cue["source"])
         metadata = media_info(source)
@@ -228,6 +235,8 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         else:
             graph.append("".join(f"[{label}]" for label in segment_labels)
                          + f"concat=n={len(segment_labels)}:v=1:a=0[vc{i}]")
+        if copy_audio:
+            continue
         if info[i]["audio"]:
             graph.append(f"[{i}:a:0]atrim=start={_fmt(clip['source_in'])}:"
                          f"end={_fmt(clip['source_out'])},asetpts=PTS-STARTPTS,"
@@ -306,7 +315,8 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                      f"amix=inputs={len(audio_labels)}:duration=first:"
                      "normalize=0[amixed]")
         current_a = "amixed"
-    _audio_graph(current_a, resolved["operations"], duration, graph)
+    if not copy_audio:
+        _audio_graph(current_a, resolved["operations"], duration, graph)
     return inputs, ";".join(graph)
 
 
@@ -337,14 +347,16 @@ def _export(timeline: dict, resolved: dict, output: Path,
         graph_path = Path(scratch) / "graph.txt"
         graph_path.write_text(graph, encoding="utf-8")
         temporary = Path(scratch) / "delivery.mp4"
+        copy_audio = resolved["audio_policy"] == "copy_source"
         command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
                    "-n", *inputs, "-/filter_complex", str(graph_path),
-                   "-map", "[vfinal]", "-map", "[afinal]",
+                   "-map", "[vfinal]", "-map", "0:a:0" if copy_audio else "[afinal]",
                    *seek_args, "-t", _fmt(expected),
                    "-r", _fmt(resolved["fps"]),
-                   "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-                   "-pix_fmt", "yuv420p", "-c:a", "aac", "-ar", "48000",
-                   "-b:a", "192k",
+                   "-c:v", "libx264", "-preset", resolved["video_preset"],
+                   "-crf", "18", "-pix_fmt", "yuv420p",
+                   *(["-c:a", "copy"] if copy_audio else
+                     ["-c:a", "aac", "-ar", "48000", "-b:a", "192k"]),
                    "-movflags", "+faststart", str(temporary)]
         result = subprocess.run(command, capture_output=True, text=True,
                                 cwd=resolved["root"])
@@ -364,7 +376,8 @@ def render(timeline: dict, resolved: dict) -> dict:
     record.update({
         "operations": [item["id"] for item in resolved["operations"]],
         "audio_cues": [item["id"] for item in resolved["audio"]],
-        "video_encoder_invocations": 1, "audio_encoder_invocations": 1,
+        "video_encoder_invocations": 1,
+        "audio_encoder_invocations": 0 if resolved["audio_policy"] == "copy_source" else 1,
         "review_status": "pending_exact_output_review",
     })
     return record

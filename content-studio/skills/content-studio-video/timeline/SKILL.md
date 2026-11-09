@@ -76,3 +76,11 @@ full-master scripts when an operation is unavailable in this route.
 
 The current route is SDR only. AI upscale, HDR/Dolby Vision, and methods marked
 `unsupported` in `methods.json` require further adapters and evidence.
+
+For a full length, uncut source with no audio edits, set `audio_policy` to
+`copy_source` in a timeline revision. This copies the source audio packets into
+the one final export without an audio encoder; validation rejects cuts, joins,
+audio cues, gain changes, missing audio, and shortened source ranges. The
+default `mix` policy keeps the existing audio graph. `video_preset` accepts
+`medium` (default), `fast`, or `veryfast` for the single x264 encode. Review
+the chosen preset and audio policy as part of timeline approval.

@@ -406,6 +406,45 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                 self.assertTrue(Path(record["output"]).is_file())
                 self.assertAlmostEqual(record["duration"], 2.5, delta=.15)
 
+    def test_full_source_audio_can_be_copied_without_encoding(self):
+        self.timeline["picture"] = [{
+            "id": "whole", "source": self.source.name,
+            "sha256": model.sha256_file(self.source),
+            "source_in": 0, "source_out": 3,
+        }]
+        self.timeline["transitions"] = []
+        self.timeline["operations"] = [{
+            "id": "graphic", "method": "motion-graphics-ass",
+            "source": self.sidecar.name,
+            "sha256": model.sha256_file(self.sidecar),
+            "start": 0, "end": 3, "review_status": "approved",
+        }]
+        self.timeline["audio"] = []
+        self.timeline["audio_policy"] = "copy_source"
+        self.timeline["video_preset"] = "veryfast"
+        resolved = model.validate(self.timeline)
+        _, graph = compiler.compile_graph(self.timeline, resolved)
+        self.assertNotIn("afinal", graph)
+        record = compiler.render(self.timeline, resolved)
+        self.assertEqual(record["audio_encoder_invocations"], 0)
+        self.assertEqual(compiler.media_info(self.output)["audio"]["codec_name"], "aac")
+
+        def packet_hash(path):
+            result = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(path),
+                "-map", "0:a:0", "-c:a", "copy", "-f", "hash", "-hash", "SHA256", "-",
+            ], capture_output=True, text=True, check=True)
+            return result.stdout.strip()
+
+        self.assertEqual(packet_hash(self.source), packet_hash(self.output))
+        self.timeline["audio"].append({
+            "id": "extra", "kind": "voice", "source": self.voice.name,
+            "sha256": model.sha256_file(self.voice), "start": 0.5,
+            "review_status": "approved",
+        })
+        with self.assertRaisesRegex(ValueError, "one uncut clip and no audio edits"):
+            model.validate(self.timeline)
+
 
 if __name__ == "__main__":
     unittest.main()
