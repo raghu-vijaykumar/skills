@@ -1,0 +1,8 @@
+{
+  "ssim": 0.626025,
+  "psnr_db": 20.413676,
+  "vmaf": 57.638538,
+  "reference": "<synthetic-testsrc2-source.mp4>",
+  "distorted": "<synthetic-denoised-preview.mp4>",
+  "note": "Illustrative measurement from synthetic media; not a delivery-quality claim."
+}
