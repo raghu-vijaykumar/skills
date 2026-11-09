@@ -418,6 +418,9 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
             "source": self.sidecar.name,
             "sha256": model.sha256_file(self.sidecar),
             "start": 0, "end": 3, "review_status": "approved",
+        }, {
+            "id": "slow-change", "method": "cross-blur",
+            "start": 0.5, "end": 2.0, "review_status": "approved",
         }]
         self.timeline["audio"] = []
         self.timeline["audio_policy"] = "copy_source"
@@ -425,8 +428,11 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         resolved = model.validate(self.timeline)
         _, graph = compiler.compile_graph(self.timeline, resolved)
         self.assertNotIn("afinal", graph)
+        self.assertIn("sendcmd=c='0.500000-1.250000", graph)
+        self.assertIn("gblur@blur1 sigma 10*TI", graph)
         record = compiler.render(self.timeline, resolved)
         self.assertEqual(record["audio_encoder_invocations"], 0)
+        self.assertAlmostEqual(record["duration"], 3, delta=.15)
         self.assertEqual(compiler.media_info(self.output)["audio"]["codec_name"], "aac")
 
         def packet_hash(path):

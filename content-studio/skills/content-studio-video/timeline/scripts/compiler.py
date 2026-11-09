@@ -283,8 +283,16 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             sidecar = asset_path(resolved["root"], item["source"])
             graph.append(f"[{current_v}]ass={_text(item['source'])}[{target}]")
         elif method == "cross-blur":
-            graph.append(f"[{current_v}]gblur=sigma=10:"
-                         f"enable='between(t,{_fmt(start)},{_fmt(end)})'[{target}]")
+            # Ease the blur in and out around the source cut; start/end remain
+            # editable timeline times and the picture/audio duration is fixed.
+            middle = (start + end) / 2
+            blur = f"gblur@blur{index}"
+            commands = (f"{_fmt(start)}-{_fmt(middle)} [expr] {blur} sigma 10*TI\\;"
+                        f"{_fmt(middle)}-{_fmt(end)} [expr] {blur} sigma 10*(1-TI)\\;"
+                        f"{_fmt(end)} {blur} sigma 0")
+            graph.append(f"[{current_v}]sendcmd=c='{commands}',"
+                         f"{blur}=sigma=0:enable='between(t,{_fmt(start)},{_fmt(end)})'"
+                         f"[{target}]")
         else:
             color = "white" if method == "fade-through-white" else "black"
             half = (end - start) / 2

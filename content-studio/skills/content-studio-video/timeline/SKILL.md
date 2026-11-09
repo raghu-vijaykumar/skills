@@ -84,3 +84,8 @@ audio cues, gain changes, missing audio, and shortened source ranges. The
 default `mix` policy keeps the existing audio graph. `video_preset` accepts
 `medium` (default), `fast`, or `veryfast` for the single x264 encode. Review
 the chosen preset and audio policy as part of timeline approval.
+
+Point transitions carry editable `start` and `end` times on the resolved edit.
+`cross-blur` now eases blur up to the window midpoint and back down; a longer
+window therefore changes the transition speed without shifting frames or
+touching source audio. Show a bounded preview after changing these times.
