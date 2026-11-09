@@ -36,3 +36,6 @@ These treatments are intentionally labelled approximations. Each use on a
 real edit still needs the mandatory Content Studio plan, exact timeline
 approval, a bounded preview, and review of the final output. The code change
 does not alter any existing video or timeline revision.
+
+The feature commit `34ae3eb` was pushed to `origin/main`; a remote HEAD check
+matched the local commit. Unrelated worktree changes were left unstaged.

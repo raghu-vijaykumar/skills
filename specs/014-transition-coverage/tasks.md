@@ -8,4 +8,4 @@
 - [X] T006 Render and inspect bounded two-shot evidence for every new effect; revise weak or broken visuals.
 - [X] T007 Add coverage for method parity, timing, source/audio preservation, stale approval, and exact output.
 - [X] T008 Update skills and reference docs, run focused and docs checks, review staged diff.
-- [ ] T009 Commit only feature files on main, push, and verify remote HEAD.
+- [X] T009 Commit only feature files on main, push, and verify remote HEAD.

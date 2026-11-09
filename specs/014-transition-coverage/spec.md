@@ -2,7 +2,7 @@
 
 **Branch**: `main` (editor requested main-only work)
 **Created**: 2026-11-09
-**Status**: In progress
+**Status**: Complete
 **Input**: Implement the remaining transition effects, including all eight catalog-only entries, in the editable single-render timeline.
 
 ## User scenarios
