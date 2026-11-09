@@ -11,6 +11,13 @@ Read the channel rules and source draft before editing. Keep the source video un
 
 For a finished vlog, create a JSON cue sheet with timed `effect` events. Choose `flash`, `swipe`, or `shutter` to conceal a known hard cut, and place that cut at the cue midpoint. Use `speed-lines` or `frame-pop` as shorter accents around action beats. All five effects can use per-cue `color` and `accent` hex colors. They add graphics over footage; they do not change the underlying shots. For Remotion vlogs, import the matching `VlogEffect` and `VlogTransition` components. Read [effects and transitions](references/effects.md) for cue examples, Remotion usage, and review checks.
 
+For a place arrival, use a `location` event with `start`, `end`, a short `label`,
+and visual or reliable audio `evidence`. It draws a compact pin and place-name
+card at the lower left. Confirm the exact destination against the footage,
+preview the card for occlusion, and render its ASS sidecar as the
+`motion-graphics-ass` operation in the approved delivery timeline. The sidecar
+does not encode a separate full video.
+
 For cooking videos, the same JSON cue sheet supports:
 
 - `title`: a two-part label and optional Kannada subtitle. Stagger the words on separate beats. Preview the shot and place the panel in open space.

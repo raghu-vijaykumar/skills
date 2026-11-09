@@ -36,8 +36,13 @@ def validate(data: dict) -> tuple[Path, float, list[dict], dict, bool]:
         start, end = float(event["start"]), float(event["end"])
         if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= duration + 0.02):
             raise ValueError(f"Event {index} is outside the source duration")
-        if event.get("kind") not in {"ingredient", "ingredient_list", "leaves", "title", "cta", "effect"}:
+        if event.get("kind") not in {"ingredient", "ingredient_list", "leaves", "title", "cta", "effect", "location"}:
             raise ValueError(f"Event {index} has an unsupported motion-graphic kind")
+        if event["kind"] == "location":
+            label = str(event.get("label", "")).strip()
+            if (not 1 <= len(label) <= 30 or not event.get("evidence")
+                    or end - start < 1):
+                raise ValueError(f"Location {index} needs a short place name, evidence, and at least one second")
         if event["kind"] == "effect":
             if event.get("preset") not in {"flash", "swipe", "shutter", "speed-lines", "frame-pop"}:
                 raise ValueError(f"Effect {index} has an unsupported preset")
@@ -237,6 +242,27 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             continue
         if event["kind"] == "effect":
             rows.extend(effect_rows(event, start, end, width, height))
+        elif event["kind"] == "location":
+            # One compact lower third follows a place arrival without hiding the scene.
+            x, y = round(width * .035), round(height * .79)
+            card = ("m 18 0 l 682 0 b 695 0 706 11 706 24 "
+                    "l 706 116 b 706 129 695 140 682 140 l 18 140 "
+                    "b 5 140 0 129 0 116 l 0 24 b 0 11 5 0 18 0")
+            slide = motion(x, y, -720, 280)
+            rows.append(line(0, start, end, "{" + slide +
+                             "\\1c&H003A3E17&\\alpha&H22&\\p1}" + card + "{\\p0}"))
+            # The teardrop and inner hole are vector shapes, so the pin stays sharp at 4K.
+            pin = ("m 23 0 b 36 0 46 10 46 23 b 46 39 32 55 23 68 "
+                   "b 14 55 0 39 0 23 b 0 10 10 0 23 0")
+            px, py = x + 31, y + 34
+            rows.append(line(1, start, end, "{" + motion(px, py, px - 720, 280) +
+                             "\\1c&H004AB5FF&\\p1}" + pin + "{\\p0}"))
+            rows.append(line(2, start, end, "{" + motion(px + 17, py + 14, px - 703, 280) +
+                             "\\1c&H003A3E17&\\p1}"
+                             "m 6 0 b 9 0 12 3 12 6 b 12 9 9 12 6 12 "
+                             "b 3 12 0 9 0 6 b 0 3 3 0 6 0{\\p0}"))
+            rows.append(line(3, start, end, "{" + motion(x + 112, y + 43, -608, 280) +
+                             "\\fs49\\b1\\1c&H00F4F7F7&}" + clean(event["label"])))
         elif event["kind"] == "title":
             # Two words hit on separate beats against the open wall beside the presenter.
             x, y = 90, 170

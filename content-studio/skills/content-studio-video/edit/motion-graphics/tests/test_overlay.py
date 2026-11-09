@@ -54,6 +54,26 @@ class OverlayTest(unittest.TestCase):
             self.assertIn(expected, rendered)
         self.assertIn("0:00:14.00,0:00:50.00", rendered)
 
+    def test_location_card_has_pin_and_escapes_place_name(self):
+        event = {"kind": "location", "start": 12, "end": 15,
+                 "label": r"Gold {Souk}", "evidence": "Gate sign visible"}
+        rendered = overlay.ass({"events": [event]}, canvas=(1920, 1080))
+        self.assertIn("0:00:12.00,0:00:15.00", rendered)
+        self.assertIn("Gold (Souk)", rendered)
+        self.assertNotIn("Gold {Souk}", rendered)
+        self.assertIn("m 23 0 b 36 0", rendered)
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "source.mp4"
+            source.touch()
+            probe = {"format": {"duration": "30"}, "streams": [
+                {"codec_type": "video", "width": 1920, "height": 1080}]}
+            with patch.object(overlay, "probe", return_value=probe):
+                checked = overlay.validate({"source": str(source), "events": [event]})
+                self.assertEqual(len(checked[2]), 1)
+                with self.assertRaisesRegex(ValueError, "short place name"):
+                    overlay.validate({"source": str(source), "events": [
+                        {**event, "evidence": ""}]})
+
     def test_rejects_out_of_order_ingredient_list(self):
         with tempfile.TemporaryDirectory() as folder:
             source = Path(folder) / "source.mp4"
