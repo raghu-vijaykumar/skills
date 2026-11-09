@@ -1,0 +1,141 @@
+{
+  "source": "<synthetic-scratch>\\src\\noisy-speech.mp4",
+  "source_bytes": 1174957,
+  "duration_seconds": 10.0,
+  "video": {
+    "width": 640,
+    "height": 360,
+    "pixel_format": "yuv420p",
+    "color_transfer": null,
+    "dolby_vision_profile": null
+  },
+  "status": "audio_review_required",
+  "denoise_engine": "ffmpeg",
+  "speech_gain": "auto",
+  "enhance_version": 5,
+  "denoise": {
+    "engine": "ffmpeg",
+    "source_lufs": -27.8,
+    "denoised_lufs": -28.0
+  },
+  "audio": {
+    "speech_intervals": [
+      [
+        0.3,
+        5.8
+      ],
+      [
+        6.6,
+        10.0
+      ]
+    ],
+    "speech_gain_db": [
+      9.62,
+      8.77
+    ],
+    "quiet_gain_db": -13.0,
+    "peak_ceiling_dbfs": -1
+  },
+  "audio_validation": {
+    "status": "review_required",
+    "windows": [
+      {
+        "source_range": [
+          0.0,
+          10.0
+        ],
+        "output_range": [
+          0.0,
+          10.0
+        ],
+        "before": {
+          "duration_seconds": 10.0,
+          "noise_floor_dbfs": -45.63,
+          "speech_level_dbfs": -26.46,
+          "snr_db": 19.17,
+          "noise_modulation_db": 2.13,
+          "peak_dbfs": -15.17,
+          "clip_ratio": 0.0,
+          "speech_band_ratio": 0.387
+        },
+        "after": {
+          "duration_seconds": 10.0,
+          "noise_floor_dbfs": -42.2,
+          "speech_level_dbfs": -17.05,
+          "snr_db": 25.16,
+          "noise_modulation_db": 12.25,
+          "peak_dbfs": -5.97,
+          "clip_ratio": 0.0,
+          "speech_band_ratio": 0.4267
+        },
+        "score": 29.97,
+        "issues": [
+          "level drift"
+        ],
+        "noise_reduction_db": -3.43,
+        "snr_gain_db": 5.99,
+        "passed": true
+      }
+    ],
+    "review_audio": {
+      "before": "<synthetic-scratch>\\out\\cleanup\\noisy-speech.mp4\\audio-review\\before.wav",
+      "after": "<synthetic-scratch>\\out\\cleanup\\noisy-speech.mp4\\audio-review\\after.wav"
+    },
+    "reason": "no diagnosed tuning profile"
+  },
+  "blur": {
+    "frames_scanned": 300,
+    "candidates": 0,
+    "review_csv": "review.csv",
+    "review_html": "review.html"
+  },
+  "render_validation": {
+    "crop_percent": null,
+    "crop_review": true,
+    "dolby_vision": false,
+    "playback_review_required": false
+  },
+  "final_audio_validation": {
+    "status": "passed",
+    "windows": [
+      {
+        "source_range": [
+          0.0,
+          10.0
+        ],
+        "output_range": [
+          0.0,
+          10.0
+        ],
+        "before": {
+          "duration_seconds": 10.0,
+          "noise_floor_dbfs": -45.63,
+          "speech_level_dbfs": -26.46,
+          "snr_db": 19.17,
+          "noise_modulation_db": 2.13,
+          "peak_dbfs": -15.17,
+          "clip_ratio": 0.0,
+          "speech_band_ratio": 0.387
+        },
+        "after": {
+          "duration_seconds": 10.0,
+          "noise_floor_dbfs": -42.21,
+          "speech_level_dbfs": -17.05,
+          "snr_db": 25.15,
+          "noise_modulation_db": 12.25,
+          "peak_dbfs": -5.98,
+          "clip_ratio": 0.0,
+          "speech_band_ratio": 0.4265
+        },
+        "score": 29.95,
+        "issues": [
+          "level drift"
+        ],
+        "noise_reduction_db": -3.42,
+        "snr_gain_db": 5.98,
+        "passed": true
+      }
+    ]
+  },
+  "processed_output": "processed.mp4"
+}
