@@ -88,4 +88,6 @@ the chosen preset and audio policy as part of timeline approval.
 Point transitions carry editable `start` and `end` times on the resolved edit.
 `cross-blur` now eases blur up to the window midpoint and back down; a longer
 window therefore changes the transition speed without shifting frames or
-touching source audio. Show a bounded preview after changing these times.
+touching source audio. Its `blur_sigma` can be set from 1 to 80 to make the
+effect readable at delivery size (default 10). Show a bounded preview after
+changing times or strength.

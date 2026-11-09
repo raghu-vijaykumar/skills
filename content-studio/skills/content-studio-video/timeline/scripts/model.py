@@ -250,6 +250,11 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                     raise ValueError(f"{op_id}.{field} must be between -0.5 and 0.5")
         if kind == "upscale-lanczos" and item.get("scale") not in (2, 4):
             raise ValueError("Lanczos upscale scale must be 2 or 4")
+        if kind == "cross-blur":
+            strength = _number(item.get("blur_sigma", 10), f"{op_id}.blur_sigma",
+                               minimum=1)
+            if strength > 80:
+                raise ValueError(f"{op_id}.blur_sigma must be <= 80")
         if kind == "title":
             font = asset_path(root, item.get("font_source"))
             if sha256_file(font) != item.get("font_sha256"):

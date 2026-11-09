@@ -286,9 +286,10 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             # Ease the blur in and out around the source cut; start/end remain
             # editable timeline times and the picture/audio duration is fixed.
             middle = (start + end) / 2
+            strength = float(item.get("blur_sigma", 10))
             blur = f"gblur@blur{index}"
-            commands = (f"{_fmt(start)}-{_fmt(middle)} [expr] {blur} sigma 10*TI\\;"
-                        f"{_fmt(middle)}-{_fmt(end)} [expr] {blur} sigma 10*(1-TI)\\;"
+            commands = (f"{_fmt(start)}-{_fmt(middle)} [expr] {blur} sigma {strength:g}*TI\\;"
+                        f"{_fmt(middle)}-{_fmt(end)} [expr] {blur} sigma {strength:g}*(1-TI)\\;"
                         f"{_fmt(end)} {blur} sigma 0")
             graph.append(f"[{current_v}]sendcmd=c='{commands}',"
                          f"{blur}=sigma=0:enable='between(t,{_fmt(start)},{_fmt(end)})'"
