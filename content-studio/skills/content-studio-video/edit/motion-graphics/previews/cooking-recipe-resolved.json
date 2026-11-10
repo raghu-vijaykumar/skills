@@ -1,0 +1,32 @@
+{
+  "id": "cooking-recipe",
+  "category": "cooking",
+  "style": "recipe",
+  "palette": {
+    "primary": "#154F50",
+    "accent": "#EF775E",
+    "background": "#FFF2D9"
+  },
+  "typography": "rounded-sans",
+  "motion": "stagger-pop",
+  "types": [
+    "title",
+    "ingredient_list",
+    "ingredient",
+    "step",
+    "timer",
+    "temperature",
+    "tip",
+    "cta"
+  ],
+  "rules": {
+    "max_overlays_per_minute": 10,
+    "avoid": [
+      "hands",
+      "food",
+      "stove",
+      "faces"
+    ],
+    "safe_margin_percent": 6
+  }
+}

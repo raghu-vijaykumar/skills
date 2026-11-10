@@ -1,6 +1,10 @@
 # Transparent CTA example
 
-Illustrative compatibility command; no 4K ProRes asset is committed. Select `classic-bar`, `minimal-pills`, or `bold-stack` in the [stock library](../../../stock-library/README.md). The renderer needs Pillow,
+The compatibility command delegates to the stock library generator. Its
+[classic-bar animation](../../../stock-library/previews/classic-bar.gif) is a
+review GIF composited from the actual approved transparent UHD asset. No full
+ProRes asset is committed. Select `classic-bar`, `minimal-pills`, or `bold-stack`
+in the [stock library](../../../stock-library/README.md). The renderer needs Pillow,
 FFmpeg, and FFprobe.
 
 ```powershell
