@@ -1,15 +1,11 @@
 # Restoration command examples
 
-Illustrative commands. `previews/denoise-before-after.png` is a real 1:1 crop from a
-synthetic noisy source and the `denoise-light` output; the other rows have no committed
-render.
+The README contains real, method-specific picture examples for the seven
+visual correction methods. `refine` is a settings-selection and timeline
+analysis route, so its evidence is the command and report contract below.
 
 ```powershell
-python content-studio/skills/content-studio-video/edit/restoration/scripts/deflicker.py --input <clip> --output <out.mp4>
-python content-studio/skills/content-studio-video/edit/restoration/scripts/lens.py --input <clip> --output <out.mp4>
-python content-studio/skills/content-studio-video/edit/restoration/scripts/sharpen_light.py --input <clip> --output <out.mp4>
-python content-studio/skills/content-studio-video/edit/restoration/scripts/sharpen_medium.py --input <clip> --output <out.mp4>
-python content-studio/skills/content-studio-video/edit/restoration/scripts/refine.py --input <clip> --output <out.mp4>
+python content-studio/skills/content-studio-video/edit/restoration/scripts/refine.py --timeline <edit-timeline.json> --output-timeline <refined-timeline.json> --report <refine.json>
 ```
 
 `deblur` is marked unsupported and has no script. Conservative sharpening cannot
