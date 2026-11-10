@@ -1,3 +1,3 @@
 id,start,end,score,remove,notes
-span-0001,2.10,2.85,0.18,yes,"Illustrative candidate; human marked remove=yes"
-span-0002,5.40,6.05,0.31,no,"Illustrative borderline span retained"
+span-0001,2.10,2.85,0.18,,"Illustrative candidate; editor decision pending"
+span-0002,5.40,6.05,0.31,,"Illustrative borderline span; editor decision pending"
