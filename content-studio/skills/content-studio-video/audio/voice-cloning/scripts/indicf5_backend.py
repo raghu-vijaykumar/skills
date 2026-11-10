@@ -9,6 +9,7 @@ this module loads ``model.safetensors`` directly and verifies the tensor count.
 from __future__ import annotations
 
 import sys
+import os
 from pathlib import Path
 
 DEFAULT_NFE_STEP = 32
@@ -64,8 +65,8 @@ def load_backend(
     weights_path, vocab_path = validate_model_dir(model_dir)
     _patch_torchaudio()
 
-    from f5_tts.infer.utils_infer import load_model, load_vocoder
-    from f5_tts.model import DiT
+    from f5_tts.infer import utils_infer
+    from f5_tts.model import CFM, DiT
     from safetensors.torch import load_file
     import torch
 
@@ -73,13 +74,24 @@ def load_backend(
         print("CUDA is unavailable; falling back to CPU", flush=True)
         device = "cpu"
 
-    model = load_model(
-        DiT,
-        MODEL_CONFIG,
-        mel_spec_type="vocos",
-        vocab_file=str(vocab_path),
-        device=device,
-    )
+    # Recent F5-TTS requires a checkpoint path in load_model(), which would
+    # process IndicF5's EMA keys incorrectly before our verified loader runs.
+    # Construct the same CFM graph directly, then load only the released EMA.
+    vocab_map, vocab_size = utils_infer.get_tokenizer(str(vocab_path), "custom")
+    model = CFM(
+        transformer=DiT(**MODEL_CONFIG, text_num_embeds=vocab_size,
+                        mel_dim=utils_infer.n_mel_channels),
+        mel_spec_kwargs={
+            "n_fft": utils_infer.n_fft,
+            "hop_length": utils_infer.hop_length,
+            "win_length": utils_infer.win_length,
+            "n_mel_channels": utils_infer.n_mel_channels,
+            "target_sample_rate": utils_infer.target_sample_rate,
+            "mel_spec_type": "vocos",
+        },
+        odeint_kwargs={"method": utils_infer.ode_method},
+        vocab_char_map=vocab_map,
+    ).to(device)
     state = load_file(str(weights_path), device="cpu")
     tensors = {
         key[len(EMA_PREFIX) :]: value
@@ -96,8 +108,10 @@ def load_backend(
             "Use --allow-partial-weights only for a reviewed fine-tune."
         )
     model.eval()
-    vocoder = load_vocoder(
-        vocoder_name="vocos", is_local=False, device=device
+    local_vocoder = os.environ.get("CONTENT_STUDIO_VOCODER_DIR")
+    vocoder = utils_infer.load_vocoder(
+        vocoder_name="vocos", is_local=bool(local_vocoder),
+        local_path=local_vocoder or "", device=device,
     )
     return model, vocoder
 

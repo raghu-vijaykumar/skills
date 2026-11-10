@@ -6,7 +6,7 @@ description: Enroll a consented voice profile and synthesize cloned Kannada/Engl
 
 Before changing production material, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
-This skill enrolls a consented voice profile and synthesizes cloned narration locally with IndicF5. It does not write scripts; use `content-studio-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, reference audio, and rendered media stay outside Git. Settings, loader caveats, and quality gates are in [references/indicf5.md](references/indicf5.md).
+This skill enrolls a consented voice profile and synthesizes cloned narration locally with IndicF5. It does not write scripts; use `content-studio-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. The repo already tracks consented bundled profiles; a short synthetic gallery sample is also tracked. Settings, loader caveats, and quality gates are in [references/indicf5.md](references/indicf5.md).
 
 ## Enroll (after the user supplies samples)
 

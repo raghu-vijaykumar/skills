@@ -1,7 +1,9 @@
 # IndicF5 narration backend
 
-Validated local settings for cloned Kannada narration. Weights, virtual
-environments, reference audio, and rendered media stay outside Git.
+Local settings for IndicF5 narration. Weights, virtual environments, workspace
+reference audio, and production renders stay outside Git. The repository has
+previously committed consented bundled profiles; the synthetic gallery audio
+in the capability matrix is a failed text-gate example.
 
 ## Model choice
 
@@ -34,6 +36,10 @@ The published `model.py` leaves the checkpoint loading lines commented out, so
 the documented `AutoModel` path can produce random or generic weights. Load the
 released weights directly:
 
+- Construct the F5 CFM/DiT graph directly. Current F5-TTS `load_model()`
+  requires a checkpoint argument and would load IndicF5's EMA-prefixed weights
+  through the wrong path before the verified loader runs.
+
 - Read `model.safetensors` and keep keys with the `ema_model._orig_mod.` prefix
   after stripping that prefix.
 - Drop the `mel_spec.mel_stft.*` buffers that the CFM model does not own.
@@ -42,6 +48,8 @@ released weights directly:
 - TorchAudio 2.11 routes `load()` through TorchCodec. If TorchCodec is absent,
   decode reference audio with SoundFile and return a tensor instead of
   installing another codec stack.
+- Set `CONTENT_STUDIO_VOCODER_DIR` to a local Vocos checkpoint directory for
+  offline inference; otherwise the F5-TTS vocoder loader resolves its default.
 
 ## Skill commands
 
