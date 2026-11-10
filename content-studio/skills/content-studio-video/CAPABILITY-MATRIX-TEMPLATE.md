@@ -9,7 +9,7 @@ the checker and readers see the same contract for every video capability.
 2. The shared **Status** and **Delivery timeline** legend.
 3. `## Capability matrix` with exactly the columns below.
 4. Any named presets, variants, or profiles, checked against their registry.
-5. `## Evidence note` stating that previews are synthetic or labelled examples.
+5. `## Evidence note` naming the source of each example and its review status.
 
 ## Status and timeline legend
 
@@ -51,11 +51,18 @@ Rules:
 
 ## Evidence rules
 
-- GIFs for motion; before/after stills for picture methods; short MP3s only when
-  audio is safe and meaningful; reports or command output for planning/workflow.
-- Generate from synthetic cards, tones, or text-to-speech. Never commit private
-  footage, private voice, credentials, licensed music, or delivery masters.
-- Label the source and the rebuild command in the evidence file or README.
-- Keep previews small and illustrative; they are not quality claims.
+- Use an actual method output for each meaningful visual or audio capability:
+  GIFs for motion, before/after stills for picture, and short MP3s for audio.
+  A single example can cover two methods only if it visibly or audibly
+  demonstrates both. Use reports or command output for planning/workflow.
+- Synthetic cards, tones, and text-to-speech are suitable inputs. A bounded
+  excerpt from an already published video may be used when its source is named.
+  Never add private draft footage, new private voice recordings, credentials,
+  licensed music, model weights, or full delivery masters to a gallery.
+- Label the source, exact script/arguments, and rebuild route in the evidence
+  file or README. Distinguish specialist output from delivery-timeline output.
+- Mark failed, no-op, unsupported, and review-only examples explicitly; a
+  successful encode does not prove the visual or audio result passed review.
+- Keep previews small and illustrative; they are not final quality claims.
 
 Run `npm run check:capabilities` after editing a matrix.

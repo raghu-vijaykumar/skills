@@ -7,14 +7,14 @@ validated by `npm run check:capabilities`.
 
 - **Template:** [CAPABILITY-MATRIX-TEMPLATE.md](CAPABILITY-MATRIX-TEMPLATE.md)
 - **Checker:** [check-capability-matrices.mjs](../../scripts/check-capability-matrices.mjs)
-- **Current coverage:** 41 matrices, 109 declared methods, and 6 explicitly
+- **Current coverage:** 42 matrices, 111 declared methods, and 6 explicitly
   unsupported methods.
 
 `Supported` means the manifest provides a runnable script. `Unsupported` means the
 manifest declares no script and the matrix makes no capability claim.
 `Yes` in the delivery-timeline column means the single-render timeline consumes an
 equivalent operation; `Specialist only` means a bounded preview carries the
-approved result forward. Previews are synthetic and illustrative, not masters.
+approved result forward. Gallery examples are illustrative, not masters.
 
 ## Animation
 
@@ -104,8 +104,10 @@ approved result forward. Previews are synthetic and illustrative, not masters.
 
 ## Evidence policy
 
-All committed previews are generated from synthetic cards, tones, or
-text-to-speech, or are labelled command/output examples. No private footage,
-private voice, credentials, licensed music, or delivery masters are included.
-Rebuild commands appear in the linked evidence files where a renderer produced
-the preview.
+Gallery inputs include synthetic cards, tones, text-to-speech, and bounded
+excerpts from already published videos. Each evidence page names the source
+and rebuild route. Examples are method-specific where a visual or audio
+change is meaningful. Failed and review-only samples are labelled. This
+gallery does not add private draft footage, new private voice recordings,
+credentials, licensed music, model weights, or delivery masters. The repository
+already tracks separately consented bundled voice profiles.
