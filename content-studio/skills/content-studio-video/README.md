@@ -7,6 +7,7 @@ validated by `npm run check:capabilities`.
 
 - **Template:** [CAPABILITY-MATRIX-TEMPLATE.md](CAPABILITY-MATRIX-TEMPLATE.md)
 - **Checker:** [check-capability-matrices.mjs](../../scripts/check-capability-matrices.mjs)
+- **Evidence review:** [CAPABILITY-EVIDENCE-AUDIT.md](CAPABILITY-EVIDENCE-AUDIT.md)
 - **Current coverage:** 42 matrices, 111 declared methods, and 6 explicitly
   unsupported methods.
 
