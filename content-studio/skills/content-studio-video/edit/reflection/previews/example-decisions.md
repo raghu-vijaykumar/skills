@@ -8,15 +8,22 @@ Dubai Fountain video near 1:35 was blended at 22% opacity. The detector returned
 hand, a visible false positive. This demonstrates why the mask cannot be treated
 as a separated reflection layer.
 
-The [bounded preview](bounded-preview.jpg) is a frame from `preview.py`'s
-before/after comparison for `scene-001`. It returned `review_required`; the
-reflection remains visible. The [AI review frame](ai-review.jpg) is from `ai.py`
+The [bounded preview GIF](bounded-preview.gif) follows `preview.py`'s
+before/after candidate for `scene-001` across the same one-second window. It
+returned `review_required`; the reflection remains visible. The
+[AI review GIF](ai-review.gif) uses the `ai.py` candidate
 using the optional DSRNet checkpoint at `--strength 0.5`. Its delivered-output
 report returned `REVIEW`: relative candidate reduction 8.9%, mean-luma change
 0.027, sharpness ratio 0.898, and all safety checks passed. The visual change is
 subtle. The checkpoint SHA-256 was
 `337e23a63fd93fc154330a6bbe21894ebd030fe9b8fa68ea7a6c8173e90f83aa`;
 the checkpoint is not committed.
+
+The labelled GIFs are rebuilt from the source and bounded candidate MP4s with:
+
+```powershell
+python content-studio/skills/content-studio-video/edit/reflection/scripts/build_gallery.py --source <synthetic-reflection.mp4> --preview <preview-candidate.mp4> --ai <dsrnet-review.mp4>
+```
 
 The older [negative detector sheet](contact-sheet.jpg) is also an actual output
 from a synthetic clip. Both scenes returned `SKIP` because no candidate rose

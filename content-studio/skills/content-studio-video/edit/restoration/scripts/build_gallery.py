@@ -7,16 +7,15 @@ in temporary clips, then the owning specialist scripts render the corrections.
 from __future__ import annotations
 
 import argparse
-import io
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
-
-
 SKILL = Path(__file__).resolve().parents[1]
 SCRIPT = SKILL / "scripts"
+sys.path.insert(0, str(SKILL.parent.parent / "shared"))
+from preview_gif import write_comparison  # noqa: E402
 
 
 def run(command: list[str]) -> bytes:
@@ -43,40 +42,6 @@ def encode(source: Path, target: Path, filters: str, start: float | None = None)
 def render(method: str, source: Path, target: Path, *options: str) -> None:
     run(["python", str(SCRIPT / f"{method.replace('-', '_')}.py"),
          "--input", str(source), "--output", str(target), *options])
-
-
-def frame(source: Path, at: float = 1.2) -> Image.Image:
-    data = run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
-                "-ss", str(at), "-i", str(source), "-frames:v", "1",
-                "-f", "image2pipe", "-vcodec", "png", "-"])
-    return Image.open(io.BytesIO(data)).convert("RGB")
-
-
-def pair(before: Path, after: Path, output: Path, crop: bool = True) -> None:
-    images = [frame(before), frame(after)]
-    if crop:
-        images = [image.crop((200, 70, 520, 250)) for image in images]
-    else:
-        images = [image.resize((320, 180), Image.Resampling.LANCZOS) for image in images]
-    result = Image.new("RGB", (640, 205), "#142838")
-    draw = ImageDraw.Draw(result)
-    for index, image in enumerate(images):
-        result.paste(image, (index * 320, 0))
-        draw.text((index * 320 + 8, 184), "BEFORE" if index == 0 else "AFTER",
-                  fill="white", font=ImageFont.load_default())
-    result.save(output, optimize=True)
-
-
-def motion_pair(before: Path, after: Path, output: Path) -> None:
-    # Only temporal defects need a GIF; both panels use the same source times.
-    graph = ("[0:v]scale=320:180:flags=lanczos[a];"
-             "[1:v]scale=320:180:flags=lanczos[b];"
-             "[a][b]hstack=inputs=2,scale=480:135:flags=lanczos,fps=8,split[p][g];"
-             "[p]palettegen=max_colors=72:stats_mode=diff[pal];"
-             "[g][pal]paletteuse=dither=bayer:bayer_scale=3")
-    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
-         "-i", str(before), "-i", str(after), "-filter_complex", graph,
-         "-t", "2.5", "-loop", "0", str(output)])
 
 
 def build(source: Path, at: float, output: Path) -> None:
@@ -107,11 +72,12 @@ def build(source: Path, at: float, output: Path) -> None:
             before = work / f"{input_name}.mp4"
             after = work / f"{method}.mp4"
             render(method, before, after, *options)
-            target = output / f"{method}{'.gif' if method == 'deflicker' else '.png'}"
-            if method == "deflicker":
-                motion_pair(before, after, target)
-            else:
-                pair(before, after, target, crop=crop)
+            target = output / f"{method}.gif"
+            # Moving panels expose temporal damage that a still cannot show.
+            transforms = ([lambda image: image.crop((200, 70, 520, 250))] * 2
+                          if crop else None)
+            write_comparison([before, after], ["BEFORE", f"AFTER: {method}"],
+                             target, duration=2.5, fps=8, transforms=transforms)
             print(f"{method}: {target.stat().st_size // 1024} KiB", flush=True)
 
 

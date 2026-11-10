@@ -13,22 +13,23 @@ output at native size before selecting a method. The original is untouched.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `compare` | Supported | Finished edit ranges → comparison preview + diagnosis | Specialist only | [Input, Lanczos, PyTorch](previews/compare-three-panel.jpg) | Left to right: input, Lanczos, AI. Diagnosis only; never replaces the source. |
-| `lanczos` | Supported | Finished SDR edit → upscaled clip | Yes | [Lanczos before/after](previews/lanczos-before-after.png) | Resolution scaling only; cannot invent detail or fix motion blur. |
-| `real-esrgan` | Supported | Finished edit + local weights → upscaled clip | Specialist only | [Vulkan Real-ESRGAN before/after](previews/real-esrgan-before-after.png) | Native 4× model assembled before 2× resize; this bounded result still needs delivery review. |
-| `pytorch` | Supported | Finished edit + local weights → upscaled clip | Specialist only | [PyTorch Real-ESRGAN before/after](previews/pytorch-before-after.png) | Optional local checkpoint; this bounded result still needs delivery review. |
+| `compare` | Supported | Finished edit ranges → comparison preview + diagnosis | Specialist only | [Animated input, Lanczos, PyTorch](previews/compare-three-panel.gif) | Left to right: input, Lanczos, AI. Diagnosis only; never replaces the source. |
+| `lanczos` | Supported | Finished SDR edit → upscaled clip | Yes | [Lanczos before/after GIF](previews/lanczos-before-after.gif) | Resolution scaling only; cannot invent detail or fix motion blur. |
+| `real-esrgan` | Supported | Finished edit + local weights → upscaled clip | Specialist only | [Vulkan Real-ESRGAN before/after GIF](previews/real-esrgan-before-after.gif) | Native 4× model assembled before 2× resize; this bounded result still needs delivery review. |
+| `pytorch` | Supported | Finished edit + local weights → upscaled clip | Specialist only | [PyTorch Real-ESRGAN before/after GIF](previews/pytorch-before-after.gif) | Optional local checkpoint; this bounded result still needs delivery review. |
 
-## Same-frame examples
+## Time-aligned examples
 
-![Input, Lanczos, and PyTorch candidate](previews/compare-three-panel.jpg)
+![Input, Lanczos, and PyTorch candidate](previews/compare-three-panel.gif)
 
-The three-panel image is the actual `compare.py` preview. Each two-panel image
-shows the same frame, with the enlarged input on the left. The AI result reports
+The three-panel GIF uses the actual `compare.py` Lanczos and AI preview clips.
+Each two-panel GIF follows the same 1.2-second source window, with the input
+enlarged using nearest-neighbour pixels on the left. The AI result reports
 are `review`, because no diagnosed pilot was approved for a delivery edit.
 [Commands and model provenance](previews/example-ai-upscale.md) record how the
 bounded samples were produced.
 
 ## Evidence note
 
-These are derived stills from an already published channel video, not a private
+These are bounded GIFs from an already published channel video, not a private
 draft or full master. The source footage and model weights are not committed.

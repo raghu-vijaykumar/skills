@@ -12,13 +12,13 @@ method visible; these previews are not quality claims for the original video.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `denoise-light` | Supported | Noisy clip → denoised clip | Yes | ![Light denoise before and after](previews/denoise-light.png) | Light spatial/temporal filter; not detail reconstruction. |
-| `denoise-medium` | Supported | Noisy clip → denoised clip | Yes | ![Medium denoise before and after](previews/denoise-medium.png) | Stronger smoothing; check texture loss. |
-| `denoise-nlmeans` | Supported | Noisy clip → denoised clip | Specialist only | ![NLMeans denoise before and after](previews/denoise-nlmeans.png) | Slower NLMeans estimate; timeline has light/medium adapters only. |
+| `denoise-light` | Supported | Noisy clip → denoised clip | Yes | ![Light denoise before and after](previews/denoise-light.gif) | Light spatial/temporal filter; not detail reconstruction. |
+| `denoise-medium` | Supported | Noisy clip → denoised clip | Yes | ![Medium denoise before and after](previews/denoise-medium.gif) | Stronger smoothing; check texture loss. |
+| `denoise-nlmeans` | Supported | Noisy clip → denoised clip | Specialist only | ![NLMeans denoise before and after](previews/denoise-nlmeans.gif) | Slower NLMeans estimate; timeline has light/medium adapters only. |
 | `deflicker` | Supported | Flickering clip → deflickered clip | Yes | ![Flicker before on left and after on right](previews/deflicker.gif) | Temporal flicker only; the sample's whole-frame luma variation falls from 2.93 to 1.49 standard deviation in the GIF. |
-| `lens` | Supported | Clipped video + lens parameters → lens-corrected clip | Yes | ![Lens geometry before and after](previews/lens.png) | Illustrative manual geometry adjustment; black corners show crop risk, not a calibrated camera profile. |
-| `sharpen-light` | Supported | Clip → sharpened clip | Yes | ![Light sharpening before and after](previews/sharpen-light.png) | Conservative sharpening; cannot recover missed focus. |
-| `sharpen-medium` | Supported | Clip → sharpened clip | Yes | ![Medium sharpening before and after](previews/sharpen-medium.png) | Stronger halo/noise risk; inspect at delivery size. |
+| `lens` | Supported | Clipped video + lens parameters → lens-corrected clip | Yes | ![Lens geometry before and after](previews/lens.gif) | Illustrative manual geometry adjustment; black corners show crop risk, not a calibrated camera profile. |
+| `sharpen-light` | Supported | Clip → sharpened clip | Yes | ![Light sharpening before and after](previews/sharpen-light.gif) | Conservative sharpening; cannot recover missed focus. |
+| `sharpen-medium` | Supported | Clip → sharpened clip | Yes | ![Medium sharpening before and after](previews/sharpen-medium.gif) | Stronger halo/noise risk; inspect at delivery size. |
 | `refine` | Supported | Clip + bounded settings search → selected polish settings | Specialist only | [Command examples](previews/example-commands.md) | Iterative per-clip selection; not a single timeline operation. |
 | `deblur` | Unsupported | Blurred clip → not available | No | [Command examples](previews/example-commands.md) | No deblur model; conservative sharpening is not deblurring. |
 
@@ -27,7 +27,7 @@ method visible; these previews are not quality claims for the original video.
 The visual samples use a 2.5-second excerpt at 245 seconds from the [published
 Tomato Bath video](https://www.youtube.com/watch?v=Sfjk9lfdbP0). The video
 remains outside Git; the gallery adds silent audio only because the specialist
-polish route requires an audio stream. Each still is a before/after pair from
+polish route requires an audio stream. Each GIF is a time-aligned before/after pair from
 the same source time. Rebuild with:
 
 ```powershell
@@ -35,5 +35,5 @@ python content-studio/skills/content-studio-video/edit/restoration/scripts/build
 ```
 
 The rendered examples show the specialist routes. The `Yes` timeline labels
-come from separate adapter support; these stills do not prove that an approved
+come from separate adapter support; these GIFs do not prove that an approved
 delivery timeline rendered the same pixels.

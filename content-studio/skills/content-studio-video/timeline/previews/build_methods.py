@@ -5,13 +5,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
-
 ROOT = Path(__file__).resolve().parents[5]
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL / "scripts"))
+sys.path.insert(0, str(SKILL.parent / "shared"))
 import compiler  # noqa: E402
 import model  # noqa: E402
+from preview_gif import write_comparison  # noqa: E402
 
 WORK = ROOT / "tmp/capability-gallery/timeline"
 OUT = SKILL / "previews/methods"
@@ -69,37 +69,9 @@ def render(timeline, filename):
     return target
 
 
-def frame(path, target):
-    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-         "-ss", "0.8", "-i", str(path), "-frames:v", "1", str(target)])
-
-
-def comparison(before, after, name):
-    left = WORK / f"{name}-before.png"
-    right = WORK / f"{name}-after.png"
-    frame(before, left)
-    frame(after, right)
-    canvas = Image.new("RGB", (640, 206), "#11161d")
-    canvas.paste(Image.open(left).convert("RGB"), (0, 26))
-    canvas.paste(Image.open(right).convert("RGB"), (320, 26))
-    draw = ImageDraw.Draw(canvas)
-    draw.text((8, 7), "SOURCE", fill="white")
-    draw.text((328, 7), f"TIMELINE: {name}", fill="white")
-    canvas.save(OUT / f"{name}.jpg", quality=87)
-
-
 def audio_mp3(video, target):
     run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i",
          str(video), "-vn", "-c:a", "libmp3lame", "-q:a", "5", str(target)])
-
-
-def temporal_comparison(before, after, target):
-    # A still cannot show temporal luminance smoothing, so place the two
-    # 12 fps preview outputs side by side in one small loop.
-    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-         "-i", str(before), "-i", str(after), "-filter_complex",
-         "[0:v][1:v]hstack=inputs=2,fps=8,split[a][b];"
-         "[b]palettegen[p];[a][p]paletteuse", "-an", str(target)])
 
 
 def main():
@@ -132,11 +104,9 @@ def main():
                                     "start": 0, "end": 2,
                                     "review_status": "pending_review", **args}]
         output = render(timeline, f"{method}.mp4")
-        if method == "deflicker":
-            temporal_comparison(baseline[source_key], output,
-                                OUT / "deflicker.gif")
-        else:
-            comparison(baseline[source_key], output, method)
+        write_comparison([baseline[source_key], output],
+                         ["BEFORE", f"AFTER: {method}"], OUT / f"{method}.gif",
+                         duration=2, fps=8)
         print(method, "picture", flush=True)
 
     font = WORK / "font.ttf"
@@ -166,7 +136,9 @@ Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,TIMELINE GRAPHIC
                                     "review_status": "pending_review", **extra}]
         output = render(timeline, f"{method}.mp4")
         baseline_key = "clean-title" if method == "title" else "normal"
-        comparison(baseline[baseline_key], output, method)
+        write_comparison([baseline[baseline_key], output],
+                         ["BEFORE", f"AFTER: {method}"], OUT / f"{method}.gif",
+                         duration=2, fps=8)
         print(method, "picture", flush=True)
 
     audio_sources = {

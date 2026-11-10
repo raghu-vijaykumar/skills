@@ -1,6 +1,6 @@
 # AI upscale gallery provenance
 
-All four linked preview images are actual outputs. A 1.2-second, 10 fps portion
+All four linked GIFs show moving, actual method outputs. A 1.2-second, 10 fps portion
 of the published Out of Office Mode Tomato Bath video near 4:05 was first
 downsampled to 320 × 180 in a temporary MP4. The three upscalers then produced
 640 × 360 video tracks from that same input. All outputs were checked at 12
@@ -24,6 +24,8 @@ python content-studio/skills/content-studio-video/edit/upscale/scripts/compare.p
 python content-studio/skills/content-studio-video/edit/upscale/scripts/build_gallery.py `
   --source <temporary-source.mp4> --lanczos <temporary-lanczos.mp4> `
   --ncnn <temporary-vulkan.mp4> --pytorch <temporary-pytorch.mp4> `
+  --compare-lanczos <compare-preview-lanczos.mp4> `
+  --compare-ai <compare-preview-ai.mp4> `
   --out content-studio/skills/content-studio-video/edit/upscale/previews
 ```
 

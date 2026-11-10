@@ -1,6 +1,7 @@
 # Shot-match example and accepted command
 
-The [three-panel image](shot-match-before-after.jpg) is an actual method output.
+The [three-panel GIF](shot-match-before-after.gif) shows actual method output
+across the same 1.5-second window.
 A 1.5-second, 640 × 360, 8 fps excerpt from the published Out of Office Mode
 Tomato Bath video near 4:05 was used as reference. A temporary copy was shifted
 with FFmpeg `colorchannelmixer=rr=1.15:bb=0.85` and placed in a one-clip input
@@ -14,7 +15,7 @@ python content-studio/skills/content-studio-video/edit/color/scripts/shot_match.
 python content-studio/skills/content-studio-video/edit/color/scripts/build_gallery.py `
   --reference <reference-clip.mp4> --before <shifted-input.mp4> `
   --after <matched-output.mp4> `
-  --out content-studio/skills/content-studio-video/edit/color/previews/shot-match-before-after.jpg
+  --out content-studio/skills/content-studio-video/edit/color/previews/shot-match-before-after.gif
 ```
 
 The prior example's `--input/--output` flags were not accepted by this entrypoint;

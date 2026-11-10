@@ -15,10 +15,10 @@ review aids, not removal claims.
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `detect` | Supported | Video or folder → analysis report + evidence JPGs + masks + manifest | No | [Detected reflection masks](previews/detected-reflection.jpg) | Candidate masks include false positives on the hand; this scene was `UNSUPPORTED`. |
-| `fix` | Supported | Approved manifest → corrected clip for FIX scenes | No | [Bounded correction candidate](previews/bounded-preview.jpg) | This is a preview, not an approved `fix.py` render. Only minor glare/veil scenes with approval may be fixed. |
-| `preview` | Supported | Manifest + REVIEW or UNSUPPORTED scene → bounded comparison MP4 | No | [Bounded before/after frame](previews/bounded-preview.jpg) | A comparison of a possible correction, always review_required; the reflection remains visible. |
+| `fix` | Supported | Approved manifest → corrected clip for FIX scenes | No | [Animated correction candidate](previews/bounded-preview.gif) | This is a preview, not an approved `fix.py` render. Only minor glare/veil scenes with approval may be fixed. |
+| `preview` | Supported | Manifest + REVIEW or UNSUPPORTED scene → bounded comparison MP4 | No | [Bounded before/after GIF](previews/bounded-preview.gif) | A comparison of a possible correction, always review_required; the reflection remains visible. |
 | `benchmark` | Supported | Clip + external backend config → benchmarks.json + benchmark.html | No | [Decision example](previews/example-decisions.md) | Does not install or promote a backend; licence and checkpoint recorded by the operator. |
-| `ai` | Supported | Clip + DSRNet checkpoint → review MP4 + report + keys + compare | No | [DSRNet before/after frame](previews/ai-review.jpg) | At strength 0.5 the report returned `REVIEW`: 8.9% relative candidate reduction, 0.027 mean-luma change; reflection still visible. |
+| `ai` | Supported | Clip + DSRNet checkpoint → review MP4 + report + keys + compare | No | [DSRNet before/after GIF](previews/ai-review.gif) | At strength 0.5 the report returned `REVIEW`: 8.9% relative candidate reduction, 0.027 mean-luma change; reflection still visible. |
 | `generative-removal` | Unsupported | Clip → not available | No | [Decision example](previews/example-decisions.md) | No generative backend bundled; unsupported. |
 
 ## Decisions
@@ -33,7 +33,7 @@ review aids, not removal claims.
 
 ## Evidence note
 
-These examples use bounded derived frames from two already published channel videos
+These examples use bounded video clips from two already published channel videos
 and a synthetic reflection blend. No source or full master is committed. The
 `fix` shows a bounded correction candidate but no approved delivered correction.
 `benchmark` has command/decision documentation only; no licensed external backend

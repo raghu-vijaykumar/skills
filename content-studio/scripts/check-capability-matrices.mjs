@@ -43,6 +43,21 @@ if (targets.length !== expectedMatrixCount)
   throw new Error(`Expected ${expectedMatrixCount} video capability matrices, found ${targets.length}`);
 
 const rowPattern = /^\|\s*`([^`]+)`\s*\|\s*(Supported|Unsupported)\s*\|/;
+// Picture comparisons must expose temporal behavior, even for effects that
+// look spatial at one frame. Static diagnostic masks remain separate evidence.
+const requiredGifRows = new Map([
+  ['edit/color', ['preset', 'shot-match']],
+  ['edit/reflection', ['fix', 'preview', 'ai']],
+  ['edit/reframe', ['subjects', 'saliency', 'center']],
+  ['edit/restoration', ['denoise-light', 'denoise-medium', 'denoise-nlmeans',
+    'deflicker', 'lens', 'sharpen-light', 'sharpen-medium']],
+  ['edit/upscale', ['compare', 'lanczos', 'real-esrgan', 'pytorch']],
+  ['source/blur-review', ['approved-cuts']],
+  ['source/stabilize', ['vidstab']],
+  ['timeline', ['crop', 'lens-correction', 'denoise-light', 'denoise-medium',
+    'deflicker', 'upscale-lanczos', 'color-eq', 'sharpen-light',
+    'sharpen-medium', 'title', 'motion-graphics-ass']],
+].map(([folder, ids]) => [folder, new Set(ids)]));
 let methodCount = 0;
 const unsupported = new Set();
 
@@ -60,6 +75,12 @@ function checkEvidence(rel, id, row) {
     throw new Error(`${rel}: ${id} matrix row must have 6 columns, found ${cells.length}`);
   const links = [...cells[4].matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((match) => match[1]);
   if (!links.length) throw new Error(`${rel}: ${id} has no evidence link`);
+  const videoArea = /^(?:edit|source|timeline)(?:\/|$)/.test(rel.replaceAll('\\', '/'));
+  const saysBeforeAfter = /before\s*(?:\/|and|-)\s*after/i.test(cells[4]);
+  if ((requiredGifRows.get(rel.replaceAll('\\', '/'))?.has(id) ||
+       (videoArea && saysBeforeAfter)) &&
+      !links.some((link) => /\.gif(?:#.*)?$/i.test(link)))
+    throw new Error(`${rel}: ${id} must link a moving before/after GIF`);
   for (const link of links) {
     const ref = link.split('#')[0];
     if (!ref) continue;

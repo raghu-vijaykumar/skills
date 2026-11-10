@@ -217,8 +217,8 @@ the ncnn/Vulkan build is MIT; keep their notices with any redistribution.
   upscale-review.html         table with links to previews
 <clip>/upscale-work/
   preview/preview.json        metrics, decision, reasons
-  preview/preview.html        three-panel image and both videos
-  preview/three-panel.jpg
+  preview/preview.html        three-panel GIF and both videos
+  preview/three-panel.gif
   preview/preview-lanczos.mp4
   preview/preview-ai.mp4
   verify/lanczos-reference.mp4  delivery-verification reference

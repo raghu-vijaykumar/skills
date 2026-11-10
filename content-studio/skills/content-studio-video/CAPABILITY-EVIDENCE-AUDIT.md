@@ -15,18 +15,24 @@ used it.
 | Area | Evidence | What it establishes |
 | --- | --- | --- |
 | Transitions | [29 named GIFs](edit/transitions/README.md) | The specialist catalogue has a distinct motion preview per named effect. |
-| Timeline picture and audio | [15 method examples](timeline/previews/methods.md) | Actual bounded `model.validate` + `compiler.preview` output, with separate source/after media. |
+| Timeline picture and audio | [15 method examples](timeline/previews/methods.md) | Actual bounded `model.validate` + `compiler.preview` output; every picture comparison is a time-aligned GIF. |
 | Restoration and upscale | [Restoration](edit/restoration/README.md), [upscale](edit/upscale/README.md) | Bounded specialist examples, including separate Lanczos and AI routes. |
 | Color, reframe, and reflection | [Color](edit/color/README.md), [reframe](edit/reframe/README.md), [reflection](edit/reflection/README.md) | Actual method outputs with review limits; the saliency and reflection examples expose failure cases. |
 | Clip editing and motion graphics | [Clip editing](edit/clip-edit/README.md), [motion graphics](edit/motion-graphics/README.md) | Distinct cut/join/trim and timed overlay examples. |
 | Audio | [Source cleanup](audio/source-cleanup/README.md), [voice cloning](audio/voice-cloning/README.md) | Before/after cleanup samples; an actual IndicF5 sample explicitly failed its text gate. |
-| Blur review | [Unapproved candidate](source/blur-review/README.md) | Actual scanner result and frame comparison, with no cut or simulated human approval. |
+| Blur review | [Unapproved candidate](source/blur-review/README.md) | Actual scanner result and moving clear/blur comparison, with no cut or simulated human approval. |
 | Engineering 3D | [Blender GIF](animation/engineering-3d/README.md) | Actual Blender 4.5.15 render of synthetic authored components and camera events. |
 
 All committed visual/audio previews are bounded. Published-source excerpts are
 attributed in their evidence pages; synthetic inputs and deliberate defects
 are labelled. A specialist preview is not proof of single-export timeline
 equivalence or of an approved delivery master.
+
+The picture-edit catalogue uses moving before/after GIFs for timeline filters,
+restoration, color, upscale, reframe, reflection candidates, and blur review.
+Static JPGs remain only for diagnostic masks or contact sheets. The capability
+checker requires direct GIF links for those picture comparison rows; the GIFs
+do not replace audio listening or exact-master review.
 
 ## Remaining evidence work
 

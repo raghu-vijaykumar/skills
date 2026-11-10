@@ -28,6 +28,11 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+VIDEO_SKILL_ROOT = next(parent for parent in Path(__file__).resolve().parents
+                        if parent.name == "content-studio-video")
+sys.path.insert(0, str(VIDEO_SKILL_ROOT / "shared"))
+from preview_gif import write_comparison  # noqa: E402
+
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".m4v", ".webm", ".avi"}
 SCHEMA_VERSION = 2
 ANALYSIS_VERSION = "1"
@@ -530,24 +535,15 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
             "device": device, "peak_vram_mb": peak_vram}
 
 
-def compare_frame(source: Path, output: Path, source_at: float, output_at: float,
-                  target: Path) -> None:
-    def grab(path: Path, at: float) -> np.ndarray:
-        result = subprocess.run(
-            ["ffmpeg", "-nostdin", "-v", "error", "-ss", f"{at:.3f}",
-             "-i", str(path), "-frames:v", "1", "-vf", "scale=960:540",
-             "-f", "image2pipe", "-vcodec", "png", "-"], capture_output=True)
-        if result.returncode or not result.stdout:
-            raise UpscaleError(f"cannot sample {path}")
-        return np.asarray(Image.open(__import__("io").BytesIO(result.stdout)).convert("RGB"))
-
-    before = grab(source, source_at)
-    after = grab(output, output_at)
-    canvas = Image.new("RGB", (before.shape[1] * 2, before.shape[0]), "white")
-    canvas.paste(Image.fromarray(before), (0, 0))
-    canvas.paste(Image.fromarray(after), (before.shape[1], 0))
-    target.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(target, quality=90)
+def compare_gif(source: Path, output: Path, source_at: float, output_at: float,
+                target: Path) -> None:
+    # Center the bounded review near the measured frame and decode small
+    # panels so even a 4K upscale yields a lightweight animated GIF.
+    lead = min(.5, output_at)
+    write_comparison([source, output], ["SOURCE", "UPSCALED"], target,
+                     starts=[source_at - lead, output_at - lead],
+                     duration=min(1.0, output_at * 2), fps=8,
+                     decode_size=(320, 180))
 
 
 def parse_target(value: str | None) -> tuple[int, int] | None:
@@ -744,9 +740,9 @@ def upscale(args) -> dict:
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     try:
         offset = min(2.0, duration / 2)
-        compare_frame(source, output, start + offset, offset,
-                      work / "before-after.jpg")
-    except UpscaleError:
+        compare_gif(source, output, start + offset, offset,
+                    work / "before-after.gif")
+    except (UpscaleError, ValueError):
         pass
     return manifest
 

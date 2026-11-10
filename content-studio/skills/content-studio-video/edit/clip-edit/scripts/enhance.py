@@ -27,6 +27,11 @@ import numpy as np
 from PIL import Image
 import yaml
 
+VIDEO_SKILL_ROOT = next(parent for parent in Path(__file__).resolve().parents
+                        if parent.name == "content-studio-video")
+sys.path.insert(0, str(VIDEO_SKILL_ROOT / "shared"))
+from preview_gif import write_comparison  # noqa: E402
+
 SCHEMA_VERSION = 1
 ANALYSIS_VERSION = "1"
 SCENE_THRESHOLD = 0.35
@@ -348,28 +353,20 @@ def write_contact_sheet(paths: list[Path], target: Path, columns: int = 3) -> No
     canvas.save(target, quality=88)
 
 
-def write_before_after(source: Path, output: Path, manifest: dict, target: Path) -> None:
-    frames = []
+def write_before_after(source: Path, output: Path, manifest: dict, folder: Path) -> None:
+    """Keep each approved scene's motion visible in its comparison evidence."""
     for scene in manifest.get("clips", [{}])[0].get("scenes", []):
         if not approved_scene(scene, True):
             continue
-        midpoint = (float(scene["start_seconds"]) + float(scene["end_seconds"])) / 2
-        before = extract_frame(source, midpoint, width=480)
-        after = extract_frame(output, midpoint, width=480)
-        pair = Image.new("RGB", (before.shape[1] * 2, before.shape[0]), "white")
-        pair.paste(Image.fromarray((before * 255).astype(np.uint8)), (0, 0))
-        pair.paste(Image.fromarray((after * 255).astype(np.uint8)),
-                   (before.shape[1], 0))
-        frames.append(pair)
-    if not frames:
-        return
-    width = frames[0].width
-    height = frames[0].height
-    canvas = Image.new("RGB", (width, height * len(frames)), "white")
-    for index, frame in enumerate(frames):
-        canvas.paste(frame, (0, index * height))
-    target.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(target, quality=88)
+        start = float(scene["start_seconds"])
+        end = float(scene["end_seconds"])
+        length = min(1.5, end - start)
+        if length < 0.25:
+            continue
+        midpoint = start + (end - start - length) / 2
+        write_comparison([source, output], ["SOURCE", "ENHANCED"],
+                         folder / f"{scene['id']}.gif", start=midpoint,
+                         duration=length, fps=8, decode_size=(320, 180))
 
 
 def write_preview_clips(source: Path, output: Path, manifest: dict, folder: Path) -> None:
@@ -700,8 +697,7 @@ def render_manifest(manifest_path: Path, output: Path,
     validation_path.write_text(json.dumps(validation, indent=2) + "\n", encoding="utf-8")
     if validation["status"] in {"passed", "review_required"}:
         write_before_after(source, output, manifest,
-                           manifest_path.parent.parent / "previews" / "before-after" /
-                           f"{source.stem}.jpg")
+                           manifest_path.parent.parent / "previews" / "before-after")
         write_preview_clips(source, output, manifest,
                             manifest_path.parent.parent / "previews" / "before-after")
     manifest["output"] = str(output.resolve())

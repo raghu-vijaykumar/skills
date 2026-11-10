@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import yaml
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import enhance
@@ -77,6 +78,10 @@ class EnhanceTest(unittest.TestCase):
             self.assertGreater(target.stat().st_size, 0)
             previews = list((output_root / "dark" / "previews" / "before-after").glob("*.mp4"))
             self.assertTrue(previews)
+            gif_previews = list((output_root / "dark" / "previews" / "before-after").glob("*.gif"))
+            self.assertTrue(gif_previews)
+            with Image.open(gif_previews[0]) as gif:
+                self.assertGreater(gif.n_frames, 1)
 
     def test_opt_in_lut_and_denoise_render(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

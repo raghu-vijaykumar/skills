@@ -24,6 +24,7 @@ from PIL import Image
 import enhance
 import refine
 import upscale
+from preview_gif import write_comparison
 
 ANALYSIS_VERSION = "1"
 SCHEMA_VERSION = 1
@@ -227,25 +228,15 @@ def decide(preview: dict) -> dict:
 
 
 def three_panel(source: Path, lanczos: Path, candidate: Path, source_at: float,
-                local_at: float, target: Path, width: int = 640) -> None:
-    def grab(path: Path, offset: float) -> Image.Image:
-        result = subprocess.run(
-            ["ffmpeg", "-nostdin", "-v", "error", "-ss", f"{max(0.0, offset):.3f}",
-             "-i", str(path), "-frames:v", "1", "-vf", f"scale={width}:-2",
-             "-f", "image2pipe", "-vcodec", "png", "-"], capture_output=True)
-        if result.returncode or not result.stdout:
-            raise upscale.UpscaleError(f"cannot sample {path}")
-        import io
-        return Image.open(io.BytesIO(result.stdout)).convert("RGB")
-
-    panels = [grab(source, source_at), grab(lanczos, local_at),
-              grab(candidate, local_at)]
-    height = min(panel.height for panel in panels)
-    canvas = Image.new("RGB", (width * 3, height), "white")
-    for index, panel in enumerate(panels):
-        canvas.paste(panel.resize((width, height)), (index * width, 0))
-    target.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(target, quality=92)
+                local_at: float, target: Path) -> None:
+    # The source uses absolute time while both candidate previews start at
+    # zero; sampling matching windows exposes temporal AI artifacts.
+    lead = min(.5, local_at)
+    write_comparison([source, lanczos, candidate],
+                     ["SOURCE", "LANCZOS", "AI CANDIDATE"], target,
+                     starts=[source_at - lead, local_at - lead, local_at - lead],
+                     duration=max(.25, 2 * lead), fps=8,
+                     panel=(320, 180), decode_size=(320, 180))
 
 
 def _write_preview_html(report: dict, path: Path) -> None:
@@ -259,7 +250,7 @@ def _write_preview_html(report: dict, path: Path) -> None:
 td,th{{border:1px solid #ccc;padding:.3rem .5rem}}td.num{{text-align:right}}</style>
 <h1>{html.escape(report['clip'])}</h1>
 <p><strong>{report['decision']['decision']}</strong> - {html.escape(reasons)}</p>
-<p><img src='three-panel.jpg' style='max-width:100%'></p>
+<p><img src='three-panel.gif' style='max-width:100%'></p>
 <p><video controls src='preview-lanczos.mp4' width='48%'></video>
 <video controls src='preview-ai.mp4' width='48%'></video></p>
 <table><tr><th>metric</th><th>AI vs Lanczos</th></tr>{rows}</table>
@@ -323,7 +314,7 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
     }
     decision = decide(preview)
     three_panel(source, lanczos_video, ai_video, round(start + seconds * 0.5, 3),
-                round(seconds * 0.5, 3), work / "three-panel.jpg")
+                round(seconds * 0.5, 3), work / "three-panel.gif")
     report = {
         "schema_version": SCHEMA_VERSION,
         "analysis_version": ANALYSIS_VERSION,
@@ -349,7 +340,7 @@ def preview_clip(source: Path, target: tuple[int, int] | None,
         "decision": decision,
         "artifacts": {"preview_lanczos": str(lanczos_video),
                       "preview_ai": str(ai_video),
-                      "three_panel": str(work / "three-panel.jpg")},
+                      "three_panel": str(work / "three-panel.gif")},
     }
     report_path = work / "preview.json"
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

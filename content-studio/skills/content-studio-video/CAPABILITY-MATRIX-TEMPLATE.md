@@ -52,7 +52,8 @@ Rules:
 ## Evidence rules
 
 - Use an actual method output for each meaningful visual or audio capability:
-  GIFs for motion, before/after stills for picture, and short MP3s for audio.
+  GIFs for every video before/after comparison (including picture changes),
+  and short MP3s for audio. Stills may illustrate static diagnostics such as masks.
   A single example can cover two methods only if it visibly or audibly
   demonstrates both. Use reports or command output for planning/workflow.
 - Synthetic cards, tones, and text-to-speech are suitable inputs. A bounded

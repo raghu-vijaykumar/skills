@@ -88,8 +88,8 @@ The harness writes `benchmark.html` and `benchmarks.json` with runtime, glare
 reduction, luma change, sharpness ratio, and an accepted/rejected result. It
 does not install the backend or change the default reflection policy.
 
-Approved renders also write side-by-side before/after JPEGs and short playable
-MP4 previews under `previews/before-after/`.
+Approved renders also write time-aligned before/after GIFs for each approved
+scene and short playable MP4 previews under `previews/before-after/`.
 
 ## Decisions
 

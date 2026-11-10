@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import upscale
@@ -45,8 +46,11 @@ class UpscaleTest(unittest.TestCase):
             self.assertTrue(data["has_audio"])
             self.assertTrue((target.parent / ".content-studio" / "upscale" /
                              source.stem / "upscale.json").is_file())
-            self.assertTrue((target.parent / ".content-studio" / "upscale" /
-                             source.stem / "before-after.jpg").is_file())
+            preview = (target.parent / ".content-studio" / "upscale" /
+                       source.stem / "before-after.gif")
+            self.assertTrue(preview.is_file())
+            with Image.open(preview) as frames:
+                self.assertGreater(frames.n_frames, 1)
 
     def test_draft_dry_run_plans_4k_upscale(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

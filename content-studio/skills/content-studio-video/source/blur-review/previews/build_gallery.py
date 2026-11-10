@@ -5,15 +5,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
-
 SKILL = Path(__file__).resolve().parents[1]
 ROOT = Path(__file__).resolve().parents[3]
 REPO = Path(__file__).resolve().parents[6]
 WORK = REPO / "tmp/capability-gallery/blur-review"
 WORK.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(ROOT / "edit/clip-edit/scripts"))
+sys.path.insert(0, str(ROOT / "shared"))
 import preprocess  # noqa: E402
+from preview_gif import write_comparison  # noqa: E402
 
 
 def run(args):
@@ -22,10 +22,10 @@ def run(args):
         raise RuntimeError(result.stderr[-800:])
 
 
-def frame(source, time, path):
+def range_clip(source, time, path):
     run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-         "-ss", str(time), "-i", str(source), "-frames:v", "1",
-         "-vf", "scale=480:270", str(path)])
+         "-ss", str(time), "-i", str(source), "-t", "0.75", "-an",
+         "-c:v", "libx264", str(path)])
 
 
 def main():
@@ -45,17 +45,14 @@ def main():
         raise RuntimeError("Expected unapproved synthetic blur candidates")
     candidate = next((row for row in rows if float(row["start"]) <= 1.4
                       <= float(row["end"])), rows[0])
-    frame(source, .4, WORK / "clear.jpg")
-    frame(source, (float(candidate["start"]) + float(candidate["end"])) / 2,
-          WORK / "candidate.jpg")
-    canvas = Image.new("RGB", (960, 310), "#151922")
-    canvas.paste(Image.open(WORK / "clear.jpg").convert("RGB"), (0, 40))
-    canvas.paste(Image.open(WORK / "candidate.jpg").convert("RGB"), (480, 40))
-    draw = ImageDraw.Draw(canvas)
-    draw.text((12, 13), "CLEAR REFERENCE", fill="white")
-    draw.text((492, 13), "FLAGGED BLUR CANDIDATE - NO CUT APPROVED",
-              fill="white")
-    canvas.save(SKILL / "previews/blur-candidate.jpg", quality=86)
+    clear = WORK / "clear-range.mp4"
+    blurred = WORK / "flagged-range.mp4"
+    range_clip(source, .2, clear)
+    range_clip(source, float(candidate["start"]), blurred)
+    # This compares two source ranges only; it does not render or approve a cut.
+    write_comparison([clear, blurred],
+                     ["CLEAR SOURCE RANGE", "FLAGGED BLUR - NO CUT"],
+                     SKILL / "previews/blur-candidate.gif", duration=.75, fps=8)
     # Keep the exact scanner rows as evidence, but do not mark remove=yes.
     (SKILL / "previews/scan-review.csv").write_bytes(
         (analysis / "review.csv").read_bytes())
