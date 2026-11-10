@@ -5,3 +5,5 @@
 - [x] T003 Add private authored-media import, deduplication, and README catalogue with tests.
 - [x] T004 Document stock selection, production gate, and ownership in the relevant skill READMEs, method manifests, and router.
 - [x] T005 Inspect bounded variant evidence and run validation.
+- [x] T006 Render and review the exact 4K shared assets under the approved Content Studio precheck.
+- [x] T007 Validate the capability matrix and package, install a versioned global skill bundle, and verify discovery.

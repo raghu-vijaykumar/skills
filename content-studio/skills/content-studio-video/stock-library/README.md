@@ -25,3 +25,10 @@ python content-studio/skills/content-studio-video/stock-library/scripts/library.
 The local library writes `catalogue.json`, `README.md`, and `media/<type>/...`. `README.md` lists only actual imported assets with name, type, dimensions, rights, creator, tags, and a relative media link. Supported types are `cta`, `meme`, `gif`, `sticker`, and `stock-clip`; files are decoded/probed and deduplicated by SHA-256. External sources are copied; files already inside the library are indexed in place. Rights must be confirmed as `owned`, `licensed`, or `permission`. Keep private media, generated previews, and its local catalogue out of source control.
 
 The separate [memes catalogue](../memes/README.md) handles user-supplied reaction material and scene-based insertion proposals. A self-created meme can be kept here as reusable stock; insertion into a video still goes through the meme skill's contextual review or an approved timeline.
+
+## Capability matrix
+
+| Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
+| --- | --- | --- | --- | --- | --- |
+| `cta-variants` | Supported | Named design, size, rate, duration, placement → silent transparent ProRes clip | No | [Exact-asset review notes](previews/cta-variants.md) | Full asset production follows the approved Content Studio precheck; the generic delivery timeline cannot yet compose this alpha clip. |
+| `authored-assets` | Supported | Authorized self-created media and metadata → private SHA-256 catalogue and README | No | [Importer tests](tests/test_stock_library.py) | Private local folder outside Git; contextual meme insertion remains in the memes skill. |

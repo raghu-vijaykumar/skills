@@ -1,7 +1,7 @@
 # Reusable Content Studio stock library
 
 **Created:** 2026-11-10
-**Status:** Skill implementation complete; full 4K asset production requires approval of the separate Content Studio precheck plan
+**Status:** Skill implementation and first 4K stock package complete; exact assets approved by the editor
 
 ## User scenarios
 
@@ -24,4 +24,4 @@
 - Named variants yield distinct nonempty RGBA frames with transparent background and correct state timing.
 - The old CLI still invokes the canonical implementation and retains its default behavior.
 - Imported media is copied and deduplicated; private README lists real assets only; unsupported formats and a library inside the source repo are rejected.
-- Documentation and focused tests pass. A full variant production render awaits its own approved precheck plan.
+- Documentation, capability-matrix, and focused tests pass. The first full variant production ran under an exact approved precheck plan and the editor approved the delivered clips.

@@ -14,8 +14,9 @@ const expectedUnsupported = new Set([
   'timeline/upscale-pytorch',
   'timeline/hdr-dolby-vision',
 ]);
-const expectedMethodCount = 109;
-const expectedMatrixCount = 41;
+// The authored stock library adds two real methods and one leaf matrix.
+const expectedMethodCount = 111;
+const expectedMatrixCount = 42;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
   .filter(({folder}) => folder === videoRoot || folder.startsWith(videoRoot + path.sep));

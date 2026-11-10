@@ -10,5 +10,5 @@ test('every video capability matrix matches its manifest, evidence, and presets'
   const script = path.join(root, 'content-studio', 'scripts', 'check-capability-matrices.mjs');
   const result = spawnSync(process.execPath, [script], {encoding: 'utf8'});
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Capability matrices: 41 skills, 109 methods, 6 unsupported/);
+  assert.match(result.stdout, /Capability matrices: 42 skills, 111 methods, 6 unsupported/);
 });
