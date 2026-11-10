@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -209,6 +211,59 @@ class UpscaleTest(unittest.TestCase):
         self.assertEqual(upscale.plan_chunks(0, 10), [(0, 0)])
         self.assertEqual(upscale.plan_chunks(25, 0), [(0, 25)])
         self.assertEqual(upscale.plan_chunks(25, 10), [(0, 10), (10, 20), (20, 25)])
+
+    def test_ncnn_x4_model_uses_native_scale_before_final_resize(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            with patch.object(upscale, "run") as command:
+                upscale.run_realesrgan(root / "realesrgan.exe", root / "in",
+                                      root / "out", "realesrgan-x4plus", 2,
+                                      128, "png")
+            argv = command.call_args.args[0]
+            self.assertEqual(argv[argv.index("-s") + 1], "4")
+
+    def test_concat_entries_resolve_relative_work_paths(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            image = Path(scratch).resolve() / "frame.png"
+            listing = image.parent / "concat.txt"
+            relative = Path(os.path.relpath(image))
+            upscale.write_concat([relative], [0.1], listing, repeat_last=False)
+            text = listing.read_text(encoding="utf-8")
+            self.assertIn(str(image), text)
+            self.assertEqual(text.count("file '"), 1)
+
+    def test_ai_chunk_encoding_preserves_cfr_frame_count_and_duration(self):
+        # The concat tail used to encode one extra frame per chunk, stretching
+        # a twelve-frame source to sixteen frames with chunk size three.
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            source, output = root / "source.mp4", root / "output.mp4"
+            subprocess.run([
+                "ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=10:duration=1.2",
+                "-an", "-c:v", "libx264", str(source),
+            ], check=True)
+
+            def copy_frames(frames, upscaled, *_args):
+                upscaled.mkdir()
+                for image in frames.glob("*.png"):
+                    shutil.copy2(image, upscaled / image.name)
+                return {"device": "test", "peak_vram_mb": None}
+
+            with patch.object(upscale, "run_realesrgan_pytorch", side_effect=copy_frames):
+                result = upscale.render_ai(
+                    source, output, root / "work", "pytorch", None, "test",
+                    2, 128, 0.0, 1.2, upscale.probe(source), chunk=3,
+                    encoder="libx265", staging="png",
+                )
+            data = json.loads(subprocess.run([
+                "ffprobe", "-v", "error", "-select_streams", "v:0",
+                "-show_entries", "stream=nb_frames,duration", "-of", "json",
+                str(output),
+            ], check=True, capture_output=True, text=True).stdout)["streams"][0]
+            self.assertEqual(result["frames"], 12)
+            self.assertEqual(int(data["nb_frames"]), 12)
+            self.assertAlmostEqual(float(data["duration"]), 1.2, delta=0.02)
 
     @unittest.skipUnless(NCNN_READY, "ncnn/Vulkan backend not installed")
     def test_ncnn_chunked_render_keeps_frames_and_audio(self):

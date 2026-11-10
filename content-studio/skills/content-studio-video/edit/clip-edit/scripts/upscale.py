@@ -236,14 +236,20 @@ def frame_deltas(timestamps: list[float], fps: float,
     return deltas
 
 
-def write_concat(frames: list[Path], deltas: list[float], target: Path) -> None:
+def write_concat(frames: list[Path], deltas: list[float], target: Path,
+                 repeat_last: bool = True) -> None:
     lines = []
     for frame, delta in zip(frames, deltas):
-        escaped = str(frame).replace("'", "'\\''")
+        # FFmpeg resolves concat entries relative to the list file, so each
+        # frame path must be absolute even when --work is relative.
+        escaped = str(frame.resolve()).replace("'", "'\\''")
         lines.append(f"file '{escaped}'")
+        # Image demuxers default to 25 fps and round sub-frame durations.
+        # A millisecond time base preserves the source cadence in the concat list.
+        lines.append("option framerate 1000")
         lines.append(f"duration {delta:.6f}")
-    if frames:
-        escaped = str(frames[-1]).replace("'", "'\\''")
+    if frames and repeat_last:
+        escaped = str(frames[-1].resolve()).replace("'", "'\\''")
         lines.append(f"file '{escaped}'")
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -330,8 +336,12 @@ def run_realesrgan(executable: Path, frames: Path, upscaled: Path,
                    staging: str = "jpeg") -> None:
     upscaled.mkdir(parents=True, exist_ok=True)
     fmt = "jpg" if staging == "jpeg" else "png"
+    # The NCNN x4 models tile their native output. Asking one for -s 2 crops
+    # each tile before assembly on some Vulkan builds, corrupting the frame.
+    # Run at native scale and resize the assembled result during encoding.
+    native_scale = (4 if model != "realesr-animevideov3" else scale)
     cmd = [str(executable), "-i", str(frames), "-o", str(upscaled),
-           "-n", model, "-s", str(scale), "-t", str(max(TILE_MIN, tile)),
+           "-n", model, "-s", str(native_scale), "-t", str(max(TILE_MIN, tile)),
            "-f", fmt]
     models = executable.parent / "models"
     if models.is_dir():
@@ -381,11 +391,16 @@ def run_realesrgan_pytorch(frames: Path, upscaled: Path, model: str, scale: int,
 
 def encode_chunk(upscaled: Path, concat: Path, output: Path,
                  size: tuple[int, int] | None, info: dict,
-                 preset: str = "medium", encoder: str = "auto") -> None:
+                 preset: str = "medium", encoder: str = "auto",
+                 cfr_fps: float | None = None) -> None:
     cmd = ["ffmpeg", "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
            "-f", "concat", "-safe", "0", "-i", str(concat)]
     if size:
         cmd += ["-vf", f"scale={size[0]}:{size[1]}:flags=lanczos"]
+    if cfr_fps is not None:
+        # Without this, the repeated tail image adds a real frame to every
+        # chunk; a short clip can play almost twice as long as its source.
+        cmd += ["-fps_mode", "cfr", "-r", f"{cfr_fps:.6f}"]
     cmd += ["-an"] + encode_args(info, preset, encoder) + [str(output)]
     run(cmd)
 
@@ -434,6 +449,9 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
     """Render an upscaled video track with source timestamps preserved."""
     fps = fps_value(info.get("fps"))
     timestamps = frame_timestamps(source, start, duration)
+    cfr = (len(timestamps) >= 2 and
+           all(abs((right - left) - 1.0 / fps) <= 0.002
+               for left, right in zip(timestamps, timestamps[1:])))
     if len(timestamps) < 2:
         timestamps = []
     total = len(timestamps) if timestamps else max(1, round(duration * fps))
@@ -490,9 +508,12 @@ def render_ai(source: Path, video: Path, work: Path, backend: str,
             timing_fallback = True
         listing = work / f"chunk-{index:03d}.txt"
         write_concat(sorted(path for path in upscaled.iterdir() if path.is_file()),
-                    deltas, listing)
+                    deltas, listing, repeat_last=not cfr)
         chunk_video = work / f"chunk-{index:03d}.mp4"
-        encode_chunk(upscaled, listing, chunk_video, None, info, preset, encoder)
+        size = ((int(info["width"]) * scale, int(info["height"]) * scale)
+                if backend == "realesrgan" else None)
+        encode_chunk(upscaled, listing, chunk_video, size, info, preset, encoder,
+                     cfr_fps=fps if cfr else None)
         rendered += count
         videos.append(chunk_video)
         print(f"upscale: {source.name} chunk {index + 1}/{len(chunks)} "
