@@ -10,6 +10,9 @@ from pathlib import Path
 
 import bpy
 from mathutils import Vector
+# Blender's --python entrypoint does not add the script folder to sys.path.
+# Resolve sibling scene and asset helpers regardless of the caller's cwd.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from model_assets import load_component
 from engineering_timeline import apply_events
 
