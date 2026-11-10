@@ -2,8 +2,11 @@
 
 Detect and classify reflection candidates, apply only conservative glare/veil
 fixes, preview bounded candidates, and optionally run a pretrained DSRNet review
-pass. The committed contact sheet is a real detector output from a synthetic clip
-where both scenes correctly returned `SKIP`.
+pass. The examples blend a short shot from the published Out of Office Mode
+Tomato Bath video with a mirrored shot from its published Dubai Fountain video
+to create a synthetic, content-rich reflection. The source videos are unchanged.
+The detector returned `UNSUPPORTED`; the bounded preview and AI pass remain
+review aids, not removal claims.
 
 **Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Previews are synthetic and illustrative, not delivery masters.
 
@@ -11,11 +14,11 @@ where both scenes correctly returned `SKIP`.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `detect` | Supported | Video or folder → analysis report + evidence JPGs + masks + manifest | No | [Detector contact sheet](previews/contact-sheet.jpg) | Candidate mask is evidence, not a reflection layer; analysis cached by source hash. |
-| `fix` | Supported | Approved manifest → corrected clip for FIX scenes | No | [Decision example](previews/example-decisions.md) | Masked highlight compression only; safety gates reject luma/clipping drift. |
-| `preview` | Supported | Manifest + REVIEW scene → bounded comparison MP4 | No | [Decision example](previews/example-decisions.md) | Always review_required; never removes content-rich reflections. |
+| `detect` | Supported | Video or folder → analysis report + evidence JPGs + masks + manifest | No | [Detected reflection masks](previews/detected-reflection.jpg) | Candidate masks include false positives on the hand; this scene was `UNSUPPORTED`. |
+| `fix` | Supported | Approved manifest → corrected clip for FIX scenes | No | [Bounded correction candidate](previews/bounded-preview.jpg) | This is a preview, not an approved `fix.py` render. Only minor glare/veil scenes with approval may be fixed. |
+| `preview` | Supported | Manifest + REVIEW or UNSUPPORTED scene → bounded comparison MP4 | No | [Bounded before/after frame](previews/bounded-preview.jpg) | A comparison of a possible correction, always review_required; the reflection remains visible. |
 | `benchmark` | Supported | Clip + external backend config → benchmarks.json + benchmark.html | No | [Decision example](previews/example-decisions.md) | Does not install or promote a backend; licence and checkpoint recorded by the operator. |
-| `ai` | Supported | Clip + DSRNet checkpoint → review MP4 + report + keys + compare | No | [Decision example](previews/example-decisions.md) | 1.54 GB weights; attenuation not reconstruction; returns REVIEW, SKIP, or REJECTED. |
+| `ai` | Supported | Clip + DSRNet checkpoint → review MP4 + report + keys + compare | No | [DSRNet before/after frame](previews/ai-review.jpg) | At strength 0.5 the report returned `REVIEW`: 8.9% relative candidate reduction, 0.027 mean-luma change; reflection still visible. |
 | `generative-removal` | Unsupported | Clip → not available | No | [Decision example](previews/example-decisions.md) | No generative backend bundled; unsupported. |
 
 ## Decisions
@@ -30,4 +33,9 @@ where both scenes correctly returned `SKIP`.
 
 ## Evidence note
 
-All committed previews are generated from synthetic cards, tones, or text-to-speech, or are labelled command/output examples. No private footage, private voice, credentials, licensed music, or full masters are included. Rebuild instructions are in the linked evidence files where a renderer produced the preview.
+These examples use bounded derived frames from two already published channel videos
+and a synthetic reflection blend. No source or full master is committed. The
+`fix` shows a bounded correction candidate but no approved delivered correction.
+`benchmark` has command/decision documentation only; no licensed external backend
+is bundled.
+The [decision notes](previews/example-decisions.md) describe their boundaries.
