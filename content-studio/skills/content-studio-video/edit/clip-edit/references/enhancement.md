@@ -63,7 +63,7 @@ content-studio enhance render `
 The Python entry point is also available directly:
 
 ```powershell
-python <bundle>/skills/content-studio-videoedit/scripts/content.py enhance analyze --folder <draft>
+python <bundle>/skills/content-studio-video/edit/clip-edit/scripts/content.py enhance analyze --folder <draft>
 ```
 
 ## Reflection backend benchmarks

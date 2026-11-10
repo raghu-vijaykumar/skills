@@ -105,6 +105,6 @@ without a reason.
 
 ## One-off use
 
-If the user invokes `content-studio-videoedit`, `content-studio-audio`,
+If the user invokes `content-studio-video-clip-edit`, `content-studio-audio`,
 `content-studio-autocut`, or another specialist directly, run the workflow
 precheck first. The specialist's own checks and review gates still apply.

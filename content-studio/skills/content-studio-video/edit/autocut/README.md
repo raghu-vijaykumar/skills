@@ -26,7 +26,7 @@ python content-studio/skills/content-studio-video/edit/autocut/scripts/autocut.p
   --auto-transcribe --detect-scenes --auto-vision --quality-score
 ```
 
-Preprocess raw camera clips first with `content-studio-videopreprocess`, then stage the per-clip `final.mp4` exports in a flat folder such as `.content-studio/autocut-input/`. AutoCut scans only the top level of `--folder`. Write `--output` to `.content-studio/rough-cut/` and use `--deliver <draft>/<id>-rough-cut.mp4` for the root deliverable.
+Preprocess raw camera clips first with `content-studio-video-preprocess`, then stage the per-clip `final.mp4` exports in a flat folder such as `.content-studio/autocut-input/`. AutoCut scans only the top level of `--folder`. Write `--output` to `.content-studio/rough-cut/` and use `--deliver <draft>/<id>-rough-cut.mp4` for the root deliverable.
 
 `--orientation` filters clips by measured width/height. Use `--include-mismatched` or `--allow <filename>` for intentional exceptions. `--fit blur` (default) centers a mismatched clip over a blurred copy of itself instead of black bars; `--fit crop` fills the frame and crops; `--fit pad` uses black bars.
 

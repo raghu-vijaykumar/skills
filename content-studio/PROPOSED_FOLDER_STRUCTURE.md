@@ -1,6 +1,6 @@
 # Content Studio video structure and workflow
 
-This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. Old `content-studio-*` names remain thin compatibility entrypoints. Source implementations, references, and tests live under [`content-studio-video/`](skills/content-studio-video/). `methods.json` distinguishes working scripts from unsupported requests.
+This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. The three retired names `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` have no top-level entrypoints; other old `content-studio-*` names remain thin compatibility entrypoints. Source implementations, references, and tests live under [`content-studio-video/`](skills/content-studio-video/). `methods.json` distinguishes working scripts from unsupported requests.
 
 ```text
 content-studio/skills/

@@ -10,6 +10,24 @@ const sourceBundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
+const retired = ['content-studio-videogen', 'content-studio-videopreprocess', 'content-studio-videoedit'];
+
+export function retireManagedSkillLinks({parent, bases, io = fs}) {
+  const removed = [];
+  // Only junctions/symlinks into this install's versioned release tree are ours to retire.
+  for (const base of bases) {
+    for (const name of retired) {
+      const candidate = path.join(base, name);
+      if (!io.existsSync(candidate) || !io.lstatSync(candidate).isSymbolicLink()) continue;
+      const target = io.realpathSync(candidate);
+      if (!target.toLowerCase().startsWith(path.join(parent, 'content-studio').toLowerCase() + path.sep)) continue;
+      io.unlinkSync(candidate);
+      removed.push(candidate);
+    }
+  }
+  return removed;
+}
+
 function run(executable, args) {
   const result = spawnSync(executable, args, {encoding:'utf8', maxBuffer:16*1024*1024});
   if (result.error || result.status !== 0)
@@ -70,7 +88,10 @@ export function installSkills({global = false, target = null, dependencies = tru
     if (lines[0] !== '---' || lines[1] !== `name: ${name}`)
       throw new Error(`Skill name/frontmatter mismatch: ${name}`);
   }
-  const removed = [];
+  // Retired migration aliases also disappear from explicit --target installs.
+  const retiredBases = global ? [skills, path.join(os.homedir(), '.codex', 'skills'),
+    path.join(os.homedir(), '.config', 'opencode', 'skills')] : [skills];
+  const removed = retireManagedSkillLinks({parent, bases: retiredBases});
   if (global) {
     const legacy = ['videogen','content-helper','video-idea-engine','hairline-create','learning-engineer',
       'content-studio-ideas','content-studio-animate','content-studio-vlog'];

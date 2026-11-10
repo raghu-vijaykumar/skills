@@ -3,8 +3,8 @@
 Illustrative report, not a real channel backup.
 
 ```powershell
-python content-studio/skills/content-studio-videoedit/scripts/content.py backup --channel <slug>
-python content-studio/skills/content-studio-videoedit/scripts/content.py sync --channel <slug>
+python content-studio/skills/content-studio-video/edit/clip-edit/scripts/content.py backup --channel <slug>
+python content-studio/skills/content-studio-video/edit/clip-edit/scripts/content.py sync --channel <slug>
 ```
 
 Expected evidence: exact public title/description/thumbnail, source reconciliation,

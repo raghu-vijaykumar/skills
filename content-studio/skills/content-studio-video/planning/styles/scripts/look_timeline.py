@@ -1,7 +1,7 @@
 """Non-destructive Content Studio timeline look annotations.
 
 Look *choice* lives here: which preset or LUT applies to which timeline range.
-Filter graph construction and rendering live in ``content-studio-videoedit``.
+Filter graph construction and rendering live in ``content-studio-video/edit/clip-edit``.
 """
 import json
 import sys

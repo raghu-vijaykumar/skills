@@ -7,7 +7,7 @@ Also supports private backups, intro prepending, local pruning and segment
 extraction when configured.
 
 The commands below use `scripts/content.py`. Run them from the
-`content-studio-videoedit` skill folder, or prefix the script with that skill's
+`content-studio-video/edit/clip-edit` skill folder, or prefix the script with that skill's
 absolute path from another lifecycle skill.
 
 One workspace per channel, one command family:

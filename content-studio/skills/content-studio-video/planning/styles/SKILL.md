@@ -59,7 +59,7 @@ Supply a `timeline` array in the Blender scene JSON. Component events use `{"tim
 
 ## Selective video filter presets
 
-This skill owns the look **choice**: the profile `look` value and the range files that decide which preset or LUT applies to which time. The preset catalog and all filter **application** — graph construction, HDR safety, and the FFmpeg render — live in `content-studio-videoedit` (`scripts/filters.py`). Available presets: `warm-golden`, `cool-cinematic`, `vintage-fade`, `vibrant-travel`, `soft-portrait`, `mono-noir`, `clean-natural`. These are approximate FFmpeg color grades, not copies of proprietary Instagram filters. Example:
+This skill owns the look **choice**: the profile `look` value and the range files that decide which preset or LUT applies to which time. The preset catalog and all filter **application** — graph construction, HDR safety, and the FFmpeg render — live in `content-studio-video/edit/clip-edit/` (`scripts/filters.py`). Available presets: `warm-golden`, `cool-cinematic`, `vintage-fade`, `vibrant-travel`, `soft-portrait`, `mono-noir`, `clean-natural`. These are approximate FFmpeg color grades, not copies of proprietary Instagram filters. Example:
 
 ```bash
 python content-studio/skills/content-studio-video/edit/clip-edit/scripts/content.py filters list
@@ -82,7 +82,7 @@ python content-studio/skills/content-studio-video/planning/styles/scripts/looks.
 python content-studio/skills/content-studio-video/planning/styles/scripts/looks.py --mode compare --input master.mp4 --looks looks.json --output comparison.mp4 --start 4 --duration 5
 ```
 
-The looks file uses `{"ranges":[{"start":3,"end":8,"preset":"warm-golden","fade":0.5},{"start":12,"end":18,"lut":"my-look.cube","fade":0.7}]}`. Times are in the final video timeline. LUT paths resolve relative to the looks JSON. Each range uses exactly one `preset` or `lut`, and non-overlapping ranges are required. Fade is applied at the beginning and end of each range. `compare` previews are limited to 30 seconds. Preserve the original input and require human review before using the output. The `timeline` mode stays in this skill; `render` and `compare` delegate graph construction and encoding to `content-studio-videoedit/scripts/filters.py`.
+The looks file uses `{"ranges":[{"start":3,"end":8,"preset":"warm-golden","fade":0.5},{"start":12,"end":18,"lut":"my-look.cube","fade":0.7}]}`. Times are in the final video timeline. LUT paths resolve relative to the looks JSON. Each range uses exactly one `preset` or `lut`, and non-overlapping ranges are required. Fade is applied at the beginning and end of each range. `compare` previews are limited to 30 seconds. Preserve the original input and require human review before using the output. The `timeline` mode stays in this skill; `render` and `compare` delegate graph construction and encoding to `content-studio-video/edit/clip-edit/scripts/filters.py`.
 
 **Integration boundary:** The timeline command writes editable annotations but the existing Content Studio timeline renderer has **not yet been taught to consume** the new `creative_look` enhancement entries. For now, `render` is the supported path for applying looks to an exported master. Do not claim that editing the annotated timeline automatically changes the final render. Blender, FFmpeg and timeline integration have not been executed end-to-end.
 
@@ -99,7 +99,7 @@ This stage audits explicit scene-level differences, adds `presentation` metadata
 
 ## Applying an approved profile to the exported video
 
-`scripts/style_render.py` applies the profile's built-in color look to an SDR master; optionally burns in SRT/ASS captions with the profile's font, placement, and safe margin, and performs one-pass EBU R128 loudness normalization. The input master is never overwritten. The color graph and HDR safety check come from `content-studio-videoedit/scripts/filters.py`; caption styling and audio normalization stay here because they come from the style profile.
+`scripts/style_render.py` applies the profile's built-in color look to an SDR master; optionally burns in SRT/ASS captions with the profile's font, placement, and safe margin, and performs one-pass EBU R128 loudness normalization. The input master is never overwritten. The color graph and HDR safety check come from `content-studio-video/edit/clip-edit/scripts/filters.py`; caption styling and audio normalization stay here because they come from the style profile.
 
 ```bash
 python content-studio/skills/content-studio-video/planning/styles/scripts/style_render.py --input master.mp4 --output styled.mp4 --profile travel-vlog

@@ -122,9 +122,10 @@ async function main() {
   }
   if (command === 'sync-skill') {
     const source = toolkit;
-    const target = path.join(cwd, '.agents', 'skills', 'content-studio-videogen');
+    const target = path.join(cwd, '.agents', 'skills', 'content-studio-video-videogen');
     const legacy = path.join(cwd, '.agents', 'skills', 'videogen');
     const previous = path.join(cwd, '.agents', 'skills', 'content-studio-animate');
+    const migrated = path.join(cwd, '.agents', 'skills', 'content-studio-videogen');
     fs.mkdirSync(path.dirname(target), {recursive: true});
     if (fs.existsSync(target) && !fs.existsSync(path.join(target, '.videogen-version'))) die(`${target} is not a managed copy; inspect it before replacement`);
     if (fs.existsSync(target)) fs.rmSync(target, {recursive: true, force: true});
@@ -134,6 +135,8 @@ async function main() {
     // Remove only a managed legacy copy after its replacement is complete.
     if (fs.existsSync(path.join(legacy, '.videogen-version'))) fs.rmSync(legacy, {recursive: true, force: true});
     if (fs.existsSync(path.join(previous, '.videogen-version'))) fs.rmSync(previous, {recursive: true, force: true});
+    // Remove the former skill name only for copies marked as managed by sync-skill.
+    if (fs.existsSync(path.join(migrated, '.videogen-version'))) fs.rmSync(migrated, {recursive: true, force: true});
     console.log(`Installed version-matched skill at ${target}`);
     return;
   }

@@ -1,6 +1,6 @@
 # Content Studio bundle
 
-The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. The top-level `content-studio-*` names are compatibility routes.
+The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. The `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` names are retired; other top-level `content-studio-*` names are compatibility routes.
 
 ## Stage routes
 

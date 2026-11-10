@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {test} from 'node:test';
 import {discoverSkills} from '../scripts/skill-discovery.mjs';
-import {installSkills} from '../scripts/install-skills.mjs';
+import {installSkills, retireManagedSkillLinks} from '../scripts/install-skills.mjs';
 
 function scratch(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'content-studio-skills-'));
@@ -64,4 +64,60 @@ test('managed install links nested skills directly and refuses unmanaged destina
   fs.unlinkSync(path.join(root, 'skills', name));
   fs.mkdirSync(path.join(root, 'skills', name));
   assert.throws(() => installSkills({target: root, dependencies: false}), /Refusing to replace unmanaged skill/);
+});
+
+test('reinstall retires managed migration links and preserves user-owned folders', (t) => {
+  const root = scratch(t);
+  let result;
+  try {
+    result = installSkills({target: root, dependencies: false});
+  } catch (error) {
+    if (process.platform === 'win32' && error.code === 'EPERM') {
+      t.skip('junction creation denied by sandbox');
+      return;
+    }
+    throw error;
+  }
+  const skills = path.join(root, 'skills');
+  const nested = path.join(result.release, 'content-studio', 'skills', 'content-studio-video');
+  const managed = ['content-studio-videogen', 'content-studio-videopreprocess'];
+  for (const name of managed) {
+    fs.symlinkSync(nested, path.join(skills, name), process.platform === 'win32' ? 'junction' : 'dir');
+  }
+  const unmanaged = path.join(skills, 'content-studio-videoedit');
+  fs.mkdirSync(unmanaged);
+  fs.writeFileSync(path.join(unmanaged, 'owner.txt'), 'keep');
+
+  const updated = installSkills({target: root, dependencies: false});
+  for (const name of managed) {
+    assert.equal(fs.existsSync(path.join(skills, name)), false);
+    assert.ok(updated.removed.includes(path.join(skills, name)));
+  }
+  assert.equal(fs.readFileSync(path.join(unmanaged, 'owner.txt'), 'utf8'), 'keep');
+  assert.equal(updated.removed.includes(unmanaged), false);
+});
+
+test('retirement cleanup unlinks all three managed aliases and leaves external or owned entries', () => {
+  const parent = path.join('C:', 'agents');
+  const base = path.join(parent, 'skills');
+  const managedRoot = path.join(parent, 'content-studio', 'v0.6.1');
+  const entries = new Map([
+    ['content-studio-videogen', {link: true, target: path.join(managedRoot, 'videogen')}],
+    ['content-studio-videopreprocess', {link: true, target: path.join(managedRoot, 'preprocess')}],
+    ['content-studio-videoedit', {link: true, target: path.join(managedRoot, 'clip-edit')}],
+  ].map(([name, value]) => [path.join(base, name), value]));
+  const removed = [];
+  const io = {
+    existsSync: (candidate) => entries.has(candidate),
+    lstatSync: (candidate) => ({isSymbolicLink: () => entries.get(candidate).link}),
+    realpathSync: (candidate) => entries.get(candidate).target,
+    unlinkSync: (candidate) => { removed.push(candidate); entries.delete(candidate); },
+  };
+  assert.deepEqual(retireManagedSkillLinks({parent, bases: [base], io}), removed);
+  assert.equal(removed.length, 3);
+
+  entries.set(path.join(base, 'content-studio-videoedit'), {link: false});
+  entries.set(path.join(base, 'content-studio-videogen'), {link: true, target: path.join(parent, 'other', 'videogen')});
+  assert.deepEqual(retireManagedSkillLinks({parent, bases: [base], io}), []);
+  assert.equal(entries.size, 2);
 });

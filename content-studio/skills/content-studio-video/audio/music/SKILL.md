@@ -87,6 +87,6 @@ It writes `<id>-final-with-music.mp4` and `music-mix.json` without changing the 
 
 ## Handoff
 
-Give `music-selection.json`, `music-mix.json`, and `<id>-final-with-music.mp4` to `content-studio-videoedit` when assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
+Give `music-selection.json`, `music-mix.json`, and `<id>-final-with-music.mp4` to `content-studio-video-clip-edit` when assembling the final master. When publishing, copy `music-credits.txt` into the video description if the track requires attribution. Publishing still needs the user's explicit request.
 
 Read [the music guide](references/music-guide.md) for license details, Pixabay Content ID handling, and catalog troubleshooting.

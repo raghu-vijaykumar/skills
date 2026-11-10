@@ -31,5 +31,5 @@ Read [the benchmark grid workflow](references/benchmark.md) for layout,
 duration, audio, and metadata details.
 
 This skill only assembles review artifacts. It does not preprocess, upscale, or
-color-correct footage; use `content-studio-videopreprocess`,
-`content-studio-videoedit`, and the upscale/enhance commands for those stages.
+color-correct footage; use `content-studio-video-preprocess`,
+`content-studio-video-clip-edit`, and the upscale/enhance commands for those stages.
