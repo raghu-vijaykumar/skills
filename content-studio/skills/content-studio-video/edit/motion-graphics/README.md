@@ -12,7 +12,7 @@ all five finished-video effects on a synthetic source.
 | --- | --- | --- | --- | --- | --- |
 | `presets` | Supported | Category + preset ID + proposed cues → resolved preset JSON + cue validation | Specialist only | [Effect preview](previews/effects.gif) | Style specification and validation layer, not proof every preset animation is rendered by overlay.py. |
 | `overlay` | Supported | Cue sheet + edited source → bounded review MP4 or ASS sidecar | Specialist only | [Effect preview](previews/effects.gif) | Cooking/location card types; source untouched; Dolby Vision preview loses RPU. |
-| `cta-stock` | Supported | Output path + size/fps/position → silent transparent UHD ProRes 4444 MOV | No | [CTA example](previews/cta-stock.md) | Pillow + FFmpeg required; other formats need a fresh render and review. |
+| `cta-stock` | Supported | Compatibility command → silent transparent UHD ProRes 4444 MOV | No | [CTA example](previews/cta-stock.md) | Canonical designs and selection are in the [stock library](../../stock-library/README.md). |
 | `hdr-compose` | Supported | Versioned manifest + hashes + human approval → HEVC Main10 HLG-base master | No | [HLG example](previews/hdr-compose.md) | Narrow 3840x2160/30 route; five-second intro/CTA; no Dolby Vision RPU preservation. |
 
 ## Named presets
@@ -36,3 +36,5 @@ synthetic source. Remotion exports `VlogEffect` and `VlogTransition` separately.
 The GIF is rendered by `overlay.py` from a synthetic cue sheet. Preset JSON is a
 specification layer; the CTA and HLG routes are labelled command examples because
 their outputs are large or manifest-bound. No private footage or full master is included.
+
+For reusable CTA designs, select `classic-bar`, `minimal-pills`, or `bold-stack` in the [stock library catalogue](../../stock-library/README.md). This skill owns timed placement and the narrow HLG composition route; the old `cta_stock.py` command delegates to the stock library generator.

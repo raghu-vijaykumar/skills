@@ -4,6 +4,8 @@ description: Maintain a private local meme catalogue and propose evidence-based,
 ---
 # Content Studio Memes
 
+For self-created memes, GIFs, and stickers intended as reusable stock across videos, also see the [stock library](../stock-library/SKILL.md) and its per-library `README.md` catalogue. This skill continues to own contextual reaction suggestions and timing review.
+
 Before inserting or rendering memes in a draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
 This skill **does not download memes automatically**. The user will add meme files later. Import only user-supplied, authorized media into a local catalogue. Do not commit third-party media, generated thumbnails or the SQLite database to Git.

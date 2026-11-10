@@ -17,7 +17,7 @@
       "id": "cta-stock",
       "script": "scripts/cta_stock.py",
       "status": "supported",
-      "review": "Review alpha, motion states, placement, and source independence at UHD"
+      "review": "Compatibility entrypoint; select variants in stock-library and review alpha, motion states, and placement at UHD"
     },
     {
       "id": "hdr-compose",

@@ -56,7 +56,7 @@ In a user-facing prompt, `motion_graphics: {"category":"travel","preset":"travel
 
 ## Reusable transparent 4K CTA
 
-`scripts/cta_stock.py` draws an original Like, Share, Subscribe-to-Subscribed, and bell sequence as a five-second, transparent UHD ProRes 4444 clip. The reference video is only visual inspiration; no frames or sound are copied. Generate the asset in the content project's assets folder, not this source repository:
+The [stock library](../../stock-library/SKILL.md) now owns the original Like, Share, Subscribe-to-Subscribed, and bell generator and its selectable designs. `scripts/cta_stock.py` remains a compatible command for existing projects. Generate the approved asset in the content project's assets folder, not this source repository:
 
 The generator requires Python Pillow plus FFmpeg and FFprobe on `PATH`.
 

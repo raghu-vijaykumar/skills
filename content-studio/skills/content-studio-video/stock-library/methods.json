@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "cta-variants",
+      "script": "scripts/cta.py",
+      "status": "supported",
+      "review": "Compare named designs; inspect alpha, state changes, shot placement, and exact 4K asset"
+    },
+    {
+      "id": "authored-assets",
+      "script": "scripts/library.py",
+      "status": "supported",
+      "review": "Confirm authorship and rights, file hash, copied media, and private README catalogue"
+    }
+  ]
+}

@@ -54,6 +54,7 @@ content-studio/skills/
       final-render/                 exact-master human review
     memory/                          private SQLite decisions
     memes/                           optional scene punctuation
+    stock-library/                   authored reusable clips, CTA variants, private media catalogue
     delivery/
       publish/                      explicit request only
       archive/                      independent public-upload backup

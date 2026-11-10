@@ -1,5 +1,7 @@
 # Memes capability matrix
 
+Self-created memes, GIFs, and stickers intended for reuse across videos can be imported into the [stock library](../stock-library/README.md), which writes a private `README.md` catalogue of actual media. This meme skill owns contextual insertion proposals and its separate local reaction catalogue.
+
 Maintain a private local meme catalogue and propose evidence-based, reviewable
 insertions. No third-party media or database is committed; evidence is labelled
 catalogue and proposal examples.

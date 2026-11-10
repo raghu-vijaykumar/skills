@@ -1,6 +1,6 @@
 # Transparent CTA and HLG intro composition
 
-Generate the original CTA after the approved Content Studio precheck. The generator draws 4K RGBA frames and encodes ProRes 4444 with alpha; it does not use the pixels or audio of a reference clip. Verify `pix_fmt` contains `a` with `ffprobe`, and inspect frames during Like, Share, Subscribe, Subscribed, and bell states over real video. Use another `--position` to make a distinct full-frame transparent placement. Do not add this to every video without reviewing the closing shot.
+Select a design from the [stock library](../../../stock-library/README.md) and generate the CTA after the approved Content Studio precheck. The generator draws 4K RGBA frames and encodes ProRes 4444 with alpha; it does not use the pixels or audio of a reference clip. Verify `pix_fmt` contains `a` with `ffprobe`, and inspect frames during Like, Share, Subscribe, Subscribed, and bell states over real video. Use another `--position` to make a distinct full-frame transparent placement. Do not add this to every video without reviewing the closing shot.
 
 `ingredient_list.heading` changes only the list heading. Existing cue sheets retain the old default. To replace a baked overlay, start from the clean edited source, remove the old CTA event, and regenerate the ASS sidecar. Pixel removal from the baked preview is not a reliable substitute.
 

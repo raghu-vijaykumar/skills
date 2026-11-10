@@ -1,6 +1,6 @@
 # Transparent CTA example
 
-Illustrative command; no 4K ProRes asset is committed. The renderer needs Pillow,
+Illustrative compatibility command; no 4K ProRes asset is committed. Select `classic-bar`, `minimal-pills`, or `bold-stack` in the [stock library](../../../stock-library/README.md). The renderer needs Pillow,
 FFmpeg, and FFprobe.
 
 ```powershell
