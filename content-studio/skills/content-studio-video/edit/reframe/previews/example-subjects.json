@@ -1,7 +1,13 @@
 {
-  "illustrative": true,
-  "boxes": [
-    {"source": "synthetic-source.mp4", "start": 0.0, "end": 3.0, "box": [0.35, 0.15, 0.60, 0.85]}
+  "subjects": [
+    {
+      "source": "reframe-source.mp4",
+      "start": 0.0,
+      "end": 1.5,
+      "box": {"x": 0.45, "y": 0.15, "w": 0.38, "h": 0.72},
+      "label": "pot",
+      "confidence": 0.9
+    }
   ],
-  "note": "Input shape for subjects.py; review the crop before use."
+  "note": "Operator-supplied normalized pot box for the published Tomato Bath excerpt; not an automated detection."
 }
