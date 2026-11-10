@@ -1,14 +1,24 @@
 # Reusable stock catalogue
 
-This repository catalogues **designs and methods**. Generated media and your private media catalogue live outside Git. Select a design, review its motion on the target footage, then render the approved size and position. All CTA designs are original drawings; no reference-video pixels or audio are used.
+This repository catalogues **designs and methods**. Full-resolution generated
+assets and your private media catalogue live outside Git; the small GIFs below
+are review examples derived from the approved CTA exports. Select a design,
+review its motion on the target footage, then render the approved size and
+position. All CTA designs are original drawings; no reference-video pixels or
+audio are used.
 
 ## Like / Share / Subscribe CTA
 
-| Variant ID | Look | Sequence | Output | Availability |
-| --- | --- | --- | --- | --- |
-| `classic-bar` | Cream connected bar with teal/coral accents | Like → Share → Subscribe → Subscribed → bell → exit | Silent transparent ProRes 4444 | Generator supported; original 4K asset previously rendered for the approved veg palav video |
-| `minimal-pills` | Three separated dark translucent pills; active chips light up | Same timed sequence | Silent transparent ProRes 4444 | Generator supported; full asset requires project precheck and review |
-| `bold-stack` | Vertical three-card stack with a large subscribe row | Same timed sequence | Silent transparent ProRes 4444 | Generator supported; full asset requires project precheck and review |
+| Variant ID | Animated example | Look | Output and availability |
+| --- | --- | --- | --- |
+| `classic-bar` | ![Classic bar CTA over fountain footage](previews/classic-bar.gif) | Cream connected bar with teal/coral accents | Like → Share → Subscribe → Subscribed → bell → exit; silent transparent ProRes 4444 generator supported. |
+| `minimal-pills` | ![Minimal pills CTA over fountain footage](previews/minimal-pills.gif) | Three separated dark translucent pills; active chips light up | Same timed sequence; silent transparent ProRes 4444 generator supported. |
+| `bold-stack` | ![Bold stack CTA over fountain footage](previews/bold-stack.gif) | Vertical three-card stack with a large subscribe row | Same timed sequence; silent transparent ProRes 4444 generator supported. |
+
+The GIFs use a still from the [published Dubai Fountain video](https://www.youtube.com/watch?v=yWKZaxVK-6I)
+at 95 seconds as a placement background. The animation comes from the exact
+reviewed alpha clips in the private stock library; the GIFs are silent and
+downscaled. See the [reproduction notes](previews/cta-variants.md).
 
 All three accept `top-right`, `top-left`, `bottom-right`, `bottom-left`, or `center`. The common review target is 3840×2160, 30 fps, five seconds. `classic-bar` is the default so existing approved commands remain valid. See [motion graphics](../edit/motion-graphics/README.md) for per-video placement and HLG composition. Placement is chosen per shot; these are selectable assets, not automatic end cards.
 
@@ -30,5 +40,5 @@ The separate [memes catalogue](../memes/README.md) handles user-supplied reactio
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `cta-variants` | Supported | Named design, size, rate, duration, placement → silent transparent ProRes clip | No | [Exact-asset review notes](previews/cta-variants.md) | Full asset production follows the approved Content Studio precheck; the generic delivery timeline cannot yet compose this alpha clip. |
+| `cta-variants` | Supported | Named design, size, rate, duration, placement → silent transparent ProRes clip | No | [Animated variants](#like--share--subscribe-cta) and [exact-asset review notes](previews/cta-variants.md) | Full asset production follows the approved Content Studio precheck; the generic delivery timeline cannot yet compose this alpha clip. |
 | `authored-assets` | Supported | Authorized self-created media and metadata → private SHA-256 catalogue and README | No | [Importer tests](tests/test_stock_library.py) | Private local folder outside Git; contextual meme insertion remains in the memes skill. |

@@ -20,6 +20,16 @@ library = load("library")
 
 
 class CTAStyleTests(unittest.TestCase):
+    def test_catalogue_gifs_show_each_variant(self):
+        # A selectable design needs its own moving example in the public matrix.
+        skill = ROOT.parent
+        readme = (skill / "README.md").read_text(encoding="utf-8")
+        for variant in cta.VARIANTS:
+            self.assertIn(f"(previews/{variant}.gif)", readme)
+            with Image.open(skill / "previews" / f"{variant}.gif") as preview:
+                self.assertEqual(preview.size, (480, 270))
+                self.assertGreaterEqual(preview.n_frames, 30)
+
     def test_all_variants_are_distinct_and_transparent(self):
         frames = {name: cta.draw_frame(2.5, 1280, 720, 5.0, "top-right", name)
                   for name in cta.VARIANTS}
