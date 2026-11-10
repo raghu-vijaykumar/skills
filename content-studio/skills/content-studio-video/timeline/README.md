@@ -1,30 +1,31 @@
 # Delivery timeline capability matrix
 
-Plan, validate, approve, and render an immutable delivery timeline. The committed GIF
-and validation output are real `init -> validate -> preview` results from a synthetic
-source; the fixture approval is synthetic and is not a production approval.
+Plan, validate, approve, and render an immutable delivery timeline. The
+method-specific picture and audio examples are actual bounded timeline
+previews from synthetic sources. The fixture approval is synthetic and is not
+a production approval.
 
-**Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Previews are synthetic and illustrative, not delivery masters.
+**Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Examples are illustrative evidence, not delivery masters.
 
 ## Capability matrix
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `timeline-delivery` | Supported | Approved timeline + hashed sources/voice/fonts/sidecars + human approval → one final MP4 + render record | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Approval must match the exact revision and input bytes; SDR only. |
-| `crop` | Supported | Timeline picture clip + crop geometry → cropped picture in final render | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Editable per clip; preview affected ranges. |
-| `lens-correction` | Supported | Timeline clip + lens parameters → lens-corrected picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Explicit parameters; no automatic camera profile. |
-| `denoise-light` | Supported | Timeline clip range → denoised picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Light denoise only; no detail reconstruction. |
-| `denoise-medium` | Supported | Timeline clip range → denoised picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Stronger smoothing; inspect texture. |
-| `deflicker` | Supported | Timeline clip range → deflickered picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Temporal flicker only. |
-| `upscale-lanczos` | Supported | Timeline clip range → Lanczos-scaled picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Resolution scaling only; AI upscale is not in this route. |
-| `color-eq` | Supported | Timeline clip/operation → basic color EQ | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Built-in EQ only; no LUT import or full preset catalog. |
-| `sharpen-light` | Supported | Timeline clip/operation → sharpened picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Cannot recover missed focus. |
-| `sharpen-medium` | Supported | Timeline clip/operation → sharpened picture | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Halo/noise risk; review at delivery size. |
-| `title` | Supported | Timeline operation + text/font → burned-in title | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Needs drawtext/font support; does not invent titles. |
-| `highpass` | Supported | Timeline audio cue → high-passed audio | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | 80 Hz-style dialogue cleanup only. |
-| `audio-denoise` | Supported | Timeline audio cue → denoised audio | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Basic filter; subjective result needs listening. |
-| `compress` | Supported | Timeline audio cue → compressed audio | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Gentle dialogue compression only. |
-| `loudnorm` | Supported | Timeline audio cue → loudness-normalized audio | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | One-pass approximation; measure and listen. |
+| `crop` | Supported | Timeline picture clip + crop geometry → cropped picture in final render | Yes | [Before / after](previews/methods/crop.jpg) and [method notes](previews/methods.md) | Editable per clip; preview affected ranges. |
+| `lens-correction` | Supported | Timeline clip + lens parameters → lens-corrected picture | Yes | [Before / after](previews/methods/lens-correction.jpg) and [method notes](previews/methods.md) | Explicit parameters; no automatic camera profile. |
+| `denoise-light` | Supported | Timeline clip range → denoised picture | Yes | [Before / after](previews/methods/denoise-light.jpg) and [method notes](previews/methods.md) | Light denoise only; no detail reconstruction. |
+| `denoise-medium` | Supported | Timeline clip range → denoised picture | Yes | [Before / after](previews/methods/denoise-medium.jpg) and [method notes](previews/methods.md) | Stronger smoothing; inspect texture. |
+| `deflicker` | Supported | Timeline clip range → deflickered picture | Yes | [Animated before / after](previews/methods/deflicker.gif) and [method notes](previews/methods.md) | Temporal flicker only. |
+| `upscale-lanczos` | Supported | Timeline clip range → Lanczos-scaled picture | Yes | [Before / after](previews/methods/upscale-lanczos.jpg) and [method notes](previews/methods.md) | Resolution scaling only; AI upscale is not in this route. |
+| `color-eq` | Supported | Timeline clip/operation → basic color EQ | Yes | [Before / after](previews/methods/color-eq.jpg) and [method notes](previews/methods.md) | Built-in EQ only; no LUT import or full preset catalog. |
+| `sharpen-light` | Supported | Timeline clip/operation → sharpened picture | Yes | [Before / after](previews/methods/sharpen-light.jpg) and [method notes](previews/methods.md) | Cannot recover missed focus. |
+| `sharpen-medium` | Supported | Timeline clip/operation → sharpened picture | Yes | [Before / after](previews/methods/sharpen-medium.jpg) and [method notes](previews/methods.md) | Halo/noise risk; review at delivery size. |
+| `title` | Supported | Timeline operation + text/font → burned-in title | Yes | [Before / after](previews/methods/title.jpg) and [method notes](previews/methods.md) | Needs drawtext/font support; does not invent titles. |
+| `highpass` | Supported | Timeline audio cue → high-passed audio | Yes | [Before](previews/methods/highpass-before.mp3) / [after](previews/methods/highpass-after.mp3) and [method notes](previews/methods.md) | 80 Hz-style dialogue cleanup only. |
+| `audio-denoise` | Supported | Timeline audio cue → denoised audio | Yes | [Before](previews/methods/audio-denoise-before.mp3) / [after](previews/methods/audio-denoise-after.mp3) and [method notes](previews/methods.md) | Basic filter; subjective result needs listening. |
+| `compress` | Supported | Timeline audio cue → compressed audio | Yes | [Before](previews/methods/compress-before.mp3) / [after](previews/methods/compress-after.mp3) and [method notes](previews/methods.md) | Gentle dialogue compression only. |
+| `loudnorm` | Supported | Timeline audio cue → loudness-normalized audio | Yes | [Before](previews/methods/loudnorm-before.mp3) / [after](previews/methods/loudnorm-after.mp3) and [method notes](previews/methods.md) | One-pass approximation; measure and listen. |
 | `cross-fade` | Supported | Editable join cue + adjacent picture → Cross fade in the final render | Yes | [Cross fade preview](../edit/transitions/previews/cross-fade.gif) | Native join transition; editable 0.15-3 s; changed recipe needs fresh approval. |
 | `fade-through-black` | Supported | Editable point or join cue + adjacent picture → Fade through black in the final render | Yes | [Fade through black preview](../edit/transitions/previews/fade-through-black.gif) | Native point or join transition; editable 0.15-3 s; changed recipe needs fresh approval. |
 | `fade-through-white` | Supported | Editable point or join cue + adjacent picture → Fade through white in the final render | Yes | [Fade through white preview](../edit/transitions/previews/fade-through-white.gif) | Native point or join transition; editable 0.15-3 s; changed recipe needs fresh approval. |
@@ -56,7 +57,7 @@ source; the fixture approval is synthetic and is not a production approval.
 | `push-right` | Supported | Editable join cue + adjacent picture → Push right in the final render | Yes | [Push right preview](../edit/transitions/previews/push-right.gif) | Native join transition; editable 0.15-3 s; changed recipe needs fresh approval. |
 | `upscale-real-esrgan` | Unsupported | Timeline clip → not available in this route | No | [Validation](previews/validate.txt) | Unsupported: AI upscale needs a separate adapter and evidence. |
 | `upscale-pytorch` | Unsupported | Timeline clip → not available in this route | No | [Validation](previews/validate.txt) | Unsupported: AI upscale needs a separate adapter and evidence. |
-| `motion-graphics-ass` | Supported | Timeline operation + approved ASS sidecar → rendered motion graphics in final | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Consumes approved ASS sidecars; not every motion-graphics preset. |
+| `motion-graphics-ass` | Supported | Timeline operation + approved ASS sidecar → rendered motion graphics in final | Yes | [Before / after](previews/methods/motion-graphics-ass.jpg) and [method notes](previews/methods.md) | Consumes approved ASS sidecars; not every motion-graphics preset. |
 | `hdr-dolby-vision` | Unsupported | HDR/Dolby Vision timeline → not available in this route | No | [Validation](previews/validate.txt) | Unsupported: the delivery timeline is SDR-only. |
 
 ## Route limits
@@ -70,4 +71,9 @@ source; the fixture approval is synthetic and is not a production approval.
 
 ## Evidence note
 
-All committed previews are generated from synthetic cards, tones, or text-to-speech, or are labelled command/output examples. No private footage, private voice, credentials, licensed music, or full masters are included.
+The method gallery uses synthetic test patterns, noise, tones, text, and a
+synthetic ASS sidecar. Its local fixture plan does not authorize production.
+No private footage, voice, credentials, licensed music, or full master is
+included. The transition GIFs linked above are specialist examples; their
+appearance does not independently prove the timeline adapter. The actual
+timeline gallery and its rebuild script are in [method notes](previews/methods.md).

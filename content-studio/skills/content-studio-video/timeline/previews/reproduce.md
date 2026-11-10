@@ -11,3 +11,6 @@ python content-studio/skills/content-studio-video/timeline/scripts/timeline.py p
 ```
 
 A final render still needs separate human timeline approval matching the exact revision.
+
+The distinct picture and audio method examples use the same timeline compiler;
+see [method notes and rebuild script](methods.md).
