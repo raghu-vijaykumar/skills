@@ -19,5 +19,5 @@
 
 ## Production catalogue
 
-- [ ] T007 Run the mandatory precheck and obtain approval of the current tag update plan.
-- [ ] T008 Apply editor-supported profiles to E01, E02, R05, and R18 and verify catalogue hashes, reference-only status, and selection proposals.
+- [x] T007 Run the mandatory precheck and obtain approval of the current tag update plan.
+- [x] T008 Apply profiles to E01, E02, R05, and R18 and verify catalogue hashes, reference-only status, and selection proposals. E01, E02, and R05 identities remain pending because only broad existing labels are supported; R18 laughter is confirmed.

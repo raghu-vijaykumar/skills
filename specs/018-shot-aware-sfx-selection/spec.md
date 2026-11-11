@@ -2,7 +2,7 @@
 
 **Feature Branch**: `raghu/instagram-reel-sfx`
 **Created**: 2026-11-11
-**Status**: Implemented in source; private catalogue update awaits the approved production plan
+**Status**: Implemented, installed, and private catalogue metadata updated under the approved production plan
 
 ## User scenarios and acceptance
 
