@@ -15,7 +15,8 @@ const expectedUnsupported = new Set([
   'timeline/hdr-dolby-vision',
 ]);
 // Reel SFX adds two real methods and one leaf matrix.
-const expectedMethodCount = 113;
+// Keep the declared-method total in sync when a reviewed capability is added.
+const expectedMethodCount = 114;
 const expectedMatrixCount = 43;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))

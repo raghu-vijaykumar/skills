@@ -12,6 +12,12 @@
       "script": "scripts/library.py",
       "status": "supported",
       "review": "Confirm rights, effects-only listening status for SFX, provenance, file hash, and private README catalogue"
+    },
+    {
+      "id": "shot-sfx-select",
+      "script": "scripts/library.py",
+      "status": "supported",
+      "review": "Review sound identities and shot tags, compare proposed cue timing with the edit, and exclude reference-only assets from delivery"
     }
   ]
 }

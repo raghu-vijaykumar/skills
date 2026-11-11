@@ -42,6 +42,27 @@ python content-studio/skills/content-studio-video/stock-library/scripts/library.
 
 The `reference-only` status blocks reuse when rights are unknown or the effects-only listening review is pending or failed. After rights and isolation are confirmed, use `library.py --library <private-library> review --id <stock-id> --rights permission --effect-review passed --note "<listening and permission evidence>"` to update the existing entry. This records a human decision, not an automatic speech-removal result. Do not index a cut containing audible voice as an effect.
 
+## Shot-aware sound-effect selection
+
+After listening to an effect, add its audible identity and the kinds of shots where it fits. Use short lowercase slug tags such as `phone-activity`, `comic-payoff`, or `physical-reaction`; these describe the edited shot, not a claim that the Reel source is licensed. Record the editor's identification in the note. The private README shows the resulting sound profile.
+
+```powershell
+python content-studio/skills/content-studio-video/stock-library/scripts/library.py --library <private-library> describe-sfx --id <stock-id> --label "Digital beep" --shot-tags phone-activity --note "Editor listened to the isolated effect" --identification-review passed
+python content-studio/skills/content-studio-video/stock-library/scripts/library.py --library <private-library> list --kind sfx --tag phone-activity
+```
+
+Create a shot manifest from the **edited video**, using verified shot boundaries and situation tags. Each shot needs `id`, `start_seconds`, `end_seconds`, `shot_tags`, and `audio_context` (`quiet`, `dialogue`, `music`, or `natural`). The selector proposes only effects with a passed audible-identity review that fit the available shot; it skips dialogue and natural sound. It returns no candidate when tags or duration do not fit. Use the default `pending` identification state when the sound is still unclear. It does not detect shot meaning from video automatically; the editor or an approved understanding pass supplies the tags.
+
+```json
+{"schema_version":1,"shots":[{"id":"S01","start_seconds":2.0,"end_seconds":3.0,"shot_tags":["phone-activity"],"audio_context":"quiet"}]}
+```
+
+```powershell
+python content-studio/skills/content-studio-video/stock-library/scripts/library.py --library <private-library> suggest-sfx --shots <shot-manifest.json> --output <proposal.json> --mode delivery
+```
+
+`delivery` is the default mode and excludes `reference-only` effects. `--mode reference` allows private comparison proposals for uncleared effects; each such candidate has `placement_allowed: false`. Every proposal has `approval_required: true` and `timeline_changed: false`. A Content Studio workflow can run the command as a step bound to its approved precheck plan and save the JSON for cue review. The workflow must not convert a reference proposal into a timeline `sfx` cue; place a reusable effect only after rights, effects-only review, shot timing, and final audio mix are approved. This selector does not render or insert audio.
+
 The separate [memes catalogue](../memes/README.md) handles user-supplied reaction material and scene-based insertion proposals. A self-created meme can be kept here as reusable stock; insertion into a video still goes through the meme skill's contextual review or an approved timeline.
 
 ## Capability matrix
@@ -50,3 +71,4 @@ The separate [memes catalogue](../memes/README.md) handles user-supplied reactio
 | --- | --- | --- | --- | --- | --- |
 | `cta-variants` | Supported | Named design, size, rate, duration, placement → silent transparent ProRes clip | No | [Animated variants](#like--share--subscribe-cta) and [exact-asset review notes](previews/cta-variants.md) | Full asset production follows the approved Content Studio precheck; the generic delivery timeline cannot yet compose this alpha clip. |
 | `authored-assets` | Supported | Reviewed visual assets or SFX reference and provenance → private SHA-256 catalogue and README | No | [Importer tests](tests/test_stock_library.py) | Unknown-rights or unreviewed SFX are reference-only; contextual meme insertion remains in the memes skill. |
+| `shot-sfx-select` | Supported | Reviewed sound profiles + edited-shot tags → ranked JSON cue proposals | Proposal only | [Selection tests](tests/test_stock_library.py) | Exact tag and duration matching; unknown-rights effects are reference-only, no automatic timeline insertion. |

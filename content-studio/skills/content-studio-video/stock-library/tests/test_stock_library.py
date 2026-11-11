@@ -135,6 +135,78 @@ class AuthoredMediaTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Unknown rights"):
                 library.add(root, sticker, "Wrong", "sticker", "unknown", "Example", [])
 
+    def test_reviewed_sound_profile_selects_matching_shot_but_preserves_dialogue(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder) / "library"
+            assets = [
+                {"id": "laugh", "name": "Laughter", "kind": "sfx", "rights": "licensed", "effect_review": "passed",
+                 "reuse_status": "reusable", "relative_path": "media/sfx/laugh.wav",
+                 "media": {"duration_seconds": 1.5},
+                 "sfx_profile": {"label": "Group laugh", "shot_tags": ["comic-payoff"],
+                                 "identification_review": "passed"}},
+                {"id": "beep", "name": "Beep", "kind": "sfx", "rights": "owned", "effect_review": "passed",
+                 "reuse_status": "reusable", "relative_path": "media/sfx/beep.wav",
+                 "media": {"duration_seconds": .4},
+                 "sfx_profile": {"label": "Digital beep", "shot_tags": ["phone-activity"],
+                                 "identification_review": "passed"}},
+            ]
+            manifest = {"schema_version": 1, "shots": [
+                {"id": "S01", "start_seconds": 0, "end_seconds": 2,
+                 "shot_tags": ["phone-activity"], "audio_context": "quiet"},
+                {"id": "S02", "start_seconds": 2, "end_seconds": 4,
+                 "shot_tags": ["comic-payoff"], "audio_context": "dialogue"},
+                {"id": "S03", "start_seconds": 4, "end_seconds": 5,
+                 "shot_tags": ["comic-payoff"], "audio_context": "quiet"},
+            ]}
+            output = library.suggest_sfx(assets, manifest)
+            self.assertEqual(output["selections"][0]["candidate"]["asset_id"], "beep")
+            self.assertIsNone(output["selections"][1]["candidate"])
+            self.assertIsNone(output["selections"][2]["candidate"])
+            self.assertFalse(output["timeline_changed"])
+            self.assertTrue(all(row["approval_required"] for row in output["selections"]))
+
+    def test_reference_effect_is_never_selected_for_delivery(self):
+        reference = {"id": "reel-laugh", "name": "Reel laugh", "kind": "sfx",
+                     "rights": "unknown",
+                     "effect_review": "passed", "reuse_status": "reference-only",
+                     "relative_path": "media/sfx/reel-laugh.wav",
+                     "media": {"duration_seconds": 1},
+                     "sfx_profile": {"label": "Laugh", "shot_tags": ["comic-payoff"],
+                                     "identification_review": "passed"}}
+        shots = {"schema_version": 1, "shots": [
+            {"id": "S01", "start_seconds": 0, "end_seconds": 2,
+             "shot_tags": ["comic-payoff"], "audio_context": "quiet"}]}
+        self.assertIsNone(library.suggest_sfx([reference], shots)["selections"][0]["candidate"])
+        candidate = library.suggest_sfx([reference], shots, "reference")["selections"][0]["candidate"]
+        self.assertEqual(candidate["asset_id"], "reel-laugh")
+        self.assertFalse(candidate["placement_allowed"])
+
+    def test_sound_description_updates_metadata_without_media_change(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder) / "library"
+            root.mkdir()
+            item = {"id": "sfx-1", "name": "Beep", "kind": "sfx", "rights": "unknown",
+                    "creator": "Example", "tags": ["sfx"], "reuse_status": "reference-only",
+                    "effect_review": "passed", "sha256": "a" * 64,
+                    "relative_path": "media/sfx/sfx-1.wav",
+                    "media": {"duration_seconds": .5}, "source_url": ""}
+            library.write_catalogue(root, [item])
+            updated = library.describe_sfx(root, "sfx-1", "Digital beep",
+                                           ["phone-activity"], "Editor listened", "passed")
+            self.assertEqual(updated["sfx_profile"]["shot_tags"], ["phone-activity"])
+            self.assertEqual(updated["sha256"], "a" * 64)
+            self.assertEqual(updated["reuse_status"], "reference-only")
+            self.assertIn("Digital beep", (root / "README.md").read_text(encoding="utf-8"))
+            pending = library.describe_sfx(root, "sfx-1", "Uncertain beep",
+                                           ["phone-activity"], "Needs listening")
+            self.assertEqual(pending["sfx_profile"]["identification_review"], "pending")
+            self.assertIsNone(library.suggest_sfx([pending], {"schema_version": 1, "shots": [
+                {"id": "S01", "start_seconds": 0, "end_seconds": 1,
+                 "shot_tags": ["phone-activity"], "audio_context": "quiet"}]},
+                "reference")["selections"][0]["candidate"])
+            with self.assertRaisesRegex(ValueError, "lowercase slugs"):
+                library.describe_sfx(root, "sfx-1", "Beep", ["bad tag"], "Editor listened")
+
 
 if __name__ == "__main__":
     unittest.main()
