@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Catalogue self-created reusable video assets in a private local folder."""
+"""Catalogue reviewed visual assets and sound-effect references in a private folder."""
 
 from __future__ import annotations
 
@@ -20,9 +20,11 @@ KINDS = {
     "gif": {".gif"},
     "sticker": {".png", ".webp", ".gif"},
     "stock-clip": {".mov", ".mp4", ".webm"},
+    "sfx": {".wav", ".flac", ".mp3", ".m4a"},
 }
-RIGHTS = {"owned", "licensed", "permission"}
-REPO_ROOT = Path(__file__).resolve().parents[4]
+RIGHTS = {"owned", "licensed", "permission", "unknown"}
+EFFECT_REVIEWS = {"pending", "passed", "failed"}
+REPO_ROOT = Path(__file__).resolve().parents[5]
 
 
 def validate_library(root: Path) -> Path:
@@ -43,6 +45,23 @@ def digest_file(path: Path) -> str:
 
 def probe_media(path: Path) -> dict:
     """Reject corrupt imports before they enter a catalogue reused across edits."""
+    if path.suffix.lower() in KINDS["sfx"]:
+        try:
+            result = subprocess.run(
+                ["ffprobe", "-v", "error", "-select_streams", "a:0",
+                 "-show_entries", "stream=codec_name,sample_rate,channels:format=duration",
+                 "-of", "json", str(path)], capture_output=True, text=True,
+                check=True, timeout=20)
+            data = json.loads(result.stdout)
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired,
+                json.JSONDecodeError) as error:
+            raise ValueError("Media file cannot be decoded") from error
+        if not data.get("streams") or float(data.get("format", {}).get("duration", 0)) <= 0:
+            raise ValueError("Media file has no usable audio")
+        stream = data["streams"][0]
+        return {"duration_seconds": float(data["format"]["duration"]),
+                "sample_rate": int(stream["sample_rate"]), "channels": int(stream["channels"]),
+                "codec": stream.get("codec_name", "unknown")}
     if path.suffix.lower() in {".mov", ".mp4", ".webm"}:
         try:
             result = subprocess.run(
@@ -89,19 +108,24 @@ def write_catalogue(root: Path, assets: list[dict]) -> None:
     catalog = root / "catalogue.json"
     readme = root / "README.md"
     lines = ["# My Content Studio stock assets", "",
-             "Private catalogue of imported, user-authorized reusable media.", "",
-             "| ID | Name | Type | Size | Rights | Creator | Tags | File |",
-             "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+             "Private catalogue of imported reusable media and reference-only effects.", "",
+             "| ID | Name | Type | Size / length | Rights | Creator | Review | Tags | Source | File |",
+             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for item in sorted(assets, key=lambda row: row["name"].casefold()):
         cells = [_markdown(str(item[key])) for key in
                  ("id", "name", "kind")]
-        cells.append(f"{item['media']['width']}×{item['media']['height']}")
+        media = item["media"]
+        cells.append(f"{media['duration_seconds']:.3f} s" if item["kind"] == "sfx"
+                     else f"{media['width']}×{media['height']}")
         cells += [_markdown(str(item[key])) for key in ("rights", "creator")]
+        cells.append(_markdown(item.get("reuse_status", "reusable")))
         cells.append(_markdown(", ".join(item["tags"])))
+        source = item.get("source_url") or "—"
+        cells.append(f"[source]({source})" if source.startswith("https://") else "—")
         cells.append(f"[media]({item['relative_path']})")
         lines.append("| " + " | ".join(cells) + " |")
     if not assets:
-        lines.append("| — | No assets imported yet | — | — | — | — | — | — |")
+        lines.append("| — | No assets imported yet | — | — | — | — | — | — | — | — | — |")
     # Replace small metadata files atomically; imported source media is never rewritten.
     for target, payload in ((catalog, json.dumps({"schema_version": 1, "assets": assets},
                                                 indent=2, ensure_ascii=False) + "\n"),
@@ -112,7 +136,9 @@ def write_catalogue(root: Path, assets: list[dict]) -> None:
 
 
 def add(root: Path, source: Path, name: str, kind: str, rights: str,
-        creator: str, tags: list[str]) -> dict:
+        creator: str, tags: list[str], *, source_url: str = "",
+        source_start: float | None = None, source_end: float | None = None,
+        source_sha256: str = "", effect_review: str = "pending") -> dict:
     root = validate_library(root)
     source = source.expanduser().resolve()
     if not source.is_file():
@@ -120,7 +146,16 @@ def add(root: Path, source: Path, name: str, kind: str, rights: str,
     if kind not in KINDS or source.suffix.lower() not in KINDS[kind]:
         raise ValueError("File extension is unsupported for this asset type")
     if rights not in RIGHTS or not name.strip() or not creator.strip():
-        raise ValueError("Name, creator, and confirmed rights are required")
+        raise ValueError("Name, creator, and a valid rights state are required")
+    if rights == "unknown" and kind != "sfx":
+        raise ValueError("Unknown rights are accepted only for reference-only SFX")
+    if kind == "sfx" and effect_review not in EFFECT_REVIEWS:
+        raise ValueError("SFX effect review must be pending, passed, or failed")
+    if (source_start is None) != (source_end is None) or (source_start is not None and
+            (source_start < 0 or source_end <= source_start)):
+        raise ValueError("Source range must have valid start and end times")
+    if source_url and not source_url.startswith("https://"):
+        raise ValueError("Source URL must use HTTPS")
     media = probe_media(source)
     assets = read_catalogue(root)
     sha = digest_file(source)
@@ -134,15 +169,39 @@ def add(root: Path, source: Path, name: str, kind: str, rights: str,
     if not internal:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+    reuse_status = ("reusable" if rights != "unknown" and
+                    (kind != "sfx" or effect_review == "passed") else "reference-only")
     item = {"id": ident, "name": name.strip(), "kind": kind, "rights": rights,
             "creator": creator.strip(), "tags": sorted(set(t.strip() for t in tags if t.strip())),
-            "sha256": sha, "relative_path": relative.as_posix(), "media": media}
+            "sha256": sha, "relative_path": relative.as_posix(), "media": media,
+            "reuse_status": reuse_status}
+    if kind == "sfx":
+        item.update({"effect_review": effect_review, "source_url": source_url,
+                     "source_start_seconds": source_start, "source_end_seconds": source_end,
+                     "source_sha256": source_sha256})
     try:
         write_catalogue(root, assets + [item])
     except Exception:
         if not internal:
             target.unlink(missing_ok=True)
         raise
+    return item
+
+
+def review_sfx(root: Path, ident: str, rights: str, effect_review: str, note: str) -> dict:
+    root = validate_library(root)
+    assets = read_catalogue(root)
+    item = next((entry for entry in assets if entry["id"] == ident), None)
+    if item is None or item["kind"] != "sfx":
+        raise ValueError("SFX catalogue ID not found")
+    if rights not in RIGHTS or effect_review not in EFFECT_REVIEWS or not note.strip():
+        raise ValueError("Valid rights, effects-only review, and review note are required")
+    # A later verified decision updates metadata in place; SHA-256 dedupe keeps one media copy.
+    item.update({"rights": rights, "effect_review": effect_review,
+                 "review_note": note.strip(),
+                 "reuse_status": ("reusable" if rights != "unknown" and
+                                  effect_review == "passed" else "reference-only")})
+    write_catalogue(root, assets)
     return item
 
 
@@ -162,6 +221,17 @@ def main() -> None:
     entry.add_argument("--rights", required=True, choices=sorted(RIGHTS))
     entry.add_argument("--creator", required=True)
     entry.add_argument("--tags", default="", help="Comma-separated search tags")
+    entry.add_argument("--source-url", default="", help="Canonical source URL for SFX")
+    entry.add_argument("--source-start", type=float)
+    entry.add_argument("--source-end", type=float)
+    entry.add_argument("--source-sha256", default="")
+    entry.add_argument("--effect-review", choices=sorted(EFFECT_REVIEWS), default="pending",
+                       help="Passed only after listening to the entire effect for voice/music bleed")
+    review = sub.add_parser("review")
+    review.add_argument("--id", required=True)
+    review.add_argument("--rights", required=True, choices=sorted(RIGHTS))
+    review.add_argument("--effect-review", required=True, choices=sorted(EFFECT_REVIEWS))
+    review.add_argument("--note", required=True, help="Human listening and rights evidence")
     args = parser.parse_args()
     root = validate_library(args.library)
     if args.action == "init":
@@ -169,7 +239,12 @@ def main() -> None:
         print(root / "README.md")
     elif args.action == "add":
         item = add(root, args.file, args.name, args.kind, args.rights,
-                   args.creator, args.tags.split(","))
+                   args.creator, args.tags.split(","), source_url=args.source_url,
+                   source_start=args.source_start, source_end=args.source_end,
+                   source_sha256=args.source_sha256, effect_review=args.effect_review)
+        print(json.dumps(item, indent=2, ensure_ascii=False))
+    elif args.action == "review":
+        item = review_sfx(root, args.id, args.rights, args.effect_review, args.note)
         print(json.dumps(item, indent=2, ensure_ascii=False))
     else:
         items = read_catalogue(root)

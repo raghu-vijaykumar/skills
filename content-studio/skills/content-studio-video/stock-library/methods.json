@@ -11,7 +11,7 @@
       "id": "authored-assets",
       "script": "scripts/library.py",
       "status": "supported",
-      "review": "Confirm authorship and rights, file hash, copied media, and private README catalogue"
+      "review": "Confirm rights, effects-only listening status for SFX, provenance, file hash, and private README catalogue"
     }
   ]
 }

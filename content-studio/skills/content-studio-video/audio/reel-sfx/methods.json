@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "reel-download",
+      "script": "scripts/reel_sfx.py",
+      "status": "supported",
+      "review": "Confirm canonical URL, creator, source hash, duration, and private output"
+    },
+    {
+      "id": "sfx-extract",
+      "script": "scripts/reel_sfx.py",
+      "status": "supported",
+      "review": "Listen to each full candidate for voice/music bleed; confirm precise range, hash, and rights state"
+    }
+  ]
+}

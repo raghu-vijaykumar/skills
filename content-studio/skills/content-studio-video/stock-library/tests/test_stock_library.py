@@ -1,6 +1,7 @@
 import importlib.util
 import tempfile
 import unittest
+import wave
 from pathlib import Path
 from PIL import Image
 
@@ -102,6 +103,37 @@ class AuthoredMediaTests(unittest.TestCase):
                                "Raghu", [])
             self.assertEqual(item["relative_path"], "media/sticker/my-original.png")
             self.assertEqual(len(list(source.parent.glob("*.png"))), 1)
+
+    def test_sfx_unknown_rights_is_reference_only_with_provenance(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            source = base / "impact.wav"
+            with wave.open(str(source), "wb") as wav:
+                wav.setnchannels(1)
+                wav.setsampwidth(2)
+                wav.setframerate(48000)
+                wav.writeframes(b"\0\0" * 4800)
+            root = base / "library"
+            item = library.add(root, source, "Impact", "sfx", "unknown", "Example creator",
+                               ["impact", "reel"], source_url="https://www.instagram.com/reel/abc/",
+                               source_start=1.2, source_end=1.3, source_sha256="a" * 64)
+            self.assertEqual(item["reuse_status"], "reference-only")
+            self.assertEqual(item["effect_review"], "pending")
+            self.assertAlmostEqual(item["media"]["duration_seconds"], .1)
+            self.assertIn("[source](https://www.instagram.com/reel/abc/)",
+                          (root / "README.md").read_text(encoding="utf-8"))
+            self.assertEqual(library.read_catalogue(root)[0]["source_start_seconds"], 1.2)
+            reviewed = library.review_sfx(root, item["id"], "unknown", "passed",
+                                          "Listened to complete effect; no voice or music")
+            self.assertEqual(reviewed["reuse_status"], "reference-only")
+            cleared = library.review_sfx(root, item["id"], "permission", "passed",
+                                         "Creator granted reuse permission")
+            self.assertEqual(cleared["reuse_status"], "reusable")
+            self.assertEqual(len(library.read_catalogue(root)), 1)
+            sticker = base / "sticker.png"
+            Image.new("RGBA", (2, 2), "red").save(sticker)
+            with self.assertRaisesRegex(ValueError, "Unknown rights"):
+                library.add(root, sticker, "Wrong", "sticker", "unknown", "Example", [])
 
 
 if __name__ == "__main__":

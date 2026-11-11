@@ -14,9 +14,9 @@ const expectedUnsupported = new Set([
   'timeline/upscale-pytorch',
   'timeline/hdr-dolby-vision',
 ]);
-// The authored stock library adds two real methods and one leaf matrix.
-const expectedMethodCount = 111;
-const expectedMatrixCount = 42;
+// Reel SFX adds two real methods and one leaf matrix.
+const expectedMethodCount = 113;
+const expectedMatrixCount = 43;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
   .filter(({folder}) => folder === videoRoot || folder.startsWith(videoRoot + path.sep));

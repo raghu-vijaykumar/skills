@@ -1,6 +1,6 @@
 ---
 name: content-studio-video-stock-library
-description: Select and create reusable transparent video CTA variants, and catalogue self-created clips, memes, GIFs, and stickers for use across Content Studio videos.
+description: Select transparent video CTA variants and catalogue authored visuals or reviewed sound effects in a private Content Studio library.
 ---
 
 # Stock library
@@ -18,4 +18,4 @@ python content-studio/skills/content-studio-video/stock-library/scripts/cta.py r
 
 The renderer needs Pillow, FFmpeg, FFprobe, and a bold Arial or DejaVu Sans font. It refuses to overwrite an existing asset. Confirm the output pixel format has an alpha channel, dimensions, no audio, and the Like, Share, Subscribe, Subscribed, and bell states over representative footage. For HDR/HLG work, the existing narrow [motion-graphics composer](../edit/motion-graphics/SKILL.md) may consume a reviewed stock clip. The generic delivery timeline does not yet support this alpha overlay operation.
 
-For **self-created** memes, GIFs, stickers, and stock clips, use `scripts/library.py` with a private folder outside Git. Supply true rights and creator metadata. The importer copies and SHA-256 deduplicates files, preserves the original, and regenerates that private folder's `README.md` catalogue. It does not make source footage or licensed assets public. See the [catalogue guide](README.md) for commands and ownership boundaries. The [memes skill](../memes/SKILL.md) continues to handle contextual reaction suggestions and rights/timing review.
+For **self-created** memes, GIFs, stickers, and stock clips, use `scripts/library.py` with a private folder outside Git. Supply true rights and creator metadata. The importer copies and SHA-256 deduplicates files, preserves the original, and regenerates that private folder's `README.md` catalogue. For sourced sound effects, use [reel SFX](../audio/reel-sfx/SKILL.md) and catalogue only reviewed candidates with source provenance; unknown rights or pending effects-only review remain `reference-only` and unavailable for reuse. The importer does not make source footage or licensed assets public. See the [catalogue guide](README.md) for commands and ownership boundaries. The [memes skill](../memes/SKILL.md) continues to handle contextual reaction suggestions and rights/timing review.
