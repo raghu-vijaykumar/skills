@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "stock-f5175198e11017fe",
+      "name": "Like Share Subscribe classic bar",
+      "kind": "cta",
+      "rights": "owned",
+      "creator": "Raghu",
+      "tags": [
+        "all-videos",
+        "classic",
+        "cta"
+      ],
+      "sha256": "f5175198e11017fee48be1d6835bc7ccacfd6104dd60dfa6336a9a064decae6a",
+      "relative_path": "media/cta/stock-f5175198e11017fe.mov",
+      "media": {
+        "width": 3840,
+        "height": 2160,
+        "duration_seconds": 5.0,
+        "pixel_format": "yuva444p12le"
+      }
+    },
+    {
+      "id": "stock-18b97983f2921f3d",
+      "name": "Like Share Subscribe minimal pills",
+      "kind": "cta",
+      "rights": "owned",
+      "creator": "Raghu",
+      "tags": [
+        "all-videos",
+        "cta",
+        "minimal"
+      ],
+      "sha256": "18b97983f2921f3da40f5713a21c2701a23653e38855493c39dabe98e4cecf81",
+      "relative_path": "media/cta/like-share-subscribe-minimal-pills-uhd-alpha.mov",
+      "media": {
+        "width": 3840,
+        "height": 2160,
+        "duration_seconds": 5.0,
+        "pixel_format": "yuva444p12le"
+      }
+    },
+    {
+      "id": "stock-eec683b21bd0ba08",
+      "name": "Like Share Subscribe bold stack",
+      "kind": "cta",
+      "rights": "owned",
+      "creator": "Raghu",
+      "tags": [
+        "all-videos",
+        "bold",
+        "cta"
+      ],
+      "sha256": "eec683b21bd0ba08f444317d67832d26d8f738ee2c209d3aaf02d0a1fa9da16e",
+      "relative_path": "media/cta/like-share-subscribe-bold-stack-uhd-alpha.mov",
+      "media": {
+        "width": 3840,
+        "height": 2160,
+        "duration_seconds": 5.0,
+        "pixel_format": "yuva444p12le"
+      }
+    },
+    {
+      "id": "stock-f8f36fa352d47b13",
+      "name": "Reel digital cue at 2.5s",
+      "kind": "sfx",
+      "rights": "unknown",
+      "creator": "Param Priya Prapancha",
+      "tags": [
+        "digital",
+        "sfx",
+        "ui"
+      ],
+      "sha256": "f8f36fa352d47b13a078695c459fb19832ebf017a5aa7be84ce595f935afd8c5",
+      "relative_path": "media/sfx/stock-f8f36fa352d47b13.wav",
+      "media": {
+        "duration_seconds": 0.46,
+        "sample_rate": 44100,
+        "channels": 2,
+        "codec": "pcm_s24le"
+      },
+      "reuse_status": "reference-only",
+      "effect_review": "passed",
+      "source_url": "https://www.instagram.com/reel/DeipetNNFCX/",
+      "source_start_seconds": 2.4,
+      "source_end_seconds": 2.86,
+      "source_sha256": "029b413755ac3ea9cb464e09decc076ae9604d569ee5ce0737fb650050077b92",
+      "sfx_profile": {
+        "label": "Digital cue",
+        "shot_tags": [
+          "phone-activity"
+        ],
+        "identification_note": "Existing catalogue says digital cue; shot situation is visible at Reel 2.6 s; audible identity needs confirmation",
+        "identification_review": "pending"
+      }
+    },
+    {
+      "id": "stock-72cc133cfd938f46",
+      "name": "Reel accent at 9.6s",
+      "kind": "sfx",
+      "rights": "unknown",
+      "creator": "Param Priya Prapancha",
+      "tags": [
+        "accent",
+        "sfx"
+      ],
+      "sha256": "72cc133cfd938f46946f46aed6f6c359f57c1420480c8a37ef960eb3002c3cbe",
+      "relative_path": "media/sfx/stock-72cc133cfd938f46.wav",
+      "media": {
+        "duration_seconds": 0.55,
+        "sample_rate": 44100,
+        "channels": 2,
+        "codec": "pcm_s24le"
+      },
+      "reuse_status": "reference-only",
+      "effect_review": "passed",
+      "source_url": "https://www.instagram.com/reel/DeipetNNFCX/",
+      "source_start_seconds": 9.55,
+      "source_end_seconds": 10.1,
+      "source_sha256": "029b413755ac3ea9cb464e09decc076ae9604d569ee5ce0737fb650050077b92",
+      "sfx_profile": {
+        "label": "Short accent",
+        "shot_tags": [
+          "comic-reaction"
+        ],
+        "identification_note": "Existing catalogue says accent; child reaction is visible at Reel 9.8 s; audible identity needs confirmation",
+        "identification_review": "pending"
+      }
+    },
+    {
+      "id": "stock-a25096be99e205c1",
+      "name": "Reel effect at 5-6s (DBS effects stem)",
+      "kind": "sfx",
+      "rights": "unknown",
+      "creator": "Param Priya Prapancha",
+      "tags": [
+        "dbs-tiger",
+        "effect",
+        "reel",
+        "sfx"
+      ],
+      "sha256": "a25096be99e205c1c5bc40965662428f8cd3c8f99a0fa9771ecd4893af9267aa",
+      "relative_path": "media/sfx/stock-a25096be99e205c1.wav",
+      "media": {
+        "duration_seconds": 1.0,
+        "sample_rate": 44100,
+        "channels": 1,
+        "codec": "pcm_s24le"
+      },
+      "reuse_status": "reference-only",
+      "effect_review": "passed",
+      "source_url": "https://www.instagram.com/reel/DeipetNNFCX/",
+      "source_start_seconds": 5.0,
+      "source_end_seconds": 6.0,
+      "source_sha256": "029b413755ac3ea9cb464e09decc076ae9604d569ee5ce0737fb650050077b92",
+      "sfx_profile": {
+        "label": "Brief effect",
+        "shot_tags": [
+          "prop-handling"
+        ],
+        "identification_note": "Existing catalogue says effect; prop handling is visible at Reel 5.5 s; audible identity needs confirmation",
+        "identification_review": "pending"
+      }
+    },
+    {
+      "id": "stock-51ebfa4c4c9007e2",
+      "name": "Reel laughter at 18-23s (DBS effects stem)",
+      "kind": "sfx",
+      "rights": "unknown",
+      "creator": "Param Priya Prapancha",
+      "tags": [
+        "dbs-tiger",
+        "laugh",
+        "reel",
+        "sfx"
+      ],
+      "sha256": "51ebfa4c4c9007e29f043976cf98f12a1e3c8700b772580eaf395dbec03232c5",
+      "relative_path": "media/sfx/stock-51ebfa4c4c9007e2.wav",
+      "media": {
+        "duration_seconds": 5.0,
+        "sample_rate": 44100,
+        "channels": 1,
+        "codec": "pcm_s24le"
+      },
+      "reuse_status": "reference-only",
+      "effect_review": "passed",
+      "source_url": "https://www.instagram.com/reel/DeipetNNFCX/",
+      "source_start_seconds": 18.0,
+      "source_end_seconds": 23.0,
+      "source_sha256": "029b413755ac3ea9cb464e09decc076ae9604d569ee5ce0737fb650050077b92",
+      "sfx_profile": {
+        "label": "Laughter",
+        "shot_tags": [
+          "comic-payoff"
+        ],
+        "identification_note": "Editor identified the 18–23 s effects stem as laughter; comic payoff at the end of the Reel",
+        "identification_review": "passed"
+      }
+    }
+  ]
+}

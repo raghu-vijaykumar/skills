@@ -48,6 +48,10 @@ export function installSkills({global = false, target = null, dependencies = tru
         const parts = path.relative(sourceBundle, item).split(path.sep);
         if (parts.some((part) => part === 'node_modules' || part === '.local' || part === 'tmp'))
           return false;
+        // Local Reel references and production evidence must not enter a versioned install.
+        if (parts.slice(0, 4).join('/') === 'skills/content-studio-video/stock-library/assets' &&
+            (parts[4] === '.content-studio' || (parts[4] === 'media' && parts[5] === 'sfx')))
+          return false;
         // The local music catalog is private and must not be copied into a release.
         return !(parts.includes('assets') && parts.includes('music') && parts.includes('local'));
       }});

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Catalogue reviewed visual assets and sound-effect references in a private folder."""
+"""Catalogue Git-backed stock assets and local-only sound-effect references."""
 
 from __future__ import annotations
 
@@ -28,13 +28,14 @@ RIGHTS = {"owned", "licensed", "permission", "unknown"}
 EFFECT_REVIEWS = {"pending", "passed", "failed"}
 AUDIO_CONTEXTS = {"quiet", "dialogue", "music", "natural"}
 REPO_ROOT = Path(__file__).resolve().parents[5]
+STOCK_ASSETS = Path(__file__).resolve().parents[1] / "assets"
 
 
 def validate_library(root: Path) -> Path:
     root = root.expanduser().resolve()
-    # Generated/private media belongs outside the versioned skill source.
-    if root == REPO_ROOT or REPO_ROOT in root.parents:
-        raise ValueError("Library must be outside the Content Studio source repository")
+    # The stock skill owns this one Git catalogue; unrelated generated assets stay out of source.
+    if (root == REPO_ROOT or REPO_ROOT in root.parents) and root != STOCK_ASSETS:
+        raise ValueError("Repository libraries must use the stock skill's assets folder")
     return root
 
 
@@ -110,8 +111,8 @@ def write_catalogue(root: Path, assets: list[dict]) -> None:
     root.mkdir(parents=True, exist_ok=True)
     catalog = root / "catalogue.json"
     readme = root / "README.md"
-    lines = ["# My Content Studio stock assets", "",
-             "Private catalogue of imported reusable media and reference-only effects.", "",
+    lines = ["# Content Studio stock assets", "",
+             "Git catalogue of owned media and local-only reference effects. SFX WAVs under `media/sfx/` are ignored by Git while redistribution rights are unknown.", "",
              "| ID | Name | Type | Size / length | Rights | Creator | Review | Sound / shot tags | Tags | Source | File |",
              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for item in sorted(assets, key=lambda row: row["name"].casefold()):
@@ -131,7 +132,11 @@ def write_catalogue(root: Path, assets: list[dict]) -> None:
         cells.append(_markdown(", ".join(item["tags"])))
         source = item.get("source_url") or "—"
         cells.append(f"[source]({source})" if source.startswith("https://") else "—")
-        cells.append(f"[media]({item['relative_path']})")
+        # Unknown-rights WAVs stay local, so the Git catalogue must not link to absent remote files.
+        if item["kind"] == "sfx" and item["rights"] == "unknown":
+            cells.append(f"`{item['relative_path']}` (local only)")
+        else:
+            cells.append(f"[media]({item['relative_path']})")
         lines.append("| " + " | ".join(cells) + " |")
     if not assets:
         lines.append("| — | No assets imported yet | — | — | — | — | — | — | — | — | — | — |")
@@ -304,7 +309,7 @@ def suggest_sfx(assets: list[dict], manifest: dict, mode: str = "delivery") -> d
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--library", required=True, type=Path,
-                        help="Private asset folder outside the source repository")
+                        help="Stock skill assets folder in the Content Studio source repository")
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("init")
     listing = sub.add_parser("list")

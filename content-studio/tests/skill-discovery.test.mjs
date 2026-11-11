@@ -57,6 +57,10 @@ test('managed install links nested skills directly and refuses unmanaged destina
   }
   const source = discoverSkills(path.join(result.release, 'content-studio', 'skills'));
   assert.equal(result.skills.length, source.length);
+  const stock = path.join(result.release, 'content-studio', 'skills', 'content-studio-video', 'stock-library', 'assets');
+  // A managed install can include owned CTA stock, but never local-only Reel excerpts.
+  assert.ok(fs.existsSync(path.join(stock, 'media', 'cta')));
+  assert.equal(fs.existsSync(path.join(stock, 'media', 'sfx')), false);
   for (const {name, folder} of source) {
     assert.equal(fs.realpathSync(path.join(root, 'skills', name)).toLowerCase(), fs.realpathSync(folder).toLowerCase());
   }

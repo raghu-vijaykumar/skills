@@ -18,7 +18,7 @@ fidelity.
 Rebuild them from the private approved library and the local public-video copy:
 
 ```powershell
-python content-studio/skills/content-studio-video/stock-library/scripts/build_gallery.py --library <private-stock-library> --background-video <published-fountain-video.mp4> --at 95
+python content-studio/skills/content-studio-video/stock-library/scripts/build_gallery.py --library content-studio/skills/content-studio-video/stock-library/assets --background-video <published-fountain-video.mp4> --at 95
 ```
 
 This approval covers the reusable clips. Each later video still needs its own

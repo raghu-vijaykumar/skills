@@ -82,7 +82,9 @@ class AuthoredMediaTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "unsupported"):
                 library.add(Path(folder) / "library", source, "Clip", "gif", "owned",
                             "Raghu", [])
-            with self.assertRaisesRegex(ValueError, "outside"):
+            self.assertEqual(library.validate_library(library.STOCK_ASSETS),
+                             library.STOCK_ASSETS.resolve())
+            with self.assertRaisesRegex(ValueError, "stock skill"):
                 library.validate_library(library.REPO_ROOT / "assets")
 
     def test_corrupt_image_rejected(self):
@@ -122,6 +124,8 @@ class AuthoredMediaTests(unittest.TestCase):
             self.assertAlmostEqual(item["media"]["duration_seconds"], .1)
             self.assertIn("[source](https://www.instagram.com/reel/abc/)",
                           (root / "README.md").read_text(encoding="utf-8"))
+            self.assertIn("`media/sfx/", (root / "README.md").read_text(encoding="utf-8"))
+            self.assertNotIn("[media](media/sfx/", (root / "README.md").read_text(encoding="utf-8"))
             self.assertEqual(library.read_catalogue(root)[0]["source_start_seconds"], 1.2)
             reviewed = library.review_sfx(root, item["id"], "unknown", "passed",
                                           "Listened to complete effect; no voice or music")
