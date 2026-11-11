@@ -14,6 +14,6 @@
 
 ## Verify and finish
 
-- [ ] T007 Run tests, documentation checks, Git ignore and LFS checks, and asset hash verification.
-- [ ] T008 Stage relevant tracked files, review the staged diff, commit, push, and verify the remote.
-- [ ] T009 After verifying the new location, remove only the old stock-library folder.
+- [x] T007 Run tests, documentation checks, Git ignore and LFS checks, and asset hash verification.
+- [x] T008 Stage relevant tracked files, review the staged diff, commit, push, and verify the remote.
+- [x] T009 After verifying the new location, remove only the old stock-library folder.

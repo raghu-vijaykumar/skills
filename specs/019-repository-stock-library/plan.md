@@ -11,3 +11,7 @@ Update `library.py` to permit only this canonical repository library within the 
 ## Gates
 
 The repository is public. The user chose to keep the four unknown-rights Reel WAVs local and ignored by Git. No permission to redistribute them is inferred. The production source and review artifacts remain outside Git. This is a storage migration and does not edit the sound or video content.
+
+## Verified result
+
+Content Studio 0.6.6 installed with the tracked catalogue and three CTA assets; the managed release omits `assets/media/sfx/`. The source and destination hashes matched for all seven media files, and nine review files were verified in the task visualization folder. The npm package contains three CTA files and zero SFX files. `npm test` passed 48 tests with two Windows skips; 13 stock tests, three Reel tests, documentation and capability checks passed. Commit `644345d` and all three CTA LFS objects reached the remote branch. The old stock-library folder was removed after these checks.
