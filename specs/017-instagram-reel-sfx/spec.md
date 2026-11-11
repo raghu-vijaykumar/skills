@@ -16,6 +16,8 @@
 - Accept only canonical Instagram Reel URLs; strip tracking parameters; fail clearly if the public page needs login or is unavailable. Never bypass access controls.
 - Record source hash and precise clip boundaries. Refuse out-of-range or empty cuts and preserve the downloaded original.
 - Do not claim a mixed-track cut is voice-free based on a filter or automatic classifier. Require complete listening review of each candidate before marking it voice-free.
+- Check official sound libraries for a clean standalone source before treating a Reel extraction as reusable. Record the license and distinguish verified originals from similar replacements.
+- If external separation is used, require approval of any upload destination, save the model/settings and stem provenance, and retain the raw cut for comparison. A separated stem still requires full human listening review.
 - Extend the existing private stock library with audio SFX, duration, source attribution, rights state, and a reuse gate. Never commit reel media or extracted audio.
 - Run the approved Content Studio precheck before production extraction and catalogue import. Do not publish or place extracted effects in a video as part of this workflow.
 
