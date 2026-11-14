@@ -42,7 +42,8 @@ def fingerprint(timeline_path: Path, timeline: dict) -> str:
              bytes.fromhex(capability_sha256())]
     for clip in result["clips"]:
         parts.append(clip["path"].as_posix().encode())
-        parts.append(bytes.fromhex(sha256_file(clip["path"])))
+        # validate() already checked this digest against the source bytes.
+        parts.append(bytes.fromhex(clip["sha256"]))
     for cue in result["audio"]:
         path = asset_path(result["root"], cue["source"])
         parts.append(path.as_posix().encode())

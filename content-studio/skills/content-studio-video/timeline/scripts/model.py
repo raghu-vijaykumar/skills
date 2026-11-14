@@ -174,13 +174,18 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         raise ValueError("Timeline needs at least one picture clip")
     ids: set[str] = set()
     resolved: list[dict] = []
+    verified_sources: dict[Path, str] = {}
     for clip in picture:
         clip_id = clip.get("id")
         if not isinstance(clip_id, str) or not clip_id or clip_id in ids:
             raise ValueError("Duplicate or missing picture clip ID")
         ids.add(clip_id)
         source = asset_path(root, clip.get("source"))
-        if sha256_file(source) != clip.get("sha256"):
+        # Reused source spans share one byte identity; hash a long original
+        # once per validation while still checking every clip's declared hash.
+        if source not in verified_sources:
+            verified_sources[source] = sha256_file(source)
+        if verified_sources[source] != clip.get("sha256"):
             raise ValueError(f"Picture source changed: {clip_id}")
         gain = _number(clip.get("audio_gain", 1), f"{clip_id}.audio_gain")
         if gain > 2:

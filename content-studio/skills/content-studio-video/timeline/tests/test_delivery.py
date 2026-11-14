@@ -186,6 +186,20 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         self.assertIn("scale=iw*2:ih*2:flags=lanczos", graph)
         self.assertGreaterEqual(graph.count("hqdn3d="), 4)
 
+    def test_reused_picture_source_is_hashed_once_for_fingerprint(self):
+        actual = model.sha256_file
+        source_reads = []
+
+        def count_source(path):
+            if Path(path).resolve() == self.source.resolve():
+                source_reads.append(path)
+            return actual(path)
+
+        with patch.object(model, "sha256_file", side_effect=count_source):
+            digest = approval.fingerprint(self.timeline_path, self.timeline)
+        self.assertEqual(len(source_reads), 1)
+        self.assertEqual(len(digest), 64)
+
     def test_unapproved_and_stale_render_refused_before_output(self):
         with self.assertRaises(SystemExit):
             with contextlib.redirect_stderr(io.StringIO()):
