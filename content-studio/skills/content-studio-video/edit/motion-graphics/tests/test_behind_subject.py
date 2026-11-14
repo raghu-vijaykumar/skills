@@ -20,6 +20,13 @@ import model  # noqa: E402
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
                      "FFmpeg and FFprobe required")
 class BehindSubjectTests(unittest.TestCase):
+    def test_cue_cli_imports_from_its_own_bundle(self):
+        # A subprocess catches import paths hidden by this test process's sys.path.
+        result = subprocess.run([sys.executable, str(FOLDER / "scripts" /
+                                                  "behind_subject.py"), "--help"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)

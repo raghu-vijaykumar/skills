@@ -9,7 +9,8 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "timeline" / "scripts"))
+# Use the installed bundle layout as well as the source checkout layout.
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "timeline" / "scripts"))
 import model  # noqa: E402
 
 PRESET = json.loads((Path(__file__).resolve().parents[1] / "presets" /
