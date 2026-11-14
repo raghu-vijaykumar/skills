@@ -1,0 +1,5 @@
+# Synthetic fast pan evidence
+
+Run `python content-studio/skills/content-studio-video/edit/fastpan-cuts/tests/build_evidence.py` from the repository root to regenerate this evidence. The builder uses the synthetic 320 × 180, 30 fps, eight-second textured pan and 440 Hz AAC tone from `tests/test_fastpan.py`. It calls the real `scan`, `preview`, and `timeline-changes` functions. The source and temporary MP4 preview are discarded after building. Only the report, changes JSON, and small GIF are committed. The report's temporary absolute source path is replaced with a descriptive placeholder; the motion scores and source hash are from the actual scan.
+
+The known synthetic pan spans source frames 60–119 (2–4 seconds). The comparison GIF shows original at left and the bounded cut preview at right for four seconds. The preview starts before the pan and joins directly to the stable landing, while the audio test verifies matching stream lengths. The changes file lists the retained 0–2 and 4–8 second ranges. Fixture approval fields exercise the guard only; this is no human approval for a real video. Real footage needs boundary, audio, and exact-final-output review.

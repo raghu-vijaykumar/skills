@@ -9,6 +9,7 @@ Before any production edit, including a direct specialist call, run the [workflo
 | Input or request | Default action |
 | --- | --- |
 | Raw camera folder | Order and diagnose originals for the user's manual edit. Preserve originals; blur is review evidence, and permanent changes wait for the delivery timeline. |
+| Rapid camera sweep | Use [fast pan cuts](content-studio/skills/content-studio-video/edit/fastpan-cuts/SKILL.md) to scan, review exact removal frames with synchronized audio, and hand approved cuts to the delivery timeline. |
 | User's edited render | Inspect the actual edit and its scene times; start a new plan for requested continuation. |
 | Narration request | Draft and review text and timing, create and listen to approved voice, then place the voice asset on the delivery timeline for final mixing. Cloning requires consent. |
 | Resolution increase | Compare unchanged, Lanczos, and eligible AI samples on the **completed edit**; upscale only when justified and approved. HDR/DV requires an explicit preservation or tone-map route. |

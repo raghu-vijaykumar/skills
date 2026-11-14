@@ -24,6 +24,7 @@ content-studio/skills/
       preprocess/                    individual-clip preparation
     edit/
       clip-edit/                     shared edit backend and manual-edit tools
+      fastpan-cuts/                  rapid sweep scan, bounded cut preview, timeline handoff
       autocut/                       experimental; explicit request only
       reframe/                       subjects, saliency, center
       color/                         correction and range presets

@@ -8,7 +8,7 @@ validated by `npm run check:capabilities`.
 - **Template:** [CAPABILITY-MATRIX-TEMPLATE.md](CAPABILITY-MATRIX-TEMPLATE.md)
 - **Checker:** [check-capability-matrices.mjs](../../scripts/check-capability-matrices.mjs)
 - **Evidence review:** [CAPABILITY-EVIDENCE-AUDIT.md](CAPABILITY-EVIDENCE-AUDIT.md)
-- **Current coverage:** 42 matrices, 111 declared methods, and 6 explicitly
+- **Current coverage:** 44 matrices, 120 declared methods, and 6 explicitly
   unsupported methods.
 
 `Supported` means the manifest provides a runnable script. `Unsupported` means the
@@ -52,6 +52,7 @@ approved result forward. Gallery examples are illustrative, not masters.
 | --- | --- | --- |
 | AutoCut | [README](edit/autocut/README.md) | 1 |
 | Clip editing | [README](edit/clip-edit/README.md) | documented operations |
+| Fast pan cuts | [README](edit/fastpan-cuts/README.md) | 3 |
 | Color | [README](edit/color/README.md) | 3 |
 | Motion graphics | [README](edit/motion-graphics/README.md) | 4 |
 | Reflection | [README](edit/reflection/README.md) | 6 |

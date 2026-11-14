@@ -1,0 +1,21 @@
+{
+  "picture": [
+    {
+      "id": "fastpan-keep-0001",
+      "source": "synthetic-pan.mp4",
+      "sha256": "aee6d12344fcd803b338f9fac551f22509299f17c21e352f0c13391bf2fad58b",
+      "source_in": 0.0,
+      "source_out": 2.0,
+      "audio_gain": 1.0
+    },
+    {
+      "id": "fastpan-keep-0002",
+      "source": "synthetic-pan.mp4",
+      "sha256": "aee6d12344fcd803b338f9fac551f22509299f17c21e352f0c13391bf2fad58b",
+      "source_in": 4.0,
+      "source_out": 8.0,
+      "audio_gain": 1.0
+    }
+  ],
+  "audio_policy": "mix"
+}

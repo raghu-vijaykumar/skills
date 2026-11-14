@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "scan", "script": "scripts/fastpan.py", "status": "supported", "review": "Inspect sustained candidates against source frames; no automatic cut"},
+    {"id": "preview", "script": "scripts/fastpan.py", "status": "supported", "review": "Review both picture joins and the synchronized audio"},
+    {"id": "timeline-changes", "script": "scripts/fastpan.py", "status": "supported", "review": "Requires reviewed exact frames and a separately approved delivery timeline"}
+  ]
+}

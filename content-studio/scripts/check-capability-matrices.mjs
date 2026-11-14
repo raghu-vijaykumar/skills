@@ -15,9 +15,9 @@ const expectedUnsupported = new Set([
   'timeline/hdr-dolby-vision',
 ]);
 // Keep the declared-method total in sync when a reviewed capability is added.
-// This revision adds the matte generator, cue helper, and timeline renderer.
-const expectedMethodCount = 117;
-const expectedMatrixCount = 43;
+// Fast pan cuts adds a separately discoverable leaf with three methods.
+const expectedMethodCount = 120;
+const expectedMatrixCount = 44;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
   .filter(({folder}) => folder === videoRoot || folder.startsWith(videoRoot + path.sep));
@@ -49,6 +49,7 @@ const rowPattern = /^\|\s*`([^`]+)`\s*\|\s*(Supported|Unsupported)\s*\|/;
 const requiredGifRows = new Map([
   ['edit/color', ['preset', 'shot-match']],
   ['edit/reflection', ['fix', 'preview', 'ai']],
+  ['edit/fastpan-cuts', ['preview']],
   ['edit/reframe', ['subjects', 'saliency', 'center']],
   ['edit/restoration', ['denoise-light', 'denoise-medium', 'denoise-nlmeans',
     'deflicker', 'lens', 'sharpen-light', 'sharpen-medium']],
