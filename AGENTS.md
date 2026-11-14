@@ -5,6 +5,12 @@
 Editable source for the `content-studio` video lifecycle bundle. The npm
 package name remains `@raghu-vijaykumar/videogen`.
 
+## Branch policy
+
+Make changes on `main` by default. Create or use another branch only when the
+user explicitly requests it. Consolidate previously branched work into `main`
+before treating it as complete.
+
 ## Before changing code
 
 1. Read the owning `SKILL.md`, its `references/`, and `methods.json` when present. Nested skills under `content-studio-video/` are individually callable.
