@@ -56,6 +56,11 @@ def fingerprint(timeline_path: Path, timeline: dict) -> str:
             sidecar = asset_path(result["root"], item["source"])
             parts.append(sidecar.as_posix().encode())
             parts.append(bytes.fromhex(sha256_file(sidecar)))
+        if item["method"] == "text-behind-subject":
+            for name in ("font_source", "matte_source"):
+                asset = asset_path(result["root"], item[name])
+                parts.append(asset.as_posix().encode())
+                parts.append(bytes.fromhex(sha256_file(asset)))
     digest = hashlib.sha256()
     for part in parts:
         digest.update(len(part).to_bytes(8, "big"))

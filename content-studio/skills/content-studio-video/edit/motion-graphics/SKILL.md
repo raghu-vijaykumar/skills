@@ -5,6 +5,8 @@ description: Add reusable timed motion graphics and transition effects to an edi
 
 # Motion graphics and vlog effects
 
+For a user request to recreate the rising place-name edit from the Enrique Beli reel, use the native [text-behind-subject preset](references/text-behind-subject.md). It generates a moving person/foreground matte locally and composes the title on the approved delivery timeline; CapCut is not required. One or several shots can each receive a cue. Inspect the moving matte and exact composite before final approval.
+
 Before changing the draft, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
 Read the channel rules and source draft before editing. Keep the source video untouched. Inspect sparse frames or short ranges to locate actions and cuts without decoding the entire master for analysis. Use speech as context, but only label ingredients actually supported by a frame or clear narration; do not invent quantities.

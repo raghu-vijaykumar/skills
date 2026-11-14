@@ -204,6 +204,20 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         if cue["kind"] == "voice" and float(cue["start"]) + metadata["duration"] > duration + .08:
             raise ValueError(f"Voice cue {cue['id']} extends past the picture")
         inputs.extend(["-i", str(source)])
+    matte_inputs: dict[str, int] = {}
+    for item in resolved["operations"]:
+        if item["method"] != "text-behind-subject":
+            continue
+        matte = asset_path(resolved["root"], item["matte_source"])
+        metadata = media_info(matte)
+        if not metadata["video"]:
+            raise ValueError(f"No video stream in foreground matte {item['id']}")
+        if matte.suffix.lower() != ".png" and metadata["duration"] + .08 < item["end"] - item["start"]:
+            raise ValueError(f"Foreground matte is shorter than cue {item['id']}")
+        matte_inputs[item["id"]] = len(clips) + len(resolved["audio"]) + len(matte_inputs)
+        if matte.suffix.lower() == ".png":
+            inputs.extend(["-loop", "1", "-framerate", _fmt(fps)])
+        inputs.extend(["-i", str(matte)])
     for i, clip in enumerate(clips):
         points = _breakpoints(clip["start"], clip["end"], resolved["operations"])
         segment_labels: list[str] = []
@@ -289,6 +303,36 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         elif method == "motion-graphics-ass":
             sidecar = asset_path(resolved["root"], item["source"])
             graph.append(f"[{current_v}]ass={_text(item['source'])}[{target}]")
+        elif method == "text-behind-subject":
+            # The white matte restores original foreground pixels after the
+            # rising title, so the title passes behind the person and terrain.
+            index_in = matte_inputs[item["id"]]
+            cue_length = end - start
+            font_size = max(1, round(height * float(item.get("font_height", .09))))
+            from_y = float(item.get("from_y", .55))
+            to_y = float(item.get("to_y", .12))
+            rise = float(item.get("rise_seconds", 1))
+            y = (f"if(lt(t,{_fmt(start + rise)}),"
+                 f"h*{from_y:g}+(h*{to_y:g}-h*{from_y:g})*"
+                 f"(t-{_fmt(start)})/{_fmt(rise)},h*{to_y:g})")
+            y = y.replace(",", "\\,")
+            graph.append(f"[{current_v}]split=2[plain{index}][letterbase{index}]")
+            graph.append(f"[letterbase{index}]drawtext=fontfile={_text(item['font_source'])}:"
+                         f"text='{_text(item['text'].strip())}':fontcolor=white:"
+                         f"fontsize={font_size}:x=(w-text_w)/2:y='{y}':"
+                         f"enable='between(t,{_fmt(start)},{_fmt(end)})'"
+                         f"[lettered{index}]")
+            graph.append(f"color=c=black:s={width}x{height}:r={_fmt(fps)}:"
+                         f"d={_fmt(duration)},format=yuv420p[blackmask{index}]")
+            graph.append(f"[{index_in}:v:0]trim=duration={_fmt(cue_length)},"
+                         f"setpts=PTS-STARTPTS+{_fmt(start)}/TB,"
+                         f"scale={width}:{height},fps={_fmt(fps)},"
+                         f"format=yuv420p[mattepart{index}]")
+            graph.append(f"[blackmask{index}][mattepart{index}]"
+                         f"overlay=eof_action=pass:repeatlast=0:format=auto,"
+                         f"format=yuv420p[fullmask{index}]")
+            graph.append(f"[lettered{index}][plain{index}][fullmask{index}]"
+                         f"maskedmerge[{target}]")
         elif method == "cross-blur":
             # Ease the blur in and out around the source cut; start/end remain
             # editable timeline times and the picture/audio duration is fixed.
@@ -368,6 +412,10 @@ def _export(timeline: dict, resolved: dict, output: Path,
     if output in [asset_path(resolved["root"], cue["source"])
                   for cue in resolved["audio"]]:
         raise ValueError("Output cannot overwrite an audio source")
+    if output in [asset_path(resolved["root"], op["matte_source"])
+                  for op in resolved["operations"]
+                  if op["method"] == "text-behind-subject"]:
+        raise ValueError("Output cannot overwrite a foreground matte")
     inputs, graph = compile_graph(timeline, resolved)
     expected = resolved["duration"]
     seek_args: list[str] = []

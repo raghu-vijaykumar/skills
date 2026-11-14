@@ -8,6 +8,18 @@
       "review": "Inspect the exact output and compare it with the approved plan"
     },
     {
+      "id": "text-behind-subject",
+      "script": "scripts/behind_subject.py",
+      "status": "supported",
+      "review": "Review locally generated moving matte, rising title composite, and exact SDR timeline export"
+    },
+    {
+      "id": "subject-matte",
+      "script": "scripts/subject_matte.py",
+      "status": "supported",
+      "review": "Review person/terrain mask through motion; thin limbs and complex edges can fail"
+    },
+    {
       "id": "overlay",
       "script": "scripts/overlay.py",
       "status": "supported",

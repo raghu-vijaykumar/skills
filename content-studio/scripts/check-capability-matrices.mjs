@@ -14,9 +14,9 @@ const expectedUnsupported = new Set([
   'timeline/upscale-pytorch',
   'timeline/hdr-dolby-vision',
 ]);
-// Reel SFX adds two real methods and one leaf matrix.
 // Keep the declared-method total in sync when a reviewed capability is added.
-const expectedMethodCount = 114;
+// This revision adds the matte generator, cue helper, and timeline renderer.
+const expectedMethodCount = 117;
 const expectedMatrixCount = 43;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
@@ -57,7 +57,8 @@ const requiredGifRows = new Map([
   ['source/stabilize', ['vidstab']],
   ['timeline', ['crop', 'lens-correction', 'denoise-light', 'denoise-medium',
     'deflicker', 'upscale-lanczos', 'color-eq', 'sharpen-light',
-    'sharpen-medium', 'title', 'motion-graphics-ass']],
+    'sharpen-medium', 'title', 'motion-graphics-ass',
+    'text-behind-subject']],
 ].map(([folder, ids]) => [folder, new Set(ids)]));
 let methodCount = 0;
 const unsupported = new Set();

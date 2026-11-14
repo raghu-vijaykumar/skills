@@ -12,11 +12,15 @@ with generated-tone audio; the source videos are untouched.
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `presets` | Supported | Category + preset ID + proposed cues → resolved preset JSON + cue validation | Specialist only | [Actual cooking-recipe result](previews/cooking-recipe-resolved.json) | Style specification and validation layer; JSON is not proof of a rendered animation. |
+| `text-behind-subject` | Supported | Shot, local foreground matte, title cue → rising title behind person/terrain in one SDR timeline export | Yes | [Synthetic rendered preview](previews/text-behind-subject.gif) | One matte per cue; review thin limbs, terrain edges, and title placement. |
+| `subject-matte` | Supported | Shot + optional terrain polygon → locally inferred person/foreground mask | Prepares timeline asset | [Synthetic composite](previews/text-behind-subject.gif) | Torchvision weights download once; dynamic person mask can miss fine edges. |
 | `overlay` | Supported | Cue sheet + edited source → bounded review MP4 or ASS sidecar | Specialist only | [Five effects](previews/effects.gif) / [location pin](previews/location.gif) | Actual review renders; source untouched; Dolby Vision preview loses RPU. |
 | `cta-stock` | Supported | Compatibility command → silent transparent UHD ProRes 4444 MOV | No | [Classic-bar variant](../../stock-library/previews/classic-bar.gif) | Exact asset preview from the delegated stock generator; select and review placement per shot. |
 | `hdr-compose` | Supported | Versioned manifest + hashes + human approval → HEVC Main10 HLG-base master | No | [HLG example](previews/hdr-compose.md) | Narrow 3840x2160/30 route; five-second intro/CTA; no Dolby Vision RPU preservation. |
 
 ## Named presets
+
+The [rising text behind subject preset](references/text-behind-subject.md) is an implemented edit recipe, separate from the nine style-only presets below. Its [GIF](previews/text-behind-subject.gif) is an actual single-export timeline preview built from synthetic artwork by `previews/build_text_behind_subject.py`; no Instagram video is stored in the repository.
 
 Select a preset through `presets.py`; this is a style specification and cue-validation
 layer, not a claim that every animation is rendered by `overlay.py`. The nine presets are:

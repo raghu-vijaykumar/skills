@@ -14,7 +14,7 @@ PICTURE_METHODS = {
     "denoise-light", "denoise-medium", "deflicker",
     "upscale-lanczos", "color-eq", "sharpen-light", "sharpen-medium",
 }
-GRAPHIC_METHODS = {"title", "motion-graphics-ass"}
+GRAPHIC_METHODS = {"title", "motion-graphics-ass", "text-behind-subject"}
 AUDIO_METHODS = {"highpass", "audio-denoise", "compress", "loudnorm"}
 # Keep the single-export join vocabulary aligned with the specialist catalog.
 # Native variants map to FFmpeg xfade; eight authored expressions use custom.
@@ -280,6 +280,38 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             font = asset_path(root, item.get("font_source"))
             if sha256_file(font) != item.get("font_sha256"):
                 raise ValueError(f"Title font changed: {op_id}")
+        if kind == "text-behind-subject":
+            # The matte is an explicit, reviewable foreground layer. Guessing a
+            # person's outline during final render would make the edit unstable.
+            font = asset_path(root, item.get("font_source"))
+            matte = asset_path(root, item.get("matte_source"))
+            if sha256_file(font) != item.get("font_sha256"):
+                raise ValueError(f"Title font changed: {op_id}")
+            if sha256_file(matte) != item.get("matte_sha256"):
+                raise ValueError(f"Foreground matte changed: {op_id}")
+            if matte.suffix.lower() not in {".png", ".mp4", ".mov", ".mkv"}:
+                raise ValueError(f"Foreground matte format is unsupported: {op_id}")
+            title = item.get("text")
+            if not isinstance(title, str) or not 1 <= len(title.strip()) <= 80:
+                raise ValueError(f"Text-behind-subject title is invalid: {op_id}")
+            for name, default in (("from_y", .55), ("to_y", .12),
+                                  ("font_height", .09)):
+                value = _number(item.get(name, default), f"{op_id}.{name}")
+                if value > 1 or (name == "font_height" and value < .02):
+                    raise ValueError(f"{op_id}.{name} must fit in the canvas")
+            rise = _number(item.get("rise_seconds", 1), f"{op_id}.rise_seconds",
+                           minimum=.1)
+            if rise > end - start:
+                raise ValueError(f"{op_id}.rise_seconds exceeds the cue range")
+            # One matte represents one source range. A join overlap contains
+            # pixels from two shots and needs a separately authored composite.
+            if not any(start >= clip["start"] and end <= clip["end"]
+                       for clip in resolved):
+                raise ValueError(f"Foreground matte cue crosses shots: {op_id}")
+            for clip in resolved[:-1]:
+                overlap = by_after.get(clip["id"], {}).get("duration", 0)
+                if overlap and start < clip["end"] and end > clip["end"] - overlap:
+                    raise ValueError(f"Foreground matte cue overlaps a join: {op_id}")
         if kind == "motion-graphics-ass":
             # ASS cues carry their own times, so the sidecar spans the full edit.
             if abs(start) > 1e-6 or abs(end - duration) > 1e-6:
@@ -319,6 +351,10 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     input_paths += [asset_path(root, c["source"]) for c in audio]
     input_paths += [asset_path(root, o["font_source"]) for o in operations if o["method"] == "title"]
     input_paths += [asset_path(root, o["source"]) for o in operations if o["method"] == "motion-graphics-ass"]
+    input_paths += [asset_path(root, o["matte_source"]) for o in operations
+                    if o["method"] == "text-behind-subject"]
+    input_paths += [asset_path(root, o["font_source"]) for o in operations
+                    if o["method"] == "text-behind-subject"]
     if output in input_paths or output == plan:
         raise ValueError("Output cannot overwrite an input")
     return {"clips": resolved, "transitions": by_after, "operations": operations,

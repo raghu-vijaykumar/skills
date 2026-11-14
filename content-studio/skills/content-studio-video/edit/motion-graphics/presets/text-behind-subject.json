@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "text-behind-subject",
+  "display_name": "Rising text behind subject",
+  "source_tutorial": "https://www.instagram.com/reel/DfkgKmgoLVs/",
+  "method": "text-behind-subject",
+  "defaults": {
+    "rise_seconds": 1.0,
+    "from_y": 0.55,
+    "to_y": 0.12,
+    "font_height": 0.09
+  },
+  "matte": {
+    "person_model": "torchvision-lraspp-voc",
+    "optional_static_foreground_polygon": true,
+    "white": "keep original foreground above title",
+    "black": "show title above original picture"
+  },
+  "review": [
+    "Title first emerges from behind terrain or the subject, then settles in open sky",
+    "Moving foreground edges do not leave halos, holes, or detached limbs",
+    "Title stays legible and does not obscure a face or important action",
+    "Exact final output keeps audio in sync and the requested duration"
+  ]
+}
