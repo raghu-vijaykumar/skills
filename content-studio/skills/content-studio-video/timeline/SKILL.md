@@ -33,6 +33,13 @@ top-level arrays such as `picture`, `operations`, or `audio`; the old
 revision remains intact. Every referenced source, voice file, font, and ASS
 sidecar needs a lowercase SHA-256 hash. `timeline.py hash --file <asset>`
 prints it. Paths to those assets are relative to `source_root`.
+For cut timelines, the renderer seeks each source input to its retained span
+before decoding. This avoids decoding a long source from frame zero for every
+kept segment; the final picture and audio are still encoded once. A timeline
+preview late in a long edit may still process preceding timeline spans, so use
+short source-linked cut previews for boundary review and benchmark the actual
+final route before committing to a long render.
+
 Each revision snapshots the approved plan, its approval, and checklist beside
 the timeline file. A changed plan needs its own human preflight approval before
 `revise` can use it; prior revisions keep their plan snapshots.

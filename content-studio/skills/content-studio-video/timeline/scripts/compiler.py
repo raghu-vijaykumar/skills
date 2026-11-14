@@ -189,7 +189,14 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                         f"Upscale {operation['id']} needs at least {scale}x "
                         f"source dimensions in the output canvas")
         info.append(metadata)
-        inputs.extend(["-i", str(clip["path"])])
+        # Seek each picture input to its retained source span before decoding.
+        # A long source used by several cuts would otherwise be decoded from
+        # frame zero once per clip, making late edits prohibitively expensive.
+        if copy_audio:
+            inputs.extend(["-i", str(clip["path"])])
+        else:
+            inputs.extend(["-ss", _fmt(clip["source_in"]),
+                           "-t", _fmt(clip["duration"]), "-i", str(clip["path"])])
     if copy_audio:
         # Preserve source packets only for a full length, unshifted source.
         source_info = info[0]
@@ -243,8 +250,8 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                     or sum(o["method"].startswith("sharpen-") for o in active) > 1):
                 raise ValueError("Conflicting overlapping picture effects")
             filters = [
-                f"trim=start={_fmt(clip['source_in'] + left)}:"
-                f"end={_fmt(clip['source_in'] + right)}",
+                f"trim=start={_fmt(left if not copy_audio else clip['source_in'] + left)}:"
+                f"end={_fmt(right if not copy_audio else clip['source_in'] + right)}",
                 "setpts=PTS-STARTPTS",
             ] + _picture_filters(active, width, height, fps, join_format)
             label = f"v{i}s{segment}"
@@ -259,8 +266,8 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         if copy_audio:
             continue
         if info[i]["audio"]:
-            graph.append(f"[{i}:a:0]atrim=start={_fmt(clip['source_in'])}:"
-                         f"end={_fmt(clip['source_out'])},asetpts=PTS-STARTPTS,"
+            graph.append(f"[{i}:a:0]atrim=start=0:"
+                         f"end={_fmt(clip['duration'])},asetpts=PTS-STARTPTS,"
                          f"aresample=48000,aformat=channel_layouts=stereo,"
                          f"volume={float(clip.get('audio_gain', 1)):g}[ac{i}]")
         else:
