@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "scan", "script": "scripts/tilt.py", "status": "supported", "review": "Inspect all candidates and sparse non-candidates; no automatic cut"},
+    {"id": "preview", "script": "scripts/tilt.py", "status": "supported", "review": "Review removed content, both sides of the join, and synchronized audio"},
+    {"id": "timeline-changes", "script": "scripts/tilt.py", "status": "supported", "review": "Requires human-approved frame cuts and separately approved timeline fingerprint"}
+  ]
+}

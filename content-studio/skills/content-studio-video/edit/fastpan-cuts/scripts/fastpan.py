@@ -227,11 +227,11 @@ def scan(source: Path, output: Path, *, sample_fps: int = 4,
 
 
 def validate_decisions(source: Path, decisions: dict, *, require_approval: bool,
-                       exact_hash: bool) -> tuple[dict, list[dict]]:
+                       exact_hash: bool, decision_schema: str = DECISION_SCHEMA) -> tuple[dict, list[dict]]:
     source = source.resolve(strict=True)
     info = media_info(source)
     stat = source.stat()
-    if decisions.get("schema") != DECISION_SCHEMA or Path(decisions.get("source", "")).resolve() != source:
+    if decisions.get("schema") != decision_schema or Path(decisions.get("source", "")).resolve() != source:
         raise ValueError("Cut decision schema or source does not match")
     if decisions.get("source_bytes") != stat.st_size or decisions.get("source_mtime_ns") != stat.st_mtime_ns:
         raise ValueError("Source size or modification time changed since review")
@@ -324,16 +324,18 @@ def preview(source: Path, decisions_file: Path, cut_id: str, output: Path,
 
 
 def timeline_changes(source: Path, decisions_file: Path,
-                     timeline_file: Path, output: Path) -> dict:
+                     timeline_file: Path, output: Path, *,
+                     decision_schema: str = DECISION_SCHEMA,
+                     clip_prefix: str = "fastpan") -> dict:
     source = source.resolve(strict=True)
     decisions = read_json(decisions_file)
     info, cuts = validate_decisions(source, decisions, require_approval=True,
-                                    exact_hash=True)
+                                    exact_hash=True, decision_schema=decision_schema)
     timeline = read_json(timeline_file)
     picture = timeline.get("picture", [])
     if (len(picture) != 1 or timeline.get("operations")
             or timeline.get("transitions") or timeline.get("audio")):
-        raise ValueError("Fast-pan handoff needs one source and no timed cues or transitions")
+        raise ValueError("Cut handoff needs one source and no timed cues or transitions")
     original = picture[0]
     root = Path(timeline.get("source_root", "")).resolve()
     if (root / original.get("source", "")).resolve() != source or original.get("sha256") != decisions["source_sha256"]:
@@ -350,7 +352,7 @@ def timeline_changes(source: Path, decisions_file: Path,
         kept.append((cursor / info["fps"], cut["start_frame"] / info["fps"]))
         cursor = cut["end_frame"]
     kept.append((cursor / info["fps"], float(source_out)))
-    clips = [{"id": f"fastpan-keep-{index:04d}", "source": original["source"],
+    clips = [{"id": f"{clip_prefix}-keep-{index:04d}", "source": original["source"],
               "sha256": original["sha256"], "source_in": round(start, 6),
               "source_out": round(end, 6), "audio_gain": float(original.get("audio_gain", 1))}
              for index, (start, end) in enumerate(kept, 1)]
