@@ -1,4 +1,4 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useId } from 'react';
 import { smooth } from './components/motion-lab/objectMotion.js';
 const leftRest = { elbow: [-132, 100], wrist: [-119, 155], angle: -14, hand: 'rest' };
@@ -53,14 +53,17 @@ function ArmArt({ side, arm, palette, skin, shirt }) {
     const armLine = `M${shoulder.join(' ')} Q${elbow[0] - side * 12} ${elbow[1] + 3} ${elbow.join(' ')} Q${elbow[0] + side * 8} ${elbow[1] - 12} ${wrist.join(' ')}`;
     return _jsxs("g", { children: [_jsx("path", { d: armLine, fill: "none", stroke: palette.skinShade, strokeWidth: 30, strokeLinecap: "round" }), _jsx("path", { d: armLine, fill: "none", stroke: skin, strokeWidth: 26, strokeLinecap: "round" }), _jsx("path", { d: `M${shoulder.join(' ')} L${sleeve.join(' ')}`, stroke: shirt, strokeWidth: 42, strokeLinecap: "round" }), _jsxs("g", { transform: `translate(${wrist.join(' ')}) rotate(${arm.angle}) scale(${side} 1)`, children: [_jsx("path", { d: hands[arm.hand], fill: skin, stroke: palette.skinShade, strokeWidth: 1.8, strokeLinejoin: "round" }), _jsx("path", { d: "M-6-6Q0-12 8-7M-2 3Q4 0 9 0", stroke: palette.skinShade, strokeWidth: 1.7, fill: "none", opacity: ".6", strokeLinecap: "round" })] })] });
 }
-/** SVG group anchored at the base of the head. Put it inside the scene SVG. */
-export function Presenter2D({ frame, face: Face, cues = [], blinkFrames = [], speech = 0, mouthOpen, x = 0, y = 0, scale = 1, palette: paletteOverride }) {
+function DefaultBody({ left, right, palette }) {
     const id = useId().replace(/[^\w-]/g, '');
+    const skin = `url(#${id}-skin)`;
+    const shirt = `url(#${id}-shirt)`;
+    return _jsxs(_Fragment, { children: [_jsxs("defs", { children: [_jsxs("linearGradient", { id: `${id}-skin`, x1: "0%", y1: "0%", x2: "90%", y2: "100%", children: [_jsx("stop", { stopColor: palette.skin }), _jsx("stop", { offset: "1", stopColor: palette.skinShade })] }), _jsxs("linearGradient", { id: `${id}-shirt`, gradientUnits: "userSpaceOnUse", x1: -92, y1: 23, x2: 121, y2: 200, children: [_jsx("stop", { stopColor: palette.shirt }), _jsx("stop", { offset: "1", stopColor: palette.shirtShade })] })] }), _jsx("path", { d: "M-126 200L-118 76Q-109 26-54 16H54Q109 26 118 76L126 200Z", fill: shirt, stroke: palette.shirtShade, strokeWidth: 2.5 }), _jsx(ArmArt, { side: -1, arm: left, palette: palette, skin: skin, shirt: shirt }), _jsx(ArmArt, { side: 1, arm: right, palette: palette, skin: skin, shirt: shirt }), _jsx("path", { d: "M-30-16H30L38 32Q0 62-38 32Z", fill: skin, stroke: palette.skinShade, strokeWidth: 2 }), _jsx("path", { d: "M-49 31Q0 80 49 31", fill: "none", stroke: palette.shirtShade, strokeWidth: 12 }), _jsx("path", { d: "M-47 35Q0 75 47 35", fill: "none", stroke: palette.shirt, strokeWidth: 3 }), _jsx("path", { d: "M-103 111L-93 194M102 107L94 194", fill: "none", stroke: palette.shirtShade, strokeWidth: 2, opacity: ".45" })] });
+}
+/** SVG group anchored at the base of the head. Put it inside the scene SVG. */
+export function Presenter2D({ frame, face: Face, body: Body = DefaultBody, cues = [], blinkFrames = [], speech = 0, mouthOpen, x = 0, y = 0, scale = 1, palette: paletteOverride }) {
     const palette = { ...defaultPalette, ...paletteOverride };
     const pose = samplePresenterPose(cues, frame);
     const eyeOpen = blinkFrames.reduce((open, blink) => Math.min(open, Math.max(0.04, Math.abs(frame - blink) / 3)), 1);
     const mouth = Math.max(0, Math.min(1, mouthOpen ?? speech));
-    const skin = `url(#${id}-skin)`;
-    const shirt = `url(#${id}-shirt)`;
-    return _jsxs("g", { transform: `translate(${x} ${y}) scale(${scale})`, "data-presenter": "2d", children: [_jsxs("defs", { children: [_jsxs("linearGradient", { id: `${id}-skin`, x1: "0%", y1: "0%", x2: "90%", y2: "100%", children: [_jsx("stop", { stopColor: palette.skin }), _jsx("stop", { offset: "1", stopColor: palette.skinShade })] }), _jsxs("linearGradient", { id: `${id}-shirt`, gradientUnits: "userSpaceOnUse", x1: -92, y1: 23, x2: 121, y2: 200, children: [_jsx("stop", { stopColor: palette.shirt }), _jsx("stop", { offset: "1", stopColor: palette.shirtShade })] })] }), _jsx("path", { d: "M-126 200L-118 76Q-109 26-54 16H54Q109 26 118 76L126 200Z", fill: shirt, stroke: palette.shirtShade, strokeWidth: 2.5 }), _jsx(ArmArt, { side: -1, arm: pose.left, palette: palette, skin: skin, shirt: shirt }), _jsx(ArmArt, { side: 1, arm: pose.right, palette: palette, skin: skin, shirt: shirt }), _jsx("path", { d: "M-30-16H30L38 32Q0 62-38 32Z", fill: skin, stroke: palette.skinShade, strokeWidth: 2 }), _jsx("path", { d: "M-49 31Q0 80 49 31", fill: "none", stroke: palette.shirtShade, strokeWidth: 12 }), _jsx("path", { d: "M-47 35Q0 75 47 35", fill: "none", stroke: palette.shirt, strokeWidth: 3 }), _jsx("path", { d: "M-103 111L-93 194M102 107L94 194", fill: "none", stroke: palette.shirtShade, strokeWidth: 2, opacity: ".45" }), _jsx("g", { transform: `rotate(${pose.head} 0 4)`, children: _jsx(Face, { eyeOpen: eyeOpen, mouthOpen: mouth, gaze: pose.head / 6, palette: palette }) })] });
+    return _jsxs("g", { transform: `translate(${x} ${y}) scale(${scale})`, "data-presenter": "2d", children: [_jsx(Body, { left: pose.left, right: pose.right, palette: palette }), _jsx("g", { transform: `rotate(${pose.head} 0 4)`, children: _jsx(Face, { eyeOpen: eyeOpen, mouthOpen: mouth, gaze: pose.head / 6, palette: palette }) })] });
 }

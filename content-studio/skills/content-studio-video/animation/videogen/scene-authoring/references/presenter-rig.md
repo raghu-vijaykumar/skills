@@ -9,6 +9,8 @@ Use a `Presenter2D` SVG rig when the presenter needs to gesture, blink, and spea
 3. Export your face component with `PresenterFaceProps`. Bind `eyeOpen` to the lids or eyes only, `gaze` to a small pupil offset, and `mouthOpen` to the lower lip or jaw path. Keep frames for glasses, hair, and face contours independent. Use React’s `useId` for any SVG gradients, masks, or clip paths. Pass skin and clothing colors through the palette for a consistent neck, arms, and torso.
 4. Store a personal profile in `~/.agents/content-studio/presenters/<id>/` with its `presenter.tsx` export and a short README on origin, reuse, and supported poses. The local library survives skill upgrades. Copy the selected profile into the consuming project so a draft can render with its exact version. The original photo is a separate design reference.
 
+For a new silhouette or art style, pass an SVG `body` component with `PresenterBodyProps`. The rig supplies each arm’s interpolated elbow and wrist, hand shape (`rest`, `point`, `open`, or `two`), angle, and the palette. Keep the neck on the same anchor and redraw the torso and sleeves around your proportions. Shape the forearm from elbow to wrist and attach the palm at the wrist. Use different finger silhouettes for different gestures and check both the held poses and their in-betweens.
+
 ## Bind motion to a scene
 
 - Place the exported presenter inside a composition SVG. Its `x` and `y` locate the neck. `scale` sizes the entire rig, including its gesture reach. View the full raised hand and face before locking captions and diagram safe areas.
