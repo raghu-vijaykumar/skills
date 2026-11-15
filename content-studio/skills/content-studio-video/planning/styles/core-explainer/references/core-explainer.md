@@ -1,3 +1,5 @@
 # Core Explainer
 
 Current built-in formats: video, carousel, post. The active registry is [styles.ts](../../../../animation/videogen/runtime/styles.ts); design tokens remain in [videogen runtime](../../../../animation/videogen/runtime/design/). Use [video guidance](../../../../animation/videogen/references/video.md) for authored scenes and [posts guidance](../../../../animation/videogen/references/posts.md) for content packages. Choose and review a visual representation for each teaching beat.
+
+For a narrated mechanism that benefits from kinetic type, a visible chapter path, or an exploded system view, import `KineticHeadline`, `ChapterSpine`, or `LayeredStack` from `@raghu-vijaykumar/videogen/runtime/components/motion-lab/index`. Cue them from the video timeline and choose each beat's object, palette, and framing separately. These are source-neutral Remotion components, not a fixed Stripe treatment. The private Stripe motion-lab probe exercised them at 0–15 s; its simplified 3D and device art did not meet the reference's visual quality, so inspect each hero at delivery size before extending it to a full Core Explainer.
