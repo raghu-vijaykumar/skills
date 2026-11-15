@@ -12,4 +12,6 @@ This is an **agent-run** route through the existing Content Studio draft and vid
 
 ## Provenance boundary
 
+For an animation-heavy treatment, use the [object animation and reference breakdown workflow](../runtime/components/motion-lab/README.md). In an `ExplainerFilm`, use `renderScene` to supply the authored mechanism shot. For a sequence that changes framing, author separate Remotion `Sequence` shots on the same narration timeline. Preview the object action with fixed framing and then review the narrated cut.
+
 The asset manifest lists every imported or generated media file by project-relative path, SHA-256, origin (`procedural`, `generated`, `recorded`, or `licensed`), and licence or private-use note. The validator checks declared assets and direct static imports from `video.tsx`; it refuses reserved `reference`/`source-reel`/`source-media` directories and escapes outside the draft, including symlink escapes. Audit custom scene modules and dynamic media paths separately. A reference can guide timing and framing in research only; it must not appear in a composition or delivered media. Source IDs identify public facts; mark diagrams of undocumented internals as illustrative.

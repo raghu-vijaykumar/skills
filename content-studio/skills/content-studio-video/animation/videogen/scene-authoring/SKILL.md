@@ -9,4 +9,6 @@ Before production edits, complete the mandatory `content-studio-workflow` preche
 
 For Core Explainer video beats, consider the source-neutral [motion primitives](../runtime/components/motion-lab/README.md) when a kinetic headline, chapter path, or layered system view clarifies the mechanism. Compose them with scene-specific visuals; the private reference used to develop them is not a bundled asset.
 
+For a motion reference, use the shot breakdown in the motion primitives guide. Plan subshot cuts and actor actions at frame precision. Animate the mechanism in separate geometry or rig layers, then prove the state change in a fixed-camera preview before adding camera, typography, or score.
+
 For a new idea, use the [frame-indexed Core Explainer route](../references/idea-to-explainer.md). Its reusable `ExplainerFilm` archetypes establish the motion grammar; replace any archetype whose geometry, interface, or action is too generic to explain the actual claim. Preview hero elements alone, then in narrated context, and record native-size rendered evidence.
