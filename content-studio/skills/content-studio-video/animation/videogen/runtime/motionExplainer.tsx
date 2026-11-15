@@ -216,8 +216,9 @@ function HeroArtwork({src, scene, w, h, frame, active}: {src: string; scene: Exp
   </div>;
 }
 
-export function ExplainerFilm({plan, renderScene, presenterImage, presenterImages, media}: {plan: ExplainerPlan;
+export function ExplainerFilm({plan, renderScene, renderPresenter, presenterImage, presenterImages, media}: {plan: ExplainerPlan;
   renderScene?: (scene: ExplainerScene, frame: number) => React.ReactNode; presenterImage?: string;
+  renderPresenter?: (scene: ExplainerScene, sceneFrame: number) => React.ReactNode;
   presenterImages?: Partial<Record<'speaking' | 'pointing' | 'thinking', string>>; media?: Record<string,string>}) {
   const frame = useCurrentFrame(), scene = plan.scenes.find((s) => frame >= s.startFrame && frame < s.endFrame);
   if (!scene) return <AbsoluteFill style={{background: '#050816'}}/>;
@@ -263,9 +264,10 @@ export function ExplainerFilm({plan, renderScene, presenterImage, presenterImage
       color: accent, textShadow: light ? 'none' : '0 6px 24px #000b'}}>{scene.stateChanges[active].label}</div>
     {scene.visual.metric && <div style={{position: 'absolute', left: portrait ? 74 : 95, bottom: portrait ? 450 : 61,
       color: light ? '#5d6f90' : '#8ea4c9', fontFamily: 'Consolas,monospace', fontSize: portrait ? 22 : 19}}>{scene.visual.metric}</div>}
-    {/* Different original cutouts can express each planned pose without using reference character frames. */}
-    <Presenter pose={scene.presenter?.pose ?? 'speaking'} label={scene.presenter?.label} w={w} h={h} frame={frame}
-      image={presenterImages?.[scene.presenter?.pose === 'pointing' || scene.presenter?.pose === 'thinking' ? scene.presenter.pose : 'speaking'] ?? presenterImage}/>
+    {/* Give the authored rig the scene-local cue clock. Keep explicit no-presenter beats clear. */}
+    {scene.presenter?.pose !== 'none' && (renderPresenter ? renderPresenter(scene, local) :
+      <Presenter pose={scene.presenter?.pose ?? 'speaking'} label={scene.presenter?.label} w={w} h={h} frame={frame}
+        image={presenterImages?.[scene.presenter?.pose === 'pointing' || scene.presenter?.pose === 'thinking' ? scene.presenter.pose : 'speaking'] ?? presenterImage}/>)}
     <div style={{position: 'absolute', left: 0, bottom: 0, height: portrait ? 9 : 7, background: accent,
       width: `${frame / plan.durationFrames * 100}%`, boxShadow: `0 0 20px ${accent}`}}/>
   </AbsoluteFill>;

@@ -9,6 +9,8 @@ Before production edits, complete the mandatory `content-studio-workflow` preche
 
 For Core Explainer video beats, consider the source-neutral [motion primitives](../runtime/components/motion-lab/README.md) when a kinetic headline, chapter path, or layered system view clarifies the mechanism. Compose them with scene-specific visuals; the private reference used to develop them is not a bundled asset.
 
+For a reusable illustrated presenter, use the [2D presenter rig workflow](references/presenter-rig.md). It covers drawing face layers from a reference, saving a local profile, keying gestures and speech to a scene, and checking the rendered result.
+
 For a motion reference, use the shot breakdown in the motion primitives guide. Plan subshot cuts and actor actions at frame precision. Animate the mechanism in separate geometry or rig layers, then prove the state change in a fixed-camera preview before adding camera, typography, or score.
 
 Run [video critique](../../../review/critique/SKILL.md) on representative narrated renders when a creative reference sets the target. Compare the onset, impact, and settle of each important action. When a retry, handoff, or state change is missing, repair the action before polishing the frame. Choose camera and cut rhythm after seeing the action at speed. Separate word-level text timing and gesture cues from the chapter headline. Verify the top changes using the same mapped beats.

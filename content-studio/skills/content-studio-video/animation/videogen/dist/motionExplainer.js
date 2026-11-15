@@ -128,7 +128,7 @@ function HeroArtwork({ src, scene, w, h, frame, active }) {
                     filter: 'drop-shadow(0 28px 30px #0009)' } }), _jsx("div", { style: { position: 'absolute', right: '9%', bottom: '10%', width: 22, height: 22, borderRadius: '50%',
                     background: active > 0 ? blue : '#273d64', border: `3px solid ${blue}`, boxShadow: `0 0 18px ${blue}77` } })] });
 }
-export function ExplainerFilm({ plan, renderScene, presenterImage, presenterImages, media }) {
+export function ExplainerFilm({ plan, renderScene, renderPresenter, presenterImage, presenterImages, media }) {
     const frame = useCurrentFrame(), scene = plan.scenes.find((s) => frame >= s.startFrame && frame < s.endFrame);
     if (!scene)
         return _jsx(AbsoluteFill, { style: { background: '#050816' } });
@@ -162,6 +162,7 @@ export function ExplainerFilm({ plan, renderScene, presenterImage, presenterImag
                                     border: `3px solid ${frame >= chapter.startFrame ? accent : '#7594c0'}`, boxShadow: frame >= chapter.startFrame ? `0 0 15px ${accent}` : undefined } }), chapter.label] }, i))] }), _jsx("div", { style: { position: 'absolute', inset: 0, transform: `translate(${cam.x ?? 0}px,${cam.y ?? 0}px) scale(${cam.scale})`, transformOrigin: '50% 53%', opacity }, children: representation }), _jsx("div", { style: { position: 'absolute', left: portrait ? 74 : 95, bottom: portrait ? 500 : 105,
                     maxWidth: portrait ? 780 : 1300, fontSize: portrait ? 34 : 38, fontWeight: 800, lineHeight: 1.17,
                     color: accent, textShadow: light ? 'none' : '0 6px 24px #000b' }, children: scene.stateChanges[active].label }), scene.visual.metric && _jsx("div", { style: { position: 'absolute', left: portrait ? 74 : 95, bottom: portrait ? 450 : 61,
-                    color: light ? '#5d6f90' : '#8ea4c9', fontFamily: 'Consolas,monospace', fontSize: portrait ? 22 : 19 }, children: scene.visual.metric }), _jsx(Presenter, { pose: scene.presenter?.pose ?? 'speaking', label: scene.presenter?.label, w: w, h: h, frame: frame, image: presenterImages?.[scene.presenter?.pose === 'pointing' || scene.presenter?.pose === 'thinking' ? scene.presenter.pose : 'speaking'] ?? presenterImage }), _jsx("div", { style: { position: 'absolute', left: 0, bottom: 0, height: portrait ? 9 : 7, background: accent,
+                    color: light ? '#5d6f90' : '#8ea4c9', fontFamily: 'Consolas,monospace', fontSize: portrait ? 22 : 19 }, children: scene.visual.metric }), scene.presenter?.pose !== 'none' && (renderPresenter ? renderPresenter(scene, local) :
+                _jsx(Presenter, { pose: scene.presenter?.pose ?? 'speaking', label: scene.presenter?.label, w: w, h: h, frame: frame, image: presenterImages?.[scene.presenter?.pose === 'pointing' || scene.presenter?.pose === 'thinking' ? scene.presenter.pose : 'speaking'] ?? presenterImage })), _jsx("div", { style: { position: 'absolute', left: 0, bottom: 0, height: portrait ? 9 : 7, background: accent,
                     width: `${frame / plan.durationFrames * 100}%`, boxShadow: `0 0 20px ${accent}` } })] });
 }

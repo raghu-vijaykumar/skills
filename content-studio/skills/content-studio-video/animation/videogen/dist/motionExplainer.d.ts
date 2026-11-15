@@ -49,10 +49,11 @@ export type ExplainerPlan = {
     }[];
     scenes: ExplainerScene[];
 };
-export declare function ExplainerFilm({ plan, renderScene, presenterImage, presenterImages, media }: {
+export declare function ExplainerFilm({ plan, renderScene, renderPresenter, presenterImage, presenterImages, media }: {
     plan: ExplainerPlan;
     renderScene?: (scene: ExplainerScene, frame: number) => React.ReactNode;
     presenterImage?: string;
+    renderPresenter?: (scene: ExplainerScene, sceneFrame: number) => React.ReactNode;
     presenterImages?: Partial<Record<'speaking' | 'pointing' | 'thinking', string>>;
     media?: Record<string, string>;
 }): React.JSX.Element;

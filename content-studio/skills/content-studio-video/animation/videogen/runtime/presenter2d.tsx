@@ -1,0 +1,132 @@
+import React, {useId, type ComponentType} from 'react';
+import {smooth} from './components/motion-lab/objectMotion.tsx';
+
+type Point = readonly [number, number];
+type Hand = 'rest' | 'point' | 'open' | 'two';
+type Arm = {elbow: Point; wrist: Point; angle: number; hand: Hand};
+type Pose = {head: number; left: Arm; right: Arm};
+
+export type PresenterGesture = 'rest' | 'point-left' | 'point-right' | 'explain' | 'two' | 'present';
+export type PresenterCue = {frame: number; gesture: PresenterGesture; transitionFrames?: number};
+export type PresenterPalette = {skin: string; skinShade: string; shirt: string; shirtShade: string};
+export type PresenterFaceProps = {
+  eyeOpen: number;
+  mouthOpen: number;
+  gaze: number;
+  palette: PresenterPalette;
+};
+
+const leftRest: Arm = {elbow: [-132, 100], wrist: [-119, 155], angle: -14, hand: 'rest'};
+const rightRest: Arm = {elbow: [132, 100], wrist: [119, 155], angle: 14, hand: 'rest'};
+const poseLibrary: Record<PresenterGesture, Pose> = {
+  rest: {head: 0, left: leftRest, right: rightRest},
+  'point-left': {head: -6, left: {elbow: [-137, 89], wrist: [-185, 18], angle: -92, hand: 'point'}, right: rightRest},
+  'point-right': {head: 6, left: leftRest, right: {elbow: [137, 89], wrist: [185, 18], angle: 92, hand: 'point'}},
+  explain: {head: 3, left: {elbow: [-141, 108], wrist: [-175, 42], angle: -30, hand: 'open'},
+    right: {elbow: [141, 108], wrist: [175, 42], angle: 30, hand: 'open'}},
+  two: {head: -2, left: leftRest, right: {elbow: [139, 98], wrist: [158, 17], angle: 17, hand: 'two'}},
+  present: {head: 4, left: leftRest, right: {elbow: [135, 103], wrist: [189, 53], angle: 73, hand: 'open'}},
+};
+
+const defaultPalette: PresenterPalette = {skin: '#e8a877', skinShade: '#a9634c', shirt: '#b64049', shirtShade: '#743344'};
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+const mixPoint = (a: Point, b: Point, t: number): Point => [mix(a[0], b[0], t), mix(a[1], b[1], t)];
+
+function mixArm(a: Arm, b: Arm, t: number): Arm {
+  return {elbow: mixPoint(a.elbow, b.elbow, t), wrist: mixPoint(a.wrist, b.wrist, t),
+    angle: mix(a.angle, b.angle, t), hand: t < 0.55 ? a.hand : b.hand};
+}
+
+function transition(from: Pose, to: Pose, start: number, duration: number, frame: number): Pose {
+  const amount = smooth(frame, start, start + duration);
+  return {head: mix(from.head, to.head, amount), left: mixArm(from.left, to.left, amount), right: mixArm(from.right, to.right, amount)};
+}
+
+/** Each cue starts from the pose already visible on that frame. */
+export function samplePresenterPose(cues: readonly PresenterCue[], frame: number): Pose {
+  let from = poseLibrary.rest;
+  let to = from;
+  let start = 0;
+  let duration = 0;
+  for (const cue of cues) {
+    if (cue.frame > frame) break;
+    from = transition(from, to, start, duration, cue.frame);
+    to = poseLibrary[cue.gesture];
+    start = cue.frame;
+    duration = cue.transitionFrames ?? 8;
+  }
+  return transition(from, to, start, duration, frame);
+}
+
+const hands: Record<Hand, string> = {
+  rest: 'M-8 9Q-17 3-15-10Q-12-20 0-20Q13-19 14-9L12 4Q7 10-8 9Z',
+  point: 'M-10 10Q-19 3-13-8L-7-13L-8-31Q-8-39-3-40Q3-41 4-34L5-17Q13-20 16-12L17-2Q15 12 5 13Z',
+  two: 'M-11 11Q-18 4-15-8L-10-14L-13-32Q-14-39-9-40Q-4-41-3-34L1-23L5-40Q6-46 12-44Q17-43 15-37L12-18Q19-18 18-10L17 0Q15 13 6 13Z',
+  open: 'M-14 11Q-17 8-17 1L-18-13Q-18-19-13-18L-10-12L-10-29Q-9-35-5-34L-2-31L0-37Q3-43 7-39L8-34Q11-38 15-35L15-30Q21-31 22-25L21-10Q20 10 10 13Z',
+};
+
+function ArmArt({side, arm, palette, skin, shirt}: {
+  side: -1 | 1; arm: Arm; palette: PresenterPalette; skin: string; shirt: string;
+}) {
+  const shoulder: Point = [side * 93, 43];
+  const elbow = arm.elbow;
+  const wrist = arm.wrist;
+  const sleeve = mixPoint(shoulder, elbow, 0.45);
+  const armLine = `M${shoulder.join(' ')} Q${elbow[0] - side * 12} ${elbow[1] + 3} ${elbow.join(' ')} Q${elbow[0] + side * 8} ${elbow[1] - 12} ${wrist.join(' ')}`;
+  return <g>
+    <path d={armLine} fill="none" stroke={palette.skinShade} strokeWidth={30} strokeLinecap="round"/>
+    <path d={armLine} fill="none" stroke={skin} strokeWidth={26} strokeLinecap="round"/>
+    <path d={`M${shoulder.join(' ')} L${sleeve.join(' ')}`} stroke={shirt} strokeWidth={42} strokeLinecap="round"/>
+    <g transform={`translate(${wrist.join(' ')}) rotate(${arm.angle}) scale(${side} 1)`}>
+      <path d={hands[arm.hand]} fill={skin} stroke={palette.skinShade} strokeWidth={1.8} strokeLinejoin="round"/>
+      <path d="M-6-6Q0-12 8-7M-2 3Q4 0 9 0" stroke={palette.skinShade} strokeWidth={1.7} fill="none" opacity=".6" strokeLinecap="round"/>
+    </g>
+  </g>;
+}
+
+export type Presenter2DProps = {
+  frame: number;
+  face: ComponentType<PresenterFaceProps>;
+  /** Ordered cues use the composition's scene-local frame clock. */
+  cues?: readonly PresenterCue[];
+  blinkFrames?: readonly number[];
+  /** Normalized speech energy. An explicit mouthOpen value can drive custom mouth timing. */
+  speech?: number;
+  mouthOpen?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  palette?: Partial<PresenterPalette>;
+};
+
+/** SVG group anchored at the base of the head. Put it inside the scene SVG. */
+export function Presenter2D({frame, face: Face, cues = [], blinkFrames = [], speech = 0, mouthOpen,
+  x = 0, y = 0, scale = 1, palette: paletteOverride}: Presenter2DProps) {
+  const id = useId().replace(/[^\w-]/g, '');
+  const palette = {...defaultPalette, ...paletteOverride};
+  const pose = samplePresenterPose(cues, frame);
+  const eyeOpen = blinkFrames.reduce((open, blink) => Math.min(open, Math.max(0.04, Math.abs(frame - blink) / 3)), 1);
+  const mouth = Math.max(0, Math.min(1, mouthOpen ?? speech));
+  const skin = `url(#${id}-skin)`;
+  const shirt = `url(#${id}-shirt)`;
+  return <g transform={`translate(${x} ${y}) scale(${scale})`} data-presenter="2d">
+    <defs>
+      <linearGradient id={`${id}-skin`} x1="0%" y1="0%" x2="90%" y2="100%">
+        <stop stopColor={palette.skin}/><stop offset="1" stopColor={palette.skinShade}/>
+      </linearGradient>
+      <linearGradient id={`${id}-shirt`} gradientUnits="userSpaceOnUse" x1={-92} y1={23} x2={121} y2={200}>
+        <stop stopColor={palette.shirt}/><stop offset="1" stopColor={palette.shirtShade}/>
+      </linearGradient>
+    </defs>
+    <path d="M-126 200L-118 76Q-109 26-54 16H54Q109 26 118 76L126 200Z" fill={shirt} stroke={palette.shirtShade} strokeWidth={2.5}/>
+    <ArmArt side={-1} arm={pose.left} palette={palette} skin={skin} shirt={shirt}/>
+    <ArmArt side={1} arm={pose.right} palette={palette} skin={skin} shirt={shirt}/>
+    <path d="M-30-16H30L38 32Q0 62-38 32Z" fill={skin} stroke={palette.skinShade} strokeWidth={2}/>
+    <path d="M-49 31Q0 80 49 31" fill="none" stroke={palette.shirtShade} strokeWidth={12}/>
+    <path d="M-47 35Q0 75 47 35" fill="none" stroke={palette.shirt} strokeWidth={3}/>
+    <path d="M-103 111L-93 194M102 107L94 194" fill="none" stroke={palette.shirtShade} strokeWidth={2} opacity=".45"/>
+    <g transform={`rotate(${pose.head} 0 4)`}>
+      <Face eyeOpen={eyeOpen} mouthOpen={mouth} gaze={pose.head / 6} palette={palette}/>
+    </g>
+  </g>;
+}
