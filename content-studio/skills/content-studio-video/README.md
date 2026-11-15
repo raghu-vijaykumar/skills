@@ -8,7 +8,7 @@ validated by `npm run check:capabilities`.
 - **Template:** [CAPABILITY-MATRIX-TEMPLATE.md](CAPABILITY-MATRIX-TEMPLATE.md)
 - **Checker:** [check-capability-matrices.mjs](../../scripts/check-capability-matrices.mjs)
 - **Evidence review:** [CAPABILITY-EVIDENCE-AUDIT.md](CAPABILITY-EVIDENCE-AUDIT.md)
-- **Current coverage:** 45 matrices, 122 declared methods, and 6 explicitly
+- **Current coverage:** 45 matrices, 124 declared methods, and 6 explicitly
   unsupported methods.
 
 `Supported` means the manifest provides a runnable script. `Unsupported` means the
@@ -85,7 +85,7 @@ approved result forward. Gallery examples are illustrative, not masters.
 | Skill | Matrix | Declared methods |
 | --- | --- | --- |
 | Benchmark | [README](review/benchmark/README.md) | 1 |
-| Reference critique | [README](review/critique/README.md) | 1 |
+| Reference critique | [README](review/critique/README.md) | 3 |
 | Final render verification | [README](review/final-render/README.md) | documented workflow |
 | Quality | [README](review/quality/README.md) | 1 |
 | Understand | [README](review/understand/README.md) | 2 |

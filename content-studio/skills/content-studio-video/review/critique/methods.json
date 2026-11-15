@@ -6,6 +6,18 @@
       "script": "scripts/compare.py",
       "status": "supported",
       "review": "Compare the mapped footage and record observed gaps and rerender criteria."
+    },
+    {
+      "id": "frame-trace",
+      "script": "scripts/frame_trace.py",
+      "status": "supported",
+      "review": "Inspect consecutive frames and record onset, progression, and outcome."
+    },
+    {
+      "id": "track-objects",
+      "script": "scripts/track_objects.py",
+      "status": "supported",
+      "review": "Verify the tracked object and check gaps and retargeted keyframes."
     }
   ]
 }

@@ -13,4 +13,6 @@ For a motion reference, use the shot breakdown in the motion primitives guide. P
 
 Run [video critique](../../../review/critique/SKILL.md) on representative narrated renders when a creative reference sets the target. Compare the onset, impact, and settle of each important action. When a retry, handoff, or state change is missing, repair the action before polishing the frame. Choose camera and cut rhythm after seeing the action at speed. Separate word-level text timing and gesture cues from the chapter headline. Verify the top changes using the same mapped beats.
 
+When a reference movement needs to carry over, use the critique skill's [frame trace and object tracks](../../../review/critique/references/frame-tracing.md). Feed verified screen-space displacement into original actors. Give fades, masks, object replacements, and track-loss gaps their own authored actions and retest them in consecutive rendered frames.
+
 For a new idea, use the [frame-indexed Core Explainer route](../references/idea-to-explainer.md). Its reusable `ExplainerFilm` archetypes establish the motion grammar; replace any archetype whose geometry, interface, or action is too generic to explain the actual claim. Preview hero elements alone, then in narrated context, and record native-size rendered evidence.

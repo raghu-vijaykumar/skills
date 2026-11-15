@@ -10,3 +10,7 @@
 - [x] Route critique from Content Studio review and hand its prioritized findings into scene authoring.
 - [x] Run on the original reel and the exact 22-second preview. Preserve private evidence, critique, and next-pass acceptance criteria in Motion Lab.
 - [x] Run package checks and verify the managed installation.
+
+## Consecutive frames and motion transfer
+
+The sparse review missed subsecond handoffs. For one mapped beat, decode all displayed pictures at each input's timestamps. Index and display each lane independently. Use region change percentages to find transitions and seeded object matching to locate visible translation. Export canvas-relative MotionObject keys in contiguous segments. A confidence loss stays visible as a gap. Verify with unequal frame rates, an occluded synthetic actor, and the original and reconstructed payment retry sequence.

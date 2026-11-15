@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video frame review</title>
+<style>
+  :root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#14161b;color:#f0f1f4}
+  body{max-width:1050px;margin:24px auto;padding:0 16px}
+  h1{font-size:1.4rem} h2{font-size:1rem;margin:0 0 12px}
+  main{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  section{min-width:0;background:#1e212a;border:1px solid #393d49;border-radius:12px;padding:16px}
+  img{display:block;height:min(60vh,640px);width:100%;object-fit:contain;background:#111217}
+  input{width:100%;accent-color:#a8b4ff;margin:12px 0}
+  output{font-variant-numeric:tabular-nums;display:block;margin:10px 0 0}
+  button{background:#2d3344;color:inherit;border:1px solid #575e71;border-radius:6px;padding:7px 11px;margin-right:6px}
+</style>
+<h1>Frame-by-frame review</h1>
+<main></main>
+<script>
+  const frames = /* FRAME_DATA */;
+  for (const [lane, rows] of Object.entries(frames)) {
+    const panel = document.createElement("section");
+    const name = lane === "reference" ? "Reference" : "Candidate";
+    panel.innerHTML = '<h2></h2><img alt=""><output></output><input type="range" min="0" value="0">'
+      + '<button type="button">Previous frame</button><button type="button">Next frame</button><button type="button">Play at ¼ speed</button>';
+    panel.querySelector("h2").textContent = name;
+    const [back, next, play] = panel.querySelectorAll("button");
+    const slider = panel.querySelector("input");
+    const image = panel.querySelector("img");
+    slider.setAttribute("aria-label", name + " frame");
+    slider.max = rows.length - 1;
+    let current = 0;
+    let timer;
+    const show = (number) => {
+      current = Math.max(0, Math.min(rows.length - 1, number));
+      const frame = rows[current];
+      slider.value = current;
+      image.src = frame.image;
+      image.alt = name + " frame " + frame.frame;
+      panel.querySelector("output").textContent = "Frame " + current + " of " + (rows.length - 1) + " · " + frame.time.toFixed(3) + " s";
+    };
+    const stop = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      play.textContent = "Play at ¼ speed";
+    };
+    const advance = () => {
+      if (current >= rows.length - 1) return stop();
+      const delay = 4000 * (rows[current + 1].time - rows[current].time);
+      timer = setTimeout(() => { show(current + 1); advance(); }, delay);
+    };
+    slider.addEventListener("input", () => { stop(); show(+slider.value); });
+    back.onclick = () => { stop(); show(current - 1); };
+    next.onclick = () => { stop(); show(current + 1); };
+    play.onclick = () => {
+      if (timer) return stop();
+      if (current === rows.length - 1) show(0);
+      play.textContent = "Pause";
+      advance();
+    };
+    show(0);
+    document.querySelector("main").append(panel);
+  }
+</script>
