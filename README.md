@@ -14,6 +14,7 @@ Before any production edit, including a direct specialist call, run the [workflo
 | Narration request | Draft and review text and timing, create and listen to approved voice, then place the voice asset on the delivery timeline for final mixing. Cloning requires consent. |
 | Resolution increase | Compare unchanged, Lanczos, and eligible AI samples on the **completed edit**; upscale only when justified and approved. HDR/DV requires an explicit preservation or tone-map route. |
 | Scene overlays | Put supported timed graphics on the delivery timeline after any upscale operation; review the exact output. |
+| Creative reference comparison | Use [video critique](content-studio/skills/content-studio-video/review/critique/SKILL.md) to compare mapped shots and turn the gaps into rerender criteria. |
 | Rising title behind a person or landscape | Use the native [text-behind-subject preset](content-studio/skills/content-studio-video/edit/motion-graphics/references/text-behind-subject.md) with a locally generated foreground matte and one reviewed cue per shot. |
 | Publication request | Review master, metadata, thumbnail, rights, and package; publish only with separate explicit authorization. |
 

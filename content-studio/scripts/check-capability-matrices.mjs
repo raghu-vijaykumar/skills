@@ -15,9 +15,9 @@ const expectedUnsupported = new Set([
   'timeline/hdr-dolby-vision',
 ]);
 // Keep the declared-method total in sync when a reviewed capability is added.
-// Fast pan cuts adds a separately discoverable leaf with three methods.
-const expectedMethodCount = 121;
-const expectedMatrixCount = 44;
+// Reference critique adds a leaf with mapped evidence for independently timed cuts.
+const expectedMethodCount = 122;
+const expectedMatrixCount = 45;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
   .filter(({folder}) => folder === videoRoot || folder.startsWith(videoRoot + path.sep));

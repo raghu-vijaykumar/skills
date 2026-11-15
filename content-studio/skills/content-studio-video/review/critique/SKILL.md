@@ -1,0 +1,14 @@
+---
+name: content-studio-video-critique
+description: Compare a rendered video with a creative reference, identify missing shots and motion, and write prioritized changes with timecoded review evidence.
+---
+
+# Content Studio video critique
+
+Use for a creative reconstruction, style study, or two revisions with different cuts. For same-cut technical fidelity use [quality](../quality/SKILL.md). For a native grid of processing variants use [benchmark](../benchmark/SKILL.md).
+
+1. Fingerprint the exact reference and candidate. Agree or infer which qualities should match. Map equivalent beats with independent source and candidate ranges. Use a null candidate for a known omission and distinguish unreviewed footage from a confirmed missing beat. For a highlight reel, report coverage separately from quality.
+2. Run `python <skill>/scripts/compare.py --reference <local-video> --candidate <local-video> --map <beat-map.json> --out <new-private-folder>`. Read the [map and report guide](references/critique.md). FFmpeg and FFprobe plus Python Pillow produce a real-speed paired GIF and timestamped still sheet per mapped beat.
+3. Inspect playbacks at original speed, then step through the important moments. Review the action, reaction, and outcome. Compare object motion, depth and camera, cut cadence and continuity, typography, presenter performance, and narration, music and effects. Listen to audio separately when available and say which checks were limited to measurements or frames.
+4. Record strengths and ranked gaps with timestamps for both sides, the viewer impact, a concrete revision, and a visible or audible retest. Mark off-scope and missing material explicitly. Report technical checks separately from the creative decision.
+5. Hand the top findings to [scene authoring](../../animation/videogen/scene-authoring/SKILL.md) and update the draft review log. Run the same map on the next exact render, adjusting candidate anchors if the cut changes. This is read-only diagnosis. Production corrections follow the [workflow precheck](../../../content-studio-workflow/SKILL.md). Keep reference comparison artifacts outside production media and release packages.

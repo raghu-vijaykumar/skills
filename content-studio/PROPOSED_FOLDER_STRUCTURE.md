@@ -52,6 +52,7 @@ content-studio/skills/
       understand/                   frame and sound evidence
       quality/                      objective measurements
       benchmark/                    synchronized comparisons
+      critique/                     creative beat mapping, motion evidence, and revision criteria
       final-render/                 exact-master human review
     memory/                          private SQLite decisions
     memes/                           optional scene punctuation

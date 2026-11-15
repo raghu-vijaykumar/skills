@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "mapped-evidence",
+      "script": "scripts/compare.py",
+      "status": "supported",
+      "review": "Compare the mapped footage and record observed gaps and rerender criteria."
+    }
+  ]
+}
