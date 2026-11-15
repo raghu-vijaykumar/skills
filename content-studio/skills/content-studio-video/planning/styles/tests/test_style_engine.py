@@ -20,6 +20,8 @@ class StyleEngineTests(unittest.TestCase):
 
     def test_recommend(self):
         self.assertEqual(engine.recommend("gradient vector equation"), "math-visual")
+        self.assertEqual(engine.resolve("core-explainer"), "core-explainer")
+        self.assertEqual(engine.recommend("why browser cache stays stale after deploy"), "core-explainer")
 
     def test_hybrid_scene_plan(self):
         result = engine.plan({"topic": "Education", "scenes": [

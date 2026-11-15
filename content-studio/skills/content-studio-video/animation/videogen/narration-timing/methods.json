@@ -12,6 +12,12 @@
       "script": "scripts/verify-narration.mjs",
       "status": "supported",
       "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "align-narration",
+      "script": "scripts/align-narration.mjs",
+      "status": "supported",
+      "review": "Listen for unnatural speedups and inspect synchronization in the rendered scene"
     }
   ]
 }

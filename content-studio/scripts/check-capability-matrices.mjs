@@ -16,7 +16,7 @@ const expectedUnsupported = new Set([
 ]);
 // Keep the declared-method total in sync when a reviewed capability is added.
 // Fast pan cuts adds a separately discoverable leaf with three methods.
-const expectedMethodCount = 120;
+const expectedMethodCount = 121;
 const expectedMatrixCount = 44;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))

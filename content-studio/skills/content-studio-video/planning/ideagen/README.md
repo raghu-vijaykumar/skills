@@ -9,7 +9,7 @@ comparison videos. Evidence is a labelled idea brief, not an analytics result.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `plan` | Supported | Channel dataset + selected idea + optional digest → editable draft + idea brief | No | [Idea brief example](previews/example-idea-brief.md) | Digest leads are unverified; no virality promise; public comparison signals do not reveal private CTR/VTR/retention. |
+| `plan` | Supported | Channel dataset or channel-neutral videogen project + selected idea → editable draft + idea brief | No | [Idea brief example](previews/example-idea-brief.md) | Channel-neutral mode requires a concrete promise and writes no analytics; digest leads are unverified; no virality promise. |
 
 ## Evidence note
 

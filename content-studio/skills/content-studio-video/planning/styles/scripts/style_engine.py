@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 STYLES = {
+    "core-explainer": {"label": "Core Explainer", "keywords": ["explain", "mechanism", "system", "payment", "cache", "deploy", "browser", "web"], "techniques": ["semantic-state-change", "dimensional-hero", "kinetic-type", "camera-detail"], "renderer": "remotion"},
     "math-visual": {"label": "Mathematical visualization", "keywords": ["math", "gradient", "equation", "vector", "algorithm", "neural", "geometry"], "techniques": ["animated-equations", "geometric-transform", "graph-animation"], "renderer": "manim"},
     "vector-science": {"label": "Illustrated science storytelling", "keywords": ["space", "biology", "planet", "science", "physics", "animal"], "techniques": ["layered-vector", "parallax", "shape-morph"], "renderer": "remotion"},
     "rapid-tech": {"label": "Rapid technical explainer", "keywords": ["code", "software", "api", "programming", "developer", "cloud"], "techniques": ["code-highlight", "kinetic-type", "rapid-cut"], "renderer": "remotion"},

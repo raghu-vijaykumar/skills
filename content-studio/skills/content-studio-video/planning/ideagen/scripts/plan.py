@@ -59,10 +59,25 @@ def render(template: str, values: dict) -> str:
 
 
 def video_scaffold_args(kind: str, slug: str) -> list[str]:
-    """Start Revise Labs long videos with a native landscape canvas."""
-    if kind == "long" and slug == "revise-labs":
+    """Start long videos on a native landscape canvas for any project."""
+    if kind == "long":
         return ["--duration", "300", "--width", "1920", "--height", "1080"]
     return []
+
+
+def project_videos_dir(root: Path) -> Path:
+    """Resolve the installed project's own draft folder instead of assuming `videos`."""
+    script = "const c=(await import(process.argv[1])).default; console.log(c.videosDir)"
+    result = subprocess.run(["node", "--input-type=module", "-e", script,
+                             (root / "videogen.config.ts").as_uri()],
+                            cwd=root, capture_output=True, text=True, check=True)
+    value = result.stdout.strip()
+    if not value:
+        raise ValueError("videogen.config.ts must declare videosDir")
+    folder = (root / value).resolve()
+    if not folder.is_relative_to(root):
+        raise ValueError("videosDir must stay inside the project")
+    return folder
 
 
 def draft_id(root: Path, channel: str, title: str) -> str:
@@ -121,15 +136,57 @@ def digest_appendix(snapshot_path: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--channel", required=True)
+    parser.add_argument("--channel")
+    parser.add_argument("--project-root", type=Path,
+                        help="channel-neutral videogen project root; requires --promise")
     parser.add_argument("--name", required=True)
     parser.add_argument("--id", help="optional explicit safe video ID")
     parser.add_argument("--force", action="store_true", help="refresh an existing brief")
     parser.add_argument("--kind", choices=["short", "long"], default="short")
+    parser.add_argument("--duration", type=float, help="initial videogen duration in seconds for a neutral draft")
     parser.add_argument("--promise", default="")
     parser.add_argument("--digest-json", type=Path, help="explicit idea-digest snapshot of unverified leads")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     args = parser.parse_args()
+
+    if bool(args.channel) == bool(args.project_root):
+        parser.error("choose exactly one of --channel or --project-root")
+    if args.duration is not None and args.duration <= 0:
+        parser.error("--duration must be positive")
+    if args.project_root:
+        # A neutral project has no channel analytics. Require the agent to state
+        # the actual teaching promise instead of writing fabricated metrics.
+        if not args.promise.strip():
+            parser.error("--project-root requires a concrete --promise")
+        root = args.project_root.resolve()
+        if not (root / "videogen.config.ts").is_file():
+            raise SystemExit(f"missing videogen.config.ts in {root}")
+        folder_id = args.id or draft_id(root, "neutral", args.name)
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", folder_id):
+            raise SystemExit("video ID must contain only letters, digits, and hyphens")
+        draft = project_videos_dir(root) / folder_id
+        if draft.exists() and (draft / "brief.md").exists() and not args.force:
+            raise SystemExit(f"draft brief exists: {draft}; use --force to refresh")
+        draft.mkdir(parents=True, exist_ok=True)
+        (draft / "brief.md").write_text(
+            f"# {args.name}\n\nFormat: {args.kind}\nStyle: core-explainer\n"
+            f"Promise: {args.promise.strip()}\n\nAudience: to define from research.\n"
+            "Evidence: add verified primary sources and dates before narration.\n",
+            encoding="utf-8")
+        (draft / "research.md").write_text(
+            "# Research\n\nNo channel analytics were supplied. Record dated primary sources, "
+            "mechanism, uncertainty, and visual references here.\n", encoding="utf-8")
+        binary = root / "node_modules" / ".bin" / ("videogen.cmd" if sys.platform == "win32" else "videogen")
+        if not (draft / "video.tsx").exists():
+            if not binary.exists():
+                raise SystemExit(f"install the videogen package in {root}")
+            canvas = video_scaffold_args(args.kind, "neutral")
+            if args.duration is not None:
+                canvas = ["--duration", str(args.duration), *canvas[2:]] if canvas else ["--duration", str(args.duration)]
+            subprocess.run([str(binary), "scaffold", folder_id, "--title", args.name,
+                            "--style", "core-explainer", *canvas],
+                           cwd=root, check=True)
+        return 0
 
     log = Log()
     cfg = load_config(Path(args.config))

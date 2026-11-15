@@ -27,13 +27,30 @@ export function scaffoldDraft(config, id, options = {}) {
       !Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0)
     throw new Error('Title, positive duration, and canvas dimensions are required');
   const compositionId = `Video${id.split('-').map((part) => part[0].toUpperCase() + part.slice(1)).join('')}`;
+  const explainer = options.style === 'core-explainer';
+  if (options.style && !explainer) throw new Error(`Unsupported scaffold style: ${options.style}`);
   const authored = [entry, path.join(folder, 'video.tsx'), path.join(folder, 'content', 'video.yaml'),
-    path.join(folder, 'layout', 'layoutSpec.ts')];
+    path.join(folder, 'layout', 'layoutSpec.ts'),
+    ...(explainer ? [path.join(folder, 'scene-plan.json'), path.join(folder, 'asset-manifest.json')] : [])];
   for (const file of authored) if (fs.existsSync(file)) throw new Error(`Refusing to replace authored video source: ${file}`);
   for (const file of authored) fs.mkdirSync(path.dirname(file), {recursive: true});
   const scene = path.join(folder, 'video.tsx');
   const configImport = relativeImport(scene, path.join(cwd, 'videogen.config.ts'));
-  fs.writeFileSync(scene, `import React from 'react';\nimport project from '${configImport}';\n\n// Replace this starter with the mechanism and visual review for this video.\nexport const Video = () => <div style={{width: '100%', height: '100%', background: project.theme.colors.background, color: project.theme.colors.text, fontFamily: project.theme.fonts.sans, display: 'grid', placeItems: 'center', fontSize: 72, padding: 96, textAlign: 'center'}}>{${JSON.stringify(title)}}</div>;\n`);
+  if (explainer) {
+    const frames = Math.ceil(duration * 30);
+    // A valid single-scene plan makes the contract executable immediately;
+    // the agent must replace its story content before creative review.
+    fs.writeFileSync(path.join(folder, 'scene-plan.json'), JSON.stringify({schemaVersion: 1, width, height, fps: 30,
+      durationFrames: frames, title, scenes: [{id: 'opening', type: 'hero', startFrame: 0, endFrame: frames,
+        title, kicker: 'CORE EXPLAINER', subtitle: '', visual: {symbol: '✦', nodes: ['Question', 'Mechanism', 'Result']},
+        stateChanges: [{frame: 0, label: title}], camera: frames === 1 ? [{frame: 0, scale: 1}] :
+          [{frame: 0, scale: 1}, {frame: frames - 1, scale: 1.08}],
+        presenter: {pose: 'speaking'}, assetIds: [], narrationCueIds: [], sourceIds: [], audioCueIds: []}]}, null, 2) + '\n');
+    fs.writeFileSync(path.join(folder, 'asset-manifest.json'), JSON.stringify({schemaVersion: 1, assets: []}, null, 2) + '\n');
+    fs.writeFileSync(scene, `import React from 'react';\nimport {ExplainerFilm} from '@raghu-vijaykumar/videogen/runtime/motionExplainer';\nimport plan from './scene-plan.json';\n\n// Replace the starter scene plan with researched teaching beats; override individual visuals here when needed.\nexport const Video = () => <ExplainerFilm plan={plan as any}/>;\n`);
+  } else {
+    fs.writeFileSync(scene, `import React from 'react';\nimport project from '${configImport}';\n\n// Replace this starter with the mechanism and visual review for this video.\nexport const Video = () => <div style={{width: '100%', height: '100%', background: project.theme.colors.background, color: project.theme.colors.text, fontFamily: project.theme.fonts.sans, display: 'grid', placeItems: 'center', fontSize: 72, padding: 96, textAlign: 'center'}}>{${JSON.stringify(title)}}</div>;\n`);
+  }
   fs.writeFileSync(entry, `import React from 'react';\nimport {Composition, registerRoot} from 'remotion';\nimport {Video} from '${relativeImport(entry, scene).replace(/\\.tsx$/, '')}';\n\n// One entry per draft keeps archived productions out of the edit bundle.\nconst Root = () => <Composition id="${compositionId}" component={Video} width={${width}} height={${height}} fps={30} durationInFrames={${Math.ceil(duration * 30)}}/>;\nregisterRoot(Root);\n`);
   fs.writeFileSync(path.join(folder, 'content', 'video.yaml'), stringify({
     video: {id, title, compositionId, durationSeconds: duration, width, height},
@@ -46,7 +63,7 @@ export function scaffoldDraft(config, id, options = {}) {
   if (!fs.existsSync(descriptionFile)) fs.writeFileSync(descriptionFile, '');
   const creative = path.join(folder, 'creative.json');
   if (!fs.existsSync(creative)) fs.writeFileSync(creative, JSON.stringify({
-    themeId: config.theme?.id ?? 'neutral', styleId: config.styles?.[0]?.id ?? 'core-explainer',
+    themeId: config.theme?.id ?? 'neutral', styleId: options.style ?? config.styles?.[0]?.id ?? 'core-explainer',
     format: height > width ? 'shorts' : 'long', renderer: 'remotion', choices: [],
   }, null, 2) + '\n');
   const manifest = path.join(folder, 'draft.json');

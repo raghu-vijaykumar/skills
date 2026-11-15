@@ -12,6 +12,9 @@ import {publishYoutube} from './publish-youtube.mjs';
 import {publishInstagram} from './publish-instagram.mjs';
 import {verifyPackage} from '../../../../../scripts/package.mjs';
 import {scaffoldDraft} from './scaffold.mjs';
+import {validateScenePlan} from './scene-plan.mjs';
+import {alignNarration} from './align-narration.mjs';
+import {generateScore} from './procedural-score.mjs';
 
 const toolkit = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cwd = process.cwd();
@@ -149,6 +152,7 @@ async function main() {
       durationSeconds: Number(flag('duration') ?? 5),
       width: Number(flag('width') ?? 1080),
       height: Number(flag('height') ?? 1920),
+      style: flag('style'),
     });
     console.log(`Scaffolded ${result.folder} as ${result.compositionId}`);
     return;
@@ -215,6 +219,18 @@ async function main() {
     run(process.execPath, [path.join(toolkit, 'scripts', 'narration.mjs'), item.dir], 'Narration');
     return;
   }
+  if (command === 'align-narration') {
+    const item = metadata(config, id);
+    const result = alignNarration(item.dir);
+    console.log(`${id}: aligned ${result.scenes} cues to ${result.duration.toFixed(2)}s (max tempo ${result.maxTempo.toFixed(2)}x)`);
+    return;
+  }
+  if (command === 'score') {
+    const item = metadata(config, id);
+    const result = generateScore(item.dir);
+    console.log(`${id}: generated original ${result.duration.toFixed(2)}s score at ${result.out}`);
+    return;
+  }
   if (command === 'publish') {
     const item = metadata(config, id);
     const platform = flag('platform') ?? 'youtube';
@@ -231,10 +247,13 @@ async function main() {
   }
   if (command === 'check' || command === 'render') {
     const item = metadata(config, id);
+    // Reject unsupported or unproven authored scenes before a costly bundle or render.
+    validateScenePlan(item.dir);
     const narrated = fs.existsSync(path.join(item.dir, 'content', 'narration.yaml'));
     if (narrated) run(process.execPath, [path.join(toolkit, 'scripts', 'verify-narration.mjs'), item.dir], 'Narration cache');
     checks(config, id, 'video', 'prepare');
     const mainComp = await composition(config, item.compositionId);
+    validateScenePlan(item.dir, mainComp);
     const isTrailer = hasFlag('trailer');
     const comp = isTrailer ? await composition(config, item.value.video?.trailerCompositionId ?? `${item.compositionId}Trailer`) : mainComp;
     const fixed = Number(item.value.video?.durationSeconds);
@@ -316,7 +335,7 @@ async function main() {
     run(process.execPath, [path.join(toolkit, 'scripts', command === 'content-check' ? 'content-check.mjs' : 'content-render.mjs'), id, ...args], command);
     return;
   }
-  die('Usage: videogen <init|scaffold|sync-skill|source|probe|studio|narration|gate|check|render|publish|content-check|content-render> [id]');
+  die('Usage: videogen <init|scaffold|sync-skill|source|probe|studio|narration|align-narration|score|gate|check|render|publish|content-check|content-render> [id]');
 }
 
 main().catch((error) => {console.error(`videogen: ${error.message}`); process.exitCode = 1;});
