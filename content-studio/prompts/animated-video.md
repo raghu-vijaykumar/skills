@@ -21,6 +21,8 @@ Fill the brackets and change **No** to **Yes** for the options you want.
    - **New character rig** — No. [Character and reference photos, expressions, gestures]
    - **3D detail shots** — No. [Cutaways, exploded views, or close-ups and what they show]
 
+   For Blender, use the [code-first 3D workflow](../skills/content-studio-video/animation/engineering-3d/references/code-first-explainer.md). Give each beat a planned time, narration cue, part or pivot, move, camera, and visible end state.
+
    **Human review · Script and storyboard** — Approve the words, visual beats, and planned assets before locking narration or building scenes. Stop here if this is the requested scope.
 3. **Lock narration and cues** — Align approved audio to on-screen actions. For Rapid Take, give every spoken word a visible action or state change and use vivid focal colors. Time music and effects against the cue sheet.
 
