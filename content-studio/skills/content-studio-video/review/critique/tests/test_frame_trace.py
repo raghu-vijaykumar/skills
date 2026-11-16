@@ -13,11 +13,21 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build
+from frame_trace import build, decode
 from track_objects import follow, retarget
 
 
 class TraceTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("ffmpeg"), "needs FFmpeg")
+    def test_fractional_bounds_keep_only_source_pts_inside_range(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ref = root / "reference.mp4"
+            run("ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "testsrc2=size=160x96:rate=30:duration=2", "-c:v", "libx264", str(ref))
+            frames = decode(ref, 0, 0.84, 1.205, root / "frames")
+            self.assertEqual([round(pts * 30) for _, pts in frames], list(range(26, 37)))
+
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
     def test_decodes_each_lane_at_its_own_rate_with_original_pts(self):
         with tempfile.TemporaryDirectory() as directory:

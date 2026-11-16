@@ -1,6 +1,7 @@
 """Build local motion evidence for independently timed narrative beats."""
 
 import argparse
+from fractions import Fraction
 import hashlib
 import io
 import json
@@ -25,7 +26,12 @@ def inspect(file):
                   not s.get("disposition", {}).get("attached_pic")), None)
     if video is None:
         raise ValueError(f"No timed video stream: {file}")
-    duration = float(video.get("duration") or probe["format"]["duration"])
+    # ffprobe rounds the displayed decimal duration, so use the exact video
+    # clock when a beat map ends at a rational frame boundary.
+    try:
+        duration = float(int(video["duration_ts"]) * Fraction(video["time_base"]))
+    except (KeyError, TypeError, ValueError, ZeroDivisionError):
+        duration = float(video.get("duration") or probe["format"]["duration"])
     if not math.isfinite(duration) or duration <= 0:
         raise ValueError(f"No positive video duration: {file}")
     with file.open("rb") as stream:

@@ -70,11 +70,15 @@ def inspect_frames(video, rows, fps, duration, region, output):
     width, height = 144, 256
     pixels = width * height * 3
     refs = {}
-    for row in rows:
+    for index, row in enumerate(rows):
         before = max(row["shot"], row["startFrame"] - 1)
-        after = min(row["shot_end"] - 1, row["startFrame"] + 3)
-        row.update(before=before, after=after)
-        refs[before] = refs[after] = None
+        limit = min(row["shot_end"], row["startFrame"] + 4)
+        if index + 1 < len(rows):
+            limit = min(limit, rows[index + 1]["startFrame"])
+        row.update(before=before, inspection_end=limit - 1)
+        refs[before] = None
+        for frame in range(row["startFrame"], limit):
+            refs[frame] = None
     process = subprocess.Popen([
         "ffmpeg", "-nostdin", "-v", "error", "-i", str(video), "-map", f"0:{media['stream_index']}",
         "-vf", f"scale={width}:{height}", "-an", "-pix_fmt", "rgb24", "-fps_mode", "passthrough",
@@ -94,7 +98,15 @@ def inspect_frames(video, rows, fps, duration, region, output):
         raise ValueError(f"Expected {duration} frames, decoded {frame}. {errors.decode(errors='replace')}")
     # This measures visible movement in a chosen screen region. It cannot identify the actor.
     for row in rows:
-        row["region_change_percent"] = changed(refs[row["before"]], refs[row["after"]], region)
+        before = refs[row["before"]]
+        # Pick the strongest frame so a short accent that has already settled
+        # on the fourth frame still has visible comparison evidence.
+        at, score = max(
+            ((at, changed(before, refs[at], region))
+             for at in range(row["startFrame"], row["inspection_end"] + 1)),
+            key=lambda result: result[1],
+        )
+        row.update(after=at, region_change_percent=score)
     build_sheets(rows, refs, output)
     return media
 

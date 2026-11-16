@@ -1,11 +1,14 @@
 """Check that the word audit catches omitted and simultaneous cues."""
 
 from pathlib import Path
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from audit_word_cues import read_plan
+from audit_word_cues import inspect_frames, read_plan
 
 
 class WordCueTests(unittest.TestCase):
@@ -37,3 +40,17 @@ class WordCueTests(unittest.TestCase):
         plan["shots"][0]["words"][1]["startFrame"] = 2
         with self.assertRaisesRegex(ValueError, "simultaneous"):
             read_plan(plan)
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
+    def test_a_single_frame_accent_is_kept(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            video = folder / "pulse.mp4"
+            subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=black:s=144x256:r=30",
+                "-vf", "drawbox=c=white:t=fill:enable='eq(n,2)'", "-frames:v", "10", str(video),
+            ], check=True)
+            fps, duration, rows = read_plan(self.plan())
+            inspect_frames(video, rows, fps, duration, (0, 0, 1, 1), folder)
+            self.assertEqual(rows[0]["after"], 2)
+            self.assertEqual(rows[0]["region_change_percent"], 100)

@@ -24,6 +24,12 @@
       "script": "scripts/audit_word_cues.py",
       "status": "supported",
       "review": "Verify the declared word timing and inspect rendered differences around each onset."
+    },
+    {
+      "id": "survey-reference",
+      "script": "scripts/survey_reference.py",
+      "status": "supported",
+      "review": "Inspect source windows and fill the actor, action, camera, expression, and sound inventory."
     }
   ]
 }

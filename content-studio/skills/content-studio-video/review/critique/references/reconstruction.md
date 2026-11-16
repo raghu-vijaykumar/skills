@@ -2,6 +2,8 @@
 
 Use a full reel or finished video to develop a repeatable method for a new subject. Keep reference picture, original narration, graphics and sound in the analysis workspace. Author the candidate from its own script, assets, voice and effects. Asset titles and layer names are for the project. Use the reference's readable pacing and composition to decide what belongs onscreen.
 
+Begin before a candidate exists. Run `python scripts/survey_reference.py --reference SOURCE --out NEW_PRIVATE_FOLDER` for complete-duration inspection windows, likely cuts, source hash, and an editable actor inventory template. Optional `--region NAME:LEFT,TOP,RIGHT,BOTTOM` flags motion separately in named parts of the square viewing canvas. This pass samples at 8 fps. When a gesture, fall, or switch happens between tiles, trace the relevant frames at their native cadence.
+
 ## Checklist for each source and result
 
 | Pass | Evidence to record | Completion criterion |
@@ -24,7 +26,7 @@ Store a private JSON plan with `fps`, `durationFrames` and contiguous half-open 
 python scripts/audit_word_cues.py --plan word-plan.json --video candidate.mp4 --out word-review
 ```
 
-Omit `--video` for a structural check during authoring. With a render, the tool measures the effect of each cue from the preceding frame to three frames after the onset within the shot. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
+Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
 
 ## Transfer the method to new subjects
 

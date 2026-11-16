@@ -29,10 +29,14 @@ def decode(file, stream, start, end, folder):
     folder.mkdir()
     # Keep the input clock while seeking. No fps filter is allowed here: a VFR
     # shot must retain each actual picture and its display timestamp.
+    seek = max(0, start - 0.25)
+    # Input seeking can return an adjacent frame on fractional boundaries.
+    # Give the decoder a small margin and enforce the half-open range on PTS.
+    bounds = f"select='gte(t,{start:.9f})*lt(t,{end:.9f})'"
     command = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "info",
-               "-copyts", "-start_at_zero", "-ss", str(start), "-t", str(end-start),
+               "-copyts", "-start_at_zero", "-ss", str(seek), "-t", str(end-seek+0.25),
                "-i", str(file), "-map", f"0:{stream}", "-an",
-               "-vf", "showinfo,scale=360:640:force_original_aspect_ratio=decrease:force_divisible_by=2",
+               "-vf", f"{bounds},showinfo,scale=360:640:force_original_aspect_ratio=decrease:force_divisible_by=2",
                "-fps_mode", "passthrough", "-q:v", "2", str(folder / "%06d.jpg")]
     result = subprocess.run(command, capture_output=True, encoding="utf-8", errors="replace")
     if result.returncode:

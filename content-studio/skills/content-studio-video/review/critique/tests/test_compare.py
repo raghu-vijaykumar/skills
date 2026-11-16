@@ -15,6 +15,17 @@ spec.loader.exec_module(compare)
 
 
 class CritiqueTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
+    def test_exact_video_duration_accepts_a_rational_last_frame_boundary(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / "short.mp4"
+            compare.run("ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=black:s=160x96:r=30",
+                        "-frames:v", "10", "-c:v", "libx264", str(file))
+            duration = compare.inspect(file)["video_seconds"]
+            self.assertEqual(duration, 10 / 30)
+            compare.validate_map({"beats": [{"id": "all", "reference": [0, 10 / 30],
+                                             "candidate": [0, 10 / 30]}]}, duration, duration)
+
     @unittest.skipUnless(shutil.which("ffmpeg"), "needs FFmpeg")
     def test_cut_scan_keeps_source_timestamps(self):
         with tempfile.TemporaryDirectory() as folder:
