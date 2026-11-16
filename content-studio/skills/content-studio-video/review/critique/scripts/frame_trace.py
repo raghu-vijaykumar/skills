@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 import re
 import subprocess
@@ -101,12 +102,49 @@ def consecutive_sheets(rows, root, lane):
         sheet.save(root / f"{lane}-{start//30:02d}.jpg", quality=91)
 
 
-def viewer(root, lanes):
+def seam_times(row):
+    if "seam" not in row:
+        return None
+    seam = row["seam"]
+    if not isinstance(seam, dict) or set(seam) != {"reference", "candidate"}:
+        raise ValueError("A seam needs separate reference and candidate times")
+    for lane, time in seam.items():
+        start, end = row[lane]
+        if type(time) not in (int, float) or not math.isfinite(time) or not start < time < end:
+            raise ValueError(f"{lane} seam must be strictly within its mapped range")
+    return seam
+
+
+def seam_pictures(lane, anchor, pictures, rows):
+    # Compare the source PTS with the anchor before rounding for display.
+    cut = next((i for i, (_, time) in enumerate(pictures) if time >= anchor - 1e-9), 0)
+    if cut < 1:
+        raise ValueError(f"Widen the {lane} range to include decoded frames on both sides of the seam")
+    return {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
+
+
+def seam_sheet(root, seams):
+    sheet = Image.new("RGB", (814, 1302), "#1b1d24")
+    draw = ImageDraw.Draw(sheet)
+    for y, (lane, frames) in enumerate(seams.items()):
+        for x, key in enumerate(("before", "after")):
+            frame = frames[key]
+            xx, yy = 407 * x, 651 * y
+            with Image.open(root / frame["image"]) as source:
+                picture = ImageOps.contain(source.convert("RGB"), (394, 615))
+            sheet.paste(picture, (xx + (407 - picture.width) // 2, yy + 21 + (615 - picture.height) // 2))
+            draw.text((xx + 8, yy + 5), f"{lane} · {key} · {frame['time']:.4f} s", fill="white")
+    sheet.save(root / "seam.jpg", quality=93)
+
+
+def viewer(root, lanes, seams=None):
     template = Path(__file__).with_name("frame-viewer.html").read_text(encoding="utf-8")
     # Only generated relative names and numeric timestamps enter this literal.
     frames = {name: [{key: row[key] for key in ("frame", "time", "image")} for row in rows]
               for name, rows in lanes.items()}
-    (root / "frames.html").write_text(template.replace("/* FRAME_DATA */", json.dumps(frames)), encoding="utf-8")
+    cuts = {lane: item["after"]["frame"] for lane, item in (seams or {}).items()}
+    (root / "frames.html").write_text(template.replace("/* FRAME_DATA */", json.dumps(frames))
+                                     .replace("/* CUT_DATA */", json.dumps(cuts)), encoding="utf-8")
 
 
 def build(reference, candidate, mapping, beat, output, regions):
@@ -116,15 +154,22 @@ def build(reference, candidate, mapping, beat, output, regions):
     row = next((row for row in rows if row["id"] == beat and row["candidate"] is not None), None)
     if row is None:
         raise ValueError(f"Expected a paired beat in the map: {beat}")
+    anchors = seam_times(row)
     output.mkdir(parents=True, exist_ok=False)
     lanes = {}
+    seams = {}
     for lane, file in files.items():
         pairs = decode(file, meta[lane]["stream_index"], *row[lane], output / lane)
         lanes[lane] = index_frames(pairs, output, lane, regions)
         consecutive_sheets(lanes[lane], output, lane)
-    viewer(output, lanes)
+        if anchors is not None:
+            seams[lane] = seam_pictures(lane, anchors[lane], pairs, lanes[lane])
+    viewer(output, lanes, seams)
     manifest = {"schema_version": 1, "beat": row, "regions": regions,
                 "inputs": meta, "decoded_frames": {lane: len(frames) for lane, frames in lanes.items()}}
+    if seams:
+        seam_sheet(output, seams)
+        manifest["seam"] = {"sheet": "seam.jpg", "lanes": seams}
     (output / "frame-trace.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest["decoded_frames"]
 

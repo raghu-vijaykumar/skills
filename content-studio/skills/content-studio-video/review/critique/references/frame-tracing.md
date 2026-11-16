@@ -10,6 +10,14 @@ Open `trace/frames.html` in a browser to step each lane independently or play it
 
 For each major actor, use the sequence to log its first clear appearance, movement, interactions, final state and exit. Give a brief handoff or a one-frame jump its own row. Align by a named event such as button press or first saved result. Equal offsets from the start of a beat may correspond to different actions.
 
+To compare a specific cut or handoff, add a seam to the same beat map. Include real frames on both sides of each anchor. The two timecodes can differ when the edits cut or change state at different moments.
+
+```json
+{"beats":[{"id":"handoff","reference":[73.2,74.2],"candidate":[74.0,74.8],"seam":{"reference":73.7,"candidate":74.4}}]}
+```
+
+The trace makes a four-frame seam sheet and records the actual decoded timestamps before and at or after the anchors. The viewer opens one frame before the seam in each lane. Use the adjacent pictures and the full sequence to verify the actor's silhouette, attachment, identifier, and state on both sides. The scorecard records the reviewer’s result.
+
 ## Track a visible actor and reuse its movement
 
 Run `python <skill>/scripts/track_objects.py --trace trace --seeds seeds.json --out tracks` with NumPy installed. Choose a tight textured box with the frame viewer. Box units are pixels of the extracted image. `first` and `last` are inclusive, zero-based indices within this trace.

@@ -18,6 +18,7 @@
 <main></main>
 <script>
   const frames = /* FRAME_DATA */;
+  const cuts = /* CUT_DATA */;
   for (const [lane, rows] of Object.entries(frames)) {
     const panel = document.createElement("section");
     const name = lane === "reference" ? "Reference" : "Candidate";
@@ -58,7 +59,15 @@
       play.textContent = "Pause";
       advance();
     };
-    show(0);
+    const cut = cuts[lane];
+    if (Number.isInteger(cut)) {
+      const jump = document.createElement("button");
+      jump.type = "button";
+      jump.textContent = "Go to seam";
+      jump.onclick = () => { stop(); show(cut); };
+      panel.append(jump);
+    }
+    show(Number.isInteger(cut) ? cut - 1 : 0);
     document.querySelector("main").append(panel);
   }
 </script>

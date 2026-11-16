@@ -17,6 +17,8 @@ For word-level motion, start from the [full reconstruction checklist](../../../r
 
 When the number of items teaches the idea, build the repeated units separately and hold the wide view long enough to see their organization. Bring one node, group or path forward when its role changes and carry the same identifying cues into the detail shot. Animate the same state used for its label or count. Check the foreground edges in the wide view, the smallest legible label at phone size and the single action that should remain visible when many units move at once.
 
+When an object crosses a cut, preserve its identifying geometry, label, and current state through the cut. Use separate controls for the camera and the object's state. Compare the adjacent pictures with the [seam sheet](../../../review/critique/references/frame-tracing.md) and inspect the full motion on both sides before scoring continuity.
+
 Run [video critique](../../../review/critique/SKILL.md) on representative narrated renders when a creative reference sets the target. Compare the onset, impact, and settle of each important action. When a retry, handoff, or state change is missing, repair the action before polishing the frame. Choose camera and cut rhythm after seeing the action at speed. Separate word-level text timing and gesture cues from the chapter headline. Verify the top changes using the same mapped beats.
 
 When a reference movement needs to carry over, use the critique skill's [frame trace and object tracks](../../../review/critique/references/frame-tracing.md). Feed verified screen-space displacement into original actors. Give fades, masks, object replacements, and track-loss gaps their own authored actions and retest them in consecutive rendered frames.

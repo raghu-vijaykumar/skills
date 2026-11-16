@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode
+from frame_trace import build, decode, seam_times
 from track_objects import follow, retarget
 
 
@@ -37,14 +37,31 @@ class TraceTests(unittest.TestCase):
                 run("ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"testsrc2=size=160x96:rate={rate}:duration=2",
                     "-c:v", "libx264", str(file))
             out = root / "trace"
-            self.assertEqual(build(ref, draft, {"beats":[{"id":"beat", "reference":[0.5,1.5], "candidate":[0,1]}]},
+            beat = {"id": "beat", "reference": [0.5, 1.5], "candidate": [0, 1],
+                    "seam": {"reference": 5 / 6, "candidate": .31}}
+            self.assertEqual(build(ref, draft, {"beats": [beat]},
                                    "beat", out, {"full": (0, 0, 1, 1)}), {"reference":24,"candidate":30})
             with (out / "reference.csv").open(newline="", encoding="utf-8") as stream:
                 rows = list(csv.DictReader(stream))
             self.assertEqual(float(rows[0]["time"]), 0.5)
             self.assertAlmostEqual(float(rows[-1]["time"]), 35 / 24, places=5)
-            self.assertIsNotNone(json.loads((out / "frame-trace.json").read_text())["inputs"]["reference"]["sha256"])
-            self.assertIn(rows[-1]["image"], (out / "frames.html").read_text(encoding="utf-8"))
+            report = json.loads((out / "frame-trace.json").read_text())
+            self.assertIsNotNone(report["inputs"]["reference"]["sha256"])
+            seams = report["seam"]["lanes"]
+            self.assertAlmostEqual(seams["reference"]["before"]["time"], 19 / 24, places=5)
+            self.assertAlmostEqual(seams["reference"]["after"]["time"], 5 / 6, places=5)
+            self.assertEqual(seams["candidate"]["before"]["time"], .3)
+            self.assertAlmostEqual(seams["candidate"]["after"]["time"], 10 / 30, places=5)
+            self.assertTrue((out / "seam.jpg").is_file())
+            viewer = (out / "frames.html").read_text(encoding="utf-8")
+            self.assertIn(rows[-1]["image"], viewer)
+            self.assertIn('const cuts = {"reference": 8, "candidate": 10}', viewer)
+
+    def test_seam_requires_times_strictly_inside_each_range(self):
+        row = {"reference": [0, 1], "candidate": [1, 2], "seam": {"reference": 1, "candidate": 1.4}}
+        with self.assertRaisesRegex(ValueError, "strictly within"):
+            seam_times(row)
+        self.assertIsNone(seam_times({"reference": [0, 1]}))
 
     def test_tracks_translation_and_does_not_bridge_occlusion(self):
         with tempfile.TemporaryDirectory() as directory:
