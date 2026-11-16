@@ -21,6 +21,10 @@ Rate each axis from 1 to 5. Use **1** for a placeholder or hard-to-read action, 
 
 For each object, record the time range, a crop or still, a motion trace or playback where applicable, and one concrete observation for each side. Fill the scores after review. For every deficit, name the exact change and the render state that verifies it. Retest the same actor against the same reference rating. Keep the appearance and motion totals separate and show any lower axis even when a total improves.
 
+For an asset whose framing changed, use `python scripts/compare_actor.py --reference SOURCE --candidate CUT --map actors.json --out actor-review`. The manifest has an `actors` list with stable `id`, `reference`, and `candidate` fields. Each side declares `seconds` and a normalized `box` in left, top, right, bottom order. Choose moments with equivalent action states. The sheet shows the full composition with the actor outlined and a scaled crop in a separate panel. Occupancy measures the supplied box. Use the crop for form and material, the full frame for staging, and the timed sequence for motion.
+
+For a hardware enclosure, verify depth at the most oblique viewing angle and during the door, card, or tray movement. Check that a wide chassis surface does not cover its front details, the moving part remains seated when closed, and the part that carries the explanation has an independent cue. Inspect the shared asset on both sides of its cut when it persists across shots.
+
 ```text
 python scripts/score_objects.py --ledger objects.json --out scores.json
 python scripts/score_objects.py --ledger revised-objects.json --previous scores.json --out revised-scores.json

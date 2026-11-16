@@ -36,6 +36,12 @@
       "script": "scripts/score_objects.py",
       "status": "supported",
       "review": "Rate each visible actor against paired evidence and retest lower appearance and motion axes."
+    },
+    {
+      "id": "compare-actor",
+      "script": "scripts/compare_actor.py",
+      "status": "supported",
+      "review": "Use real frame occupancy for staging and scaled crops for surface and form."
     }
   ]
 }
