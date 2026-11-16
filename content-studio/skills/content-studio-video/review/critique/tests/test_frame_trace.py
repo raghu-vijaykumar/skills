@@ -14,7 +14,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
 from frame_trace import build, decode, seam_times
-from track_objects import follow, retarget
+from track_objects import follow, measure_relative, retarget
 
 
 class TraceTests(unittest.TestCase):
@@ -84,6 +84,22 @@ class TraceTests(unittest.TestCase):
             keys = retarget(points, {"start_frame":10,"fps":30,"width":1000,"height":1920})
             self.assertEqual([[k["frame"] for k in band] for band in keys], [[10,11,12],[14]])
             self.assertEqual(keys[0][-1]["x"], 40)
+
+    def test_relative_track_cancels_translation_and_exposes_loss(self):
+        def record(name, path):
+            return {"id": name, "lane": "candidate", "first": 0, "last": 3, "samples": [
+                {"frame": i, "time": i/30, "x": x, "y": .5 if x is not None else None}
+                for i, x in enumerate(path)
+            ]}
+        shoe = record("shoe", [.4, .36, None, .29])
+        ground = record("ground", [.7, .66, .62, .58])
+        request = {"id": "stance", "subject": "shoe", "anchor": "ground"}
+        result, = measure_relative([shoe, ground], [request])
+        self.assertEqual(result["tracked_frames"], 3)
+        self.assertEqual([p["dx"] for p in result["samples"]], [0, 0, None, .01])
+        self.assertEqual(result["max_abs_dx"], .01)
+        with self.assertRaisesRegex(ValueError, "same lane"):
+            measure_relative([shoe, {**ground, "lane": "reference"}], [request])
 
 
 if __name__ == "__main__":

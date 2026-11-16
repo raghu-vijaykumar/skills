@@ -19,15 +19,24 @@ Begin before a candidate exists. Run `python scripts/survey_reference.py --refer
 
 For a private experiment the author can run the creative comparisons without asking the requester to act as the editor. Follow the production precheck when the task is a production edit. Publication has its own authorization.
 
+## Reuse the production plan across visual presets
+
+- Keep the research, narration, word clock, stable actor IDs, rig targets, state changes, handoffs, and retest criteria together. Use real-world photos and observed or documented action when beginning without a video reference. This includes photos of specific people for cartoons and caricatures.
+- A visual preset owns shapes, textures, linework, shading, palette, and the matching geometry for its rig targets. Rebuild those layers for a different look, such as cel shading or pixel art. Render the same named action with the new assets and recheck posing, material, contrast and staging at delivery size.
+- The editorial treatment owns the pacing. Rapid Take expects a visible cue from each spoken word and strong focal color. Core Explainer uses the same assets and frame clock for deliberate state changes and readable holds.
+- For a private automated pass, diagnose and rank deficits from the exact render, revise the affected assets or cue ranges, then rerender and score those actions in context. Record remaining deficits and their evidence so a next pass can resume. Use the same loop inside successive chapters for a long-form video, and check handoffs across chapter boundaries in the final master.
+
 ## Inspect the word clock
 
 Store a private JSON plan with `fps`, `durationFrames` and contiguous half-open `shots`. A shot has `startFrame`, `endFrame`, `asset`, `emotion`, `inventory`, `script` and `words`. Each word has `text`, `startFrame`, `endFrame`, `actor` and `action`. Give each word its own onset frame. The runtime caption also takes a `line` number so it can accumulate a short readable group. Use the final narration's frame clock; if only provider offsets are available after retiming, label them estimates until playback or alignment verifies them.
+
+Set `"style": "rapid-take"` at the plan root for Rapid Take. Its words also require `cueKind`. Use `object` for an independently animated prop or mechanism, `character` for acting, `continuation` for a specified next state in an ongoing action, and `editorial` for a meaningful framing or cut cue. This distinguishes a planned visual cue from caption highlighting. The audit records the declared kinds. Verify that the rendered actor actually does the named action. `artPreset` can label the visual treatment and has no effect on cue validation.
 
 ```text
 python scripts/audit_word_cues.py --plan word-plan.json --video candidate.mp4 --out word-review
 ```
 
-Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
+Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Rapid Take measures per-pixel color channel changes as well as brightness shifts, so it can flag a visual accent that changes hue at the same brightness. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
 
 ## Transfer the method to new subjects
 

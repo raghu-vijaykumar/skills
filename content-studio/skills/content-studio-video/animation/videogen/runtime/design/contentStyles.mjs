@@ -20,8 +20,8 @@ export const CONTENT_STYLES = Object.freeze([
   Object.freeze({
     id: 'rapid-take',
     name: 'Rapid Take',
-    look: 'High-velocity satirical',
-    use: 'Fast, evidence-led tech news with meme punctuation',
+    look: 'Vivid, word-timed motion',
+    use: 'Fast visual storytelling and sourced satirical commentary',
     formats: Object.freeze(['video']),
     tokens: 'src/design/rapidTake.ts',
   }),

@@ -24,7 +24,7 @@ table. A project may enable only a subset; listing does not install a renderer.
 | `core-explainer` | video, carousel, post | Mechanism-led technical explanations | [Treatment example](core-explainer/previews/treatment.md) |
 | `evidence-lab` | video, carousel, post | Research-led investigations with firsthand captures | [Treatment example](evidence-lab/previews/treatment.md) |
 | `hairline` | video | Narration-timed line-art animation | [Treatment example](hairline/previews/treatment.md) |
-| `rapid-take` | video | Fast, evidence-led tech news | [Treatment example](rapid-take/previews/treatment.md) |
+| `rapid-take` | video | Vivid, word-timed visual stories and satirical commentary | [Treatment example](rapid-take/previews/treatment.md) |
 | `tech-dispatch` | carousel, post | Source-led technology posts | [Treatment example](tech-dispatch/previews/treatment.md) |
 
 The seven selectable video-filter looks are `warm-golden`, `cool-cinematic`,

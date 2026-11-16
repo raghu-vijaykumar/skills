@@ -15,8 +15,8 @@ export declare const CONTENT_STYLES: readonly (Readonly<{
 }> | Readonly<{
     id: "rapid-take";
     name: "Rapid Take";
-    look: "High-velocity satirical";
-    use: "Fast, evidence-led tech news with meme punctuation";
+    look: "Vivid, word-timed motion";
+    use: "Fast visual storytelling and sourced satirical commentary";
     formats: readonly string[];
     tokens: "src/design/rapidTake.ts";
 }> | Readonly<{
@@ -44,8 +44,8 @@ export declare const contentStyle: (id: any) => Readonly<{
 }> | Readonly<{
     id: "rapid-take";
     name: "Rapid Take";
-    look: "High-velocity satirical";
-    use: "Fast, evidence-led tech news with meme punctuation";
+    look: "Vivid, word-timed motion";
+    use: "Fast visual storytelling and sourced satirical commentary";
     formats: readonly string[];
     tokens: "src/design/rapidTake.ts";
 }> | Readonly<{

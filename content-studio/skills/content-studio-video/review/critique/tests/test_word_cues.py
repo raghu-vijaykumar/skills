@@ -6,9 +6,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from audit_word_cues import inspect_frames, read_plan
+from audit_word_cues import changed, inspect_frames, read_plan
 
 
 class WordCueTests(unittest.TestCase):
@@ -40,6 +41,28 @@ class WordCueTests(unittest.TestCase):
         plan["shots"][0]["words"][1]["startFrame"] = 2
         with self.assertRaisesRegex(ValueError, "simultaneous"):
             read_plan(plan)
+
+    def test_rapid_take_requires_visible_cue_kinds_and_allows_visual_reskins(self):
+        plan = {**self.plan(), "style": "rapid-take"}
+        words = plan["shots"][0]["words"]
+        words[0]["cueKind"] = "object"
+        for invalid in (None, "caption", ["object"]):
+            words[1]["cueKind"] = invalid
+            with self.assertRaisesRegex(ValueError, "Rapid Take word 'it.' needs a cueKind"):
+                read_plan(plan)
+        words[1]["cueKind"] = "continuation"
+        self.assertEqual(read_plan({**plan, "artPreset": "anime"}),
+                         read_plan({**plan, "artPreset": "pixel-art"}))
+        words[0]["text"] = "Press it."
+        words.pop()
+        with self.assertRaisesRegex(ValueError, "one spoken word per Rapid Take cue"):
+            read_plan(plan)
+
+    def test_color_accent_can_move_without_changing_luma(self):
+        red = Image.new("RGB", (8, 8), (255, 0, 0))
+        green = Image.new("RGB", (8, 8), (0, 130, 0))
+        self.assertEqual(changed(red, green, (0, 0, 1, 1)), 0)
+        self.assertEqual(changed(red, green, (0, 0, 1, 1), color=True), 100)
 
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
     def test_a_single_frame_accent_is_kept(self):

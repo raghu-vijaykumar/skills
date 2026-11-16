@@ -127,6 +127,49 @@ def retarget(points, settings):
     return segments
 
 
+def measure_relative(tracks, requests):
+    if not isinstance(requests, list):
+        raise ValueError("relative_tracks must be a list")
+    by_id = {track["id"]: track for track in tracks}
+    ids = set()
+    results = []
+    for request in requests:
+        name = request["id"]
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,47}", name) or name in ids:
+            raise ValueError("Relative tracks need unique lowercase IDs")
+        ids.add(name)
+        subject = by_id[request["subject"]]
+        anchor = by_id[request["anchor"]]
+        if subject is anchor or subject["lane"] != anchor["lane"]:
+            raise ValueError(f"{name}: choose two distinct tracks from the same lane")
+        start = max(subject["first"], anchor["first"])
+        end = min(subject["last"], anchor["last"])
+        if end < start:
+            raise ValueError(f"{name}: the tracks need overlapping frames")
+        fixed = {p["frame"]: p for p in anchor["samples"]}
+        baseline = None
+        samples = []
+        for point in subject["samples"]:
+            if not start <= point["frame"] <= end:
+                continue
+            other = fixed[point["frame"]]
+            dx, dy = None, None
+            if point["x"] is not None and other["x"] is not None:
+                # Subtract simultaneous anchor position, then measure change from the first joint frame.
+                offset = point["x"] - other["x"], point["y"] - other["y"]
+                if baseline is None:
+                    baseline = offset
+                dx, dy = (round(value - initial, 6) for value, initial in zip(offset, baseline))
+            samples.append({"frame": point["frame"], "time": point["time"], "dx": dx, "dy": dy})
+        visible = [p for p in samples if p["dx"] is not None]
+        results.append({**request, "lane": subject["lane"], "range": [start, end],
+                        "tracked_frames": len(visible),
+                        "max_abs_dx": max((abs(p["dx"]) for p in visible), default=None),
+                        "max_abs_dy": max((abs(p["dy"]) for p in visible), default=None),
+                        "samples": samples})
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for flag in ("trace", "seeds", "out"):
@@ -139,7 +182,8 @@ def main():
         for lane in ("reference", "candidate"):
             with (root / f"{lane}.csv").open(encoding="utf-8", newline="") as stream:
                 rows[lane] = list(csv.DictReader(stream))
-        tracks = json.loads(args.seeds.read_text(encoding="utf-8-sig"))["tracks"]
+        seeds = json.loads(args.seeds.read_text(encoding="utf-8-sig"))
+        tracks = seeds["tracks"]
         ids = [track["id"] for track in tracks]
         if not ids or len(ids) != len(set(ids)) or not all(re.fullmatch(r"[a-z][a-z0-9-]{0,47}", name) for name in ids):
             raise ValueError("Tracks need unique lowercase IDs")
@@ -157,6 +201,8 @@ def main():
             report.append(record)
             print(f"{track['id']}: {tracked}/{len(points)} tracked")
         data = {"schema_version": 1, "beat": manifest["beat"], "inputs": manifest["inputs"], "tracks": report}
+        if "relative_tracks" in seeds:
+            data["relative_tracks"] = measure_relative(report, seeds["relative_tracks"])
         (args.out / "tracks.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     except (OSError, ValueError, KeyError, TypeError) as error:
         parser.exit(1, f"Object trace failed: {error}\n")

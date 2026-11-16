@@ -12,7 +12,7 @@ renderer owned by this leaf.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `treatment` | Supported | Approved topic/scenes + evidence → Rapid Take treatment plan and render handoff (video only) | No | [Treatment example](previews/treatment.md) | Fast, evidence-led tech news with meme punctuation. The planning skill does not render video; the selected renderer and format must be validated before export. |
+| `treatment` | Supported | Approved topic/scenes + evidence → Rapid Take treatment plan and render handoff (video only) | No | [Treatment example](previews/treatment.md) | Fast visual storytelling with word-timed actors and vivid focal color. The planning skill does not render video; the selected renderer and format must be validated before export. |
 
 ## Evidence note
 

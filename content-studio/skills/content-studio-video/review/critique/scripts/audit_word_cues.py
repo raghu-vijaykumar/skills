@@ -13,12 +13,16 @@ from PIL import Image, ImageChops, ImageDraw
 from compare import inspect
 
 
+VISIBLE_CUE_KINDS = {"object", "character", "continuation", "editorial"}
+
+
 def tokens(text):
     return re.findall(r"[^\W_]+(?:['’\-][^\W_]+)*", text.casefold())
 
 
 def read_plan(plan):
     fps, duration = plan["fps"], plan["durationFrames"]
+    rapid_take = plan.get("style") == "rapid-take"
     if type(fps) is not int or fps < 1 or type(duration) is not int or duration < 1:
         raise ValueError("Expected positive integer fps and durationFrames")
     cursor = 0
@@ -41,7 +45,15 @@ def read_plan(plan):
             if not all(isinstance(word.get(key), str) and word[key].strip()
                        for key in ("text", "actor", "action")):
                 raise ValueError(f"{actor}: name the visible target and action for {word['text']!r}")
-            actual.extend(tokens(word["text"]))
+            word_tokens = tokens(word["text"])
+            if rapid_take:
+                if len(word_tokens) != 1:
+                    raise ValueError(f"{actor}: use one spoken word per Rapid Take cue for {word['text']!r}")
+                kind = word.get("cueKind")
+                if not isinstance(kind, str) or kind not in VISIBLE_CUE_KINDS:
+                    kinds = ", ".join(sorted(VISIBLE_CUE_KINDS))
+                    raise ValueError(f"{actor}: Rapid Take word {word['text']!r} needs a cueKind ({kinds})")
+            actual.extend(word_tokens)
             previous = onset
             cues.append({**word, "shot": start, "shot_end": end})
         if not actual or tokens(shot["script"]) != actual:
@@ -58,16 +70,23 @@ def crop_region(image, region):
     return image.crop((int(l * width), int(t * height), round(r * width), round(b * height)))
 
 
-def changed(first, second, region):
-    patch = crop_region(ImageChops.difference(first.convert("L"), second.convert("L")), region)
+def changed(first, second, region, *, color=False):
+    if color:
+        # A vivid hue can change without changing the luma. Count that pixel once.
+        red, green, blue = ImageChops.difference(first, second).split()
+        diff = ImageChops.lighter(red, ImageChops.lighter(green, blue))
+    else:
+        diff = ImageChops.difference(first.convert("L"), second.convert("L"))
+    patch = crop_region(diff, region)
     return round(100 * sum(patch.histogram()[12:]) / (patch.width * patch.height), 3)
 
 
-def inspect_frames(video, rows, fps, duration, region, output):
+def inspect_frames(video, rows, fps, duration, region, output, *, color=False):
     media = inspect(video)
     if Fraction(media["fps"]) != fps:
         raise ValueError(f"Expected {fps} fps, found {media['fps']}")
-    width, height = 144, 256
+    scale = 256 / max(media["width"], media["height"])
+    width, height = (max(1, round(media[key] * scale)) for key in ("width", "height"))
     pixels = width * height * 3
     refs = {}
     for index, row in enumerate(rows):
@@ -102,7 +121,7 @@ def inspect_frames(video, rows, fps, duration, region, output):
         # Pick the strongest frame so a short accent that has already settled
         # on the fourth frame still has visible comparison evidence.
         at, score = max(
-            ((at, changed(before, refs[at], region))
+            ((at, changed(before, refs[at], region, color=color))
              for at in range(row["startFrame"], row["inspection_end"] + 1)),
             key=lambda result: result[1],
         )
@@ -119,8 +138,10 @@ def build_sheets(rows, refs, output):
         for i, row in enumerate(group):
             x, y = i % 8 * 144, i // 8 * 186
             for side in ("before", "after"):
-                frame = refs[row[side]].resize((72, 128), Image.Resampling.LANCZOS)
-                page.paste(frame, (x + (72 if side == "after" else 0), y))
+                frame = refs[row[side]].copy()
+                frame.thumbnail((72, 128), Image.Resampling.LANCZOS)
+                left = x + (72 if side == "after" else 0) + (72 - frame.width) // 2
+                page.paste(frame, (left, y + (128 - frame.height) // 2))
             draw.text((x + 3, y + 131), f"{row['startFrame']} · {row['text']}"[:23], fill="white")
             draw.text((x + 3, y + 151), f"{row['region_change_percent']:.1f}% region change", fill="#c5abdd")
         page.save(output / f"words-{batch//24+1:03}.jpg", quality=89)
@@ -141,13 +162,20 @@ def main():
         plan = json.loads(args.plan.read_text(encoding="utf-8-sig"))
         fps, duration, cues = read_plan(plan)
         args.out.mkdir(parents=True, exist_ok=False)
-        media = inspect_frames(args.video, cues, fps, duration, args.region, args.out) if args.video else None
+        rapid_take = plan.get("style") == "rapid-take"
+        media = (inspect_frames(args.video, cues, fps, duration, args.region, args.out, color=rapid_take)
+                 if args.video else None)
         evidence = {
             "fps": fps, "durationFrames": duration, "shot_count": len(plan["shots"]), "word_count": len(cues),
             "video": media, "region": args.region,
+            "change_basis": ("rgb-channel" if rapid_take else "luma") if media else None,
             "low_motion_onsets": sum(row.get("region_change_percent", 100) < 1 for row in cues) if media else None,
             "rows": cues,
         }
+        if rapid_take:
+            evidence["style"] = "rapid-take"
+            evidence["cue_counts"] = {kind: sum(cue["cueKind"] == kind for cue in cues)
+                                      for kind in sorted(VISIBLE_CUE_KINDS)}
         (args.out / "word-evidence.json").write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
     except (OSError, ValueError, KeyError, TypeError) as error:
         cli.exit(1, f"Word cue audit failed: {error}\n")
