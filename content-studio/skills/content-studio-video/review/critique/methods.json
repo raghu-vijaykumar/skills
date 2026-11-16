@@ -18,6 +18,12 @@
       "script": "scripts/track_objects.py",
       "status": "supported",
       "review": "Verify the tracked object and check gaps and retargeted keyframes."
+    },
+    {
+      "id": "audit-word-cues",
+      "script": "scripts/audit_word_cues.py",
+      "status": "supported",
+      "review": "Verify the declared word timing and inspect rendered differences around each onset."
     }
   ]
 }

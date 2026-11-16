@@ -13,6 +13,8 @@ For a reusable illustrated presenter, use the [2D presenter rig workflow](refere
 
 For a motion reference, use the shot breakdown in the motion primitives guide. Plan subshot cuts and actor actions at frame precision. Animate the mechanism in separate geometry or rig layers, then prove the state change in a fixed-camera preview before adding camera, typography, or score.
 
+For word-level motion, start from the [full reconstruction checklist](../../../review/critique/references/reconstruction.md). Treat spoken onset, caption emphasis, meaningful object action and presenter reaction as separate cues. Update each cue's clock when narration or cuts change.
+
 Run [video critique](../../../review/critique/SKILL.md) on representative narrated renders when a creative reference sets the target. Compare the onset, impact, and settle of each important action. When a retry, handoff, or state change is missing, repair the action before polishing the frame. Choose camera and cut rhythm after seeing the action at speed. Separate word-level text timing and gesture cues from the chapter headline. Verify the top changes using the same mapped beats.
 
 When a reference movement needs to carry over, use the critique skill's [frame trace and object tracks](../../../review/critique/references/frame-tracing.md). Feed verified screen-space displacement into original actors. Give fades, masks, object replacements, and track-loss gaps their own authored actions and retest them in consecutive rendered frames.
