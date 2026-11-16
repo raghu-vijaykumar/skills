@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode, landmark_times, seam_times
+from frame_trace import build, decode, hold_pictures, hold_ranges, landmark_times, seam_times
 from track_objects import follow, measure_relative, retarget
 
 
@@ -40,7 +40,8 @@ class TraceTests(unittest.TestCase):
             beat = {"id": "beat", "reference": [0.5, 1.5], "candidate": [0, 1],
                     "seam": {"reference": 5 / 6, "candidate": .31},
                     "landmarks": [{"id": "settled", "reference": 1.15, "candidate": .75},
-                                  {"id": "impact", "reference": 2 / 3, "candidate": .6}]}
+                                  {"id": "impact", "reference": 2 / 3, "candidate": .6}],
+                    "holds": [{"id": "result", "reference": [.75, 1.25], "candidate": [.4, .9]}]}
             self.assertEqual(build(ref, draft, {"beats": [beat]},
                                    "beat", out, {"full": (0, 0, 1, 1)}), {"reference":24,"candidate":30})
             with (out / "reference.csv").open(newline="", encoding="utf-8") as stream:
@@ -65,6 +66,14 @@ class TraceTests(unittest.TestCase):
             self.assertEqual(impact["lanes"]["candidate"]["after"]["frame"], 18)
             self.assertTrue((out / "landmark-impact.jpg").is_file())
             self.assertIn('"impact": {"reference": 4, "candidate": 18}', viewer)
+            hold = report["holds"][0]
+            self.assertEqual(hold["lanes"]["reference"]["decoded_frames"], 12)
+            self.assertEqual(hold["lanes"]["candidate"]["decoded_frames"], 15)
+            self.assertEqual(hold["lanes"]["reference"]["middle"]["time"], 1.0)
+            self.assertEqual(hold["lanes"]["candidate"]["duration_seconds"], .5)
+            self.assertEqual(hold["lanes"]["candidate"]["last"]["frame"], 26)
+            self.assertTrue((out / "hold-result.jpg").is_file())
+            self.assertIn('const holds = {"result": "hold-result.jpg"}', viewer)
 
     def test_seam_requires_times_strictly_inside_each_range(self):
         row = {"reference": [0, 1], "candidate": [1, 2], "seam": {"reference": 1, "candidate": 1.4}}
@@ -82,6 +91,14 @@ class TraceTests(unittest.TestCase):
         for events, message in invalid:
             with self.subTest(events=events), self.assertRaisesRegex(ValueError, message):
                 landmark_times({**row, "landmarks": events})
+
+    def test_holds_must_fit_the_beat_and_include_a_decoded_picture(self):
+        row = {"reference": [0, 1], "candidate": [1, 2],
+               "holds": [{"id": "result", "reference": [.3, .7], "candidate": [1.8, 2.1]}]}
+        with self.assertRaisesRegex(ValueError, "inside its mapped range"):
+            hold_ranges(row)
+        with self.assertRaisesRegex(ValueError, "No decoded picture"):
+            hold_pictures("candidate", "result", [1.01, 1.02], [("image", 1.0)], [{}])
 
     def test_tracks_translation_and_does_not_bridge_occlusion(self):
         with tempfile.TemporaryDirectory() as directory:

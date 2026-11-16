@@ -12,6 +12,8 @@ Start with the audience question and show a cause, an action and its result. Syn
 
 When the explanation compares two routes or a changing set, draw both from the same underlying states. Keep a route's origin, payload and destination visible through a branch. When part of a production line goes idle, let its individual objects stop and derive any count or graph from that state. In the narrated render, verify the shared starting state, the point of divergence and the settled comparison with [paired frame landmarks](../../../../review/critique/references/frame-tracing.md).
 
+For teaching results that appear as a number, status, or decision, give the result its own readable hold after movement settles. Preserve the originating actor as context and use the exact export to inspect the beginning, middle and final frames of the hold. Choose the hold from the amount of information the viewer must read.
+
 When a creative reference sets the craft target, use the [object scoring rubric](../../../../review/critique/references/object-scoring.md) for hero assets, faces and supporting props. Compare form, material treatment and staging separately from mechanics, timing and continuity. Rerender and score the affected actors after each revision.
 
 For an original topic without a reference video, [build and score heroes from real-world photos](../../../../review/critique/references/photo-reference.md). Use photos for physical form and finish. Use observed states or documentation for the moving assembly and inspect the whole action in the rendered cut.

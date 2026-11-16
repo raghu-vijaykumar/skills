@@ -29,6 +29,8 @@ For several meaningful changes inside a beat, put `landmarks` on the same beat r
 
 The viewer's landmark menu jumps both lanes to the corresponding decoded picture. Each event also gets a four-frame `landmark-<id>.jpg` sheet. Check the preceding and following frames to confirm the authored event, then use the same landmarks to compare a revision. Adjust candidate times if the choreography or edit changes.
 
+For results that need time to read, map the visibly legible interval with `holds` on the same beat. For example, `"holds": [{"id":"amount-readable","reference":[109.6,112.0],"candidate":[110.7,112.5]}]`. Use first and end-exclusive times within each mapped lane. The report records the annotated duration, actual decoded frames inside the interval, and first, middle and last evidence. Use the six-frame hold sheet and step the full interval in the viewer to look for obstruction, motion blur, or loss of emphasis. Confirm readability against the actual render. The annotated duration and count measure the interval and do not judge its contents.
+
 ## Track a visible actor and reuse its movement
 
 Run `python <skill>/scripts/track_objects.py --trace trace --seeds seeds.json --out tracks` with NumPy installed. Choose a tight textured box with the frame viewer. Box units are pixels of the extracted image. `first` and `last` are inclusive, zero-based indices within this trace.

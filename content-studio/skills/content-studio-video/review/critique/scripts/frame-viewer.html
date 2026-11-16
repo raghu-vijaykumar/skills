@@ -10,6 +10,7 @@
   main{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
   nav{display:flex;align-items:center;gap:10px;margin:0 0 14px}
   nav[hidden]{display:none}
+  nav a{color:#c5ccff}
   section{min-width:0;background:#1e212a;border:1px solid #393d49;border-radius:12px;padding:16px}
   img{display:block;height:min(60vh,640px);width:100%;object-fit:contain;background:#111217}
   input{width:100%;accent-color:#a8b4ff;margin:12px 0}
@@ -17,15 +18,17 @@
   button{background:#2d3344;color:inherit;border:1px solid #575e71;border-radius:6px;padding:7px 11px;margin-right:6px}
 </style>
 <h1>Frame-by-frame review</h1>
-<nav hidden aria-label="Paired landmarks">
+<nav hidden id="landmarks" aria-label="Paired landmarks">
   <label for="landmark">Paired landmark</label>
   <select id="landmark"><option value="">Choose an event</option></select>
 </nav>
+<nav hidden id="holds" aria-label="Paired hold sheets"><span>Hold sheets</span></nav>
 <main></main>
 <script>
   const frames = /* FRAME_DATA */;
   const cuts = /* CUT_DATA */;
   const landmarks = /* LANDMARK_DATA */;
+  const holds = /* HOLD_DATA */;
   const jumpToFrame = {};
   for (const [lane, rows] of Object.entries(frames)) {
     const panel = document.createElement("section");
@@ -90,5 +93,15 @@
       menu.value = "";
     });
     menu.closest("nav").hidden = false;
+  }
+  if (Object.keys(holds).length) {
+    const holdLinks = document.querySelector("#holds");
+    for (const [name, sheet] of Object.entries(holds)) {
+      const link = document.createElement("a");
+      link.href = sheet;
+      link.textContent = name.replaceAll("-", " ");
+      holdLinks.append(link);
+    }
+    holdLinks.hidden = false;
   }
 </script>

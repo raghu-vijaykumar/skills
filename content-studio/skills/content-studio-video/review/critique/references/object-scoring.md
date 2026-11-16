@@ -27,6 +27,8 @@ For a hardware enclosure, verify depth at the most oblique viewing angle and dur
 
 When several changes happen within the same shot, map their [landmarks](frame-tracing.md) by the visible action. Choose the arrival, contact or activation, and settled result. Jump to matching events in both lanes before judging timing, even when the word, pause, or camera cut differs between versions.
 
+For a large number, status, or decision, use a paired hold interval after the entry settles. Time how long the result is legible in each cut, then check the full sheet and sequence for crowding, competing motion, or an early exit. Judge staging and timing from that evidence alongside the moment of first reveal.
+
 For a recurring presenter, score the held face and hand form separately when both matter. Map a complete gesture from its first motion through the target, cue word and recovery. Check the visible hand at native cadence for finger separation, wrist attachment and overlap with the face or prop. For acting, compare the function of the gaze, expression and gesture to the matching teaching beat, even if the new narration uses different words. An isolated preview shows anatomy and motion. The full narrated frame shows whether the pose directs attention to the right object at the right time.
 
 ```text

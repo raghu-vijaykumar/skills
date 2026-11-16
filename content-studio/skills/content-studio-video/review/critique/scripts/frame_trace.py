@@ -116,18 +116,48 @@ def seam_times(row):
     return paired_times(row, row["seam"], "seam") if "seam" in row else None
 
 
-def landmark_times(row):
-    landmarks = row.get("landmarks", [])
-    if not isinstance(landmarks, list):
-        raise ValueError("landmarks must be a list of named events")
+def named_entries(row, key, label):
+    entries = row.get(key, [])
+    if not isinstance(entries, list):
+        raise ValueError(f"{key} must be a list of named {label} entries")
     anchors = {}
-    for item in landmarks:
+    for item in entries:
         name = item.get("id") if isinstance(item, dict) else None
         if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,47}", name) or name in anchors:
-            raise ValueError(f"Invalid or duplicate landmark ID: {name!r}")
-        times = {lane: time for lane, time in item.items() if lane != "id"}
-        anchors[name] = paired_times(row, times, f"landmark {name}")
+            raise ValueError(f"Invalid or duplicate {label} ID: {name!r}")
+        anchors[name] = {lane: time for lane, time in item.items() if lane != "id"}
     return anchors
+
+
+def landmark_times(row):
+    return {name: paired_times(row, times, f"landmark {name}")
+            for name, times in named_entries(row, "landmarks", "landmark").items()}
+
+
+def hold_ranges(row):
+    ranges = named_entries(row, "holds", "hold")
+    for name, lanes in ranges.items():
+        if set(lanes) != {"reference", "candidate"}:
+            raise ValueError(f"Hold {name} needs separate reference and candidate ranges")
+        for lane, interval in lanes.items():
+            start, end = row[lane]
+            if (not isinstance(interval, list) or len(interval) != 2
+                    or not all(type(t) in (int, float) and math.isfinite(t) for t in interval)
+                    or not start <= interval[0] < interval[1] <= end):
+                raise ValueError(f"{lane} hold {name} needs a finite increasing range inside its mapped range")
+    return ranges
+
+
+def hold_pictures(lane, name, interval, pictures, rows):
+    start, end = interval
+    # Keep a half-open PTS range even when the two cuts run at different rates.
+    inside = [(i, t) for i, (_, t) in enumerate(pictures) if start - 1e-9 <= t < end - 1e-9]
+    if not inside:
+        raise ValueError(f"No decoded picture in {lane} hold {name}; widen the hold range")
+    midpoint = (start + end) / 2
+    middle, _ = min(inside, key=lambda entry: abs(entry[1] - midpoint))
+    return {"seconds": interval, "duration_seconds": round(end - start, 6), "decoded_frames": len(inside),
+            "first": rows[inside[0][0]], "middle": rows[middle], "last": rows[inside[-1][0]]}
 
 
 def seam_pictures(lane, anchor, pictures, rows, label="seam"):
@@ -138,11 +168,11 @@ def seam_pictures(lane, anchor, pictures, rows, label="seam"):
     return {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
 
 
-def seam_sheet(root, seams, filename="seam.jpg"):
-    sheet = Image.new("RGB", (814, 1302), "#1b1d24")
+def comparison_sheet(root, lanes, filename, moments):
+    sheet = Image.new("RGB", (407 * len(moments), 1302), "#1b1d24")
     draw = ImageDraw.Draw(sheet)
-    for y, (lane, frames) in enumerate(seams.items()):
-        for x, key in enumerate(("before", "after")):
+    for y, (lane, frames) in enumerate(lanes.items()):
+        for x, key in enumerate(moments):
             frame = frames[key]
             xx, yy = 407 * x, 651 * y
             with Image.open(root / frame["image"]) as source:
@@ -152,7 +182,7 @@ def seam_sheet(root, seams, filename="seam.jpg"):
     sheet.save(root / filename, quality=93)
 
 
-def viewer(root, lanes, seams, landmarks):
+def viewer(root, lanes, seams, landmarks, holds):
     template = Path(__file__).with_name("frame-viewer.html").read_text(encoding="utf-8")
     # The script literals contain generated relative names, validated IDs and numbers.
     frames = {name: [{key: row[key] for key in ("frame", "time", "image")} for row in rows]
@@ -160,9 +190,11 @@ def viewer(root, lanes, seams, landmarks):
     cuts = {lane: item["after"]["frame"] for lane, item in (seams or {}).items()}
     jumps = {event["id"]: {lane: item["after"]["frame"] for lane, item in event["lanes"].items()}
              for event in landmarks}
+    hold_sheets = {hold["id"]: hold["sheet"] for hold in holds}
     (root / "frames.html").write_text(template.replace("/* FRAME_DATA */", json.dumps(frames))
                                      .replace("/* CUT_DATA */", json.dumps(cuts))
-                                     .replace("/* LANDMARK_DATA */", json.dumps(jumps)), encoding="utf-8")
+                                     .replace("/* LANDMARK_DATA */", json.dumps(jumps))
+                                     .replace("/* HOLD_DATA */", json.dumps(hold_sheets)), encoding="utf-8")
 
 
 def build(reference, candidate, mapping, beat, output, regions):
@@ -175,6 +207,8 @@ def build(reference, candidate, mapping, beat, output, regions):
     anchors = seam_times(row)
     events = landmark_times(row)
     landmarks = [{"id": name, "sheet": f"landmark-{name}.jpg", "lanes": {}} for name in events]
+    intervals = hold_ranges(row)
+    holds = [{"id": name, "sheet": f"hold-{name}.jpg", "lanes": {}} for name in intervals]
     output.mkdir(parents=True, exist_ok=False)
     lanes = {}
     seams = {}
@@ -187,16 +221,23 @@ def build(reference, candidate, mapping, beat, output, regions):
         for event in landmarks:
             name = event["id"]
             event["lanes"][lane] = seam_pictures(lane, events[name][lane], pairs, lanes[lane], name)
-    viewer(output, lanes, seams, landmarks)
+        for hold in holds:
+            name = hold["id"]
+            hold["lanes"][lane] = hold_pictures(lane, name, intervals[name][lane], pairs, lanes[lane])
+    viewer(output, lanes, seams, landmarks, holds)
     manifest = {"schema_version": 1, "beat": row, "regions": regions,
                 "inputs": meta, "decoded_frames": {lane: len(frames) for lane, frames in lanes.items()}}
     if seams:
-        seam_sheet(output, seams)
+        comparison_sheet(output, seams, "seam.jpg", ("before", "after"))
         manifest["seam"] = {"sheet": "seam.jpg", "lanes": seams}
     if landmarks:
         for event in landmarks:
-            seam_sheet(output, event["lanes"], event["sheet"])
+            comparison_sheet(output, event["lanes"], event["sheet"], ("before", "after"))
         manifest["landmarks"] = landmarks
+    if holds:
+        for hold in holds:
+            comparison_sheet(output, hold["lanes"], hold["sheet"], ("first", "middle", "last"))
+        manifest["holds"] = holds
     (output / "frame-trace.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest["decoded_frames"]
 
