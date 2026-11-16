@@ -18,12 +18,20 @@ def probe(source: Path) -> dict:
     return json.loads(result.stdout)
 
 
-def validate(data: dict) -> tuple[Path, float, list[dict], dict, bool]:
+def validate(data: dict, *, for_timeline_sidecar: bool = False) -> tuple[Path, float, list[dict], dict, bool]:
     source = Path(data["source"]).resolve()
     if not source.is_file():
         raise ValueError(f"Source video does not exist: {source}")
     meta = probe(source)
     duration = float(meta["format"]["duration"])
+    if "timeline_duration_seconds" in data:
+        if not for_timeline_sidecar:
+            raise ValueError("timeline_duration_seconds is only for a timeline ASS sidecar")
+        # A pre-render timeline can be longer or shorter than the probed canvas
+        # source. The native timeline validates the final composite duration.
+        duration = float(data["timeline_duration_seconds"])
+        if not math.isfinite(duration) or duration <= 0:
+            raise ValueError("timeline_duration_seconds must be positive and finite")
     streams = meta.get("streams", [])
     if not any(s.get("codec_type") == "video" for s in streams):
         raise ValueError("Source needs a video stream")
@@ -35,7 +43,8 @@ def validate(data: dict) -> tuple[Path, float, list[dict], dict, bool]:
     for index, event in enumerate(events):
         start, end = float(event["start"]), float(event["end"])
         if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= duration + 0.02):
-            raise ValueError(f"Event {index} is outside the source duration")
+            boundary = "timeline" if "timeline_duration_seconds" in data else "source"
+            raise ValueError(f"Event {index} is outside the {boundary} duration")
         if event.get("kind") not in {"ingredient", "ingredient_list", "leaves", "title", "cta", "effect", "location"}:
             raise ValueError(f"Event {index} has an unsupported motion-graphic kind")
         if event["kind"] == "location":
@@ -367,10 +376,13 @@ def main() -> None:
                         help="permit a combined HLG-base preview that cannot retain Dolby Vision RPU")
     args = parser.parse_args()
     data = json.loads(args.cues.read_text(encoding="utf-8"))
-    source, total, events, video, has_audio = validate(data)
+    source, total, events, video, has_audio = validate(
+        data, for_timeline_sidecar=args.command != "render"
+    )
     if args.command == "validate":
         dv = ", Dolby Vision RPU present" if has_dolby_vision(video) else ""
-        print(f"Valid: {len(events)} cues, {total:.2f}s source, {video.get('color_transfer', 'unknown')} transfer{dv}")
+        basis = "timeline" if "timeline_duration_seconds" in data else "source"
+        print(f"Valid: {len(events)} cues, {total:.2f}s {basis}, {video.get('color_transfer', 'unknown')} transfer{dv}")
         return
     if not args.output:
         parser.error(f"{args.command} requires --output")

@@ -22,6 +22,12 @@ The cut-cover presets require at least 0.30 seconds; use roughly 0.4–0.8 secon
 
 Run `python scripts/overlay.py validate <cues.json>`, then `sidecar <cues.json> --output <source-basename.ass>`. Load the ASS over the original for the exact source video and audio. `render <cues.json> --start S --duration D --output <new-preview.mp4>` makes a bounded review copy. A Dolby Vision source requires `--allow-dv-preview`: the combined copy preserves the HLG base-layer tags, not its RPU. Never overwrite the original or describe the preview as Dolby Vision equivalent. Review the entrance, midpoint, and exit of each cue at delivery size; a still at the peak does not establish whether the motion feels right. The ASS canvas follows the source aspect ratio, including portrait footage.
 
+For a cut or intro-prepended timeline that has not been rendered, add
+`"timeline_duration_seconds": <final-seconds>` beside `source`. The source is
+then only the canvas and color probe for `validate`/`sidecar`; cue times
+belong to the final timeline. Standalone `render` rejects this override so a
+preview cannot silently run past the available source frames.
+
 Silent source clips are supported: the preview keeps them silent. When audio exists, it is copied from the source.
 
 The overlay colors are authored as RGB graphics and may look different under an HDR player's display transform. Check them on the intended display; this does not imply a grade or color transform to the source footage.

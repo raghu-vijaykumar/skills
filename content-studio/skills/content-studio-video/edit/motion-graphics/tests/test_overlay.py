@@ -25,6 +25,28 @@ class OverlayTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "outside the source duration"):
                     overlay.validate(data)
 
+    def test_timeline_sidecar_can_extend_past_canvas_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "source.mp4"
+            source.touch()
+            data = {"source": str(source), "timeline_duration_seconds": 15,
+                    "events": [{"kind": "cta", "start": 12, "end": 15}]}
+            probe = {"format": {"duration": "10"}, "streams": [
+                {"codec_type": "video", "width": 1920, "height": 1080}]}
+            with patch.object(overlay, "probe", return_value=probe):
+                _, duration, events, _, _ = overlay.validate(
+                    data, for_timeline_sidecar=True
+                )
+                self.assertEqual(duration, 15)
+                self.assertIn("0:00:12.00,0:00:15.00",
+                              overlay.ass(data, length=duration))
+                # A standalone render still cannot use frames beyond its source.
+                with self.assertRaisesRegex(ValueError, "only for a timeline ASS sidecar"):
+                    overlay.validate(data)
+                data["timeline_duration_seconds"] = 11
+                with self.assertRaisesRegex(ValueError, "outside the timeline duration"):
+                    overlay.validate(data, for_timeline_sidecar=True)
+
     def test_preview_shifts_cue_and_escapes_ass_controls(self):
         data = {"events": [{"kind": "ingredient", "start": 12, "end": 16,
                             "label": r"Rice{\bord20}", "action": "ADD", "evidence": "Visible rice"}]}

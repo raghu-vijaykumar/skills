@@ -20,6 +20,13 @@ preview the card for occlusion, and render its ASS sidecar as the
 `motion-graphics-ass` operation in the approved delivery timeline. The sidecar
 does not encode a separate full video.
 
+For a timeline whose final picture is not rendered yet, keep `source` as an
+existing video for canvas size and color probing and set
+`timeline_duration_seconds` to the planned final length. `validate` and
+`sidecar` then accept cue times on that final timeline; `render` still requires
+all cues to fit the actual source video. The native timeline separately checks
+the sidecar span and hash before its single final export.
+
 For cooking videos, the same JSON cue sheet supports:
 
 - `title`: a two-part label and optional Kannada subtitle. Stagger the words on separate beats. Preview the shot and place the panel in open space.
