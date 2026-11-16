@@ -56,6 +56,13 @@ Place the rendered sections on the video timeline with bounded tempo changes:
 python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "/path/to/vlog-draft" assemble --script narration.json --video "/path/to/master.mp4" --preview
 ```
 
+For a timeline whose picture edit is planned but has not been rendered, use
+`assemble --script narration.json --duration 952` to create the aligned voice
+asset without a temporary full-length video. `--video` and `--duration` are
+mutually exclusive. The duration-only route does not create a picture preview;
+review bounded voice samples separately and use the approved delivery timeline
+for the final picture and audio export.
+
 - Keeps each section at its timestamp, applies at most `1.12` `atempo`, and reports every overrun in `timeline.json` instead of hiding it.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.

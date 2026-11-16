@@ -11,7 +11,7 @@ new workspace profiles and model weights are not gallery assets.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `enroll-and-synthesize` | Supported | Consented samples + approved script + IndicF5 model → segment WAVs + manifest + assembled narration | Specialist only | [Actual inference sample and commands](previews/example-synthesis.md) | Sample failed transcription and is not approved narration; consent mandatory; tempo cap 1.12; listening review required. |
+| `enroll-and-synthesize` | Supported | Consented samples + approved script + IndicF5 model → segment WAVs + manifest + assembled narration | Specialist only | [Actual inference sample and commands](previews/example-synthesis.md) | Sample failed transcription and is not approved narration; `assemble --duration` accepts a planned timeline length without an intermediate picture; consent, tempo cap 1.12 and listening review remain required. |
 
 ## Evidence note
 

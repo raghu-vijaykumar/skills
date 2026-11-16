@@ -11,6 +11,29 @@ spec=importlib.util.spec_from_file_location("voice_bootstrap",SOURCE)
 voice=importlib.util.module_from_spec(spec);spec.loader.exec_module(voice)
 
 class VoiceBootstrapTests(unittest.TestCase):
+    def test_assembly_target_accepts_voice_only_duration(self):
+        self.assertEqual(voice.assembly_target(None, 952.0, False), (None, 952.0))
+
+    def test_assembly_target_requires_video_for_preview(self):
+        with self.assertRaisesRegex(SystemExit, "--preview requires --video"):
+            voice.assembly_target(None, 952.0, True)
+
+    def test_assembly_target_rejects_invalid_duration(self):
+        for seconds in (0, -1, float("nan"), float("inf")):
+            with self.subTest(seconds=seconds), self.assertRaises(SystemExit):
+                voice.assembly_target(None, seconds, False)
+
+    def test_assembly_target_uses_existing_video_duration(self):
+        with tempfile.TemporaryDirectory() as d:
+            video_path = Path(d) / "picture.mp4"
+            video_path.write_bytes(b"fixture")
+            with patch.object(voice, "media_duration", return_value=14.5) as probe_duration:
+                self.assertEqual(
+                    voice.assembly_target(str(video_path), None, True),
+                    (video_path.resolve(), 14.5),
+                )
+                probe_duration.assert_called_once_with(video_path.resolve())
+
     def test_sha256(self):
         with tempfile.TemporaryDirectory() as d:
             f=Path(d)/"sample.wav";f.write_bytes(b"abc")

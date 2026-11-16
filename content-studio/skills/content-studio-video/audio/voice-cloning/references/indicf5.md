@@ -69,6 +69,11 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
   --script narration.json --video "/path/to/master.mp4" --preview
 ```
 
+When the delivery timeline is approved before picture rendering, replace
+`--video` with `--duration <seconds>` to assemble the voice-only WAV against
+the planned duration. `--preview` still requires a real video; use a bounded
+timeline preview for picture and mix review.
+
 The script JSON contains ordered `segments` with `id`, `start`, `end`, and
 `text`. Outputs live under `<workspace>/.content-studio/voice/narration/`.
 Synthesis refuses to run without an affirmed consent note. `assemble` needs

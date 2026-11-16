@@ -7,6 +7,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -279,6 +280,20 @@ def _run(command):
         )
 
 
+def assembly_target(video_arg, duration_arg, preview):
+    """Resolve a voice-only timeline without requiring a picture render."""
+    if video_arg:
+        video = Path(video_arg).expanduser().resolve()
+        if not video.is_file():
+            _fail("Video not found: " + str(video))
+        return video, media_duration(video)
+    if preview:
+        _fail("--preview requires --video")
+    if duration_arg is None or not math.isfinite(duration_arg) or duration_arg <= 0:
+        _fail("--duration must be a positive finite number of seconds")
+    return None, duration_arg
+
+
 def cmd_assemble(workspace, args):
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         _fail("FFmpeg and FFprobe are required")
@@ -305,10 +320,7 @@ def cmd_assemble(workspace, args):
     if missing:
         _fail("Missing rendered segments: " + ", ".join(missing))
 
-    video = Path(args.video).expanduser().resolve()
-    if not video.is_file():
-        _fail("Video not found: " + str(video))
-    video_seconds = media_duration(video)
+    video, video_seconds = assembly_target(args.video, args.duration, args.preview)
     durations = {
         segment["id"]: float(manifest["segments"][segment["id"]]["seconds"])
         for segment in segments
@@ -480,7 +492,9 @@ def main():
 
     assemble = sub.add_parser("assemble")
     assemble.add_argument("--script", required=True)
-    assemble.add_argument("--video", required=True)
+    target = assemble.add_mutually_exclusive_group(required=True)
+    target.add_argument("--video")
+    target.add_argument("--duration", type=float)
     assemble.add_argument("--max-tempo", type=float, default=1.12)
     assemble.add_argument("--gap", type=float, default=0.3)
     assemble.add_argument("--lufs", type=float, default=-16.0)
