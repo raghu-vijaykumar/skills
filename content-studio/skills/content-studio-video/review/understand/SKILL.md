@@ -23,6 +23,7 @@ Writes:
 - `frames/frame-*.jpg`: low-resolution frames sampled about every `--interval` seconds.
 - `sheets/sheet-*.jpg`: timestamped contact sheets for quick visual review.
 - `evidence.json`: source SHA-256, duration, frame times, sheet ranges, and supplied context.
+- Bounded `--start`/`--end` evidence retains absolute source timestamps; check the sheet labels before aligning narration, especially near the range end.
 - `voiceover-template.json` and `observations-template.json`: empty scaffolds.
 
 Use `--start`/`--end` for a range, `--no-grid` to skip sheets, and `--frame-width` to change thumbnail size. Timestamps come from the PTS of the frames FFmpeg selected and are approximate within one sample interval. These frames are review evidence, not delivery media. Contact sheets need Pillow.

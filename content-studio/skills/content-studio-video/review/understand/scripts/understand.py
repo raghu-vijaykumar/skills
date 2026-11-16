@@ -136,11 +136,16 @@ def extract_frames(video, frames_dir, start, end, interval, width, quality):
         float(value)
         for value in re.findall(r"pts_time:([0-9]+(?:\.[0-9]+)?)", result.stderr)
     ]
-    if len(times) != len(paths):
-        times = [index * interval for index in range(len(paths))]
-    elif start > 0 and min(times) < start - 0.01:
-        # Input seeking normally resets PTS; add the seek offset when it does not.
-        times = [start + value for value in times]
+    if len(times) < len(paths):
+        # Missing showinfo entries require an estimated seek-relative grid.
+        times = [start + index * interval for index in range(len(paths))]
+    else:
+        # FFmpeg can report a terminal selected frame that -t does not write.
+        # Output files correspond to the first showinfo entries in that case.
+        times = times[: len(paths)]
+        if start > 0 and min(times) < start - 0.01:
+            # Input seeking normally resets PTS to zero.
+            times = [start + value for value in times]
     times = [min(end, max(start, value)) for value in times]
     return list(zip(paths, times))
 

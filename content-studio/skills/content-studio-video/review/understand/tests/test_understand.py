@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 
@@ -110,6 +111,33 @@ class UnderstandTests(unittest.TestCase):
                 )
             )
             self.assertEqual(template["language"], "Kannada-English")
+
+    def test_bounded_range_ignores_unwritten_terminal_showinfo_frame(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            frames_dir = Path(scratch) / "frames"
+
+            def ffmpeg_with_extra_terminal_frame(*_args, **_kwargs):
+                for index in range(3):
+                    (frames_dir / f"frame-{index:04d}.jpg").write_bytes(b"jpeg")
+                # The frame at 600s reached showinfo but the -t boundary
+                # prevented an output JPEG for it.
+                stderr = " ".join(
+                    f"pts_time:{seconds}" for seconds in (0, 5, 10, 15)
+                )
+                return subprocess.CompletedProcess([], 0, "", stderr)
+
+            with mock.patch.object(
+                understand.subprocess,
+                "run",
+                side_effect=ffmpeg_with_extra_terminal_frame,
+            ):
+                pairs = understand.extract_frames(
+                    Path("unused.mp4"), frames_dir, 585, 600, 5, 160, 4
+                )
+
+            self.assertEqual(
+                [seconds for _path, seconds in pairs], [585, 590, 595]
+            )
 
     def test_rejects_invalid_interval(self):
         with tempfile.TemporaryDirectory() as scratch:
