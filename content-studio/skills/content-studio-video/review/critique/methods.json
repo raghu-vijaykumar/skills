@@ -11,7 +11,7 @@
       "id": "frame-trace",
       "script": "scripts/frame_trace.py",
       "status": "supported",
-      "review": "Inspect consecutive frames and compare onset, progression, and readable holds across independently mapped intervals."
+      "review": "Inspect consecutive frames and compare onset, holds, and local contact in independently mapped full-frame and detail sheets."
     },
     {
       "id": "track-objects",

@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode, hold_pictures, hold_ranges, landmark_times, seam_times
+from frame_trace import build, decode, detail_boxes, hold_pictures, hold_ranges, landmark_times, seam_times
 from track_objects import follow, measure_relative, retarget
 
 
@@ -38,6 +38,7 @@ class TraceTests(unittest.TestCase):
                     "-c:v", "libx264", str(file))
             out = root / "trace"
             beat = {"id": "beat", "reference": [0.5, 1.5], "candidate": [0, 1],
+                    "details": {"reference": [.125, .25, .625, .75], "candidate": [.5, 0, .9, .5]},
                     "seam": {"reference": 5 / 6, "candidate": .31},
                     "landmarks": [{"id": "settled", "reference": 1.15, "candidate": .75},
                                   {"id": "impact", "reference": 2 / 3, "candidate": .6}],
@@ -74,6 +75,21 @@ class TraceTests(unittest.TestCase):
             self.assertEqual(hold["lanes"]["candidate"]["last"]["frame"], 26)
             self.assertTrue((out / "hold-result.jpg").is_file())
             self.assertIn('const holds = {"result": "hold-result.jpg"}', viewer)
+            self.assertEqual(report["detail_boxes_pixels"], {"reference": [20, 24, 100, 72], "candidate": [80, 0, 144, 48]})
+            self.assertEqual(len(list((out / "reference-detail").glob("*.jpg"))), 24)
+            self.assertEqual(len(list((out / "candidate-detail").glob("*.jpg"))), 30)
+            with Image.open(out / "candidate-detail/000011.jpg") as detail:
+                self.assertEqual(detail.size, (360, 270))
+            for entry in (report["seam"], impact, hold):
+                self.assertTrue((out / entry["detail_sheet"]).is_file())
+
+    def test_detail_boxes_require_separate_in_frame_bounds(self):
+        meta = dict.fromkeys(("reference", "candidate"), {"width": 160, "height": 96})
+        self.assertEqual(detail_boxes({}, meta), {})
+        with self.assertRaisesRegex(ValueError, "separate reference and candidate"):
+            detail_boxes({"details": {"reference": [0, 0, 1, 1]}}, meta)
+        with self.assertRaisesRegex(ValueError, "inside the frame"):
+            detail_boxes({"details": {"reference": [0, 0, 1, 1], "candidate": [.5, 0, 1.1, 1]}}, meta)
 
     def test_seam_requires_times_strictly_inside_each_range(self):
         row = {"reference": [0, 1], "candidate": [1, 2], "seam": {"reference": 1, "candidate": 1.4}}

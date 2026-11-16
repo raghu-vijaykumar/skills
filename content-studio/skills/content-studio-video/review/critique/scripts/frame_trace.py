@@ -11,6 +11,7 @@ import subprocess
 from PIL import Image, ImageChops, ImageDraw, ImageOps
 
 from compare import inspect, validate_map
+from compare_actor import parse_box
 
 
 def parse_region(value):
@@ -26,7 +27,7 @@ def parse_region(value):
     raise argparse.ArgumentTypeError("use name:x0,y0,x1,y1 with normalized coordinates from 0 to 1")
 
 
-def decode(file, stream, start, end, folder):
+def decode(file, stream, start, end, folder, *, detail=None):
     folder.mkdir()
     # Keep the input clock while seeking. No fps filter is allowed here: a VFR
     # shot must retain each actual picture and its display timestamp.
@@ -34,10 +35,15 @@ def decode(file, stream, start, end, folder):
     # Input seeking can return an adjacent frame on fractional boundaries.
     # Give the decoder a small margin and enforce the half-open range on PTS.
     bounds = f"select='gte(t,{start:.9f})*lt(t,{end:.9f})'"
+    filters = [bounds, "showinfo"]
+    if detail:
+        left, top, right, bottom = detail
+        filters.append(f"crop={right-left}:{bottom-top}:{left}:{top}:exact=1")
+    filters.append("scale=360:640:force_original_aspect_ratio=decrease:force_divisible_by=2")
     command = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "info",
                "-copyts", "-start_at_zero", "-ss", str(seek), "-t", str(end-seek+0.25),
                "-i", str(file), "-map", f"0:{stream}", "-an",
-               "-vf", f"{bounds},showinfo,scale=360:640:force_original_aspect_ratio=decrease:force_divisible_by=2",
+               "-vf", ",".join(filters),
                "-fps_mode", "passthrough", "-q:v", "2", str(folder / "%06d.jpg")]
     result = subprocess.run(command, capture_output=True, encoding="utf-8", errors="replace")
     if result.returncode:
@@ -168,18 +174,35 @@ def seam_pictures(lane, anchor, pictures, rows, label="seam"):
     return {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
 
 
-def comparison_sheet(root, lanes, filename, moments):
+def detail_boxes(row, meta):
+    if "details" not in row:
+        return {}
+    boxes = row["details"]
+    if not isinstance(boxes, dict) or set(boxes) != set(meta):
+        raise ValueError("Details need separate reference and candidate boxes")
+    return {lane: parse_box(box, meta[lane]["width"], meta[lane]["height"]) for lane, box in boxes.items()}
+
+
+def comparison_sheet(root, lanes, filename, moments, *, detail=False):
     sheet = Image.new("RGB", (407 * len(moments), 1302), "#1b1d24")
     draw = ImageDraw.Draw(sheet)
     for y, (lane, frames) in enumerate(lanes.items()):
         for x, key in enumerate(moments):
             frame = frames[key]
             xx, yy = 407 * x, 651 * y
-            with Image.open(root / frame["image"]) as source:
+            source_path = f"{lane}-detail/{frame['frame'] + 1:06}.jpg" if detail else frame["image"]
+            with Image.open(root / source_path) as source:
                 picture = ImageOps.contain(source.convert("RGB"), (394, 615))
             sheet.paste(picture, (xx + (407 - picture.width) // 2, yy + 21 + (615 - picture.height) // 2))
             draw.text((xx + 8, yy + 5), f"{lane} · {key} · {frame['time']:.4f} s", fill="white")
     sheet.save(root / filename, quality=93)
+
+
+def write_comparison(root, entry, moments, details):
+    comparison_sheet(root, entry["lanes"], entry["sheet"], moments)
+    if details:
+        entry["detail_sheet"] = f"detail-{entry['sheet']}"
+        comparison_sheet(root, entry["lanes"], entry["detail_sheet"], moments, detail=True)
 
 
 def viewer(root, lanes, seams, landmarks, holds):
@@ -208,12 +231,18 @@ def build(reference, candidate, mapping, beat, output, regions):
     events = landmark_times(row)
     landmarks = [{"id": name, "sheet": f"landmark-{name}.jpg", "lanes": {}} for name in events]
     intervals = hold_ranges(row)
+    details = detail_boxes(row, meta)
     holds = [{"id": name, "sheet": f"hold-{name}.jpg", "lanes": {}} for name in intervals]
     output.mkdir(parents=True, exist_ok=False)
     lanes = {}
     seams = {}
     for lane, file in files.items():
         pairs = decode(file, meta[lane]["stream_index"], *row[lane], output / lane)
+        if details:
+            # Crop before the review resize and prove that each crop uses the full-frame clock.
+            crops = decode(file, meta[lane]["stream_index"], *row[lane], output / f"{lane}-detail", detail=details[lane])
+            if [time for _, time in pairs] != [time for _, time in crops]:
+                raise ValueError(f"The {lane} detail trace does not match the full-frame timestamps")
         lanes[lane] = index_frames(pairs, output, lane, regions)
         consecutive_sheets(lanes[lane], output, lane)
         if anchors is not None:
@@ -227,16 +256,18 @@ def build(reference, candidate, mapping, beat, output, regions):
     viewer(output, lanes, seams, landmarks, holds)
     manifest = {"schema_version": 1, "beat": row, "regions": regions,
                 "inputs": meta, "decoded_frames": {lane: len(frames) for lane, frames in lanes.items()}}
+    if details:
+        manifest["detail_boxes_pixels"] = details
     if seams:
-        comparison_sheet(output, seams, "seam.jpg", ("before", "after"))
         manifest["seam"] = {"sheet": "seam.jpg", "lanes": seams}
+        write_comparison(output, manifest["seam"], ("before", "after"), details)
     if landmarks:
         for event in landmarks:
-            comparison_sheet(output, event["lanes"], event["sheet"], ("before", "after"))
+            write_comparison(output, event, ("before", "after"), details)
         manifest["landmarks"] = landmarks
     if holds:
         for hold in holds:
-            comparison_sheet(output, hold["lanes"], hold["sheet"], ("first", "middle", "last"))
+            write_comparison(output, hold, ("first", "middle", "last"), details)
         manifest["holds"] = holds
     (output / "frame-trace.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest["decoded_frames"]

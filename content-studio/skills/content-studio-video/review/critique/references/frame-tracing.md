@@ -31,6 +31,8 @@ The viewer's landmark menu jumps both lanes to the corresponding decoded picture
 
 For results that need time to read, map the visibly legible interval with `holds` on the same beat. For example, `"holds": [{"id":"amount-readable","reference":[109.6,112.0],"candidate":[110.7,112.5]}]`. Use first and end-exclusive times within each mapped lane. The report records the annotated duration, actual decoded frames inside the interval, and first, middle and last evidence. Use the six-frame hold sheet and step the full interval in the viewer to look for obstruction, motion blur, or loss of emphasis. Confirm readability against the actual render. The annotated duration and count measure the interval and do not judge its contents.
 
+For a small hinge, finger contact, or display edge, add one independent `details` box per lane, such as `"details": {"reference":[0.46,0.38,0.72,0.61],"candidate":[0.28,0.41,0.60,0.67]}`. Use normalized left, top, right, bottom coordinates. Each box stays fixed within its lane for the beat. Crop before the review resize so fine features survive. The detail frames use the same decoded timestamps, and paired seams, landmarks and holds get companion `detail-*.jpg` sheets. Open the full-frame sheet for scale and clearance, then check attachment and material in the corresponding detail sheet. Split a beat or widen its box if the object moves outside it.
+
 ## Track a visible actor and reuse its movement
 
 Run `python <skill>/scripts/track_objects.py --trace trace --seeds seeds.json --out tracks` with NumPy installed. Choose a tight textured box with the frame viewer. Box units are pixels of the extracted image. `first` and `last` are inclusive, zero-based indices within this trace.

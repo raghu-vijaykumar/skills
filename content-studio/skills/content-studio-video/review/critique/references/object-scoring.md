@@ -25,6 +25,8 @@ For an asset whose framing changed, use `python scripts/compare_actor.py --refer
 
 For a hardware enclosure, verify depth at the most oblique viewing angle and during the door, card, or tray movement. Check that a wide chassis surface does not cover its front details, the moving part remains seated when closed, and the part that carries the explanation has an independent cue. Inspect the shared asset on both sides of its cut when it persists across shots.
 
+Use [paired detail crops](frame-tracing.md) when a hand covers a prop, a lid swings, or a tray slides into a rack. Compare the same contact before and after its cue. Use the full frame to score whether the small interaction reads during playback.
+
 When several changes happen within the same shot, map their [landmarks](frame-tracing.md) by the visible action. Choose the arrival, contact or activation, and settled result. Jump to matching events in both lanes before judging timing, even when the word, pause, or camera cut differs between versions.
 
 For a large number, status, or decision, use a paired hold interval after the entry settles. Time how long the result is legible in each cut, then check the full sheet and sequence for crowding, competing motion, or an early exit. Judge staging and timing from that evidence alongside the moment of first reveal.
