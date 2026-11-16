@@ -59,3 +59,34 @@ class ObjectScoreTests(unittest.TestCase):
         self.assertIn("material -3", checklist)
         self.assertIn("Lower than the preceding review on timing", checklist)
         self.assertNotIn("complete-phone", checklist)
+
+    def test_single_photo_scores_appearance_and_keeps_motion_open(self):
+        row = self.row()
+        row["reference"].update(photos=[{"evidence": "front.jpg", "shows": "Profile and contact"}],
+                                motion=None, motion_basis={"kind": "unverified"})
+        report = summarize({"objects": [row]})
+        rated = report["objects"][0]
+        self.assertEqual(rated["category_scores"]["appearance"], {"reference": 4.0, "candidate": 4.0})
+        self.assertEqual(rated["category_scores"]["motion"], {"reference": None, "candidate": 4.0})
+        self.assertNotIn("mechanics", rated["axis_deltas"])
+        self.assertEqual(report["counts"]["review"], 1)
+        self.assertIn("motion evidence pending", retest_checklist(report))
+        row["reference"]["motion"] = row["candidate"]["motion"].copy()
+        with self.assertRaisesRegex(ValueError, "cannot supply reference motion scores"):
+            assess(row)
+
+    def test_sourced_motion_closes_pending_baseline(self):
+        row = self.row()
+        row["reference"].update(photos=[{"evidence": "rest.jpg", "shows": "Unpressed"}],
+                                motion=None, motion_basis={"kind": "unverified"})
+        prior = summarize({"objects": [row]})
+        row["reference"].update(motion=row["candidate"]["motion"].copy(), motion_basis={
+            "kind": "photo-sequence", "evidence": "ordered views", "states": ["Rest", "Contact"],
+        })
+        with self.assertRaisesRegex(ValueError, "two distinct"):
+            assess(row)
+        row["reference"]["photos"].append({"evidence": "pressed.jpg", "shows": "Contact closed"})
+        retest = summarize({"objects": [row]}, prior)
+        self.assertEqual(retest["objects"][0]["status"], "matched")
+        self.assertNotIn("mechanics", retest["objects"][0]["change_since_review"])
+        self.assertNotIn("motion evidence pending", retest_checklist(retest))

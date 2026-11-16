@@ -37,3 +37,17 @@ class ActorComparisonTests(unittest.TestCase):
             self.assertEqual(row["candidate"]["frame_fraction"], [.5, .4])
             with Image.open(output / row["sheet"]) as sheet:
                 self.assertEqual(sheet.size, (1280, 824))
+
+            photo = root / "portrait.jpg"
+            im = Image.new("RGB", (240, 160), "orange")
+            exif = im.getexif()
+            exif[274] = 6  # A portrait photo stored sideways.
+            im.save(photo, exif=exif)
+            mapping["actors"][0]["reference"].pop("seconds")
+            photo_output = root / "photo-review"
+            self.assertEqual(build(photo, video, mapping, photo_output, reference_photo=True), 1)
+            evidence = json.loads((photo_output / "evidence.json").read_text())
+            ref = evidence["reference"]
+            self.assertEqual((ref["kind"], ref["width"], ref["height"]), ("photo", 160, 240))
+            self.assertEqual(evidence["actors"][0]["reference"]["box_pixels"], [16, 48, 144, 168])
+            self.assertNotIn("requested_seconds", evidence["actors"][0]["reference"])

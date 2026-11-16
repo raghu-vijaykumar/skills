@@ -1,6 +1,7 @@
 """Build matched actor crops and full-frame staging evidence."""
 
 import argparse
+import hashlib
 import io
 import json
 import math
@@ -44,9 +45,21 @@ def paste_fit(sheet, image, rect):
     return (*offset, fitted.width, fitted.height)
 
 
-def build(reference, candidate, mapping, output):
+def open_photo(file):
+    with Image.open(file) as source:
+        if getattr(source, "is_animated", False):
+            raise ValueError("Use a single real-world photo per appearance comparison")
+        frame = ImageOps.exif_transpose(source).convert("RGB")
+    with file.open("rb") as stream:
+        checksum = hashlib.file_digest(stream, "sha256").hexdigest()
+    return frame, {"kind": "photo", "file": file.name, "sha256": checksum,
+                   "width": frame.width, "height": frame.height}
+
+
+def build(reference, candidate, mapping, output, reference_photo=False):
     sides = {"reference": reference, "candidate": candidate}
-    media = {side: inspect(file) for side, file in sides.items()}
+    photo, source = open_photo(reference) if reference_photo else (None, inspect(reference))
+    media = {"reference": source, "candidate": inspect(candidate)}
     actors = mapping.get("actors")
     if not isinstance(actors, list) or not actors:
         raise ValueError("Use a nonempty actors list")
@@ -63,8 +76,17 @@ def build(reference, candidate, mapping, output):
         evidence = {"id": name, "sheet": f"{name}.png"}
         for i, (side, file) in enumerate(sides.items()):
             sample = actor[side]
-            at = sample["seconds"]
-            frame = capture(file, media[side], at)
+            if side == "reference" and photo is not None:
+                if "seconds" in sample:
+                    raise ValueError("Omit seconds for the reference photo")
+                frame = photo
+                title = "reference photo  |  source framing"
+                moment = {}
+            else:
+                at = sample["seconds"]
+                frame = capture(file, media[side], at)
+                title = f"{side}  {at:.3f}s  |  full frame"
+                moment = {"requested_seconds": at}
             w, h = frame.size
             l, t, r, b = parse_box(sample["box"], w, h)
             x = i * 640
@@ -72,9 +94,9 @@ def build(reference, candidate, mapping, output):
             draw.rectangle((fx+fw*l/w, fy+fh*t/h, fx+fw*r/w, fy+fh*b/h), outline="#68edcc", width=2)
             paste_fit(sheet, frame.crop((l, t, r, b)), (x + 10, 440, 620, 366))
             size = [(r-l)/w, (b-t)/h]
-            draw.text((x+20, 16), f"{side}  {at:.3f}s  |  full frame", fill="white")
+            draw.text((x+20, 16), title, fill="white")
             draw.text((x+20, 403), f"actor crop  |  {size[0]:.1%} of frame width  {size[1]:.1%} of height", fill="#68edcc")
-            evidence[side] = {"requested_seconds": at, "box_pixels": [l,t,r,b], "frame_fraction": size}
+            evidence[side] = {**moment, "box_pixels": [l,t,r,b], "frame_fraction": size}
         sheet.save(output / evidence["sheet"])
         rows.append(evidence)
     (output / "evidence.json").write_text(json.dumps({**media, "actors": rows}, indent=2)+"\n", encoding="utf-8")
@@ -83,12 +105,16 @@ def build(reference, candidate, mapping, output):
 
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
-    for name in ("reference", "candidate", "map", "out"):
+    reference = cli.add_mutually_exclusive_group(required=True)
+    reference.add_argument("--reference", type=Path, help="Local reference video.")
+    reference.add_argument("--reference-photo", type=Path, help="Local real-world still for appearance review.")
+    for name in ("candidate", "map", "out"):
         cli.add_argument("--"+name, type=Path, required=True)
     args = cli.parse_args()
     try:
         mapping = json.loads(args.map.read_text(encoding="utf-8-sig"))
-        count = build(args.reference, args.candidate, mapping, args.out)
+        count = build(args.reference or args.reference_photo, args.candidate, mapping, args.out,
+                      reference_photo=bool(args.reference_photo))
     except (OSError, KeyError, TypeError, ValueError) as error:
         cli.exit(1, f"Actor comparison failed: {error}\n")
     print(f"{count} actor comparisons in {args.out}")
