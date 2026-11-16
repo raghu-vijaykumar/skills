@@ -23,6 +23,8 @@ For each object, record the time range, a crop or still, a motion trace or playb
 
 For an asset whose framing changed, use `python scripts/compare_actor.py --reference SOURCE --candidate CUT --map actors.json --out actor-review`. The manifest has an `actors` list with stable `id`, `reference`, and `candidate` fields. Each side declares `seconds` and a normalized `box` in left, top, right, bottom order. Choose moments with equivalent action states. The sheet shows the full composition with the actor outlined and a scaled crop in a separate panel. Occupancy measures the supplied box. Use the crop for form and material, the full frame for staging, and the timed sequence for motion.
 
+For a retest, add `--previous EARLIER_CUT` and put a `previous` sample with its own `seconds` and `box` on each actor. The sheet reads source, previous and candidate. The evidence fingerprints every input. Use the middle column to verify the revision gained the intended quality and to spot changes to framing and contrast before changing the score. Use consecutive frames separately to judge movement.
+
 For a hardware enclosure, verify depth at the most oblique viewing angle and during the door, card, or tray movement. Check that a wide chassis surface does not cover its front details, the moving part remains seated when closed, and the part that carries the explanation has an independent cue. Inspect the shared asset on both sides of its cut when it persists across shots.
 
 Use [paired detail crops](frame-tracing.md) when a hand covers a prop, a lid swings, or a tray slides into a rack. Compare the same contact before and after its cue. Use the full frame to score whether the small interaction reads during playback.

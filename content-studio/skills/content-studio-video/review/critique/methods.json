@@ -41,7 +41,7 @@
       "id": "compare-actor",
       "script": "scripts/compare_actor.py",
       "status": "supported",
-      "review": "Use real frame occupancy for staging and scaled crops for surface and form."
+      "review": "Use full-frame occupancy for staging and independent source, previous and revised crops for form and material."
     }
   ]
 }

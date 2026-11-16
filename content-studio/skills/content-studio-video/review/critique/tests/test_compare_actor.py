@@ -51,3 +51,28 @@ class ActorComparisonTests(unittest.TestCase):
             self.assertEqual((ref["kind"], ref["width"], ref["height"]), ("photo", 160, 240))
             self.assertEqual(evidence["actors"][0]["reference"]["box_pixels"], [16, 48, 144, 168])
             self.assertNotIn("requested_seconds", evidence["actors"][0]["reference"])
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
+    def test_revision_sheet_keeps_a_separate_previous_frame_and_box(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            video, previous = root / "object.mp4", root / "old.mp4"
+            for clip, size in ((video, "160x240"), (previous, "240x160")):
+                run("ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"testsrc2=size={size}:rate=30",
+                    "-frames:v", "12", "-c:v", "libx264", str(clip))
+            row = {"id": "prop", "reference": {"seconds": 0, "box": [0, 0, 1, 1]},
+                   "candidate": {"seconds": .1, "box": [.25, .2, .75, .6]}}
+            with self.assertRaisesRegex(ValueError, "independent previous sample"):
+                build(video, video, {"actors": [row]}, root / "missing", previous=previous)
+            self.assertFalse((root / "missing").exists())
+            row["previous"] = {"seconds": .2, "box": [.1, .25, .7, .75]}
+            output = root / "revision"
+            self.assertEqual(build(video, video, {"actors": [row]}, output, previous=previous), 1)
+            evidence = json.loads((output / "evidence.json").read_text())
+            self.assertEqual(evidence["previous"]["file"], "old.mp4")
+            self.assertNotEqual(evidence["previous"]["sha256"], evidence["candidate"]["sha256"])
+            result = evidence["actors"][0]
+            self.assertEqual(result["previous"]["requested_seconds"], .2)
+            self.assertEqual(result["previous"]["box_pixels"], [24, 40, 168, 120])
+            with Image.open(output / result["sheet"]) as sheet:
+                self.assertEqual(sheet.size, (1920, 824))

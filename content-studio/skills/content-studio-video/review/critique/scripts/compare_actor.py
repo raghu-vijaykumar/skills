@@ -56,22 +56,31 @@ def open_photo(file):
                    "width": frame.width, "height": frame.height}
 
 
-def build(reference, candidate, mapping, output, reference_photo=False):
-    sides = {"reference": reference, "candidate": candidate}
+def build(reference, candidate, mapping, output, reference_photo=False, *, previous=None):
+    # Keep the source, before and after in reading order for revision reviews.
+    sides = {"reference": reference}
+    if previous is not None:
+        sides["previous"] = previous
+    sides["candidate"] = candidate
     photo, source = open_photo(reference) if reference_photo else (None, inspect(reference))
-    media = {"reference": source, "candidate": inspect(candidate)}
+    media = {side: source if side == "reference" else inspect(file) for side, file in sides.items()}
     actors = mapping.get("actors")
     if not isinstance(actors, list) or not actors:
         raise ValueError("Use a nonempty actors list")
-    output.mkdir(parents=True, exist_ok=False)
-    rows = []
     seen = set()
     for actor in actors:
-        name = actor["id"]
+        name = actor.get("id") if isinstance(actor, dict) else None
         if not isinstance(name, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,47}", name) or name in seen:
             raise ValueError(f"Invalid or duplicate actor ID {name!r}")
         seen.add(name)
-        sheet = Image.new("RGB", (1280, 824), "#1a1b21")
+        for side in sides:
+            if not isinstance(actor.get(side), dict):
+                raise ValueError(f"{name}: provide an independent {side} sample")
+    output.mkdir(parents=True, exist_ok=False)
+    rows = []
+    for actor in actors:
+        name = actor["id"]
+        sheet = Image.new("RGB", (640 * len(sides), 824), "#1a1b21")
         draw = ImageDraw.Draw(sheet)
         evidence = {"id": name, "sheet": f"{name}.png"}
         for i, (side, file) in enumerate(sides.items()):
@@ -110,11 +119,12 @@ def main():
     reference.add_argument("--reference-photo", type=Path, help="Local real-world still for appearance review.")
     for name in ("candidate", "map", "out"):
         cli.add_argument("--"+name, type=Path, required=True)
+    cli.add_argument("--previous", type=Path, help="Previous render for a three-column actor retest.")
     args = cli.parse_args()
     try:
         mapping = json.loads(args.map.read_text(encoding="utf-8-sig"))
         count = build(args.reference or args.reference_photo, args.candidate, mapping, args.out,
-                      reference_photo=bool(args.reference_photo))
+                      reference_photo=bool(args.reference_photo), previous=args.previous)
     except (OSError, KeyError, TypeError, ValueError) as error:
         cli.exit(1, f"Actor comparison failed: {error}\n")
     print(f"{count} actor comparisons in {args.out}")
