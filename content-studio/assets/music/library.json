@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "YouTube Audio Library and Pixabay Music",
-  "updated": "2026-11-02",
+  "updated": "2026-11-16",
   "local_root": "local",
   "categories": [
     {
@@ -73,5 +73,20 @@
       "label": "Uncategorized"
     }
   ],
-  "tracks": []
+  "tracks": [
+    {
+      "file": "ambient/Pulsar - The Grey Room _ Density & Time.mp3",
+      "title": "Pulsar",
+      "artist": "The Grey Room / Density & Time",
+      "category": "ambient",
+      "mood": "calm",
+      "duration_seconds": 248.077,
+      "license": "youtube-audio-library",
+      "attribution_required": false,
+      "attribution_text": "",
+      "source_url": "https://studio.youtube.com/channel/UC-jjjJYPl8rlR029Aag5ZKw/music",
+      "downloaded": "2026-11-16",
+      "sha256": "7ee3da0e513d5030524830faf87c4af9e3160104231dd3b247940989aa1955e8"
+    }
+  ]
 }
