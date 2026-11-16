@@ -36,7 +36,7 @@ Fill the brackets and change **No** to **Yes** for the options you want.
    - **Scene transitions** — No. [Scene joins and preferred effect]
    - **Timed graphics** — No. [Labels, pointers, or diagrams and their cues]
 
-5. **Render and deliver** — Export the requested range or full video and return editable sources. **Human review · Exact master** — Check picture and sound before handing off the package. Publishing requires a separate explicit request.
+5. **Render and deliver** — Export the requested range or full video and return editable sources. Use the [artifact scorecard](../skills/content-studio-video/review/critique/references/artifact-scoring.md) when reviewing each generated deliverable. **Human review · Exact master** — Check picture, sound, hooks, rehooks, pacing, and payoff before handing off the package. Publishing requires a separate explicit request.
 
    - **Thumbnail** — No. [Direction]
    - **Metadata** — No. [Title and description preferences]

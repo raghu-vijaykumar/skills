@@ -15,6 +15,10 @@ For a new topic without a video reference, use the [real-world photo workflow](r
 
 For 3D explainers, use the [3D review checkpoints](../../animation/engineering-3d/references/code-first-explainer.md#critique-a-3d-render). Match a real device view for physical fidelity and the same teaching action for motion. Compare fixed-camera component proofs before judging the narrated camera move and record a code-level fix and retest for each deficit.
 
+Use [teaching scoring](references/teaching-scoring.md) for educational beats. Verify the mechanism and its visible cause and effect, then track actual learner results separately from the reviewer’s score.
+
+Use [artifact scoring](references/artifact-scoring.md) to cover the selected script, storyboard, models, animation, narration, mix, accessories, and exact master. Score hook, rehooks, variety and payoff alongside the technical and teaching evidence.
+
 1. Fingerprint the exact reference and candidate. Agree or infer which qualities should match. Map equivalent beats with independent source and candidate ranges. Use a null candidate for a known omission and distinguish unreviewed footage from a confirmed missing beat. For a highlight reel, report coverage separately from quality.
 2. Run `python <skill>/scripts/compare.py --reference <local-video> --candidate <local-video> --map <beat-map.json> --out <new-private-folder>`. For a full reconstruction, add `--cut-threshold 0.24` to survey abrupt changes across both videos and break dense chapters into separate actions. Read the [map and report guide](references/critique.md). FFmpeg and FFprobe plus Python Pillow produce a real-speed paired GIF and timestamped still sheet per mapped beat.
 3. Inspect playbacks at original speed. When the request concerns animation completeness, choose a bounded sequence and use [frame tracing and object tracks](references/frame-tracing.md). Review all its consecutive frames to find short entrances, handoffs, masked transitions, or pose changes. Use separate object tracks for each edit, and export only verified movement for retargeting. Evaluate audio separately and state what you could inspect.
