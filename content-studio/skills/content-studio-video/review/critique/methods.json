@@ -30,6 +30,12 @@
       "script": "scripts/survey_reference.py",
       "status": "supported",
       "review": "Inspect source windows and fill the actor, action, camera, expression, and sound inventory."
+    },
+    {
+      "id": "score-objects",
+      "script": "scripts/score_objects.py",
+      "status": "supported",
+      "review": "Rate each visible actor against paired evidence and retest lower appearance and motion axes."
     }
   ]
 }
