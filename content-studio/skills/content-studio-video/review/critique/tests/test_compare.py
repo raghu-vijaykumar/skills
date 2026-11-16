@@ -15,6 +15,16 @@ spec.loader.exec_module(compare)
 
 
 class CritiqueTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("ffmpeg"), "needs FFmpeg")
+    def test_cut_scan_keeps_source_timestamps(self):
+        with tempfile.TemporaryDirectory() as folder:
+            clip = Path(folder) / "cut.mp4"
+            compare.run("ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=black:s=160x96:r=24:d=1",
+                        "-f", "lavfi", "-i", "color=white:s=160x96:r=24:d=1",
+                        "-filter_complex", "[0:v][1:v]concat=n=2:v=1:a=0", "-c:v", "libx264", str(clip))
+            markers = compare.scan_cut_candidates(clip, 0, .24)
+            self.assertEqual([mark["seconds"] for mark in markers], [1.0])
+
     def test_map_coverage_is_union_and_unmatched_ranges_stay_uncovered(self):
         rows = compare.validate_map({"beats": [
             {"id": "open", "reference": [0, 1.5], "candidate": [0, 1]},

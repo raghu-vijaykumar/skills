@@ -13,6 +13,12 @@ Use seconds from the start of each local file. Ranges are half-open and at most 
 
 The GIF aligns range starts at 12 fps without changing speed. A short side goes black after its range ends. Stills sample matching **relative positions** inside each range and label each time separately. Use new subranges anchored to action onset or impact when you need to measure timing drift. These aids are for viewing, not measuring dropped frames. Seek in the original files for frame-accurate readings and audio. File metadata and coverage are in `evidence.json`.
 
+## Review a complete reconstruction
+
+1. Map the whole piece by equivalent teaching beats. Use optional `--cut-threshold 0.24` to store a full-length `cut_survey` with timestamps and scores on each side. Check flagged times against the pictures. Flashes, zooms, and abrupt overlays may trigger the scan. Keep inspecting for smaller movements and dissolves that may score below the threshold.
+2. Within a chapter, log one row per meaningful action. Record its actor, source in and out, candidate in and out, and visible result. A chapter can cover the same idea while omitting a transfer, intermediate state, or pose. Prioritize omissions that break the causal story.
+3. Step through the dense actions and seams at native frame cadence. For an insert promoted from a short proof, check the frame before and after both boundaries in the full cut. Confirm where the actor starts, where it ends, whether its identity survives the handoff, and whether the timing still reads with the full narration and mix. Count mapped duration, inspected intervals, and verified actions separately.
+
 ## Review record
 
 1. Record the two exact files, format, intent, mapped duration, known omissions, and any audit limits. Label a preview as a preview.

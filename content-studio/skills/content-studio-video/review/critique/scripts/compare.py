@@ -79,6 +79,18 @@ def seek_args(file, time):
     return ("-ss", f"{time:.6f}", "-i", str(file))
 
 
+def scan_cut_candidates(file, stream, threshold):
+    """Flag abrupt picture changes on native timestamps for manual review."""
+    graph = (
+        "setpts=PTS-STARTPTS,scale=256:256:force_original_aspect_ratio=decrease,"
+        f"select='gt(scene,{threshold})',metadata=print:key=lavfi.scene_score:file=-"
+    )
+    log = run("ffmpeg", "-nostdin", "-loglevel", "error", "-i", str(file),
+              "-map", f"0:{stream}", "-an", "-vf", graph, "-f", "null", "-").decode()
+    return [{"seconds": float(at), "score": float(score)} for at, score in
+            re.findall(r"pts_time:([\d.eE+\-]+)\s*\r?\n\s*lavfi.scene_score=([\d.]+)", log)]
+
+
 def still_sheet(files, streams, row, output):
     width, height, label_height = 224, 280, 24
     fractions = (0.08, 0.28, 0.50, 0.72, 0.92)
@@ -116,7 +128,7 @@ def paired_motion(files, streams, row, output):
         "-filter_complex", graph, "-map", "[out]", "-an", "-loop", "0", str(output))
 
 
-def build(reference, candidate, mapping, output):
+def build(reference, candidate, mapping, output, cut_threshold=None):
     media = {role: inspect(file) for role, file in (("reference", reference), ("candidate", candidate))}
     lengths = [media[role]["video_seconds"] for role in ("reference", "candidate")]
     rows = validate_map(mapping, *lengths)
@@ -135,6 +147,14 @@ def build(reference, candidate, mapping, output):
         "rows": [{**row, "sheet": f"{row['id']}.jpg", "motion": f"{row['id']}.gif"}
                  if row["candidate"] is not None else row for row in rows],
     }
+    if cut_threshold is not None:
+        # Scan each master once. Keep a single timestamp list so overlapping
+        # diagnostic rows do not count the same reference cut twice.
+        evidence["cut_survey"] = {
+            "threshold": cut_threshold,
+            **{role: scan_cut_candidates(file, stream, cut_threshold)
+               for role, file, stream in zip(("reference", "candidate"), (reference, candidate), streams)},
+        }
     (output / "evidence.json").write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
     return len(mapped)
 
@@ -143,10 +163,14 @@ def main():
     cli = argparse.ArgumentParser(description=__doc__)
     for flag in ("reference", "candidate", "map", "out"):
         cli.add_argument("--" + flag, type=Path, required=True)
+    cli.add_argument("--cut-threshold", type=float, metavar="SCORE",
+                     help="Also survey both exact videos for abrupt picture changes (0 < SCORE < 1).")
     args = cli.parse_args()
+    if args.cut_threshold is not None and not 0 < args.cut_threshold < 1:
+        cli.error("--cut-threshold must be between 0 and 1, exclusive")
     try:
         count = build(args.reference.resolve(), args.candidate.resolve(),
-                      json.loads(args.map.read_text(encoding="utf-8-sig")), args.out.resolve())
+                      json.loads(args.map.read_text(encoding="utf-8-sig")), args.out.resolve(), args.cut_threshold)
     except (OSError, KeyError, ValueError) as error:
         cli.exit(1, f"Critique evidence failed: {error}\n")
     print(f"{count} mapped beat comparisons in {args.out}")
