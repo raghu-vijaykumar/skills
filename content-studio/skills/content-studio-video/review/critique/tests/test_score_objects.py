@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from score_objects import assess, summarize
+from score_objects import assess, retest_checklist, summarize
 
 
 class ObjectScoreTests(unittest.TestCase):
@@ -41,3 +41,21 @@ class ObjectScoreTests(unittest.TestCase):
         del row["revision"]
         with self.assertRaisesRegex(ValueError, "concrete revision"):
             assess(row)
+
+    def test_retest_checklist_prioritizes_gaps_and_keeps_regressions(self):
+        light = self.row() | {"id": "light"}
+        light["candidate"]["motion"]["timing"] = 3
+        large = self.row() | {"id": "rack", "film": "Study", "shot": "load", "actor": "Rack"}
+        large["candidate"]["appearance"]["material"] = 1
+        large["candidate"]["motion"]["timing"] = 5
+        absent = self.row() | {"id": "missing-card", "candidate": None}
+        matched = self.row() | {"id": "complete-phone"}
+        result = summarize({"objects": [light, large, absent, matched]},
+                           summarize({"objects": [self.row() | {"id": "light"}]}))
+        checklist = retest_checklist(result)
+        self.assertEqual(checklist.count("- [ ]"), 3)
+        self.assertLess(checklist.index("missing-card"), checklist.index("Study / load / Rack"))
+        self.assertLess(checklist.index("Study / load / Rack"), checklist.index("- [ ] light"))
+        self.assertIn("material -3", checklist)
+        self.assertIn("Lower than the preceding review on timing", checklist)
+        self.assertNotIn("complete-phone", checklist)

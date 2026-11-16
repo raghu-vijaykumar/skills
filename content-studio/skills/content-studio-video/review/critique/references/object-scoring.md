@@ -29,7 +29,9 @@ For a recurring presenter, score the held face and hand form separately when bot
 
 ```text
 python scripts/score_objects.py --ledger objects.json --out scores.json
-python scripts/score_objects.py --ledger revised-objects.json --previous scores.json --out revised-scores.json
+python scripts/score_objects.py --ledger revised-objects.json --previous scores.json --out revised-scores.json --retests retests.md
 ```
 
 The JSON has an `objects` list. Each row has a stable `id`, `reference` and `candidate` (or `null` for an absent candidate), and a `revision` with a retest for any deficit. Each complete side has `evidence`, `observation`, `appearance` with `form`, `material` and `staging`, and `motion` with `mechanics`, `timing` and `continuity`. Use `motion: null` on both sides for an intentionally static prop. The script summarizes authored scores and flags any lower axis. It does not infer scores from pixel differences.
+
+The optional Markdown checklist starts with missing actors, then sorts open retests by the sum of their lower axes. It also flags any axis that fell since the preceding review. Use it to choose the next cut to revise, taking into account how long the actor remains on screen and whether the deficit changes what the viewer understands. Regenerate the checklist from the new evidence-backed ledger after each pass.

@@ -80,19 +80,45 @@ def summarize(ledger, prior=None):
     }
 
 
+def retest_checklist(report):
+    def priority(row):
+        # An absent object is a structural gap. Among existing objects,
+        # an above-reference axis cannot erase a deficit on another axis.
+        shortfall = sum(-value for value in row["axis_deltas"].values() if value < 0)
+        return row["status"] != "missing", -shortfall, row["id"]
+
+    open_rows = sorted((row for row in report["objects"] if row["deficits"]), key=priority)
+    lines = ["# Object retests", "", f"{len(open_rows)} objects have open reference deficits.", ""]
+    for row in open_rows:
+        title = " / ".join(str(row[key]) for key in ("film", "shot", "actor") if row.get(key))
+        deltas = ", ".join(f"{axis} {row['axis_deltas'][axis]:+d}" for axis in row["deficits"])
+        revision = " ".join(row["revision"].split())
+        lines.append(f"- [ ] {title or row['id']} ({row['status']}, {deltas}). {revision}")
+        regressed = [axis for axis, change in row.get("change_since_review", {}).items() if change < 0]
+        if regressed:
+            lines.append(f"  Lower than the preceding review on {', '.join(regressed)}.")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--ledger", required=True, type=Path)
     cli.add_argument("--previous", type=Path)
     cli.add_argument("--out", required=True, type=Path)
+    cli.add_argument("--retests", type=Path, help="Also write a ranked Markdown checklist for open objects.")
     args = cli.parse_args()
     try:
         ledger = json.loads(args.ledger.read_text(encoding="utf-8-sig"))
         prior = json.loads(args.previous.read_text(encoding="utf-8-sig")) if args.previous else None
         report = summarize(ledger, prior)
+        if args.retests and (args.retests.exists() or args.retests.resolve() == args.out.resolve()):
+            raise ValueError("Use a separate new file for the retest checklist")
         with args.out.open("x", encoding="utf-8") as stream:
             json.dump(report, stream, ensure_ascii=False, indent=2)
             stream.write("\n")
+        if args.retests:
+            with args.retests.open("x", encoding="utf-8") as stream:
+                stream.write(retest_checklist(report))
     except (KeyError, TypeError, ValueError, OSError) as error:
         cli.exit(1, f"Object score failed: {error}\n")
     print(", ".join(f"{count} {status}" for status, count in report["counts"].items()))
