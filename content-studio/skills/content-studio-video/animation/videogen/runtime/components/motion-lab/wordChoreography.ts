@@ -10,6 +10,10 @@ export type WordActor = Readonly<{
 
 type Transition = {frame: number; from: number; to: number; frames: number; ease: 'linear' | 'smooth'};
 type Track = {initial: number; transitions: Transition[]};
+type WordAction = {
+  cue: WordMotionCue;
+  targets: {channel: string; track: Track; transition: Transition}[];
+};
 
 function sampleTrack(track: Track, frame: number): number {
   const transitions = track.transitions;
@@ -40,8 +44,10 @@ export function compileWordChoreography(
     })),
   ]));
 
+  const wordActions: WordAction[] = [];
   let previous = -1;
-  for (const {startFrame, endFrame, text, actor, action} of words) {
+  for (const cue of words) {
+    const {startFrame, endFrame, text, actor, action} = cue;
     if (!Number.isSafeInteger(startFrame) || !Number.isSafeInteger(endFrame) ||
         startFrame <= previous || endFrame <= startFrame) {
       throw new Error(`${text}: expected ordered word frames with a distinct onset and positive duration`);
@@ -53,7 +59,7 @@ export function compileWordChoreography(
     if (!Object.hasOwn(actions, action)) throw new Error(`${text}: missing action ${actor}.${action}`);
     const targets = Object.entries(actions[action]);
     if (!targets.length) throw new Error(`${actor}.${action}: expected at least one channel target`);
-    for (const [channel, target] of targets) {
+    const actionTracks = targets.map(([channel, target]) => {
       const track = channels.get(channel);
       const label = `${actor}.${action}.${channel}`;
       if (!track) throw new Error(`${label}: missing initial channel`);
@@ -65,8 +71,11 @@ export function compileWordChoreography(
       }
       // An interruption inherits the actual pose. Other channels keep their own motion.
       const from = sampleTrack(track, startFrame);
-      track.transitions.push({frame: startFrame, from, to, frames, ease});
-    }
+      const transition = {frame: startFrame, from, to, frames, ease};
+      track.transitions.push(transition);
+      return {channel, track, transition};
+    });
+    wordActions.push({cue: {...cue}, targets: actionTracks});
   }
 
   return {
@@ -75,6 +84,21 @@ export function compileWordChoreography(
       const channels = tracks.get(actor);
       if (!channels) throw new Error(`Missing actor ${actor}`);
       return Object.fromEntries(Array.from(channels, ([id, track]) => [id, sampleTrack(track, frame)]));
+    },
+    /** Inspect planned motion before the next word takes focus. Use the exclusive end of this shot's clock. */
+    inspectWordActions(endFrame: number) {
+      if (!Number.isSafeInteger(endFrame) || endFrame < 1 ||
+          wordActions.some(({cue}) => cue.endFrame > endFrame)) {
+        throw new Error('Expected an exclusive end frame covering every word in this shot');
+      }
+      return wordActions.map(({cue, targets}, index) => {
+        const last = (wordActions[index + 1]?.cue.startFrame ?? endFrame) - 1;
+        // Credit only the channels this word actually changes, even while unrelated channels move.
+        const changedChannels = targets.filter(({track, transition}) =>
+          sampleTrack(track, last) !== transition.from
+        ).map(({channel}) => channel);
+        return {startFrame: cue.startFrame, text: cue.text, actor: cue.actor, action: cue.action, changedChannels};
+      });
     },
   };
 }

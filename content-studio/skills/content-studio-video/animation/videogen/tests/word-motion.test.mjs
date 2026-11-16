@@ -50,6 +50,26 @@ test('an art swap receives the exact same rig values for every frame', () => {
   assert.throws(() => render(0, {}), /Art preset is missing actor switch/);
 });
 
+test('word action evidence flags repeated states and tweens that miss their word window', () => {
+  const word = (startFrame, action) => ({startFrame, endFrame: startFrame + 1, text: action, line: 0,
+    actor: 'clock', action});
+  const scene = compileWordChoreography([
+    word(0, 'reveal'), word(2, 'reveal'), word(4, 'tick'),
+    word(5, 'focus'), word(8, 'ring'),
+  ], {
+    clock: {initial: {opacity: 0, rotation: 0, bright: 0}, actions: {
+      reveal: {opacity: 1},
+      tick: {rotation: {to: 30, frames: 4}},
+      focus: {bright: 1},
+      ring: {rotation: {to: 60, frames: 4, ease: 'smooth'}},
+    }},
+  });
+  assert.deepEqual(scene.inspectWordActions(12).map(row => row.changedChannels),
+    [['opacity'], [], [], ['bright'], ['rotation']]);
+  assert.equal(scene.sample('clock', 5).rotation, 7.5);
+  assert.throws(() => scene.inspectWordActions(8), /exclusive end frame/);
+});
+
 test('missing word bindings and invalid track settings fail before rendering', () => {
   assert.throws(() => compileWordChoreography(cues, {}), /Press: missing actor switch/);
   assert.throws(() => compileWordChoreography([{...cues[0], action: 'constructor'}], actors), /missing action/);

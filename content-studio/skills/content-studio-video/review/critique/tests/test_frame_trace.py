@@ -121,6 +121,7 @@ class TraceTests(unittest.TestCase):
             self.assertEqual(report["landmarks"][0]["lanes"]["previous"]["word_to_picture_ms"], 60)
             self.assertEqual(report["holds"][0]["lanes"]["previous"]["decoded_frames"], 6)
             self.assertIn('"previous": 6', (out / "frames.html").read_text(encoding="utf-8"))
+            self.assertIn('id="play-together"', (out / "frames.html").read_text(encoding="utf-8"))
             with Image.open(out / "detail-seam.jpg") as sheet:
                 self.assertEqual(sheet.size, (814, 1953))
 

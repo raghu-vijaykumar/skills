@@ -8,6 +8,8 @@ python <skill>/scripts/frame_trace.py --reference source.mp4 --candidate draft.m
 
 Open `trace/frames.html` in a browser to step each lane independently or play it at quarter speed. The 30-frame sheets enumerate consecutive pictures. When a boundary lands between frames, the trace retains the actual presentation timestamps inside the half-open range. The CSV records the picture timestamp and the percentage of luma pixels differing by at least 16 of 255 from the previous decoded image, for the full picture and each named region. This includes cuts, camera motion, fades and lighting. Treat it as an inspection cue.
 
+Use **Play together** after jumping to a mapped landmark or choosing the equivalent first frame in each lane. Real speed or quarter speed advances each lane by the same elapsed time from its displayed picture and uses its own decoded timestamps. Playback stops when the shortest lane ends. Step a lane or choose a landmark to pause and adjust alignment before continuing.
+
 For a revision, pass `--previous earlier.mp4` and add a `previous` range to the selected beat. Add an independent `previous` entry to each seam, landmark, word anchor, hold and detail box you use. The viewer, indexes and comparison sheets show the source, earlier render and current render in that order. Map the same visible action independently so an improvement in the timing survives changes to the edit.
 
 For each major actor, use the sequence to log its first clear appearance, movement, interactions, final state and exit. Give a brief handoff or a one-frame jump its own row. Align by a named event such as button press or first saved result. Equal offsets from the start of a beat may correspond to different actions.

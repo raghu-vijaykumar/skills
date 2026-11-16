@@ -8,6 +8,14 @@ Keep one frame-indexed scene plan for any number of visual presets. Rapid Take d
 4. Bind each art preset to all actor IDs. Each adapter draws the sampled state with the selected palette, shapes, surfaces and articulation. Anime and pixel art can use different geometry and fits while preserving the same contact and visible result. Keep the desired event timing and gesture targets in the shared plan. Use purpose-built geometry for small hands or contact points that disappear in a coarser look.
 5. Render an isolated asset and a narrated clip. Check each onset, land and hold and confirm they read at speed and at native size. Run the [word cue audit](../../../../review/critique/references/reconstruction.md#inspect-the-word-clock) and [score the actors](../../../../review/critique/references/object-scoring.md). Rework the specific failing part and rerender the exact affected spans. Check caption clearance, the one focal action, and character emotion in every new look.
 
+When adding a look, keep the shot timings, narration file, actor IDs and action
+definitions in the same source modules. The preset supplies original art for all
+actors, including palette, caption treatment, layer geometry, surface finish
+and local attachment points. Test a silhouette, a close-up of a contact, and a
+held facial expression. For pixel art, confirm that snapping to the grid leaves
+the first meaningful move and contact visible at the intended frames. For anime,
+check proportions and contact through the widest gesture and pose changes.
+
 ## Runtime
 
 Compile at project load or memoize for a scene. Use one clock for words, art and audio. All frames are absolute within the clock supplied to the compiler. At a scene cut, use the same timeline clock or subtract the shot's start from every cue and sample with the scene-local frame. Use actor definitions in back-to-front paint order. A channel updated by the next word starts at the sampled position already visible. Unaddressed channels continue and finished channels hold. A numeric target changes immediately. A target with `frames` reaches `to` after that many frames, with linear or smooth easing.
@@ -39,10 +47,29 @@ function Scene({frame, art}: {frame: number; art: WordArtPreset}) {
 }
 ```
 
+Before rendering a Rapid Take shot, use
+`choreography.inspectWordActions(shotEndFrame)` for cues handled by the
+compiler. An empty `changedChannels` means the declared action contributes no
+state change before the next word or shot end. Check for a repeated target or a
+tween that advances only after the next cue. Give that word its own meaningful
+advance, or bind a visible camera or editorial change in the composition. For
+actions authored outside the compiler, inspect the equivalent native frames.
+Review the rendered event even when the channel check passes.
+
 An art component receives `channels` and `frame`. Bind the existing `Presenter2D` rig through shared pose or gesture data using the same word onsets. Swap its `face` and `body` drawings for a new look. Keep blinks and speech motion tied to the same aligned audio. Clamp the iris travel to each drawing's eye opening and inspect the most extreme gaze and the held reaction. Use the runtime with an authored cue plan, prepared art and a render composition.
 
 ## Long-form continuation
 
-Once a narrated sample passes, extend the same plan by chapter. Store the selected audio, actor inventory, cues, action definitions, preset and exact review evidence with the draft. Re-align after a rewrite, recheck the changed spans in context and verify the assembled seams. Rerender a failing region and compare its exact frames and audio. Record the scorecard and remaining gaps before calling a master ready. When swapping only visual art, keep the cue signature and narration stable. Map the same visible contact or reaction and its speech anchor in both renders with the [frame trace](../../../../review/critique/references/frame-tracing.md). Verify that each adapter makes the event readable on the shared clock. A numeric channel can advance on cue while a drawing's occlusion or pixel rounding postpones the first visible change.
+Once a narrated sample passes, extend the same plan by chapter. Store the
+selected audio, actor inventory, cues, action definitions, preset and exact
+review evidence with the draft. Each chapter records its frame range, entrance
+and exit actor states, word audit, scored actors, and remaining retests. Resume
+from the first unresolved retest. Re-align after a rewrite, recheck affected
+spans in context, and verify the assembled seams. For a look swap, run
+`audit_word_cues.py --same-cues-as` against the previous plan, verify the same
+narration is used, and map the same visible contact or reaction against its
+spoken word with the [frame trace](../../../../review/critique/references/frame-tracing.md).
+Use the scorecard and remaining gaps to decide whether the exact master is
+ready.
 
 When an actor enters before a shot boundary, give the overlap an absolute start frame and sample it from both shots. Keep the outgoing actor on that clock until it clears. Align narration and captions to their existing shot clocks. When a hand releases an object, evaluate its world position, orientation, and scale at the release frame and start the independent trajectory there. Use a three-lane trace to compare the first visible change, contact, and settled pose against the reference and earlier render.

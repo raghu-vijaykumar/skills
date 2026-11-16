@@ -8,7 +8,7 @@
   body{max-width:1050px;margin:24px auto;padding:0 16px}
   h1{font-size:1.4rem} h2{font-size:1rem;margin:0 0 12px}
   main{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-  nav{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  nav{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 14px}
   nav[hidden]{display:none}
   nav a{color:#c5ccff}
   section{min-width:0;background:#1e212a;border:1px solid #393d49;border-radius:12px;padding:16px}
@@ -18,6 +18,12 @@
   button{background:#2d3344;color:inherit;border:1px solid #575e71;border-radius:6px;padding:7px 11px;margin-right:6px}
 </style>
 <h1>Frame-by-frame review</h1>
+<nav aria-label="Comparison playback">
+  <button id="play-together" type="button">Play together</button>
+  <select id="comparison-speed" aria-label="Comparison playback speed">
+    <option value="0.25">¼ speed</option><option value="1">Real speed</option>
+  </select>
+</nav>
 <nav hidden id="landmarks" aria-label="Paired landmarks">
   <label for="landmark">Paired landmark</label>
   <select id="landmark"><option value="">Choose an event</option></select>
@@ -30,6 +36,16 @@
   const landmarks = /* LANDMARK_DATA */;
   const holds = /* HOLD_DATA */;
   const jumpToFrame = {};
+  const lanes = [];
+  const together = document.querySelector("#play-together");
+  const speed = document.querySelector("#comparison-speed");
+  let comparisonFrame;
+  const stopComparison = () => {
+    if (comparisonFrame === undefined) return;
+    cancelAnimationFrame(comparisonFrame);
+    comparisonFrame = undefined;
+    together.textContent = "Play together";
+  };
   for (const [lane, rows] of Object.entries(frames)) {
     const panel = document.createElement("section");
     const name = {reference:"Reference", previous:"Previous render", candidate:"Candidate"}[lane];
@@ -56,16 +72,17 @@
       timer = undefined;
       play.textContent = "Play at ¼ speed";
     };
-    jumpToFrame[lane] = (frame) => { stop(); show(frame); };
+    jumpToFrame[lane] = (frame) => { stopComparison(); stop(); show(frame); };
     const advance = () => {
       if (current >= rows.length - 1) return stop();
       const delay = 4000 * (rows[current + 1].time - rows[current].time);
       timer = setTimeout(() => { show(current + 1); advance(); }, delay);
     };
-    slider.addEventListener("input", () => { stop(); show(+slider.value); });
-    back.onclick = () => { stop(); show(current - 1); };
-    next.onclick = () => { stop(); show(current + 1); };
+    slider.addEventListener("input", () => jumpToFrame[lane](+slider.value));
+    back.onclick = () => jumpToFrame[lane](current - 1);
+    next.onclick = () => jumpToFrame[lane](current + 1);
     play.onclick = () => {
+      stopComparison();
       if (timer) return stop();
       if (current === rows.length - 1) show(0);
       play.textContent = "Pause";
@@ -76,12 +93,38 @@
       const jump = document.createElement("button");
       jump.type = "button";
       jump.textContent = "Go to seam";
-      jump.onclick = () => { stop(); show(cut); };
+      jump.onclick = () => jumpToFrame[lane](cut);
       panel.append(jump);
     }
     show(Number.isInteger(cut) ? cut - 1 : 0);
+    lanes.push({rows, current: () => current, show, stop});
     document.querySelector("main").append(panel);
   }
+  together.onclick = () => {
+    if (comparisonFrame !== undefined) return stopComparison();
+    for (const lane of lanes) lane.stop();
+    // A mapped landmark can occur at a different timestamp in every edit.
+    // Anchor elapsed playback to the currently displayed picture in each lane.
+    const start = lanes.map(lane => lane.rows[lane.current()].time);
+    const duration = Math.min(...lanes.map((lane, i) => lane.rows.at(-1).time - start[i]));
+    if (duration <= 0) return;
+    const rate = Number(speed.value);
+    const beginning = performance.now();
+    const tick = (now) => {
+      const elapsed = Math.min(duration, (now - beginning) * rate / 1000);
+      for (const [i, lane] of lanes.entries()) {
+        // Advance by actual presentation timestamps instead of frame count.
+        let frame = lane.current();
+        while (frame + 1 < lane.rows.length && lane.rows[frame + 1].time <= start[i] + elapsed + 1e-9) frame++;
+        if (frame !== lane.current()) lane.show(frame);
+      }
+      if (elapsed >= duration) stopComparison();
+      else comparisonFrame = requestAnimationFrame(tick);
+    };
+    together.textContent = "Pause together";
+    comparisonFrame = requestAnimationFrame(tick);
+  };
+  speed.addEventListener("change", stopComparison);
   if (Object.keys(landmarks).length) {
     const menu = document.querySelector("#landmark");
     for (const event of Object.keys(landmarks)) {

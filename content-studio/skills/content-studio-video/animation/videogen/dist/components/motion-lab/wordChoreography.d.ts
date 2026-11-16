@@ -13,5 +13,13 @@ export type WordActor = Readonly<{
 export declare function compileWordChoreography(words: readonly WordMotionCue[], actors: Readonly<Record<string, WordActor>>): {
     actorIds: readonly string[];
     sample(actor: string, frame: number): WordChannels;
+    /** Inspect planned motion before the next word takes focus. Use the exclusive end of this shot's clock. */
+    inspectWordActions(endFrame: number): {
+        startFrame: number;
+        text: string;
+        actor: string;
+        action: string;
+        changedChannels: string[];
+    }[];
 };
 export type WordChoreography = ReturnType<typeof compileWordChoreography>;

@@ -63,10 +63,34 @@ at speed. Use Core Explainer when the viewer needs to inspect how each step work
    hand pivot and cue. Compile the cue-driven action tracks once and bind the
    [art preset](../../../../animation/videogen/scene-authoring/references/word-choreography.md)
    to those tracks for each render.
-5. Validate the plan with `audit_word_cues.py` using `style: rapid-take` in the
+5. Check compiled actions against their word windows and validate the plan with
+   `audit_word_cues.py` using `style: rapid-take` in the
    JSON plan. Recheck the exact render at the cue frames and at playback speed.
    With sound and captions off, verify that each hero reveal and the major
    action still read. Then verify the spoken word lands with the event.
+
+## From a new long-form idea
+
+1. Write the viewer promise and research the claims. Outline chapter payoffs
+   and separate the factual mechanism from the comic analogy. For each joke,
+   give the setup a visual the viewer recognizes and give the punchline its own
+   object, action or reaction.
+2. Pick a narrated proof with a real mechanism, a comic prop and a presenter
+   reaction. Use the [shared scene authoring workflow](../../../../animation/videogen/scene-authoring/references/word-choreography.md)
+   to build photo-grounded assets, prepare the rig, align the final take, and
+   plan an event for every word. Set one vivid focal accent per active event.
+3. Score the isolated heroes and the exact narrated proof. For variants, replay
+   the same line and actor tracks through each art preset and inspect the same
+   word, contact and held reaction. Revise the lowest axes against the relevant
+   video or real-world evidence before extending the film.
+4. Continue chapter by chapter. Track unresolved action and craft deficits in
+   the draft and use the same cues, rig and palette rules through the full cut.
+   Audit the assembled timeline, review seams and listen to the exact master
+   at playback speed.
+
+This route runs through scene authoring, narration timing, Remotion rendering
+and critique. The agent authors the script, source-backed artwork and cue
+bindings, then evaluates rendered evidence between revisions.
 
 ## Sound
 
