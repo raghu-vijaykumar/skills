@@ -12,3 +12,5 @@ Content Studio can animate an original 2D presenter from scene cues. Users can c
 - Test pure pose interpolation and render multiple characters together. Update the scene authoring skill, verify package and installation, then commit and push the shared implementation and documentation.
 
 The follow-up silhouette revision adds optional custom torso and hand art. The animated joint and facial cues stay on the same clock. Verify that a custom body receives the expected joints and that existing profiles still use the default body.
+
+Allow a foreground component to paint after the head with the same sampled arms and palette. Verify DOM paint order and use a rendered hand crossing the presenter’s face to check the rig and art together.

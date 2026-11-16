@@ -67,3 +67,16 @@ test('authored gaze and each finger continue smoothly through an interrupted cue
   const markup = renderToStaticMarkup(React.createElement(Presenter2D, {face, frame: 12, cues: [reach]}));
   assert.match(markup, /data-gaze="0\.5" data-gaze-y="-1"/);
 });
+
+test('foreground art can occlude the face with the sampled body pose', () => {
+  const layer = (name) => ({right, palette}) => React.createElement('g', {
+    'data-layer': name, 'data-wrist': right.wrist.join(','), fill: palette.skin,
+  });
+  const face = () => React.createElement('g', {'data-layer': 'face'});
+  const markup = renderToStaticMarkup(React.createElement(Presenter2D, {
+    face, body: layer('body'), foreground: layer('foreground'), frame: 7,
+    cues: [{frame: 4, gesture: 'rest', transitionFrames: 0, pose: {right: {wrist: [36, -140]}}}],
+    palette: {skin: '#df9c83'},
+  }));
+  assert.match(markup, /data-layer="body" data-wrist="36,-140" fill="#df9c83".*data-layer="face".*data-layer="foreground" data-wrist="36,-140" fill="#df9c83"/);
+});

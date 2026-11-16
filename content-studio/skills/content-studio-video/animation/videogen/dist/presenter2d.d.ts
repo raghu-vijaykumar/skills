@@ -54,6 +54,8 @@ export type Presenter2DProps = {
     frame: number;
     face: ComponentType<PresenterFaceProps>;
     body?: ComponentType<PresenterBodyProps>;
+    /** Draw a front-facing limb from the same sampled pose after the head. */
+    foreground?: ComponentType<PresenterBodyProps>;
     /** Ordered cues use the composition's scene-local frame clock. */
     cues?: readonly PresenterCue[];
     blinkFrames?: readonly number[];
@@ -66,5 +68,5 @@ export type Presenter2DProps = {
     palette?: Partial<PresenterPalette>;
 };
 /** SVG group anchored at the base of the head. Put it inside the scene SVG. */
-export declare function Presenter2D({ frame, face: Face, body: Body, cues, blinkFrames, speech, mouthOpen, x, y, scale, palette: paletteOverride }: Presenter2DProps): React.JSX.Element;
+export declare function Presenter2D({ frame, face: Face, body: Body, foreground: Foreground, cues, blinkFrames, speech, mouthOpen, x, y, scale, palette: paletteOverride }: Presenter2DProps): React.JSX.Element;
 export {};

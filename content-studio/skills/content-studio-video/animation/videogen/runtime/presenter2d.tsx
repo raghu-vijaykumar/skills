@@ -113,6 +113,8 @@ export type Presenter2DProps = {
   frame: number;
   face: ComponentType<PresenterFaceProps>;
   body?: ComponentType<PresenterBodyProps>;
+  /** Draw a front-facing limb from the same sampled pose after the head. */
+  foreground?: ComponentType<PresenterBodyProps>;
   /** Ordered cues use the composition's scene-local frame clock. */
   cues?: readonly PresenterCue[];
   blinkFrames?: readonly number[];
@@ -149,7 +151,7 @@ function DefaultBody({left, right, palette}: PresenterBodyProps) {
 }
 
 /** SVG group anchored at the base of the head. Put it inside the scene SVG. */
-export function Presenter2D({frame, face: Face, body: Body = DefaultBody, cues = [], blinkFrames = [], speech = 0, mouthOpen,
+export function Presenter2D({frame, face: Face, body: Body = DefaultBody, foreground: Foreground, cues = [], blinkFrames = [], speech = 0, mouthOpen,
   x = 0, y = 0, scale = 1, palette: paletteOverride}: Presenter2DProps) {
   const palette = {...defaultPalette, ...paletteOverride};
   const pose = samplePresenterPose(cues, frame);
@@ -160,5 +162,6 @@ export function Presenter2D({frame, face: Face, body: Body = DefaultBody, cues =
     <g transform={`rotate(${pose.head} 0 4)`}>
       <Face eyeOpen={eyeOpen} mouthOpen={mouth} gaze={pose.gaze?.[0] ?? pose.head / 6} gazeY={pose.gaze?.[1]} palette={palette}/>
     </g>
+    {Foreground && <Foreground left={pose.left} right={pose.right} palette={palette}/>}
   </g>;
 }
