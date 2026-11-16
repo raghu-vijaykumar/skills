@@ -1,16 +1,25 @@
-# Social post workflow
+# Social post workflow form
 
-## My input
+Fill the brackets and change **No** to **Yes** for the options you want.
 
-- **Idea or source** — [paste notes or link]
-- **Platform** — [name]
-- **Audience, tone, and brand** — [preferences]
-- **Format** — [single image | GIF | image carousel | GIF carousel | text | recommend]
+- **Idea or source** — [notes, links, approved assets, or finished video]
+- **Purpose** — [explain | share evidence | promote | other]
+- **Platform and audience** — [platform, who it’s for]
+- **Format** — [text | single image | GIF | silent MP4 | image carousel | GIF carousel | recommend]
+- **Preset** — [Core Explainer | Tech Dispatch | Evidence Lab | project preset | recommend]
+- **Brand and tone** — [palette, type, language, voice]
 
-## Workflow
+## Workflow in order
 
-1. **Plan** — If I omitted the platform, ask before choosing dimensions and copy length. If I selected recommend, briefly compare supported formats and propose one. Run Content Studio precheck with the exact style, renderer, command, outputs, estimate, fallback, and review criteria.
-2. **Human review · Plan** — Wait for approval of the current revision before production.
-3. **In parallel after plan approval** — Verify facts and source rights. Draft the hook, caption, and alt text. Plan one clear idea per card or GIF at mobile size. Keep citations and editable source with the design.
-4. **In order** — Build the selected format and preview each asset at final size. For animated posts, also preview the full motion; for carousels, show the complete sequence.
-5. **Human review · Package** — Show the assets, caption, alt text, and attribution. Revise as needed and export the approved format. Publishing requires a separate explicit request.
+1. **Precheck** — Confirm platform limits and preset compatibility. Show the copy and asset deliverables, selected tools and exact commands where applicable, estimate, fallback, and review criteria. **Human review** — Approve the plan before production.
+2. **Copy and assets in parallel** — Verify facts, usage rights, and attribution. Draft or reuse supplied copy. Outline the cards or motion at mobile size.
+
+   - **Write or revise copy and caption** — No. [Hook, points, length, language or approved copy to edit]
+   - **CTA or offer** — No. [Action, offer terms, destination]
+   - **New illustration or graphic** — No. [Subject and real-world or brand references]
+   - **Motion or video excerpt** — No. [Scene, time range, and planned action. Select Yes for GIF or MP4.]
+   - **Alt text** — No. [Accessibility notes for media posts]
+
+   **Human review · Draft package** — Check the copy and any card sequence or motion plan before export.
+3. **Build and verify** — Preview assets at final size. Check the full motion or carousel order when selected, and verify copy, links, and attribution.
+4. **Human review · Final package** — Review the exact exports, copy, and any alt text. Return editable sources and approved files. Publishing requires a separate explicit request.

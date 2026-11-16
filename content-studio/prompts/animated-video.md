@@ -1,23 +1,40 @@
-# Animated explainer workflow
+# Animated video workflow form
 
-## My input
+Fill the brackets and change **No** to **Yes** for the options you want.
 
 - **Topic, script, or reference** — [paste text, link, or path]
-- **Scope** — [analyze script only | script and storyboard | named scenes | full video]
-- **Audience, format, duration, language, and channel** — [fill in or leave optional]
-- **Style and tools** — [Core Explainer | Rapid Take | other], [2D | 2.5D | Blender 3D | recommend]
+- **Scope** — [analyze script only | script and storyboard | named scenes and ranges | full video]
+- **Purpose** — [code or system explainer | how it works | commentary | promotion | other]
+- **Format** — [short-form | long-form], [target duration], [9:16 | 16:9 | other], [platform or channel]
+- **Audience and language** — [who it’s for, language, tone]
+- **Preset** — [Core Explainer (step-by-step) | Rapid Take (fast word cues) | Hairline (line animation) | Evidence Lab (source-led) | custom | recommend]
+- **Renderer and project** — [Remotion (code-driven motion) | Blender (3D) | hybrid | recommend], [existing project path if any]
+- **Art direction** — [anime | pixel art | realistic | other], [palette and visual references]
 
-## Workflow
+## Workflow in order
 
-1. **Analyze · Output `script-analysis.md`** — Write an editable beat sheet grouped into hook, explanation, and payoff. Give each beat its timestamp or script line, a short narration summary, the object or part that moves or changes on screen, and the evidence or open question. Flag missing visuals and claims I need to verify.
-2. **Human review · Beat sheet and plan** — Link `script-analysis.md` so I can review the beat order, claims, and planned visuals. If I selected script analysis only, stop at this handoff. For production, include the beat sheet with the Content Studio precheck plan. Name the supported renderer, exact method and command, assets, outputs, estimate, fallback, and acceptance criteria. Wait for my approval of the current plan before proceeding.
-3. **Parallel after plan approval**
+1. **Precheck and script analysis** — Deliver `script-analysis.md` with the hook, explanation, and payoff. For each beat, list the time or script line, claim, on-screen action, and evidence or open question. **Human review** — Check the beat sheet. Stop here for analysis-only. For production, approve the plan with compatible preset and renderer, inputs, exact commands, outputs, estimates, fallback, and acceptance criteria.
+2. **Script and asset research in parallel** — Draft the narration and verify claims. Collect real-world references for objects and people, including stylized characters. Make original assets or use cleared ones. For 3D, verify geometry, moving parts, and the Blender render path. Combine both tracks into a storyboard with a visible action for each teaching beat.
 
-   - **Script** — Research claims and draft original narration.
-   - **Assets** — Scout hero assets and check their provenance. Verify the render backend if the plan uses Blender.
-4. **Human review · Script and storyboard** — Use the draft narration and available assets to storyboard the visible mechanism. Label illustrative or undocumented details. Show the script, cue timing, and visual beats for approval before locking the voice or building out the scenes.
-5. **In order** — Align the approved narration. Preview the hero and moving parts in isolation, then render a short narrated scene. Check the cue timing, animation, materials, framing, readability, and sound.
-6. **Human review · Scene proof** — Show the bounded render at delivery size. Resolve changes before extending the treatment.
-7. **Human review · Exact master** — If I requested the full video, render it and check picture and sound with me. Deliver editable scene sources and requested outputs. Metadata, thumbnail, and publishing are separate requests.
+   - **Promotion or CTA** — No. [Offer or action, destination, placement]
+   - **New hero assets** — No. [Objects, people, photos, model, or CAD references]
+   - **New character rig** — No. [Character and reference photos, expressions, gestures]
+   - **3D detail shots** — No. [Cutaways, exploded views, or close-ups and what they show]
 
-- **Voice and source media** — [original narration | approved recorded voice | consented clone if expressly requested]. Use references for analysis and make original scene assets.
+   **Human review · Script and storyboard** — Approve the words, visual beats, and planned assets before locking narration or building scenes. Stop here if this is the requested scope.
+3. **Lock narration and cues** — Align approved audio to on-screen actions. For Rapid Take, give every spoken word a visible action or state change and use vivid focal colors. Time music and effects against the cue sheet.
+
+   - **Narration** — No. [Recorded file | generated voice | consented clone], [delivery notes]
+   - **Music** — No. [Cleared track or mood]
+   - **Sound effects (SFX)** — No. [Cue, desired sound, cleared or original source]
+   - **Captions** — No. [Language and treatment]
+
+4. **Build and preview** — Test each new hero, rig, or moving part on its own, then in a scene at delivery size with the selected audio. Score each hero’s fidelity and motion against the reference video or real-world sources. **Human review · Scene proof** — Review isolated previews, the scene, and timecoded scores for fidelity, motion, and cue timing. Approve the treatment before extending it.
+
+   - **Scene transitions** — No. [Scene joins and preferred effect]
+   - **Timed graphics** — No. [Labels, pointers, or diagrams and their cues]
+
+5. **Render and deliver** — Export the requested range or full video and return editable sources. **Human review · Exact master** — Check picture and sound before handing off the package. Publishing requires a separate explicit request.
+
+   - **Thumbnail** — No. [Direction]
+   - **Metadata** — No. [Title and description preferences]
