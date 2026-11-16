@@ -210,7 +210,13 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             raise ValueError(f"No audio stream in {cue['id']}")
         if cue["kind"] == "voice" and float(cue["start"]) + metadata["duration"] > duration + .08:
             raise ValueError(f"Voice cue {cue['id']} extends past the picture")
-        inputs.extend(["-i", str(source)])
+        if cue.get("loop"):
+            # Repeat the approved source in the decoder, then trim it before
+            # mixing so neither a full music master nor a second encode exists.
+            inputs.extend(["-stream_loop", "-1", "-t",
+                           _fmt(float(cue["duration"])), "-i", str(source)])
+        else:
+            inputs.extend(["-i", str(source)])
     matte_inputs: dict[str, int] = {}
     for item in resolved["operations"]:
         if item["method"] != "text-behind-subject":
@@ -390,11 +396,20 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         metadata = media_info(asset_path(resolved["root"], cue["source"]))
         delay = int(round(float(cue["start"]) * 1000))
         target = f"cue{i}"
-        graph.append(f"[{index}:a:0]aresample=48000,"
-                     f"aformat=channel_layouts=stereo,"
-                     f"volume={float(cue.get('gain', 1)):g},"
-                     f"adelay={delay}|{delay},apad,"
-                     f"atrim=duration={_fmt(duration)}[{target}]")
+        filters = [f"[{index}:a:0]aresample=48000",
+                   "aformat=channel_layouts=stereo",
+                   f"volume={float(cue.get('gain', 1)):g}"]
+        if cue.get("loop"):
+            length = float(cue["duration"])
+            filters.append(f"atrim=duration={_fmt(length)}")
+            if float(cue.get("fade_in", 0)):
+                filters.append(f"afade=t=in:st=0:d={_fmt(float(cue['fade_in']))}")
+            if float(cue.get("fade_out", 0)):
+                filters.append(f"afade=t=out:st={_fmt(length - float(cue['fade_out']))}:"
+                               f"d={_fmt(float(cue['fade_out']))}")
+        filters.extend([f"adelay={delay}|{delay}", "apad",
+                        f"atrim=duration={_fmt(duration)}[{target}]"])
+        graph.append(",".join(filters))
         audio_labels.append(target)
     if len(audio_labels) > 1:
         graph.append("".join(f"[{label}]" for label in audio_labels) +

@@ -112,6 +112,26 @@ class TimelineModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Audio asset changed"):
             model.validate(self.timeline)
 
+    def test_looped_music_has_finite_reviewed_span(self):
+        cue = {"id": "bed", "kind": "music", "source": self.voice.name,
+               "sha256": model.sha256_file(self.voice), "start": 0.5,
+               "duration": 3.5, "loop": True, "gain": 0.1,
+               "fade_in": 0.4, "fade_out": 0.6,
+               "review_status": "approved"}
+        self.timeline["audio"] = [cue]
+        self.assertEqual(model.validate(self.timeline)["duration"], 4)
+        cue["duration"] = 3.6
+        with self.assertRaisesRegex(ValueError, "exceeds timeline"):
+            model.validate(self.timeline)
+        cue["duration"] = 3.5
+        cue["kind"] = "voice"
+        with self.assertRaisesRegex(ValueError, "Only music cues"):
+            model.validate(self.timeline)
+        cue["kind"] = "music"
+        cue["fade_out"] = 2
+        with self.assertRaisesRegex(ValueError, "exceeds the music span"):
+            model.validate(self.timeline)
+
     def test_unreviewed_transition_is_refused(self):
         self.timeline["picture"].append({
             "id": "p2", "source": "source.mp4",

@@ -44,6 +44,12 @@ Each revision snapshots the approved plan, its approval, and checklist beside
 the timeline file. A changed plan needs its own human preflight approval before
 `revise` can use it; prior revisions keep their plan snapshots.
 
+A licensed music cue may set `"loop": true` with a finite `"duration"` in
+seconds, measured from its `start`. Optional `fade_in` and `fade_out` seconds
+soften the bed edges. The renderer loops the hashed source at decode time and
+trims it before mixing, so the music stays on the one delivery timeline. Review
+the repeat seam and the music level against narration in bounded previews.
+
 Operation times are seconds on the resolved output timeline, after cuts and
 transition overlaps. Each operation and audio cue has a stable `id`, a
 `start` and `end` when applicable, a method, and `review_status`.

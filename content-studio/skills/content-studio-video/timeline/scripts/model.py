@@ -345,6 +345,19 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         gain = _number(cue.get("gain", 1), f"{cue_id}.gain")
         if gain > 2:
             raise ValueError("Audio cue gain must be <= 2")
+        if "loop" in cue:
+            # A repeated licensed music bed stays an input to the single final
+            # encode; its finite span is explicit in the reviewed timeline.
+            if cue.get("loop") is not True or cue["kind"] != "music":
+                raise ValueError(f"Only music cues support loop=true: {cue_id}")
+            length = _number(cue.get("duration"), f"{cue_id}.duration",
+                             minimum=.001)
+            if at + length > duration + .001:
+                raise ValueError(f"Looped music cue exceeds timeline: {cue_id}")
+            for fade in ("fade_in", "fade_out"):
+                value = _number(cue.get(fade, 0), f"{cue_id}.{fade}")
+                if value > min(length / 2, 10):
+                    raise ValueError(f"{cue_id}.{fade} exceeds the music span")
     if audio_policy == "copy_source":
         # Stream copy is valid only when the picture edit cannot shift source audio.
         if (len(resolved) != 1 or resolved[0]["source_in"] != 0

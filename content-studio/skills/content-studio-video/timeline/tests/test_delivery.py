@@ -116,6 +116,29 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
     def tearDown(self):
         self.temp.cleanup()
 
+    def test_music_loop_stays_a_finite_input_to_one_render(self):
+        self.timeline["operations"] = []
+        self.timeline["transitions"] = []
+        self.timeline["picture"] = [{
+            "id": "p1", "source": self.source.name,
+            "sha256": model.sha256_file(self.source),
+            "source_in": 0, "source_out": 2.2, "audio_gain": 0,
+        }]
+        self.timeline["audio"] = [{
+            "id": "bed", "kind": "music", "source": self.voice.name,
+            "sha256": model.sha256_file(self.voice), "start": 0.1,
+            "duration": 2, "loop": True, "gain": 0.2,
+            "fade_in": 0.1, "fade_out": 0.1,
+            "review_status": "approved",
+        }]
+        resolved = model.validate(self.timeline)
+        inputs, graph = compiler.compile_graph(self.timeline, resolved)
+        self.assertIn("-stream_loop", inputs)
+        self.assertIn("afade=t=out:st=1.900000:d=0.100000", graph)
+        rendered = compiler.preview(self.timeline, resolved,
+                                    self.root / "loop-preview.mp4", 0, 2.2)
+        self.assertAlmostEqual(rendered["duration"], 2.2, delta=.15)
+
     def _approved(self):
         record = {"actor": "human", "reviewer": "fixture editor",
                   "review_note": "Reviewed timing and voice",
