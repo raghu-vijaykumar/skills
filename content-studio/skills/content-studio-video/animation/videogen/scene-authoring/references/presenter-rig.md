@@ -26,7 +26,7 @@ For a presenter who follows the mechanism, write each gesture's purpose next to 
 
 Use the [photo-based actor review](../../../../review/critique/references/photo-reference.md) to score a recognizable likeness, stylized finish, and staging. Review the rendered blink, gaze, mouth shapes and gestures separately. Use an ordered photo sequence or footage to establish a characteristic expression change. Use timed capture for the person's actual speech or gesture rhythm. Keep any subject-specific motion comparison open until the evidence supports it.
 
-For a walking or running character, block the planted foot, lift and next landing separately. Pin the planted foot in world coordinates, solve the knee to meet the foot, and move the camera independently. Carry the position through a reaction or prop release. Use a [relative object track](../../../../review/critique/references/frame-tracing.md) across visible stance frames to verify contact under a pan, then inspect lift and landing by eye.
+For a walking or running character, block the planted foot, lift and next landing separately. Pin the planted foot in world coordinates, solve the knee to meet the foot, and move the camera independently. Carry the position through a reaction or prop release. Use a [relative object track](../../../../review/critique/references/frame-tracing.md) across visible stance frames to verify contact under a pan. Add a second scene anchor for a uniform push-in. Inspect lift and landing by eye and confirm that the tighter framing leaves room for the held prop and the reacting character.
 
 ## Wire a profile into Core Explainer
 

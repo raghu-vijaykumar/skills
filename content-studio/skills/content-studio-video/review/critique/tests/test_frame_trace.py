@@ -138,6 +138,24 @@ class TraceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "same lane"):
             measure_relative([shoe, {**ground, "lane": "reference"}], [request])
 
+    def test_second_anchor_cancels_uniform_zoom_and_exposes_true_shift(self):
+        def track(name, coordinates):
+            return {"id": name, "lane": "candidate", "first": 0, "last": len(coordinates)-1,
+                    "samples": [{"frame": i, "time": i/30, "x": x, "y": y}
+                                for i, (x, y) in enumerate(coordinates)]}
+
+        shoe = track("shoe", [(.4, .54), (.6, .62), (.63, .62), (.61, .62), (.62, .62)])
+        ground = track("ground", [(.2, .3), (.3, .26), (.3, .26), (.3, .26), (.3, .26)])
+        second = track("mark", [(.6, .3), (.9, .26), (.9, .26), (None, None), (.3, .26)])
+        request = {"id": "stance", "subject": "shoe", "anchor": "ground", "scale_anchor": "mark"}
+        result, = measure_relative([shoe, ground, second], [request])
+        self.assertEqual(result["tracked_frames"], 3)
+        self.assertEqual([row["dx"] for row in result["samples"]], [0, 0, .02, None, None])
+        self.assertEqual([row["scale"] for row in result["samples"]], [1.0, 1.5, 1.5, None, None])
+        self.assertEqual(result["max_abs_dy"], 0)
+        with self.assertRaisesRegex(ValueError, "distinct tracks"):
+            measure_relative([shoe, ground, second], [{**request, "scale_anchor": "ground"}])
+
 
 if __name__ == "__main__":
     unittest.main()

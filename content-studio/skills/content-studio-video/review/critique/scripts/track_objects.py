@@ -140,27 +140,43 @@ def measure_relative(tracks, requests):
         ids.add(name)
         subject = by_id[request["subject"]]
         anchor = by_id[request["anchor"]]
-        if subject is anchor or subject["lane"] != anchor["lane"]:
-            raise ValueError(f"{name}: choose two distinct tracks from the same lane")
-        start = max(subject["first"], anchor["first"])
-        end = min(subject["last"], anchor["last"])
+        scale_anchor = by_id[request["scale_anchor"]] if "scale_anchor" in request else None
+        selected = [subject, anchor] + ([scale_anchor] if scale_anchor is not None else [])
+        if len({track["id"] for track in selected}) != len(selected) or any(
+                track["lane"] != subject["lane"] for track in selected):
+            raise ValueError(f"{name}: choose distinct tracks from the same lane")
+        start = max(track["first"] for track in selected)
+        end = min(track["last"] for track in selected)
         if end < start:
             raise ValueError(f"{name}: the tracks need overlapping frames")
         fixed = {p["frame"]: p for p in anchor["samples"]}
+        second = {p["frame"]: p for p in scale_anchor["samples"]} if scale_anchor is not None else None
         baseline = None
+        base_distance = None
         samples = []
         for point in subject["samples"]:
             if not start <= point["frame"] <= end:
                 continue
             other = fixed[point["frame"]]
-            dx, dy = None, None
-            if point["x"] is not None and other["x"] is not None:
-                # Subtract simultaneous anchor position, then measure change from the first joint frame.
+            row = {"frame": point["frame"], "time": point["time"], "dx": None, "dy": None}
+            scale = 1.0
+            if second is not None:
+                extra = second[point["frame"]]
+                scale = None
+                if point["x"] is not None and other["x"] is not None and extra["x"] is not None:
+                    # Compare anchor spacing to the first joint sample to undo uniform zoom.
+                    distance = math.hypot(extra["x"] - other["x"], extra["y"] - other["y"])
+                    if distance > 0:
+                        base_distance = distance if base_distance is None else base_distance
+                        scale = distance / base_distance
+                row["scale"] = round(scale, 6) if scale is not None else None
+            if point["x"] is not None and other["x"] is not None and scale is not None:
+                # Express the subject offset in the first joint frame's coordinate scale.
                 offset = point["x"] - other["x"], point["y"] - other["y"]
                 if baseline is None:
                     baseline = offset
-                dx, dy = (round(value - initial, 6) for value, initial in zip(offset, baseline))
-            samples.append({"frame": point["frame"], "time": point["time"], "dx": dx, "dy": dy})
+                row["dx"], row["dy"] = (round(value / scale - initial, 6) for value, initial in zip(offset, baseline))
+            samples.append(row)
         visible = [p for p in samples if p["dx"] is not None]
         results.append({**request, "lane": subject["lane"], "range": [start, end],
                         "tracked_frames": len(visible),
