@@ -15,8 +15,12 @@ For a new silhouette or art style, pass an SVG `body` component with `PresenterB
 
 - Place the exported presenter inside a composition SVG. Its `x` and `y` locate the neck. `scale` sizes the entire rig, including its gesture reach. View the full raised hand and face before locking captions and diagram safe areas.
 - Author ordered scene-local cues for `rest`, `point-left`, `point-right`, `explain`, `two`, or `present`. The left and right directions refer to the screen. Start a gesture a few frames before the thing it directs attention to. Use `transitionFrames` to set the approach and let the action hold long enough to read.
+- For a contact, reaction or handoff that needs its own pose, add `pose` to a cue. The rig interpolates explicit gaze and elbow and wrist targets from the pose already on screen. `gaze` is a horizontal and vertical pair around zero, with positive vertical values looking down. A custom face can read `gazeY` independently of head rotation.
+- A custom body can draw interpolated `fingers` using five extension values from thumb to little finger, with 0 curled and 1 extended. Key elbow and wrist together to keep arm length believable as the position changes. Fit the shirt sleeve to the upper arm and compute the palm angle from the forearm. Use an angle offset for the wrist turn. The default body's preset silhouettes cover the original gesture set.
 - Use `blinkFrames` for blink centers. Supply speech energy normalized to 0–1 at the composition rate for simple mouth movement. For precise dialogue, author phoneme-based mouth cues in the face component and drive that channel with explicit frame timing.
 - Place the character in a fixed-camera isolated preview, then in the narrated scene. Inspect the gesture start, peak, settle, and first transition into the next gesture. Check blink and speech frames and confirm that hands avoid captions and that poses actually point to the intended object.
+
+For a presenter who follows the mechanism, write each gesture's purpose next to its cue. Specify the object, active hand, gaze target, and expected held pose. A reset at a camera cut can use a zero-frame cue. Within a continuous shot, start a new cue early enough to move into place or use an explicit recovery cue. Check finger separation, wrist attachment, elbow shape and gaze during consecutive frames as well as at the hold.
 
 ## Wire a profile into Core Explainer
 

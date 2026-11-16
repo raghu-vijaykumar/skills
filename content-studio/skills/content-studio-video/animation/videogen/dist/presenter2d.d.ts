@@ -1,22 +1,33 @@
 import React, { type ComponentType } from 'react';
 type Point = readonly [number, number];
 type Hand = 'rest' | 'point' | 'open' | 'two';
+/** Extension of thumb through little finger. Zero is curled and one is extended. */
+export type PresenterFingers = readonly [number, number, number, number, number];
 type Arm = {
     elbow: Point;
     wrist: Point;
     angle: number;
     hand: Hand;
+    fingers?: PresenterFingers;
 };
 type Pose = {
     head: number;
     left: Arm;
     right: Arm;
+    gaze?: Point;
 };
 export type PresenterGesture = 'rest' | 'point-left' | 'point-right' | 'explain' | 'two' | 'present';
+export type PresenterPoseOverride = {
+    head?: number;
+    left?: Partial<Arm>;
+    right?: Partial<Arm>;
+    gaze?: Point;
+};
 export type PresenterCue = {
     frame: number;
     gesture: PresenterGesture;
     transitionFrames?: number;
+    pose?: PresenterPoseOverride;
 };
 export type PresenterPalette = {
     skin: string;
@@ -28,6 +39,8 @@ export type PresenterFaceProps = {
     eyeOpen: number;
     mouthOpen: number;
     gaze: number;
+    /** Vertical gaze in rig coordinates. Positive values look down. */
+    gazeY?: number;
     palette: PresenterPalette;
 };
 export type PresenterBodyProps = {

@@ -25,6 +25,8 @@ For an asset whose framing changed, use `python scripts/compare_actor.py --refer
 
 For a hardware enclosure, verify depth at the most oblique viewing angle and during the door, card, or tray movement. Check that a wide chassis surface does not cover its front details, the moving part remains seated when closed, and the part that carries the explanation has an independent cue. Inspect the shared asset on both sides of its cut when it persists across shots.
 
+For a recurring presenter, score the held face and hand form separately when both matter. Map a complete gesture from its first motion through the target, cue word and recovery. Check the visible hand at native cadence for finger separation, wrist attachment and overlap with the face or prop. For acting, compare the function of the gaze, expression and gesture to the matching teaching beat, even if the new narration uses different words. An isolated preview shows anatomy and motion. The full narrated frame shows whether the pose directs attention to the right object at the right time.
+
 ```text
 python scripts/score_objects.py --ledger objects.json --out scores.json
 python scripts/score_objects.py --ledger revised-objects.json --previous scores.json --out revised-scores.json

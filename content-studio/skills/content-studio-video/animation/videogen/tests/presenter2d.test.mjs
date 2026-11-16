@@ -43,3 +43,27 @@ test('an authored body receives the same articulated pose and its palette', () =
   assert.match(rig, /data-eye="1"/);
   assert.doesNotMatch(rig, /<linearGradient/);
 });
+
+test('authored gaze and each finger continue smoothly through an interrupted cue', () => {
+  const reach = {
+    frame: 0, gesture: 'point-right', transitionFrames: 12,
+    pose: {gaze: [.5, -1], right: {fingers: [.25, 1, .2, .2, .2], wrist: [170, 12]}},
+  };
+  const stop = {
+    frame: 5, gesture: 'rest', transitionFrames: 8,
+    pose: {gaze: [-.5, 0], right: {fingers: [.9, 1, .9, .8, .7], wrist: [136, 13]}},
+  };
+  const atInterruption = samplePresenterPose([reach], 5);
+  assert.deepEqual(samplePresenterPose([reach, stop], 5), atInterruption);
+  const middle = samplePresenterPose([reach, stop], 9);
+  assert.ok(middle.right.fingers[2] > atInterruption.right.fingers[2]);
+  assert.ok(middle.right.fingers[2] < .9);
+  const final = samplePresenterPose([reach, stop], 13);
+  assert.deepEqual(final.right.fingers, stop.pose.right.fingers);
+  assert.deepEqual(final.right.wrist, stop.pose.right.wrist);
+  assert.deepEqual(final.gaze, stop.pose.gaze);
+  assert.deepEqual(final.left, samplePresenterPose([], 13).left);
+  const face = ({gaze, gazeY}) => React.createElement('g', {'data-gaze': gaze, 'data-gaze-y': gazeY});
+  const markup = renderToStaticMarkup(React.createElement(Presenter2D, {face, frame: 12, cues: [reach]}));
+  assert.match(markup, /data-gaze="0\.5" data-gaze-y="-1"/);
+});

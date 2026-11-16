@@ -3,16 +3,21 @@ import {smooth} from './components/motion-lab/objectMotion.tsx';
 
 type Point = readonly [number, number];
 type Hand = 'rest' | 'point' | 'open' | 'two';
-type Arm = {elbow: Point; wrist: Point; angle: number; hand: Hand};
-type Pose = {head: number; left: Arm; right: Arm};
+/** Extension of thumb through little finger. Zero is curled and one is extended. */
+export type PresenterFingers = readonly [number, number, number, number, number];
+type Arm = {elbow: Point; wrist: Point; angle: number; hand: Hand; fingers?: PresenterFingers};
+type Pose = {head: number; left: Arm; right: Arm; gaze?: Point};
 
 export type PresenterGesture = 'rest' | 'point-left' | 'point-right' | 'explain' | 'two' | 'present';
-export type PresenterCue = {frame: number; gesture: PresenterGesture; transitionFrames?: number};
+export type PresenterPoseOverride = {head?: number; left?: Partial<Arm>; right?: Partial<Arm>; gaze?: Point};
+export type PresenterCue = {frame: number; gesture: PresenterGesture; transitionFrames?: number; pose?: PresenterPoseOverride};
 export type PresenterPalette = {skin: string; skinShade: string; shirt: string; shirtShade: string};
 export type PresenterFaceProps = {
   eyeOpen: number;
   mouthOpen: number;
   gaze: number;
+  /** Vertical gaze in rig coordinates. Positive values look down. */
+  gazeY?: number;
   palette: PresenterPalette;
 };
 export type PresenterBodyProps = {left: Arm; right: Arm; palette: PresenterPalette};
@@ -30,17 +35,33 @@ const poseLibrary: Record<PresenterGesture, Pose> = {
 };
 
 const defaultPalette: PresenterPalette = {skin: '#e8a877', skinShade: '#a9634c', shirt: '#b64049', shirtShade: '#743344'};
-const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+const mix = (a: number, b: number, t: number) => t === 1 ? b : a + (b - a) * t;
 const mixPoint = (a: Point, b: Point, t: number): Point => [mix(a[0], b[0], t), mix(a[1], b[1], t)];
+const fingerPresets: Record<Hand, PresenterFingers> = {
+  rest: [.38, .28, .24, .22, .22],
+  point: [.54, 1, .22, .2, .2],
+  open: [.87, .96, 1, .94, .9],
+  two: [.48, .96, 1, .24, .22],
+};
 
 function mixArm(a: Arm, b: Arm, t: number): Arm {
-  return {elbow: mixPoint(a.elbow, b.elbow, t), wrist: mixPoint(a.wrist, b.wrist, t),
+  const arm: Arm = {elbow: mixPoint(a.elbow, b.elbow, t), wrist: mixPoint(a.wrist, b.wrist, t),
     angle: mix(a.angle, b.angle, t), hand: t < 0.55 ? a.hand : b.hand};
+  if (a.fingers || b.fingers) {
+    const from = a.fingers ?? fingerPresets[a.hand];
+    const to = b.fingers ?? fingerPresets[b.hand];
+    arm.fingers = [mix(from[0], to[0], t), mix(from[1], to[1], t), mix(from[2], to[2], t),
+      mix(from[3], to[3], t), mix(from[4], to[4], t)];
+  }
+  return arm;
 }
 
 function transition(from: Pose, to: Pose, start: number, duration: number, frame: number): Pose {
   const amount = smooth(frame, start, start + duration);
-  return {head: mix(from.head, to.head, amount), left: mixArm(from.left, to.left, amount), right: mixArm(from.right, to.right, amount)};
+  const pose: Pose = {head: mix(from.head, to.head, amount),
+    left: mixArm(from.left, to.left, amount), right: mixArm(from.right, to.right, amount)};
+  if (from.gaze || to.gaze) pose.gaze = mixPoint(from.gaze ?? [from.head / 6, 0], to.gaze ?? [to.head / 6, 0], amount);
+  return pose;
 }
 
 /** Each cue starts from the pose already visible on that frame. */
@@ -52,7 +73,10 @@ export function samplePresenterPose(cues: readonly PresenterCue[], frame: number
   for (const cue of cues) {
     if (cue.frame > frame) break;
     from = transition(from, to, start, duration, cue.frame);
-    to = poseLibrary[cue.gesture];
+    const base = poseLibrary[cue.gesture];
+    // Override the target so a cut or interruption can sample the same pose independently.
+    to = cue.pose ? {...base, ...cue.pose, left: {...base.left, ...cue.pose.left},
+      right: {...base.right, ...cue.pose.right}} : base;
     start = cue.frame;
     duration = cue.transitionFrames ?? 8;
   }
@@ -134,7 +158,7 @@ export function Presenter2D({frame, face: Face, body: Body = DefaultBody, cues =
   return <g transform={`translate(${x} ${y}) scale(${scale})`} data-presenter="2d">
     <Body left={pose.left} right={pose.right} palette={palette}/>
     <g transform={`rotate(${pose.head} 0 4)`}>
-      <Face eyeOpen={eyeOpen} mouthOpen={mouth} gaze={pose.head / 6} palette={palette}/>
+      <Face eyeOpen={eyeOpen} mouthOpen={mouth} gaze={pose.gaze?.[0] ?? pose.head / 6} gazeY={pose.gaze?.[1]} palette={palette}/>
     </g>
   </g>;
 }

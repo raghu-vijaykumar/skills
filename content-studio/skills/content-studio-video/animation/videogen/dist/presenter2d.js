@@ -13,15 +13,32 @@ const poseLibrary = {
     present: { head: 4, left: leftRest, right: { elbow: [135, 103], wrist: [189, 53], angle: 73, hand: 'open' } },
 };
 const defaultPalette = { skin: '#e8a877', skinShade: '#a9634c', shirt: '#b64049', shirtShade: '#743344' };
-const mix = (a, b, t) => a + (b - a) * t;
+const mix = (a, b, t) => t === 1 ? b : a + (b - a) * t;
 const mixPoint = (a, b, t) => [mix(a[0], b[0], t), mix(a[1], b[1], t)];
+const fingerPresets = {
+    rest: [.38, .28, .24, .22, .22],
+    point: [.54, 1, .22, .2, .2],
+    open: [.87, .96, 1, .94, .9],
+    two: [.48, .96, 1, .24, .22],
+};
 function mixArm(a, b, t) {
-    return { elbow: mixPoint(a.elbow, b.elbow, t), wrist: mixPoint(a.wrist, b.wrist, t),
+    const arm = { elbow: mixPoint(a.elbow, b.elbow, t), wrist: mixPoint(a.wrist, b.wrist, t),
         angle: mix(a.angle, b.angle, t), hand: t < 0.55 ? a.hand : b.hand };
+    if (a.fingers || b.fingers) {
+        const from = a.fingers ?? fingerPresets[a.hand];
+        const to = b.fingers ?? fingerPresets[b.hand];
+        arm.fingers = [mix(from[0], to[0], t), mix(from[1], to[1], t), mix(from[2], to[2], t),
+            mix(from[3], to[3], t), mix(from[4], to[4], t)];
+    }
+    return arm;
 }
 function transition(from, to, start, duration, frame) {
     const amount = smooth(frame, start, start + duration);
-    return { head: mix(from.head, to.head, amount), left: mixArm(from.left, to.left, amount), right: mixArm(from.right, to.right, amount) };
+    const pose = { head: mix(from.head, to.head, amount),
+        left: mixArm(from.left, to.left, amount), right: mixArm(from.right, to.right, amount) };
+    if (from.gaze || to.gaze)
+        pose.gaze = mixPoint(from.gaze ?? [from.head / 6, 0], to.gaze ?? [to.head / 6, 0], amount);
+    return pose;
 }
 /** Each cue starts from the pose already visible on that frame. */
 export function samplePresenterPose(cues, frame) {
@@ -33,7 +50,10 @@ export function samplePresenterPose(cues, frame) {
         if (cue.frame > frame)
             break;
         from = transition(from, to, start, duration, cue.frame);
-        to = poseLibrary[cue.gesture];
+        const base = poseLibrary[cue.gesture];
+        // Override the target so a cut or interruption can sample the same pose independently.
+        to = cue.pose ? { ...base, ...cue.pose, left: { ...base.left, ...cue.pose.left },
+            right: { ...base.right, ...cue.pose.right } } : base;
         start = cue.frame;
         duration = cue.transitionFrames ?? 8;
     }
@@ -65,5 +85,5 @@ export function Presenter2D({ frame, face: Face, body: Body = DefaultBody, cues 
     const pose = samplePresenterPose(cues, frame);
     const eyeOpen = blinkFrames.reduce((open, blink) => Math.min(open, Math.max(0.04, Math.abs(frame - blink) / 3)), 1);
     const mouth = Math.max(0, Math.min(1, mouthOpen ?? speech));
-    return _jsxs("g", { transform: `translate(${x} ${y}) scale(${scale})`, "data-presenter": "2d", children: [_jsx(Body, { left: pose.left, right: pose.right, palette: palette }), _jsx("g", { transform: `rotate(${pose.head} 0 4)`, children: _jsx(Face, { eyeOpen: eyeOpen, mouthOpen: mouth, gaze: pose.head / 6, palette: palette }) })] });
+    return _jsxs("g", { transform: `translate(${x} ${y}) scale(${scale})`, "data-presenter": "2d", children: [_jsx(Body, { left: pose.left, right: pose.right, palette: palette }), _jsx("g", { transform: `rotate(${pose.head} 0 4)`, children: _jsx(Face, { eyeOpen: eyeOpen, mouthOpen: mouth, gaze: pose.gaze?.[0] ?? pose.head / 6, gazeY: pose.gaze?.[1], palette: palette }) })] });
 }
