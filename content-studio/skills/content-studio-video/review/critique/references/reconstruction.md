@@ -22,7 +22,7 @@ For a private experiment the author can run the creative comparisons without ask
 ## Reuse the production plan across visual presets
 
 - Keep the research, narration, word clock, stable actor IDs, rig targets, state changes, handoffs, and retest criteria together. Use real-world photos and observed or documented action when beginning without a video reference. This includes photos of specific people for cartoons and caricatures.
-- A visual preset owns shapes, textures, linework, shading, palette, and the matching geometry for its rig targets. Rebuild those layers for a different look, such as cel shading or pixel art. Render the same named action with the new assets and recheck posing, material, contrast and staging at delivery size.
+- A visual preset owns shapes, textures, linework, shading, palette, and the matching geometry for its rig targets. Rebuild those layers for a different look, such as cel shading or pixel art. Use the [word choreography runtime](../../../animation/videogen/scene-authoring/references/word-choreography.md) to sample the same action channels for each render. Recheck posing, material, contrast and staging at delivery size.
 - The editorial treatment owns the pacing. Rapid Take expects a visible cue from each spoken word and strong focal color. Core Explainer uses the same assets and frame clock for deliberate state changes and readable holds.
 - For a private automated pass, diagnose and rank deficits from the exact render, revise the affected assets or cue ranges, then rerender and score those actions in context. Record remaining deficits and their evidence so a next pass can resume. Use the same loop inside successive chapters for a long-form video, and check handoffs across chapter boundaries in the final master.
 
@@ -35,6 +35,8 @@ Set `"style": "rapid-take"` at the plan root for Rapid Take. Its words also requ
 ```text
 python scripts/audit_word_cues.py --plan word-plan.json --video candidate.mp4 --out word-review
 ```
+
+For a new art preset, add `--same-cues-as previous-word-plan.json`. The audit fails if the shot ranges, spoken words, frames, caption groups or actor/action bindings drift. `cue_sha256` records those fields and `artPreset` records the chosen artwork. Compare the actual narration and visible action as part of the rendered review.
 
 Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Rapid Take measures per-pixel color channel changes as well as brightness shifts, so it can flag a visual accent that changes hue at the same brightness. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
 

@@ -9,7 +9,7 @@ import unittest
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from audit_word_cues import changed, inspect_frames, read_plan
+from audit_word_cues import changed, cue_signature, inspect_frames, read_plan
 
 
 class WordCueTests(unittest.TestCase):
@@ -63,6 +63,17 @@ class WordCueTests(unittest.TestCase):
         green = Image.new("RGB", (8, 8), (0, 130, 0))
         self.assertEqual(changed(red, green, (0, 0, 1, 1)), 0)
         self.assertEqual(changed(red, green, (0, 0, 1, 1), color=True), 100)
+
+    def test_preset_signature_preserves_clock_and_actions(self):
+        plan = self.plan()
+        anime = cue_signature(*read_plan({**plan, "artPreset": "anime"}))
+        self.assertEqual(anime, cue_signature(*read_plan({**plan, "artPreset": "pixel-art"})))
+        word = plan["shots"][0]["words"][1]
+        word["startFrame"] += 1
+        self.assertNotEqual(anime, cue_signature(*read_plan(plan)))
+        word["startFrame"] -= 1
+        word["action"] = "blink"
+        self.assertNotEqual(anime, cue_signature(*read_plan(plan)))
 
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
     def test_a_single_frame_accent_is_kept(self):

@@ -13,7 +13,7 @@ For a reusable illustrated presenter, use the [2D presenter rig workflow](refere
 
 For a motion reference, use the shot breakdown in the motion primitives guide. Plan subshot cuts and actor actions at frame precision. Animate the mechanism in separate geometry or rig layers, then prove the state change in a fixed-camera preview before adding camera, typography, or score.
 
-For word-level motion, start from the [full reconstruction checklist](../../../review/critique/references/reconstruction.md). Treat spoken onset, caption emphasis, meaningful object action and presenter reaction as separate cues. Update each cue's clock when narration or cuts change.
+For word-level motion, start from the [full reconstruction checklist](../../../review/critique/references/reconstruction.md). Use [word choreography and art presets](references/word-choreography.md) to compile actor actions on the speech clock and render them with replaceable artwork. Update the clock when narration or cuts change.
 
 When the number of items teaches the idea, build the repeated units separately and hold the wide view long enough to see their organization. Bring one node, group or path forward when its role changes and carry the same identifying cues into the detail shot. Animate the same state used for its label or count. Check the foreground edges in the wide view, the smallest legible label at phone size and the single action that should remain visible when many units move at once.
 

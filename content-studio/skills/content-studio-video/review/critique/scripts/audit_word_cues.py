@@ -2,6 +2,7 @@
 
 import argparse
 from fractions import Fraction
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -62,6 +63,14 @@ def read_plan(plan):
     if cursor != duration or not cues:
         raise ValueError("The shot ranges must cover the entire timeline")
     return fps, duration, cues
+
+
+def cue_signature(fps, duration, cues):
+    # Include the paint-independent word clock and bindings, with scene cuts.
+    fields = ("shot", "shot_end", "startFrame", "endFrame", "text", "line", "actor", "action", "cueKind")
+    rows = [[cue.get(field) for field in fields] for cue in cues]
+    clock = json.dumps([fps, duration, rows], ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(clock.encode("utf-8")).hexdigest()
 
 
 def crop_region(image, region):
@@ -152,6 +161,7 @@ def main():
     cli.add_argument("--plan", required=True, type=Path)
     cli.add_argument("--out", required=True, type=Path)
     cli.add_argument("--video", type=Path)
+    cli.add_argument("--same-cues-as", type=Path, help="check only the word clock and actor/action bindings against another plan")
     cli.add_argument("--region", nargs=4, type=float, default=(.06, .32, .94, .74),
                      metavar=("LEFT", "TOP", "RIGHT", "BOTTOM"))
     args = cli.parse_args()
@@ -161,17 +171,25 @@ def main():
     try:
         plan = json.loads(args.plan.read_text(encoding="utf-8-sig"))
         fps, duration, cues = read_plan(plan)
+        signature = cue_signature(fps, duration, cues)
+        if args.same_cues_as:
+            baseline = json.loads(args.same_cues_as.read_text(encoding="utf-8-sig"))
+            if signature != cue_signature(*read_plan(baseline)):
+                raise ValueError("The word clock or actor/action bindings differ from the baseline plan")
         args.out.mkdir(parents=True, exist_ok=False)
         rapid_take = plan.get("style") == "rapid-take"
         media = (inspect_frames(args.video, cues, fps, duration, args.region, args.out, color=rapid_take)
                  if args.video else None)
         evidence = {
             "fps": fps, "durationFrames": duration, "shot_count": len(plan["shots"]), "word_count": len(cues),
+            "cue_sha256": signature,
             "video": media, "region": args.region,
             "change_basis": ("rgb-channel" if rapid_take else "luma") if media else None,
             "low_motion_onsets": sum(row.get("region_change_percent", 100) < 1 for row in cues) if media else None,
             "rows": cues,
         }
+        if isinstance(plan.get("artPreset"), str):
+            evidence["artPreset"] = plan["artPreset"]
         if rapid_take:
             evidence["style"] = "rapid-take"
             evidence["cue_counts"] = {kind: sum(cue["cueKind"] == kind for cue in cues)

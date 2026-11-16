@@ -1,0 +1,17 @@
+import type { WordMotionCue } from './wordMotion.tsx';
+export type WordChannels = Readonly<Record<string, number>>;
+export type WordTarget = number | Readonly<{
+    to: number;
+    frames: number;
+    ease?: 'linear' | 'smooth';
+}>;
+export type WordActor = Readonly<{
+    initial: WordChannels;
+    actions: Readonly<Record<string, Readonly<Record<string, WordTarget>>>>;
+}>;
+/** Compile once on the same frame clock as the audio. Sample in any render order. */
+export declare function compileWordChoreography(words: readonly WordMotionCue[], actors: Readonly<Record<string, WordActor>>): {
+    actorIds: readonly string[];
+    sample(actor: string, frame: number): WordChannels;
+};
+export type WordChoreography = ReturnType<typeof compileWordChoreography>;

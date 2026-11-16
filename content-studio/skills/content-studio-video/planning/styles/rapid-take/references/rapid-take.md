@@ -60,7 +60,9 @@ at speed. Use Core Explainer when the viewer needs to inspect how each step work
 4. Reuse the action plan across art presets. A photo-grounded character can have
    cel-shaded or pixel-art layers with the same gaze, wrist and expression
    targets. A clock can change shape, palette and texture while retaining its
-   hand pivot and cue. See the [shared production checklist](../../../../review/critique/references/reconstruction.md).
+   hand pivot and cue. Compile the cue-driven action tracks once and bind the
+   [art preset](../../../../animation/videogen/scene-authoring/references/word-choreography.md)
+   to those tracks for each render.
 5. Validate the plan with `audit_word_cues.py` using `style: rapid-take` in the
    JSON plan. Recheck the exact render at the cue frames and at playback speed.
    With sound and captions off, verify that each hero reveal and the major

@@ -7,3 +7,7 @@ export type {StackLayer, LayeredStackProps} from './LayeredStack.tsx';
 export {MotionObject, RoutedPacket, progress, samplePose, smooth} from './objectMotion.tsx';
 export type {MotionKey, Point, Pose} from './objectMotion.tsx';
 export {sampleWordMotion, WordMotionCaption, type WordMotionCue} from './wordMotion.tsx';
+export {compileWordChoreography} from './wordChoreography.ts';
+export type {WordActor, WordChannels, WordChoreography, WordTarget} from './wordChoreography.ts';
+export {WordMotionCast} from './WordMotionCast.tsx';
+export type {WordActorArtProps, WordArtPreset} from './WordMotionCast.tsx';

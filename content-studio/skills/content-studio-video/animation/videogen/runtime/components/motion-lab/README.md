@@ -10,6 +10,7 @@ Import from `@raghu-vijaykumar/videogen/runtime/components/motion-lab/index` in 
 | `MotionObject` | Scene-local frame, ordered `MotionKey[]`, and SVG children | Move, rotate, scale, or reveal each original object independently. Keys inherit previous values. |
 | `RoutedPacket` | Scene-local frame, start and arrival frames, endpoints, and optional stop fraction | Show a request, reply, or event traveling along a visible route. Stop the packet partway to make a failure observable. |
 | `WordMotionCaption` and `sampleWordMotion` | Ordered word cues and the frame on the narration clock | Highlight every timed spoken word and get the same cue for actor choreography. Author the actor and action separately. |
+| `compileWordChoreography` and `WordMotionCast` | Ordered word cues, named actor actions and an art preset keyed by actor | Sample independent rig channels at any frame and render them through interchangeable artwork. See [word choreography and art presets](../../../scene-authoring/references/word-choreography.md). |
 
 Choose these per teaching beat; they are not a required frame template. Render the hero alone and in its narrated scene. The first private Stripe study found that CSS stack and device stand-ins are much flatter than the reference, so use authored or licensed depth assets for delivery-quality hero objects.
 
