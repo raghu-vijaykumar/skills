@@ -161,6 +161,26 @@ def word_anchor_times(row, landmarks):
             for name, times in anchors.items()}
 
 
+def motion_intervals(row, landmarks):
+    intervals = named_entries(row, "motion_intervals", "motion interval")
+    for name, interval in intervals.items():
+        if set(interval) != {"start", "end"} or not all(
+                isinstance(event, str) and event in landmarks for event in interval.values()):
+            raise ValueError(f"Motion interval {name} needs start and end landmark IDs")
+        for lane in lane_names(row):
+            if landmarks[interval["start"]][lane] >= landmarks[interval["end"]][lane]:
+                raise ValueError(f"Motion interval {name} needs an earlier start landmark in {lane}")
+    return intervals
+
+
+def motion_interval_pictures(lane, interval, pairs, events):
+    # Measures use the displayed pictures, which can differ from the authored anchors.
+    start, end = (events[interval[edge]]["lanes"][lane]["after"]["frame"] for edge in ("start", "end"))
+    start_time, end_time = pairs[start][1], pairs[end][1]
+    return {"start_frame": start, "end_frame": end, "frame_steps": end - start,
+            "duration_ms": (end_time - start_time) * 1000}
+
+
 def hold_ranges(row):
     ranges = named_entries(row, "holds", "hold")
     expected = lane_names(row)
@@ -269,6 +289,8 @@ def build(reference, candidate, mapping, beat, output, regions, *, previous=None
     events = landmark_times(row)
     words = word_anchor_times(row, events)
     landmarks = [{"id": name, "sheet": f"landmark-{name}.jpg", "lanes": {}} for name in events]
+    by_name = {event["id"]: event for event in landmarks}
+    motions = [{"id": name, **span, "lanes": {}} for name, span in motion_intervals(row, events).items()]
     intervals = hold_ranges(row)
     details = detail_boxes(row, meta)
     holds = [{"id": name, "sheet": f"hold-{name}.jpg", "lanes": {}} for name in intervals]
@@ -290,6 +312,8 @@ def build(reference, candidate, mapping, beat, output, regions, *, previous=None
             name = event["id"]
             event["lanes"][lane] = seam_pictures(
                 lane, events[name][lane], pairs, lanes[lane], name, word_onset=words.get(name, {}).get(lane))
+        for motion in motions:
+            motion["lanes"][lane] = motion_interval_pictures(lane, motion, pairs, by_name)
         for hold in holds:
             name = hold["id"]
             hold["lanes"][lane] = hold_pictures(lane, name, intervals[name][lane], pairs, lanes[lane])
@@ -309,6 +333,13 @@ def build(reference, candidate, mapping, beat, output, regions, *, previous=None
         for hold in holds:
             write_comparison(output, hold, ("first", "middle", "last"), details)
         manifest["holds"] = holds
+    if motions:
+        for motion in motions:
+            ref_ms = motion["lanes"]["reference"]["duration_ms"]
+            for lane in motion["lanes"].values():
+                lane["delta_vs_reference_ms"] = round(lane["duration_ms"] - ref_ms, 1)
+                lane["duration_ms"] = round(lane["duration_ms"], 1)
+        manifest["motion_intervals"] = motions
     (output / "frame-trace.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest["decoded_frames"]
 

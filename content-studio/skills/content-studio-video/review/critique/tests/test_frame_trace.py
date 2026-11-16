@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode, detail_boxes, hold_pictures, hold_ranges, landmark_times, seam_times, word_anchor_times
+from frame_trace import build, decode, detail_boxes, hold_pictures, hold_ranges, landmark_times, motion_intervals, seam_times, word_anchor_times
 from track_objects import follow, measure_relative, retarget
 
 
@@ -100,8 +100,10 @@ class TraceTests(unittest.TestCase):
             row = {"id": "release", "reference": [.25, .75], "previous": [.4, .92], "candidate": [.5, 1],
                    "details": dict.fromkeys(names, [.125, .125, .875, .875]),
                    "seam": {"reference": .5, "previous": .61, "candidate": .7},
-                   "landmarks": [{"id": "detach", "reference": .55, "previous": .65, "candidate": .8}],
+                   "landmarks": [{"id": "detach", "reference": .55, "previous": .65, "candidate": .8},
+                                 {"id": "landed", "reference": .707, "previous": .85, "candidate": .91}],
                    "word_anchors": [{"id": "detach", "reference": .50, "previous": .62, "candidate": .78}],
+                   "motion_intervals": [{"id": "flight", "start": "detach", "end": "landed"}],
                    "holds": [{"id": "fall", "reference": [.58, .74], "previous": [.68, .92], "candidate": [.82, 1]}]}
             out = root / "trace"
             for malformed, message in (({**row, "previous": [1.5, 2.5]}, "previous range"),
@@ -119,6 +121,11 @@ class TraceTests(unittest.TestCase):
             self.assertEqual(report["seam"]["lanes"]["previous"]["before"]["time"], .6)
             self.assertEqual(report["seam"]["lanes"]["previous"]["after"]["time"], .64)
             self.assertEqual(report["landmarks"][0]["lanes"]["previous"]["word_to_picture_ms"], 60)
+            flight, = report["motion_intervals"]
+            self.assertEqual(flight["lanes"]["reference"]["frame_steps"], 3)
+            self.assertEqual(flight["lanes"]["previous"]["duration_ms"], 200.0)
+            self.assertEqual(flight["lanes"]["candidate"]["duration_ms"], 133.3)
+            self.assertEqual(flight["lanes"]["candidate"]["delta_vs_reference_ms"], 8.3)
             self.assertEqual(report["holds"][0]["lanes"]["previous"]["decoded_frames"], 6)
             self.assertIn('"previous": 6', (out / "frames.html").read_text(encoding="utf-8"))
             self.assertIn('id="play-together"', (out / "frames.html").read_text(encoding="utf-8"))
@@ -170,6 +177,14 @@ class TraceTests(unittest.TestCase):
             hold_ranges(row)
         with self.assertRaisesRegex(ValueError, "No decoded picture"):
             hold_pictures("candidate", "result", [1.01, 1.02], [("image", 1.0)], [{}])
+
+    def test_motion_interval_needs_ordered_landmarks_in_each_lane(self):
+        landmarks = {"start": {"reference": .4, "candidate": 1.5}, "end": {"reference": .6, "candidate": 1.4}}
+        row = {"motion_intervals": [{"id": "transfer", "start": "start", "end": "end"}]}
+        with self.assertRaisesRegex(ValueError, "earlier start landmark in candidate"):
+            motion_intervals(row, landmarks)
+        with self.assertRaisesRegex(ValueError, "start and end landmark IDs"):
+            motion_intervals(row, {"start": landmarks["start"]})
 
     def test_tracks_translation_and_does_not_bridge_occlusion(self):
         with tempfile.TemporaryDirectory() as directory:

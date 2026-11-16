@@ -26,6 +26,12 @@ For a private experiment the author can run the creative comparisons without ask
 - The editorial treatment owns the pacing. Rapid Take expects a visible cue from each spoken word and strong focal color. Core Explainer uses the same assets and frame clock for deliberate state changes and readable holds.
 - For a private automated pass, diagnose and rank deficits from the exact render, revise the affected assets or cue ranges, then rerender and score those actions in context. Record remaining deficits and their evidence so a next pass can resume. Use the same loop inside successive chapters for a long-form video, and check handoffs across chapter boundaries in the final master.
 
+For a timing deficit, map the first visible action and its contact or settled
+state in every cut. Compare the motion interval and the offset from the
+spoken cue independently. A prop can enter on its word and still take too
+long to land. Use the [landmark evidence](frame-tracing.md) when retesting the
+action and its subsequent reading hold.
+
 ## Inspect the word clock
 
 Store a private JSON plan with `fps`, `durationFrames` and contiguous half-open `shots`. A shot has `startFrame`, `endFrame`, `asset`, `emotion`, `inventory`, `script` and `words`. Each word has `text`, `startFrame`, `endFrame`, `actor` and `action`. Give each word its own onset frame. The runtime caption also takes a `line` number so it can accumulate a short readable group. Use the final narration's frame clock; if only provider offsets are available after retiming, label them estimates until playback or alignment verifies them.

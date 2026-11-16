@@ -26,3 +26,7 @@ repeated targets and changes arriving after the next word. Reuse the compiled
 tracks across art presets. Review the visible result with the existing word cue
 audit, frame trace, and actor scorecard. Cover immediate changes, overlapping
 actions, identical targets and a one-frame cue window in the runtime tests.
+
+For pacing retests, measure time between two visible landmarks using each cut's
+decoded timestamps. Report frame steps and the time difference from the
+reference. Validate order in each cut and test different frame rates.

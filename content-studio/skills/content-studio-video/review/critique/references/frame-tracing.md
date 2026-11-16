@@ -33,6 +33,14 @@ For several meaningful changes inside a beat, put `landmarks` on the same beat r
 
 The viewer's landmark menu jumps both lanes to the corresponding decoded picture. Each event also gets a four-frame `landmark-<id>.jpg` sheet. Check the preceding and following frames to confirm the authored event, then use the same landmarks to compare a revision. Adjust candidate times if the choreography or edit changes.
 
+Use `"motion_intervals": [{"id":"travel","start":"card-enters","end":"history-revealed"}]`
+to measure the motion between two ordered landmarks. The report gives each
+lane’s elapsed milliseconds, decoded frame steps, and signed time difference
+from the reference. It uses the same displayed pictures as the landmark sheets.
+Step the interval to confirm the movement and independently identify its first
+and settled frames. Zero frame steps means both anchors resolved to the same
+displayed picture.
+
 To check word-to-action sync, put `"word_anchors": [{"id":"contact","reference":1.20,"candidate":2.41}]` on the same beat row. Use a matching landmark ID and the onset of the cue word from each lane's aligned audio. An onset may fall at the start of its mapped beat. The trace records the supplied `word_onset_seconds` and signed `word_to_picture_ms` from that onset to the first decoded picture at or after the visual landmark. The landmark sheet prints the offset on its `after` frame. Positive is picture after speech. The tool measures against supplied anchors. Check the chosen word and visible event by listening and stepping the frames, and refresh both anchors after an edit. Apply the same check when comparing two art presets played to identical narration.
 
 For results that need time to read, map the visibly legible interval with `holds` on the same beat. For example, `"holds": [{"id":"amount-readable","reference":[109.6,112.0],"candidate":[110.7,112.5]}]`. Use first and end-exclusive times within each mapped lane. The report records the annotated duration, actual decoded frames inside the interval, and first, middle and last evidence. Use the six-frame hold sheet and step the full interval in the viewer to look for obstruction, motion blur, or loss of emphasis. Confirm readability against the actual render. The annotated duration and count measure the interval and do not judge its contents.
