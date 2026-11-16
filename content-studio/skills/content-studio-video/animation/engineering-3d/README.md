@@ -10,7 +10,8 @@ assembly JSON. It is illustrative geometry, not a faithful device cutaway.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `blender-cutaway` | Supported | Authored scene JSON + optional approved assets → rendered MP4 | Specialist only | ![Actual Blender assembly preview](previews/illustrative-cpu.gif) [Source and rebuild](previews/example-scene.md) | Blender 4.x required; no arbitrary mesh cross-sections; synthetic geometry is not faithful hardware reconstruction. |
+| `blender-cutaway` | Supported | Authored scene JSON + optional approved assets → rendered MP4 | Specialist only | ![Actual Blender assembly preview](previews/illustrative-cpu.gif) [Source and rebuild](previews/example-scene.md) | Blender 4.2 or later. The JSON renderer assembles supplied parts and has no arbitrary mesh sectioning. |
+| `blender-preview` | Supported | Project Python scene builder, JSON inputs, and frame selection → PNGs and a benchmark manifest | Specialist only | [Preview contract tests](tests/test_headless_preview.py) · [Commands](references/headless-preview.md) | The project owns geometry, custom motion, and scene assembly. Sample timings estimate workload. |
 
 ## Evidence note
 

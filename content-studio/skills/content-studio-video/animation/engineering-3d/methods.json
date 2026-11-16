@@ -6,6 +6,12 @@
       "script": "scripts/engineering_blender.py",
       "status": "supported",
       "review": "Compare with source and verify exact output"
+    },
+    {
+      "id": "blender-preview",
+      "script": "scripts/headless_preview.py",
+      "status": "supported",
+      "review": "Check required parts and the actual sampled states at working and delivery resolution."
     }
   ]
 }

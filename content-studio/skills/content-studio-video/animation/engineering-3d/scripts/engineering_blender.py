@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Blender background renderer for authored engineering assemblies.
 Run with: blender -b --python engineering_blender.py -- scene.json output.mp4
-Requires Blender 4.x. Components are illustrative unless supplied as validated assets.
+Requires Blender 4.2 or later. Components are illustrative unless supplied as validated assets.
 """
 import json
 import math
@@ -47,10 +47,16 @@ def animate_location(obj, start, end, frames):
     obj.keyframe_insert(data_path="location", frame=1)
     obj.location = end
     obj.keyframe_insert(data_path="location", frame=frames)
-    if obj.animation_data and obj.animation_data.action:
-        for fc in obj.animation_data.action.fcurves:
-            for kp in fc.keyframe_points:
-                kp.interpolation = "BEZIER"
+    animation = obj.animation_data
+    # Blender 5 stores curves on the slot instead of the legacy Action API.
+    if bpy.app.version >= (5, 0):
+        from bpy_extras.anim_utils import action_get_channelbag_for_slot
+        curves = action_get_channelbag_for_slot(animation.action, animation.action_slot).fcurves
+    else:
+        curves = animation.action.fcurves
+    for curve in curves:
+        for key in curve.keyframe_points:
+            key.interpolation = "BEZIER"
 
 def make_scene(spec, spec_dir=Path(".")):
     bpy.ops.object.select_all(action="SELECT")
@@ -61,7 +67,7 @@ def make_scene(spec, spec_dir=Path(".")):
         raise ValueError("Unsupported duration or fps")
     frames = max(2, round(fps * duration))
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.render.engine = "BLENDER_EEVEE" if bpy.app.version >= (5, 0) else "BLENDER_EEVEE_NEXT"
     scene.render.fps = fps
     scene.frame_end = frames
     scene.render.resolution_x = int(spec.get("width", 1280))
@@ -131,6 +137,8 @@ def main():
     scene = make_scene(spec, Path(args[0]).resolve().parent)
     target = Path(args[1]).resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
+    if hasattr(scene.render.image_settings, "media_type"):
+        scene.render.image_settings.media_type = "VIDEO"
     scene.render.image_settings.file_format = "FFMPEG"
     scene.render.ffmpeg.format = "MPEG4"
     scene.render.ffmpeg.codec = "H264"
