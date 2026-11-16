@@ -91,6 +91,12 @@ only FFmpeg; `synthesize` needs the IndicF5 environment.
 5. Fit each section with `voice.py assemble`, which applies at most 12%
    `atempo` and reports every overrun; do not silently speed up or trim the
    script.
+   When the approved script fixes words/sec and limits silence, pass
+   `--fit-slot --min-tempo 0.88 --max-tempo 1.12`. This opt-in route adjusts
+   shorter as well as longer syntheses to their authored windows and reports
+   cue words/sec, pace deltas, and the maximum opening/intercue/ending gap.
+   A tempo-bound failure remains review-required; re-synthesize or reapprove
+   timing rather than forcing a larger stretch.
 6. `assemble` loudness-normalizes the track to `-16 LUFS`, true peak `-1.5 dBTP`.
 7. Render the 1080p review preview and require a human listening review before
    the production mux or publication.

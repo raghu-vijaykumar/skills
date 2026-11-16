@@ -119,6 +119,37 @@ class FitTimelineTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             narration.fit_timeline(self.segments(), {"a": 1.0, "b": 1.0}, 40.0, max_tempo=0.9)
 
+    def test_fit_slot_corrects_small_fast_and_slow_voice_variations(self):
+        segments = [
+            {"id": "a", "start": 0.0, "end": 17.0, "text": "one two three"},
+            {"id": "b", "start": 21.0, "end": 37.0, "text": "one two three"},
+        ]
+        placed = narration.fit_timeline(
+            segments, {"a": 17.536, "b": 15.488}, 42.0, fit_slot=True
+        )
+        self.assertAlmostEqual(placed[0]["tempo"], 17.536 / 17.0, places=4)
+        self.assertAlmostEqual(placed[1]["tempo"], 15.488 / 16.0, places=4)
+        self.assertAlmostEqual(placed[0]["end"], 17.0, places=2)
+        self.assertAlmostEqual(placed[1]["end"], 37.0, places=2)
+        self.assertFalse(any(item["needs_review"] for item in placed))
+        self.assertEqual(narration.timeline_summary(placed, 42.0)["max_narration_gap_seconds"], 5.0)
+
+    def test_fit_slot_reports_unacceptable_stretch(self):
+        placed = narration.fit_timeline(
+            self.segments(), {"a": 10.0, "b": 30.0}, 40.0,
+            fit_slot=True, min_tempo=0.88, max_tempo=1.12,
+        )
+        self.assertEqual(placed[0]["tempo"], 0.88)
+        self.assertLess(placed[0]["pace_delta_seconds"], -0.05)
+        self.assertEqual(placed[1]["tempo"], 1.12)
+        self.assertGreater(placed[1]["pace_delta_seconds"], 0.05)
+        self.assertTrue(all(item["needs_review"] for item in placed))
+
+    def test_fit_slot_rejects_invalid_min_tempo(self):
+        with self.assertRaises(ValueError):
+            narration.fit_timeline(self.segments(), {"a": 10.0, "b": 10.0}, 40.0,
+                                   fit_slot=True, min_tempo=0)
+
     def test_summary_counts_review_sections(self):
         placed = narration.fit_timeline(
             self.segments(), {"a": 30.0, "b": 10.0}, 40.0

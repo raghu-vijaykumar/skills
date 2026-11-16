@@ -88,10 +88,14 @@ def fit_timeline(
     video_seconds: float,
     max_tempo: float = 1.12,
     gap: float = 0.3,
+    fit_slot: bool = False,
+    min_tempo: float = 0.88,
 ) -> list[dict]:
-    """Place sections at their timestamps with bounded, reported tempo changes."""
+    """Place sections with bounded tempo; optionally fill their written slots."""
     if max_tempo < 1.0:
         raise ValueError("max_tempo must be at least 1.0")
+    if not 0 < min_tempo <= 1.0:
+        raise ValueError("min_tempo must be greater than 0 and at most 1.0")
     if gap < 0:
         raise ValueError("gap must not be negative")
     placed: list[dict] = []
@@ -105,10 +109,18 @@ def fit_timeline(
             else video_seconds
         )
         available = max(next_start - start - gap, 0.1)
-        tempo = min(natural / available, max_tempo) if natural > available else 1.0
+        slot_seconds = segment["end"] - segment["start"]
+        if fit_slot:
+            # The authored slot represents the approved spoken pace. Stretch
+            # only within the reviewed range and report any unfilled slot.
+            tempo = max(min_tempo, min(natural / slot_seconds, max_tempo))
+        else:
+            tempo = min(natural / available, max_tempo) if natural > available else 1.0
         duration = natural / tempo
         end = start + duration
         overrun = max(0.0, end - (next_start - gap))
+        pace_delta = duration - slot_seconds if fit_slot else 0.0
+        word_count = len(segment.get("text", "").split())
         placed.append(
             {
                 "id": segment["id"],
@@ -117,9 +129,12 @@ def fit_timeline(
                 "tempo": round(tempo, 4),
                 "start": round(start, 3),
                 "end": round(end, 3),
-                "slot_seconds": round(segment["end"] - segment["start"], 3),
+                "slot_seconds": round(slot_seconds, 3),
+                "word_count": word_count,
+                "delivered_wps": round(word_count / duration, 3) if word_count else None,
+                "pace_delta_seconds": round(pace_delta, 3),
                 "overrun_seconds": round(overrun, 3),
-                "needs_review": bool(overrun > 0.05),
+                "needs_review": bool(overrun > 0.05 or abs(pace_delta) > 0.05),
             }
         )
         cursor = end + gap
@@ -135,11 +150,18 @@ def timeline_summary(placed: list[dict], video_seconds: float) -> dict:
         "narration_seconds": round(end, 3),
         "mix_seconds": round(max(video_seconds, end + 0.4), 3),
         "overrun_total": round(sum(item["overrun_seconds"] for item in placed), 3),
+        "max_narration_gap_seconds": round(max(
+            placed[0]["start"],
+            max(0.0, video_seconds - placed[-1]["end"]),
+            *(max(0.0, right["start"] - left["end"])
+              for left, right in zip(placed, placed[1:])),
+        ), 3),
         "review": [
             {
                 "id": item["id"],
                 "natural_seconds": item["natural_seconds"],
                 "tempo": item["tempo"],
+                "pace_delta_seconds": item["pace_delta_seconds"],
                 "overrun_seconds": item["overrun_seconds"],
             }
             for item in placed

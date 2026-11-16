@@ -64,6 +64,7 @@ review bounded voice samples separately and use the approved delivery timeline
 for the final picture and audio export.
 
 - Keeps each section at its timestamp, applies at most `1.12` `atempo`, and reports every overrun in `timeline.json` instead of hiding it.
+- For an approved written pace, use `assemble --fit-slot --min-tempo 0.88 --max-tempo 1.12` to fit each cue to its authored window. The report records placed words/sec and the longest narration gap. Cues that need tempo beyond those bounds are marked for review; re-render or revise them before delivery.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
 - If narration extends past the video, the preview holds the final frame so the overrun is audible. Resolve it by trimming the script, extending the final frame, or moving the section earlier — do not raise the tempo cap.

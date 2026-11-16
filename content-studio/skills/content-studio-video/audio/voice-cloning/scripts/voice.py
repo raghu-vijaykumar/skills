@@ -331,6 +331,8 @@ def cmd_assemble(workspace, args):
         video_seconds,
         max_tempo=args.max_tempo,
         gap=args.gap,
+        fit_slot=args.fit_slot,
+        min_tempo=args.min_tempo,
     )
     summary = narration.timeline_summary(placed, video_seconds)
 
@@ -496,6 +498,9 @@ def main():
     target.add_argument("--video")
     target.add_argument("--duration", type=float)
     assemble.add_argument("--max-tempo", type=float, default=1.12)
+    assemble.add_argument("--min-tempo", type=float, default=0.88)
+    assemble.add_argument("--fit-slot", action="store_true",
+                          help="Fit each cue to its approved written pace window")
     assemble.add_argument("--gap", type=float, default=0.3)
     assemble.add_argument("--lufs", type=float, default=-16.0)
     assemble.add_argument("--preview", action="store_true")
