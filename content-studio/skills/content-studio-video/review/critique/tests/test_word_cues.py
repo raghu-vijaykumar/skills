@@ -9,7 +9,7 @@ import unittest
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from audit_word_cues import changed, cue_signature, inspect_frames, read_plan
+from audit_word_cues import changed, cue_signature, inspect_frames, read_plan, read_targets
 
 
 class WordCueTests(unittest.TestCase):
@@ -75,6 +75,16 @@ class WordCueTests(unittest.TestCase):
         word["action"] = "blink"
         self.assertNotEqual(anime, cue_signature(*read_plan(plan)))
 
+    def test_target_regions_are_keyed_to_unique_cue_frames(self):
+        _, _, cues = read_plan(self.plan())
+        row = {"frame": 2, "region": [.1, .2, .5, .75]}
+        self.assertEqual(read_targets({"targets": [row]}, cues), {2: row["region"]})
+        for entries in ([row, row], [{**row, "frame": 3}], [{**row, "frame": True}]):
+            with self.assertRaisesRegex(ValueError, "unique word onset"):
+                read_targets({"targets": entries}, cues)
+        with self.assertRaisesRegex(ValueError, "Invalid target region"):
+            read_targets({"targets": [{**row, "region": [0, 0, .001, 1]}]}, cues)
+
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
     def test_a_single_frame_accent_is_kept(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -88,3 +98,23 @@ class WordCueTests(unittest.TestCase):
             inspect_frames(video, rows, fps, duration, (0, 0, 1, 1), folder)
             self.assertEqual(rows[0]["after"], 2)
             self.assertEqual(rows[0]["region_change_percent"], 100)
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
+    def test_target_evidence_ignores_changes_outside_the_annotated_actor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            video = folder / "targets.mp4"
+            subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=black:s=144x256:r=30",
+                "-vf", ("drawbox=x=72:w=72:h=256:c=white:t=fill:enable='eq(n,2)+eq(n,5)',"
+                        "drawbox=x=0:w=36:h=256:c=white:t=fill:enable='eq(n,3)'"),
+                "-frames:v", "10", str(video),
+            ], check=True)
+            fps, duration, rows = read_plan(self.plan())
+            inspect_frames(video, rows, fps, duration, (0, 0, 1, 1), folder,
+                           targets={2: [0, 0, .22, 1], 5: [0, 0, .22, 1]})
+            self.assertEqual((rows[0]["after"], rows[0]["target_after"]), (2, 3))
+            self.assertEqual(rows[0]["target_change_percent"], 100)
+            self.assertGreater(rows[1]["region_change_percent"], 40)
+            self.assertEqual(rows[1]["target_change_percent"], 0)
+            self.assertTrue((folder / "targets-001.jpg").is_file())

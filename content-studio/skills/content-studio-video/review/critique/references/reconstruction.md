@@ -44,7 +44,15 @@ python scripts/audit_word_cues.py --plan word-plan.json --video candidate.mp4 --
 
 For a new art preset, add `--same-cues-as previous-word-plan.json`. The audit fails if the shot ranges, spoken words, frames, caption groups or actor/action bindings drift. `cue_sha256` records those fields and `artPreset` records the chosen artwork. Compare the actual narration and visible action as part of the rendered review.
 
-Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Rapid Take measures per-pixel color channel changes as well as brightness shifts, so it can flag a visual accent that changes hue at the same brightness. Use `--region LEFT TOP RIGHT BOTTOM` to focus on the actor, excluding captions if you are testing object motion. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
+Omit `--video` for a structural check during authoring. With a render, the tool compares the preceding frame with each of the first four frames of the word, stopping at the next cue or shot. The strongest change supplies the comparison tile so a one-frame impact remains visible in the audit. Rapid Take measures per-pixel color channel changes as well as brightness shifts, so it can flag a visual accent that changes hue at the same brightness. Use `--region LEFT TOP RIGHT BOTTOM` to focus the full audit. Inspect low-motion cues and the state changes shown on their before/after tiles. Joint movement, flicker and a moving camera may register as change. Compare the relevant native frames and audio before calling an action captured.
+
+For selected onsets, pass `--target-regions targets.json` with
+`{"targets":[{"frame":123,"region":[0.14,0.35,0.62,0.54]}]}`. Each frame is an
+exact word onset. Give its actor an independent region that covers the
+relevant travel and excludes unrelated motion and captions. The audit reports a
+target percentage and strongest frame alongside the regular measurement and
+writes cropped `targets-*.jpg` sheets. These are downscaled triage images.
+Review tiny movements, occlusion, and held results in a native frame trace.
 
 ## Transfer the method to new subjects
 

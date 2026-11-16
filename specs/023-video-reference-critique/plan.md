@@ -30,3 +30,7 @@ actions, identical targets and a one-frame cue window in the runtime tests.
 For pacing retests, measure time between two visible landmarks using each cut's
 decoded timestamps. Report frame steps and the time difference from the
 reference. Validate order in each cut and test different frame rates.
+
+Allow the word audit to inspect a different actor crop at each selected onset.
+Preserve the default global measurement and select each crop's peak picture
+independently. Test a cue with background change and no actor movement.

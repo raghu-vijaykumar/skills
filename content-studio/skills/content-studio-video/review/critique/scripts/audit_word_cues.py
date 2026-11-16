@@ -73,10 +73,36 @@ def cue_signature(fps, duration, cues):
     return hashlib.sha256(clock.encode("utf-8")).hexdigest()
 
 
+def valid_region(bounds):
+    if not isinstance(bounds, (list, tuple)) or len(bounds) != 4 or not all(
+            type(value) in (int, float) and math.isfinite(value) for value in bounds):
+        return False
+    left, top, right, bottom = bounds
+    return 0 <= left < right <= 1 and 0 <= top < bottom <= 1 and right-left >= .02 and bottom-top >= .02
+
+
+def read_targets(manifest, cues):
+    entries = manifest.get("targets") if isinstance(manifest, dict) else None
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Expected a nonempty targets list")
+    onsets = {cue["startFrame"] for cue in cues}
+    targets = {}
+    for entry in entries:
+        frame = entry.get("frame") if isinstance(entry, dict) else None
+        if type(frame) is not int or frame not in onsets or frame in targets:
+            raise ValueError(f"Expected a unique word onset frame, got {frame!r}")
+        bounds = entry.get("region")
+        if not valid_region(bounds):
+            raise ValueError(f"Invalid target region at word onset {frame}")
+        targets[frame] = bounds
+    return targets
+
+
 def crop_region(image, region):
     width, height = image.size
     l, t, r, b = region
-    return image.crop((int(l * width), int(t * height), round(r * width), round(b * height)))
+    left, top = int(l * width), int(t * height)
+    return image.crop((left, top, max(left + 1, round(r * width)), max(top + 1, round(b * height))))
 
 
 def changed(first, second, region, *, color=False):
@@ -90,7 +116,7 @@ def changed(first, second, region, *, color=False):
     return round(100 * sum(patch.histogram()[12:]) / (patch.width * patch.height), 3)
 
 
-def inspect_frames(video, rows, fps, duration, region, output, *, color=False):
+def inspect_frames(video, rows, fps, duration, region, output, *, color=False, targets=None):
     media = inspect(video)
     if Fraction(media["fps"]) != fps:
         raise ValueError(f"Expected {fps} fps, found {media['fps']}")
@@ -125,35 +151,48 @@ def inspect_frames(video, rows, fps, duration, region, output, *, color=False):
     if process.returncode or frame != duration:
         raise ValueError(f"Expected {duration} frames, decoded {frame}. {errors.decode(errors='replace')}")
     # This measures visible movement in a chosen screen region. It cannot identify the actor.
-    for row in rows:
+    def strongest(row, bounds):
         before = refs[row["before"]]
-        # Pick the strongest frame so a short accent that has already settled
-        # on the fourth frame still has visible comparison evidence.
-        at, score = max(
-            ((at, changed(before, refs[at], region, color=color))
-             for at in range(row["startFrame"], row["inspection_end"] + 1)),
-            key=lambda result: result[1],
-        )
+        return max(((at, changed(before, refs[at], bounds, color=color))
+                    for at in range(row["startFrame"], row["inspection_end"] + 1)),
+                   key=lambda result: result[1])
+
+    focused = []
+    target_regions = targets or {}
+    for row in rows:
+        # The target may peak on a different frame than the overall shot.
+        at, score = strongest(row, region)
         row.update(after=at, region_change_percent=score)
+        bounds = target_regions.get(row["startFrame"])
+        if bounds is not None:
+            at, score = strongest(row, bounds)
+            row.update(target_region=bounds, target_after=at, target_change_percent=score)
+            focused.append(row)
     build_sheets(rows, refs, output)
+    build_sheets(focused, refs, output, targeted=True)
     return media
 
 
-def build_sheets(rows, refs, output):
+def build_sheets(rows, refs, output, *, targeted=False):
+    prefix = "targets" if targeted else "words"
+    after = "target_after" if targeted else "after"
+    field = "target_change_percent" if targeted else "region_change_percent"
     for batch in range(0, len(rows), 24):
         group = rows[batch:batch + 24]
         page = Image.new("RGB", (1152, math.ceil(len(group) / 8) * 186), "#252131")
         draw = ImageDraw.Draw(page)
         for i, row in enumerate(group):
             x, y = i % 8 * 144, i // 8 * 186
-            for side in ("before", "after"):
+            for side in ("before", after):
                 frame = refs[row[side]].copy()
+                if targeted:
+                    frame = crop_region(frame, row["target_region"])
                 frame.thumbnail((72, 128), Image.Resampling.LANCZOS)
-                left = x + (72 if side == "after" else 0) + (72 - frame.width) // 2
+                left = x + (72 if side == after else 0) + (72 - frame.width) // 2
                 page.paste(frame, (left, y + (128 - frame.height) // 2))
             draw.text((x + 3, y + 131), f"{row['startFrame']} · {row['text']}"[:23], fill="white")
-            draw.text((x + 3, y + 151), f"{row['region_change_percent']:.1f}% region change", fill="#c5abdd")
-        page.save(output / f"words-{batch//24+1:03}.jpg", quality=89)
+            draw.text((x + 3, y + 151), f"{row[field]:.1f}% region change", fill="#c5abdd")
+        page.save(output / f"{prefix}-{batch//24+1:03}.jpg", quality=89)
 
 
 def main():
@@ -161,16 +200,20 @@ def main():
     cli.add_argument("--plan", required=True, type=Path)
     cli.add_argument("--out", required=True, type=Path)
     cli.add_argument("--video", type=Path)
+    cli.add_argument("--target-regions", type=Path, help="independent actor regions for selected word onsets")
     cli.add_argument("--same-cues-as", type=Path, help="check only the word clock and actor/action bindings against another plan")
     cli.add_argument("--region", nargs=4, type=float, default=(.06, .32, .94, .74),
                      metavar=("LEFT", "TOP", "RIGHT", "BOTTOM"))
     args = cli.parse_args()
-    l, t, r, b = args.region
-    if not (0 <= l < r <= 1 and 0 <= t < b <= 1 and r-l >= .02 and b-t >= .02):
+    if not valid_region(args.region):
         cli.error("use normalized LEFT TOP RIGHT BOTTOM coordinates")
+    if args.target_regions and not args.video:
+        cli.error("--target-regions requires --video")
     try:
         plan = json.loads(args.plan.read_text(encoding="utf-8-sig"))
         fps, duration, cues = read_plan(plan)
+        targets = (read_targets(json.loads(args.target_regions.read_text(encoding="utf-8-sig")), cues)
+                   if args.target_regions else {})
         signature = cue_signature(fps, duration, cues)
         if args.same_cues_as:
             baseline = json.loads(args.same_cues_as.read_text(encoding="utf-8-sig"))
@@ -178,7 +221,7 @@ def main():
                 raise ValueError("The word clock or actor/action bindings differ from the baseline plan")
         args.out.mkdir(parents=True, exist_ok=False)
         rapid_take = plan.get("style") == "rapid-take"
-        media = (inspect_frames(args.video, cues, fps, duration, args.region, args.out, color=rapid_take)
+        media = (inspect_frames(args.video, cues, fps, duration, args.region, args.out, color=rapid_take, targets=targets)
                  if args.video else None)
         evidence = {
             "fps": fps, "durationFrames": duration, "shot_count": len(plan["shots"]), "word_count": len(cues),
@@ -190,6 +233,10 @@ def main():
         }
         if isinstance(plan.get("artPreset"), str):
             evidence["artPreset"] = plan["artPreset"]
+        if targets:
+            evidence["targeted_onsets"] = len(targets)
+            evidence["low_target_motion_onsets"] = sum(row["target_change_percent"] < 1 for row in cues
+                                                       if "target_change_percent" in row)
         if rapid_take:
             evidence["style"] = "rapid-take"
             evidence["cue_counts"] = {kind: sum(cue["cueKind"] == kind for cue in cues)
