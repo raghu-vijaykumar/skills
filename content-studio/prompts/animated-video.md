@@ -9,8 +9,8 @@
 
 ## Workflow
 
-1. **Analyze** — Map the hook, explanation, and payoff in a short beat list. For each beat, name the claim, visible action, and evidence. Mark uncertain claims and missing visuals. If I chose script analysis only, hand me the beat list and stop there.
-2. **Human review · Plan** — Before production, run Content Studio precheck. Propose a supported renderer with exact method, command, assets, outputs, estimate, fallback, and acceptance criteria. Wait for my approval of the current revision.
+1. **Analyze · Output `script-analysis.md`** — Write an editable beat sheet grouped into hook, explanation, and payoff. Give each beat its timestamp or script line, a short narration summary, the object or part that moves or changes on screen, and the evidence or open question. Flag missing visuals and claims I need to verify.
+2. **Human review · Beat sheet and plan** — Link `script-analysis.md` so I can review the beat order, claims, and planned visuals. If I selected script analysis only, stop at this handoff. For production, include the beat sheet with the Content Studio precheck plan. Name the supported renderer, exact method and command, assets, outputs, estimate, fallback, and acceptance criteria. Wait for my approval of the current plan before proceeding.
 3. **Parallel after plan approval**
 
    - **Script** — Research claims and draft original narration.
