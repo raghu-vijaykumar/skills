@@ -1,21 +1,37 @@
-# Camera-footage vlog — Content Studio prompt
+# Vlog workflow
 
-Input: `<raw-video-folder-or-manual-render>`
-Requested stage: `<prepare clips | write voice script | generate and mix voice | assess upscale | add scene overlays | final review>`
-Channel/draft and creative preferences: `<optional>`
+## My input
 
-If the input is a raw video folder and no stage is specified, **prepare clips only**. Stop and hand the individual clips to me for manual editing. If the input is a rendered edit and no stage is specified, inspect it and propose the next available stages without changing it.
+- **Footage** — [raw vlog folder or manual export path]
+- **Stage** — [source prep | continue from manual edit | final review]
+- **Draft and channel** — [path or ID, optional]
+- **Keep or avoid** — [must-keep shots, dialogue, HDR/Dolby Vision, or other notes]
 
-Before any production edit, run `content-studio-workflow` precheck. Inspect the source, draft, and system; show an editable plan with the exact installed operation skill, method ID, script and arguments, inputs, outputs, estimate, fallback, and review criterion. Incorporate my changes and obtain approval of the current plan revision. A changed method or stage requires fresh approval. Check each requested method's `methods.json` before promising it.
+## Workflow
 
-## Stage rules
+1. **Precheck** — Identify the footage and the requested stage. A raw folder defaults to source prep. If I supply only a manual export, inspect it and propose stages for my review. Give me an editable plan with method IDs, exact commands, outputs, estimates, fallbacks, and what I will review.
+2. **Human review · Plan** — Wait for my approval of the current plan before production. If the plan changes, show me the revision for approval.
+3. **Raw folder · Source prep** — Use ordered originals as the handoff. Work from a copy when the input folder layout needs to stay intact.
 
-- **Prepare clips:** Order and deduplicate sources; diagnose audio, blur, stabilization, and HDR/Dolby Vision. Apply only approved source fixes. Preserve original footage, keep blur spans as review evidence, and hand off `drafts/<id>/.content-studio/processed-clips/` plus `.content-studio/_timeline.csv`. Do not make a joined master, story edit, narration, overlay, or upscale from a raw-folder request.
-- **Manual edit:** I choose shots, trims, transitions, and story outside Content Studio. Record the supplied render's path and hash; use its timeline for all later work.
-- **Voice script:** Analyze frames and audio from that render. Use verified evidence and my context for names, events, and opinions. Audit adjacent cues in long scenes for repeated descriptions; replace them with distinct, sourced facts about the place when relevant, or leave natural sound room. Keep source URLs in cue notes, distinguish general facts from what I actually did, and report uncertain claims. Stop for text and timing approval.
-- **Voice:** Generate only from an approved script. Clone a voice only with my explicit request, consented samples, and a listening check. Preserve original dialogue and ambience unless I approve a specific mix change. Produce review audio and a separately reviewed voiced video with the narration mix script.
-- **Upscale:** Only after any requested voice mix, assess the completed edited video. Compare untouched, Lanczos, and available AI previews on bounded ranges; estimate full runtime and check noise, flicker, detail, HDR/DV, and exact-output side effects. Skip if there is no worthwhile gain. Never batch-upscale the raw clips.
-- **Scene overlays:** Only for scenes I identify. Verify cue times against the voiced/upscaled edit, preview each motion type, and render code-generated graphics at delivery resolution **after** upscale. Do not upscale the graphics.
-- **Final review:** Inspect affected ranges and the full picture and audio, then prepare only the requested package items. Publication and archive are separate requests.
+   1. **In order** — Confirm capture times, flag uncertain timestamps, retain byte-identical duplicates in quarantine, and flag near-duplicates for review. Write the final capture order.
+   2. **Source checks · Parallel where supported**
 
-AutoCut is experimental and runs only if I explicitly request it. Do not mute speech, remove filler, add music, memes, captions, a thumbnail, or publish by default. If a method or backend is unavailable, report the gap and offer a supported route; do not claim an output was made.
+      - **Media inventory** — Clip duration, dimensions, and audio-track presence.
+      - **Blur** — Flag candidate spans and provide review evidence.
+      - **Audio** — Check speech and ambience for cleanup needs.
+      - **Stabilization** — Flag unstable motion and likely crop.
+      - **HDR/Dolby Vision** — Identify clips needing preservation or a tone-map decision.
+      - **Fast camera pans** — [skip | scan for candidate ranges].
+      - **Sustained camera tilt** — [skip | scan for candidate ranges].
+      - Compare a diagnosed issue with a bounded preview when useful.
+   3. **Human review · Source handoff** — Show ordered originals, `.content-studio/_timeline.csv`, and reports in `.content-studio/analysis/source-review/`. Flag changes I may want to make. Keep the originals and deliver the handoff for my manual edit. Permanent source changes stay proposed for the later delivery timeline.
+4. **Manual export · Continue when I supply it** — Fingerprint the export and start a new plan. I select only the stages I want.
+
+   1. **Choose stages** — [review cuts and joins | diagnose audio/color/stabilization | draft voice script | generate and mix voice | assess upscale | add overlays or transitions | final review].
+   2. **In parallel when independent** — Diagnose picture and audio. For voice, draft verified, timecoded narration from the exact edit and my context. Replace repeated long-scene descriptions with distinct, sourced facts or leave room for ambience.
+   3. **Human review · Script and timing, if requested** — Show the text and cue timing before generating voice. For cloning, use only a consented profile when I explicitly request it. Preserve dialogue and ambience unless I approve a change.
+   4. **In order** — If requested, compare bounded upscale candidates on the completed edit. Plan any selected upscale before delivery-resolution overlays. Bind voice and timed effects to the resolved picture timeline using supported methods.
+   5. **Human review · Exact timeline** — Show proposed cuts, voice, effects, previews, output settings, and the revision fingerprint. Wait for my approval before the final render.
+   6. **Human review · Exact master** — Check the complete picture and sound and the affected ranges with me. Prepare only the requested package items after review.
+
+- **Optional requests** — [AutoCut | filler removal | music | memes | captions | thumbnail | metadata | archive | none]. Default to none. Publishing requires my separate explicit request.

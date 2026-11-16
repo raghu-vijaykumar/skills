@@ -10,6 +10,15 @@ python <workflow-skill>/scripts/preflight.py --folder <draft> review
 
 For raw sources, `content-studio-video/source/preprocess/scripts/prepare_clips.py` now forces analysis-only mode. It writes source hashes, media and blur evidence under `.content-studio/analysis/source-review/`, with no enhanced clip export. Carry any selected permanent source change into the later delivery timeline after mapping it onto the manual edit. For a supplied manual edit, start a new plan with `--stage edited-render`; diagnose requested methods, build one delivery timeline after plan approval, obtain separate human approval of the resolved timeline and voice/effects, then render once. Unsupported timeline methods must stop before export. `init` defaults edited work to `source-prep`. Before approval, replace generic routes with the selected operation folder, method ID, exact `command` argv array for each executable workflow step, inputs, outputs, estimated time, fallback, and acceptance/review criterion. The runner rejects any command or argument change from the approved step. The plan includes confirmed global/category/project memory preferences from the shared private database, or an explicit absent-database state. Edit `plan.json` after `init`. If a representative AI preview later measures 2.5 seconds per frame, rerun `profile` with `--ai-seconds-per-frame 2.5`, copy the updated system report into the plan, and present the revised estimate for review. A new `system.json` alone does not update or reapprove the plan.
 
+## Present the plan for review
+
+Use this structure for every video route. Select only the steps needed for the request, and keep the exact method and argv in the linked editable plan.
+
+1. **In order** — Name the prerequisite and the output it produces.
+2. **Parallel after step 1** — List independently runnable steps as nested bullets. Include each output and estimated time.
+3. **Human review · [Checkpoint]** — Link the artifact and state what the editor should approve or change. Say what starts after approval.
+4. **Resume** — Continue from the approved revision. If the stage ends in a handoff, name the input the user supplies to start the next stage.
+
 ## Benchmark interpretation
 
 `profile` runs at most two seconds of decode and Lanczos scaling on a representative source, with a 90-second timeout per run. This is a planning probe, not an image-quality result or a sustained encode benchmark. It does not modify the source. The extrapolated decode/Lanczos hours omit writing and encoding; avoid presenting them as delivery time. CPU/GPU thermals, codec, storage speed, frame size and model choice can change sustained throughput. Report the sample and planned used duration alongside every estimate.
