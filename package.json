@@ -1,6 +1,6 @@
 {
   "name": "@raghu-vijaykumar/videogen",
-  "version": "0.7.24",
+  "version": "0.7.25",
   "private": true,
   "engines": {
     "node": ">=22.18.0"

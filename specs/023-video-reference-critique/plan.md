@@ -14,3 +14,5 @@
 ## Consecutive frames and motion transfer
 
 The sparse review missed subsecond handoffs. For one mapped beat, decode all displayed pictures at each input's timestamps. Index and display each lane independently. Use region change percentages to find transitions and seeded object matching to locate visible translation. Export canvas-relative MotionObject keys in contiguous segments. A confidence loss stays visible as a gap. Verify with unequal frame rates, an occluded synthetic actor, and the original and reconstructed payment retry sequence.
+
+For revision review, allow an optional independently mapped previous cut to join the same frame trace. The three exact streams carry their own ranges, word anchors, event times, holds, and normalized crop bounds. Confirm the previous lane preserves its decoded timebase and the two-lane workflow still runs with its existing map.

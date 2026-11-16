@@ -32,7 +32,7 @@
   const jumpToFrame = {};
   for (const [lane, rows] of Object.entries(frames)) {
     const panel = document.createElement("section");
-    const name = lane === "reference" ? "Reference" : "Candidate";
+    const name = {reference:"Reference", previous:"Previous render", candidate:"Candidate"}[lane];
     panel.innerHTML = '<h2></h2><img alt=""><output></output><input type="range" min="0" value="0">'
       + '<button type="button">Previous frame</button><button type="button">Next frame</button><button type="button">Play at ¼ speed</button>';
     panel.querySelector("h2").textContent = name;

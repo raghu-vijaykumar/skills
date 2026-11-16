@@ -88,6 +88,42 @@ class TraceTests(unittest.TestCase):
             for entry in (report["seam"], impact, hold):
                 self.assertTrue((out / entry["detail_sheet"]).is_file())
 
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "needs FFmpeg and FFprobe")
+    def test_revision_lane_uses_its_own_clock_across_motion_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            names = ("reference", "previous", "candidate")
+            files = {name: root / f"{name}.mp4" for name in names}
+            for name, rate in zip(names, (24, 25, 30)):
+                run("ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"testsrc2=size=96x96:rate={rate}:duration=2",
+                    "-c:v", "libx264", str(files[name]))
+            row = {"id": "release", "reference": [.25, .75], "previous": [.4, .92], "candidate": [.5, 1],
+                   "details": dict.fromkeys(names, [.125, .125, .875, .875]),
+                   "seam": {"reference": .5, "previous": .61, "candidate": .7},
+                   "landmarks": [{"id": "detach", "reference": .55, "previous": .65, "candidate": .8}],
+                   "word_anchors": [{"id": "detach", "reference": .50, "previous": .62, "candidate": .78}],
+                   "holds": [{"id": "fall", "reference": [.58, .74], "previous": [.68, .92], "candidate": [.82, 1]}]}
+            out = root / "trace"
+            for malformed, message in (({**row, "previous": [1.5, 2.5]}, "previous range"),
+                                       ({**row, "seam": {"reference": .5, "candidate": .7}}, "previous and candidate")):
+                with self.assertRaisesRegex(ValueError, message):
+                    build(files["reference"], files["candidate"], {"beats": [malformed]}, "release", out, {},
+                          previous=files["previous"])
+            with self.assertRaisesRegex(ValueError, "supply the previous video"):
+                build(files["reference"], files["candidate"], {"beats": [row]}, "release", out, {})
+            counts = build(files["reference"], files["candidate"], {"beats": [row]}, "release", out, {},
+                           previous=files["previous"])
+            self.assertEqual(counts, {"reference": 12, "previous": 13, "candidate": 15})
+            report = json.loads((out / "frame-trace.json").read_text())
+            self.assertEqual(list(report["inputs"]), list(names))
+            self.assertEqual(report["seam"]["lanes"]["previous"]["before"]["time"], .6)
+            self.assertEqual(report["seam"]["lanes"]["previous"]["after"]["time"], .64)
+            self.assertEqual(report["landmarks"][0]["lanes"]["previous"]["word_to_picture_ms"], 60)
+            self.assertEqual(report["holds"][0]["lanes"]["previous"]["decoded_frames"], 6)
+            self.assertIn('"previous": 6', (out / "frames.html").read_text(encoding="utf-8"))
+            with Image.open(out / "detail-seam.jpg") as sheet:
+                self.assertEqual(sheet.size, (814, 1953))
+
     def test_detail_boxes_require_separate_in_frame_bounds(self):
         meta = dict.fromkeys(("reference", "candidate"), {"width": 160, "height": 96})
         self.assertEqual(detail_boxes({}, meta), {})

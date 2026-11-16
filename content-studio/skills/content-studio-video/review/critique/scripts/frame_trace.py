@@ -10,7 +10,7 @@ import subprocess
 
 from PIL import Image, ImageChops, ImageDraw, ImageOps
 
-from compare import inspect, validate_map
+from compare import inspect, validate_map, validate_span
 from compare_actor import parse_box
 
 
@@ -108,9 +108,18 @@ def consecutive_sheets(rows, root, lane):
         sheet.save(root / f"{lane}-{start//30:02d}.jpg", quality=91)
 
 
+def lane_names(row):
+    return ("reference", "previous", "candidate") if "previous" in row else ("reference", "candidate")
+
+
+def lane_description(lanes):
+    return f"{', '.join(lanes[:-1])} and {lanes[-1]}"
+
+
 def paired_times(row, beats, label, *, allow_start=False):
-    if not isinstance(beats, dict) or set(beats) != {"reference", "candidate"}:
-        raise ValueError(f"{label} needs separate reference and candidate times")
+    lanes = lane_names(row)
+    if not isinstance(beats, dict) or set(beats) != set(lanes):
+        raise ValueError(f"{label} needs separate {lane_description(lanes)} times")
     for lane, time in beats.items():
         start, end = row[lane]
         if (type(time) not in (int, float) or not math.isfinite(time)
@@ -154,9 +163,10 @@ def word_anchor_times(row, landmarks):
 
 def hold_ranges(row):
     ranges = named_entries(row, "holds", "hold")
+    expected = lane_names(row)
     for name, lanes in ranges.items():
-        if set(lanes) != {"reference", "candidate"}:
-            raise ValueError(f"Hold {name} needs separate reference and candidate ranges")
+        if set(lanes) != set(expected):
+            raise ValueError(f"Hold {name} needs separate {lane_description(expected)} ranges")
         for lane, interval in lanes.items():
             start, end = row[lane]
             if (not isinstance(interval, list) or len(interval) != 2
@@ -196,12 +206,12 @@ def detail_boxes(row, meta):
         return {}
     boxes = row["details"]
     if not isinstance(boxes, dict) or set(boxes) != set(meta):
-        raise ValueError("Details need separate reference and candidate boxes")
+        raise ValueError(f"Details need separate {lane_description(tuple(meta))} boxes")
     return {lane: parse_box(box, meta[lane]["width"], meta[lane]["height"]) for lane, box in boxes.items()}
 
 
 def comparison_sheet(root, lanes, filename, moments, *, detail=False):
-    sheet = Image.new("RGB", (407 * len(moments), 1302), "#1b1d24")
+    sheet = Image.new("RGB", (407 * len(moments), 651 * len(lanes)), "#1b1d24")
     draw = ImageDraw.Draw(sheet)
     for y, (lane, frames) in enumerate(lanes.items()):
         for x, key in enumerate(moments):
@@ -240,13 +250,21 @@ def viewer(root, lanes, seams, landmarks, holds):
                                      .replace("/* HOLD_DATA */", json.dumps(hold_sheets)), encoding="utf-8")
 
 
-def build(reference, candidate, mapping, beat, output, regions):
-    files = {"reference": reference, "candidate": candidate}
+def build(reference, candidate, mapping, beat, output, regions, *, previous=None):
+    # Every cut retains its own timestamps and world state across the review.
+    files = {"reference": reference}
+    if previous is not None:
+        files["previous"] = previous
+    files["candidate"] = candidate
     meta = {lane: inspect(file) for lane, file in files.items()}
-    rows = validate_map(mapping, *[meta[lane]["video_seconds"] for lane in files])
+    rows = validate_map(mapping, meta["reference"]["video_seconds"], meta["candidate"]["video_seconds"])
     row = next((row for row in rows if row["id"] == beat and row["candidate"] is not None), None)
     if row is None:
         raise ValueError(f"Expected a paired beat in the map: {beat}")
+    if previous is None and "previous" in row:
+        raise ValueError(f"{beat}: supply the previous video with --previous")
+    if previous is not None:
+        validate_span(beat, "previous", row.get("previous"), meta["previous"]["video_seconds"])
     anchors = seam_times(row)
     events = landmark_times(row)
     words = word_anchor_times(row, events)
@@ -300,15 +318,17 @@ def main():
     for flag in ("reference", "candidate", "map", "out"):
         parser.add_argument("--"+flag, required=True, type=Path)
     parser.add_argument("--beat", required=True)
+    parser.add_argument("--previous", type=Path, help="Earlier render for a third, independently mapped lane.")
     parser.add_argument("--region", action="append", type=parse_region, default=[])
     args = parser.parse_args()
     regions = {"full": (0, 0, 1, 1), **dict(args.region)}
     try:
         counts = build(args.reference.resolve(), args.candidate.resolve(),
-                       json.loads(args.map.read_text(encoding="utf-8-sig")), args.beat, args.out.resolve(), regions)
+                       json.loads(args.map.read_text(encoding="utf-8-sig")), args.beat, args.out.resolve(), regions,
+                       previous=args.previous.resolve() if args.previous is not None else None)
     except (OSError, ValueError, KeyError) as error:
         parser.exit(1, f"Frame trace failed: {error}\n")
-    print(f"{args.beat}: {counts['reference']} reference frames, {counts['candidate']} candidate frames")
+    print(f"{args.beat}: " + ", ".join(f"{count} {lane} frames" for lane, count in counts.items()))
 
 
 if __name__ == "__main__":

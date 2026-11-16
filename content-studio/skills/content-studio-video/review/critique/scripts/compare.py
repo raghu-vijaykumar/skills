@@ -41,6 +41,16 @@ def inspect(file):
             "fps": video["avg_frame_rate"], "has_audio": any(s["codec_type"] == "audio" for s in probe["streams"])}
 
 
+def validate_span(name, role, span, seconds):
+    if not isinstance(span, list) or len(span) != 2 or not all(
+        type(point) in (int, float) and math.isfinite(point) for point in span
+    ):
+        raise ValueError(f"{name}: {role} needs two finite times")
+    start, end = span
+    if not (0 <= start < end <= seconds and end - start <= 15):
+        raise ValueError(f"{name}: {role} range must be within 0–{seconds:g} and at most 15 seconds")
+
+
 def validate_map(data, reference_seconds, candidate_seconds):
     rows = data.get("beats") if isinstance(data, dict) else None
     if not isinstance(rows, list) or not rows:
@@ -57,13 +67,7 @@ def validate_map(data, reference_seconds, candidate_seconds):
             span = row[role]
             if role == "candidate" and span is None:
                 continue
-            if not isinstance(span, list) or len(span) != 2 or not all(
-                type(point) in (int, float) and math.isfinite(point) for point in span
-            ):
-                raise ValueError(f"{name}: {role} needs two finite times")
-            start, end = span
-            if not (0 <= start < end <= seconds and end - start <= 15):
-                raise ValueError(f"{name}: {role} range must be within 0–{seconds:g} and at most 15 seconds")
+            validate_span(name, role, span, seconds)
     return rows
 
 
