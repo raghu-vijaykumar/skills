@@ -102,28 +102,43 @@ def consecutive_sheets(rows, root, lane):
         sheet.save(root / f"{lane}-{start//30:02d}.jpg", quality=91)
 
 
-def seam_times(row):
-    if "seam" not in row:
-        return None
-    seam = row["seam"]
-    if not isinstance(seam, dict) or set(seam) != {"reference", "candidate"}:
-        raise ValueError("A seam needs separate reference and candidate times")
-    for lane, time in seam.items():
+def paired_times(row, beats, label):
+    if not isinstance(beats, dict) or set(beats) != {"reference", "candidate"}:
+        raise ValueError(f"{label} needs separate reference and candidate times")
+    for lane, time in beats.items():
         start, end = row[lane]
         if type(time) not in (int, float) or not math.isfinite(time) or not start < time < end:
-            raise ValueError(f"{lane} seam must be strictly within its mapped range")
-    return seam
+            raise ValueError(f"{lane} {label} must be strictly within its mapped range")
+    return beats
 
 
-def seam_pictures(lane, anchor, pictures, rows):
+def seam_times(row):
+    return paired_times(row, row["seam"], "seam") if "seam" in row else None
+
+
+def landmark_times(row):
+    landmarks = row.get("landmarks", [])
+    if not isinstance(landmarks, list):
+        raise ValueError("landmarks must be a list of named events")
+    anchors = {}
+    for item in landmarks:
+        name = item.get("id") if isinstance(item, dict) else None
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,47}", name) or name in anchors:
+            raise ValueError(f"Invalid or duplicate landmark ID: {name!r}")
+        times = {lane: time for lane, time in item.items() if lane != "id"}
+        anchors[name] = paired_times(row, times, f"landmark {name}")
+    return anchors
+
+
+def seam_pictures(lane, anchor, pictures, rows, label="seam"):
     # Compare the source PTS with the anchor before rounding for display.
     cut = next((i for i, (_, time) in enumerate(pictures) if time >= anchor - 1e-9), 0)
     if cut < 1:
-        raise ValueError(f"Widen the {lane} range to include decoded frames on both sides of the seam")
+        raise ValueError(f"Widen the {lane} range to include decoded frames on both sides of {label}")
     return {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
 
 
-def seam_sheet(root, seams):
+def seam_sheet(root, seams, filename="seam.jpg"):
     sheet = Image.new("RGB", (814, 1302), "#1b1d24")
     draw = ImageDraw.Draw(sheet)
     for y, (lane, frames) in enumerate(seams.items()):
@@ -134,17 +149,20 @@ def seam_sheet(root, seams):
                 picture = ImageOps.contain(source.convert("RGB"), (394, 615))
             sheet.paste(picture, (xx + (407 - picture.width) // 2, yy + 21 + (615 - picture.height) // 2))
             draw.text((xx + 8, yy + 5), f"{lane} · {key} · {frame['time']:.4f} s", fill="white")
-    sheet.save(root / "seam.jpg", quality=93)
+    sheet.save(root / filename, quality=93)
 
 
-def viewer(root, lanes, seams=None):
+def viewer(root, lanes, seams, landmarks):
     template = Path(__file__).with_name("frame-viewer.html").read_text(encoding="utf-8")
-    # Only generated relative names and numeric timestamps enter this literal.
+    # The script literals contain generated relative names, validated IDs and numbers.
     frames = {name: [{key: row[key] for key in ("frame", "time", "image")} for row in rows]
               for name, rows in lanes.items()}
     cuts = {lane: item["after"]["frame"] for lane, item in (seams or {}).items()}
+    jumps = {event["id"]: {lane: item["after"]["frame"] for lane, item in event["lanes"].items()}
+             for event in landmarks}
     (root / "frames.html").write_text(template.replace("/* FRAME_DATA */", json.dumps(frames))
-                                     .replace("/* CUT_DATA */", json.dumps(cuts)), encoding="utf-8")
+                                     .replace("/* CUT_DATA */", json.dumps(cuts))
+                                     .replace("/* LANDMARK_DATA */", json.dumps(jumps)), encoding="utf-8")
 
 
 def build(reference, candidate, mapping, beat, output, regions):
@@ -155,6 +173,8 @@ def build(reference, candidate, mapping, beat, output, regions):
     if row is None:
         raise ValueError(f"Expected a paired beat in the map: {beat}")
     anchors = seam_times(row)
+    events = landmark_times(row)
+    landmarks = [{"id": name, "sheet": f"landmark-{name}.jpg", "lanes": {}} for name in events]
     output.mkdir(parents=True, exist_ok=False)
     lanes = {}
     seams = {}
@@ -164,12 +184,19 @@ def build(reference, candidate, mapping, beat, output, regions):
         consecutive_sheets(lanes[lane], output, lane)
         if anchors is not None:
             seams[lane] = seam_pictures(lane, anchors[lane], pairs, lanes[lane])
-    viewer(output, lanes, seams)
+        for event in landmarks:
+            name = event["id"]
+            event["lanes"][lane] = seam_pictures(lane, events[name][lane], pairs, lanes[lane], name)
+    viewer(output, lanes, seams, landmarks)
     manifest = {"schema_version": 1, "beat": row, "regions": regions,
                 "inputs": meta, "decoded_frames": {lane: len(frames) for lane, frames in lanes.items()}}
     if seams:
         seam_sheet(output, seams)
         manifest["seam"] = {"sheet": "seam.jpg", "lanes": seams}
+    if landmarks:
+        for event in landmarks:
+            seam_sheet(output, event["lanes"], event["sheet"])
+        manifest["landmarks"] = landmarks
     (output / "frame-trace.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return manifest["decoded_frames"]
 

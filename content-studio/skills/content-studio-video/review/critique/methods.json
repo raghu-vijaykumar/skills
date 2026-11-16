@@ -11,7 +11,7 @@
       "id": "frame-trace",
       "script": "scripts/frame_trace.py",
       "status": "supported",
-      "review": "Inspect consecutive frames and record onset, progression, and outcome."
+      "review": "Inspect consecutive frames and use named landmarks to compare onset, progression, and outcome."
     },
     {
       "id": "track-objects",

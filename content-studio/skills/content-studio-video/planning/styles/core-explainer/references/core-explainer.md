@@ -10,6 +10,8 @@ When an illustrated presenter carries an explanation, use the [2D rig workflow](
 
 Start with the audience question and show a cause, an action and its result. Sync the decisive word to the corresponding state change where it improves understanding. Hold the starting state, open a detail view for the moving part, and hold the result long enough to read it. A restrained palette can keep attention on the active part. Reuse the same [production and critique workflow](../../../../review/critique/references/reconstruction.md), rigs and cue clock as Rapid Take, with pacing chosen for the mechanism.
 
+When the explanation compares two routes or a changing set, draw both from the same underlying states. Keep a route's origin, payload and destination visible through a branch. When part of a production line goes idle, let its individual objects stop and derive any count or graph from that state. In the narrated render, verify the shared starting state, the point of divergence and the settled comparison with [paired frame landmarks](../../../../review/critique/references/frame-tracing.md).
+
 When a creative reference sets the craft target, use the [object scoring rubric](../../../../review/critique/references/object-scoring.md) for hero assets, faces and supporting props. Compare form, material treatment and staging separately from mechanics, timing and continuity. Rerender and score the affected actors after each revision.
 
 For an original topic without a reference video, [build and score heroes from real-world photos](../../../../review/critique/references/photo-reference.md). Use photos for physical form and finish. Use observed states or documentation for the moving assembly and inspect the whole action in the rendered cut.

@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode, seam_times
+from frame_trace import build, decode, landmark_times, seam_times
 from track_objects import follow, measure_relative, retarget
 
 
@@ -38,7 +38,9 @@ class TraceTests(unittest.TestCase):
                     "-c:v", "libx264", str(file))
             out = root / "trace"
             beat = {"id": "beat", "reference": [0.5, 1.5], "candidate": [0, 1],
-                    "seam": {"reference": 5 / 6, "candidate": .31}}
+                    "seam": {"reference": 5 / 6, "candidate": .31},
+                    "landmarks": [{"id": "settled", "reference": 1.15, "candidate": .75},
+                                  {"id": "impact", "reference": 2 / 3, "candidate": .6}]}
             self.assertEqual(build(ref, draft, {"beats": [beat]},
                                    "beat", out, {"full": (0, 0, 1, 1)}), {"reference":24,"candidate":30})
             with (out / "reference.csv").open(newline="", encoding="utf-8") as stream:
@@ -56,12 +58,30 @@ class TraceTests(unittest.TestCase):
             viewer = (out / "frames.html").read_text(encoding="utf-8")
             self.assertIn(rows[-1]["image"], viewer)
             self.assertIn('const cuts = {"reference": 8, "candidate": 10}', viewer)
+            self.assertEqual([item["id"] for item in report["landmarks"]], ["settled", "impact"])
+            impact = report["landmarks"][1]
+            self.assertAlmostEqual(impact["lanes"]["reference"]["before"]["time"], 15 / 24, places=5)
+            self.assertAlmostEqual(impact["lanes"]["reference"]["after"]["time"], 16 / 24, places=5)
+            self.assertEqual(impact["lanes"]["candidate"]["after"]["frame"], 18)
+            self.assertTrue((out / "landmark-impact.jpg").is_file())
+            self.assertIn('"impact": {"reference": 4, "candidate": 18}', viewer)
 
     def test_seam_requires_times_strictly_inside_each_range(self):
         row = {"reference": [0, 1], "candidate": [1, 2], "seam": {"reference": 1, "candidate": 1.4}}
         with self.assertRaisesRegex(ValueError, "strictly within"):
             seam_times(row)
         self.assertIsNone(seam_times({"reference": [0, 1]}))
+
+    def test_landmarks_need_unique_ids_and_separate_interior_times(self):
+        row = {"reference": [0, 1], "candidate": [1, 2]}
+        self.assertEqual(landmark_times(row), {})
+        event = {"id": "impact", "reference": .5, "candidate": 1.4}
+        invalid = [([event, event], "duplicate"), ([{**event, "id": "../impact"}], "Invalid"),
+                   ([{**event, "candidate": 2}], "strictly within"),
+                   ([{"id": "impact", "reference": .7}], "separate reference and candidate")]
+        for events, message in invalid:
+            with self.subTest(events=events), self.assertRaisesRegex(ValueError, message):
+                landmark_times({**row, "landmarks": events})
 
     def test_tracks_translation_and_does_not_bridge_occlusion(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -18,6 +18,17 @@ To compare a specific cut or handoff, add a seam to the same beat map. Include r
 
 The trace makes a four-frame seam sheet and records the actual decoded timestamps before and at or after the anchors. The viewer opens one frame before the seam in each lane. Use the adjacent pictures and the full sequence to verify the actor's silhouette, attachment, identifier, and state on both sides. The scorecard records the reviewer’s result.
 
+For several meaningful changes inside a beat, put `landmarks` on the same beat row. Name the same visible state or event on both sides and map its time independently. Include frames before and at or after every time.
+
+```json
+"landmarks": [
+  {"id":"card-enters","reference":54.6,"candidate":54.5},
+  {"id":"history-revealed","reference":56.2,"candidate":55.1}
+]
+```
+
+The viewer's landmark menu jumps both lanes to the corresponding decoded picture. Each event also gets a four-frame `landmark-<id>.jpg` sheet. Check the preceding and following frames to confirm the authored event, then use the same landmarks to compare a revision. Adjust candidate times if the choreography or edit changes.
+
 ## Track a visible actor and reuse its movement
 
 Run `python <skill>/scripts/track_objects.py --trace trace --seeds seeds.json --out tracks` with NumPy installed. Choose a tight textured box with the frame viewer. Box units are pixels of the extracted image. `first` and `last` are inclusive, zero-based indices within this trace.
