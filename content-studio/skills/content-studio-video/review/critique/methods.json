@@ -11,7 +11,7 @@
       "id": "frame-trace",
       "script": "scripts/frame_trace.py",
       "status": "supported",
-      "review": "Inspect consecutive frames and compare onset, holds, and local contact in independently mapped full-frame and detail sheets."
+      "review": "Compare onset, holds, and contact in full-frame and detail sheets. Check word-to-picture offsets against independently supplied speech anchors."
     },
     {
       "id": "track-objects",

@@ -13,7 +13,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from compare import run
-from frame_trace import build, decode, detail_boxes, hold_pictures, hold_ranges, landmark_times, seam_times
+from frame_trace import build, decode, detail_boxes, hold_pictures, hold_ranges, landmark_times, seam_times, word_anchor_times
 from track_objects import follow, measure_relative, retarget
 
 
@@ -42,6 +42,7 @@ class TraceTests(unittest.TestCase):
                     "seam": {"reference": 5 / 6, "candidate": .31},
                     "landmarks": [{"id": "settled", "reference": 1.15, "candidate": .75},
                                   {"id": "impact", "reference": 2 / 3, "candidate": .6}],
+                    "word_anchors": [{"id": "impact", "reference": .6, "candidate": .62}],
                     "holds": [{"id": "result", "reference": [.75, 1.25], "candidate": [.4, .9]}]}
             self.assertEqual(build(ref, draft, {"beats": [beat]},
                                    "beat", out, {"full": (0, 0, 1, 1)}), {"reference":24,"candidate":30})
@@ -65,6 +66,10 @@ class TraceTests(unittest.TestCase):
             self.assertAlmostEqual(impact["lanes"]["reference"]["before"]["time"], 15 / 24, places=5)
             self.assertAlmostEqual(impact["lanes"]["reference"]["after"]["time"], 16 / 24, places=5)
             self.assertEqual(impact["lanes"]["candidate"]["after"]["frame"], 18)
+            self.assertEqual(impact["lanes"]["reference"]["word_onset_seconds"], .6)
+            self.assertEqual(impact["lanes"]["reference"]["word_to_picture_ms"], 66.7)
+            self.assertEqual(impact["lanes"]["candidate"]["word_to_picture_ms"], -20.0)
+            self.assertNotIn("word_to_picture_ms", report["landmarks"][0]["lanes"]["reference"])
             self.assertTrue((out / "landmark-impact.jpg").is_file())
             self.assertIn('"impact": {"reference": 4, "candidate": 18}', viewer)
             hold = report["holds"][0]
@@ -107,6 +112,19 @@ class TraceTests(unittest.TestCase):
         for events, message in invalid:
             with self.subTest(events=events), self.assertRaisesRegex(ValueError, message):
                 landmark_times({**row, "landmarks": events})
+
+    def test_word_anchors_require_a_mapped_landmark_and_onsets_in_both_lanes(self):
+        row = {"reference": [0, 1], "candidate": [1, 2],
+               "landmarks": [{"id": "impact", "reference": .5, "candidate": 1.4}]}
+        landmarks = landmark_times(row)
+        anchor = {"id": "impact", "reference": 0, "candidate": 1}
+        self.assertEqual(word_anchor_times({**row, "word_anchors": [anchor]}, landmarks),
+                         {"impact": {"reference": 0, "candidate": 1}})
+        for entry, message in (({**anchor, "id": "unknown"}, "matching landmark"),
+                               ({**anchor, "candidate": 2}, "mapped half-open range"),
+                               ({"id": "impact", "reference": .2}, "separate reference and candidate")):
+            with self.subTest(entry=entry), self.assertRaisesRegex(ValueError, message):
+                word_anchor_times({**row, "word_anchors": [entry]}, landmarks)
 
     def test_holds_must_fit_the_beat_and_include_a_decoded_picture(self):
         row = {"reference": [0, 1], "candidate": [1, 2],

@@ -108,12 +108,15 @@ def consecutive_sheets(rows, root, lane):
         sheet.save(root / f"{lane}-{start//30:02d}.jpg", quality=91)
 
 
-def paired_times(row, beats, label):
+def paired_times(row, beats, label, *, allow_start=False):
     if not isinstance(beats, dict) or set(beats) != {"reference", "candidate"}:
         raise ValueError(f"{label} needs separate reference and candidate times")
     for lane, time in beats.items():
         start, end = row[lane]
-        if type(time) not in (int, float) or not math.isfinite(time) or not start < time < end:
+        if (type(time) not in (int, float) or not math.isfinite(time)
+                or not (start <= time < end if allow_start else start < time < end)):
+            if allow_start:
+                raise ValueError(f"{lane} {label} must be inside its mapped half-open range")
             raise ValueError(f"{lane} {label} must be strictly within its mapped range")
     return beats
 
@@ -138,6 +141,15 @@ def named_entries(row, key, label):
 def landmark_times(row):
     return {name: paired_times(row, times, f"landmark {name}")
             for name, times in named_entries(row, "landmarks", "landmark").items()}
+
+
+def word_anchor_times(row, landmarks):
+    anchors = named_entries(row, "word_anchors", "word anchor")
+    for name in anchors:
+        if name not in landmarks:
+            raise ValueError(f"Word anchor {name} needs a matching landmark")
+    return {name: paired_times(row, times, f"word anchor {name}", allow_start=True)
+            for name, times in anchors.items()}
 
 
 def hold_ranges(row):
@@ -166,12 +178,17 @@ def hold_pictures(lane, name, interval, pictures, rows):
             "first": rows[inside[0][0]], "middle": rows[middle], "last": rows[inside[-1][0]]}
 
 
-def seam_pictures(lane, anchor, pictures, rows, label="seam"):
+def seam_pictures(lane, anchor, pictures, rows, label="seam", word_onset=None):
     # Compare the source PTS with the anchor before rounding for display.
     cut = next((i for i, (_, time) in enumerate(pictures) if time >= anchor - 1e-9), 0)
     if cut < 1:
         raise ValueError(f"Widen the {lane} range to include decoded frames on both sides of {label}")
-    return {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
+    result = {"seconds": anchor, "before": rows[cut - 1], "after": rows[cut]}
+    if word_onset is not None:
+        # Measure from the supplied speech clock to the exact displayed picture PTS.
+        result["word_onset_seconds"] = word_onset
+        result["word_to_picture_ms"] = round((pictures[cut][1] - word_onset) * 1000, 1)
+    return result
 
 
 def detail_boxes(row, meta):
@@ -194,7 +211,10 @@ def comparison_sheet(root, lanes, filename, moments, *, detail=False):
             with Image.open(root / source_path) as source:
                 picture = ImageOps.contain(source.convert("RGB"), (394, 615))
             sheet.paste(picture, (xx + (407 - picture.width) // 2, yy + 21 + (615 - picture.height) // 2))
-            draw.text((xx + 8, yy + 5), f"{lane} · {key} · {frame['time']:.4f} s", fill="white")
+            label = f"{lane} · {key} · {frame['time']:.4f} s"
+            if key == "after" and "word_to_picture_ms" in frames:
+                label += f" · from cue {frames['word_to_picture_ms']:+.1f} ms"
+            draw.text((xx + 8, yy + 5), label, fill="white")
     sheet.save(root / filename, quality=93)
 
 
@@ -229,6 +249,7 @@ def build(reference, candidate, mapping, beat, output, regions):
         raise ValueError(f"Expected a paired beat in the map: {beat}")
     anchors = seam_times(row)
     events = landmark_times(row)
+    words = word_anchor_times(row, events)
     landmarks = [{"id": name, "sheet": f"landmark-{name}.jpg", "lanes": {}} for name in events]
     intervals = hold_ranges(row)
     details = detail_boxes(row, meta)
@@ -249,7 +270,8 @@ def build(reference, candidate, mapping, beat, output, regions):
             seams[lane] = seam_pictures(lane, anchors[lane], pairs, lanes[lane])
         for event in landmarks:
             name = event["id"]
-            event["lanes"][lane] = seam_pictures(lane, events[name][lane], pairs, lanes[lane], name)
+            event["lanes"][lane] = seam_pictures(
+                lane, events[name][lane], pairs, lanes[lane], name, word_onset=words.get(name, {}).get(lane))
         for hold in holds:
             name = hold["id"]
             hold["lanes"][lane] = hold_pictures(lane, name, intervals[name][lane], pairs, lanes[lane])
