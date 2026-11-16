@@ -4,12 +4,14 @@ Use a `Presenter2D` SVG rig when the presenter needs to gesture, blink, and spea
 
 ## Draw the character
 
-1. Choose a reference the project can use. Record the likeness cues that matter at the presenter’s actual size, such as hair shape, facial proportions, brows, beard, and eyewear.
+1. For a cartoon, caricature, or other portrayal of a specific person, start with real photos of that person. Collect a neutral front view, a three-quarter view, and a characteristic expression when available. Use a side view for a speaking turn when the angle matters. Record the person's recognizable silhouette, feature spacing, hairline, brows, nose, jaw or beard, and eyewear at the presenter’s actual size. If only one photo is available, ground the visible features in that view and record which angles still need evidence.
 2. Draw original vector layers. Start with a front view for the neutral pose. Give the head a consistent origin at the base of the jaw. Use the rig’s SVG coordinate system, where the head rises from the neck anchor at `(0, 0)` and the torso extends about 200 units down. Aim for a head roughly 160 units wide by 230 high, then adjust the shot scale together with room for both hands.
 3. Export your face component with `PresenterFaceProps`. Bind `eyeOpen` to the lids or eyes only, `gaze` to a small pupil offset, and `mouthOpen` to the lower lip or jaw path. Keep frames for glasses, hair, and face contours independent. Use React’s `useId` for any SVG gradients, masks, or clip paths. Pass skin and clothing colors through the palette for a consistent neck, arms, and torso.
 4. Store a personal profile in `~/.agents/content-studio/presenters/<id>/` with its `presenter.tsx` export and a short README on origin, reuse, and supported poses. The local library survives skill upgrades. Copy the selected profile into the consuming project so a draft can render with its exact version. The original photo is a separate design reference.
 
 For a new silhouette or art style, pass an SVG `body` component with `PresenterBodyProps`. The rig supplies each arm’s interpolated elbow and wrist, hand shape (`rest`, `point`, `open`, or `two`), angle, and the palette. Keep the neck on the same anchor and redraw the torso and sleeves around your proportions. Shape the forearm from elbow to wrist and attach the palm at the wrist. Use different finger silhouettes for different gestures and check both the held poses and their in-betweens.
+
+For a caricature, choose which real features to exaggerate and which relationships make the person recognizable. Build the exaggeration into the face shapes and preserve those relationships through head turns, blinks and speech. Compare the isolated neutral pose and a representative expression with the real photos at corresponding angles. Check that the likeness reads at delivery size without the name or costume carrying the recognition.
 
 ## Bind motion to a scene
 
@@ -21,6 +23,8 @@ For a new silhouette or art style, pass an SVG `body` component with `PresenterB
 - Place the character in a fixed-camera isolated preview, then in the narrated scene. Inspect the gesture start, peak, settle, and first transition into the next gesture. Check blink and speech frames and confirm that hands avoid captions and that poses actually point to the intended object.
 
 For a presenter who follows the mechanism, write each gesture's purpose next to its cue. Specify the object, active hand, gaze target, and expected held pose. A reset at a camera cut can use a zero-frame cue. Within a continuous shot, start a new cue early enough to move into place or use an explicit recovery cue. Check finger separation, wrist attachment, elbow shape and gaze during consecutive frames as well as at the hold.
+
+Use the [photo-based actor review](../../../../review/critique/references/photo-reference.md) to score a recognizable likeness, stylized finish, and staging. Review the rendered blink, gaze, mouth shapes and gestures separately. Use an ordered photo sequence or footage to establish a characteristic expression change. Use timed capture for the person's actual speech or gesture rhythm. Keep any subject-specific motion comparison open until the evidence supports it.
 
 ## Wire a profile into Core Explainer
 

@@ -17,6 +17,12 @@ Use local photo files and the exact rendered video. The regular actor map applie
 
 Repeat for the real-world views needed to judge a part. Compare a matching angle and state for form and material. Judge the staging axis against readability in the authored video.
 
+## Cartoons and caricatures of real people
+
+Use real photos of the person, including neutral and three-quarter views and a characteristic expression when available. Record the distinctive features and any deliberate exaggeration, then draw or model the character's original layers with the [presenter rig workflow](../../../animation/videogen/scene-authoring/references/presenter-rig.md).
+
+For the appearance score, assess whether the stylized silhouette, face relationships and distinctive features still read as that person in a comparable view. Use material to assess the chosen drawing, shading or texture treatment and staging to assess likeness at delivery size. For motion, score blink, gaze, speech, expression changes and gesture continuity from the rendered performance. If reproducing the person's own mannerisms, compare against a real expression sequence or capture and keep that comparison open until it has motion evidence.
+
 ## Record the motion basis
 
 Keep the normal reference appearance, candidate ratings and evidence fields from the [object scorer](object-scoring.md). Add these two fields to the reference object.
