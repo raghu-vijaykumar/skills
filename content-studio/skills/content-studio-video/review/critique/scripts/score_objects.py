@@ -1,6 +1,7 @@
 """Report paired, evidence-backed art and animation ratings for authored objects."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -61,6 +62,9 @@ def assess(entry):
     if basis == "static" and b is not None and b["motion"] is not None:
         raise ValueError(f"{name}: use an animation basis for an actor whose motion is scored")
     fix = entry.get("revision")
+    review_note = entry.get("review_note")
+    if review_note is not None and not has_text(review_note):
+        raise ValueError(f"{name}: describe the unresolved review issue")
     change = {}
     category_scores = {}
     for category, axes in (("appearance", APPEARANCE), ("motion", MOTION)):
@@ -84,11 +88,16 @@ def assess(entry):
         }
         change.update({axis: candidate.get(axis, 0) - reference[axis] for axis in axes})
     deficits = sorted((axis for axis, delta in change.items() if delta < 0), key=change.get)
-    if b is None:
+    if b is None and review_note is not None:
+        # An occluded or unreviewed part has no candidate scores to compare.
+        change.clear()
+        deficits.clear()
+        status = "review"
+    elif b is None:
         status = "missing"
     elif deficits:
         status = "improve"
-    elif basis == "unverified":
+    elif basis == "unverified" or review_note is not None:
         status = "review"
     else:
         status = "better" if any(value > 0 for value in change.values()) else "matched"
@@ -125,10 +134,45 @@ def summarize(ledger, prior=None):
                     if axis in previous["axis_deltas"]
                 }
     statuses = ("missing", "improve", "matched", "better")
-    if any("motion_review" in row for row in assessed):
+    if any("motion_review" in row or row["status"] == "review" for row in assessed):
         statuses += ("review",)
     return {"objects": assessed, "counts": {status: sum(row["status"] == status for row in assessed)
                                            for status in statuses}}
+
+
+def score_checkpoint(ledger, inventory, stage, render_sha256, prior=None):
+    ids = inventory["ids"]
+    if not isinstance(ids, list) or not ids or not all(has_text(name) for name in ids):
+        raise ValueError("Supply a nonempty inventory of part or action IDs")
+    if len(ids) != len(set(ids)):
+        raise ValueError("Inventory IDs must be unique")
+    missing = sorted(set(ids) - {row["id"] for row in ledger["objects"]})
+    if missing:
+        raise ValueError(f"Missing inventory reviews: {', '.join(missing)}")
+    if ledger.get("render_sha256") != render_sha256:
+        raise ValueError("Ledger SHA-256 must match the reviewed render")
+
+    report = summarize(ledger, prior)
+    previous_rows = {row["id"]: row for row in prior["objects"]} if prior is not None else {}
+    for row in report["objects"]:
+        previous = previous_rows.get(row["id"], {})
+        targets = dict(previous.get("regression_targets", {}))
+        previous_candidate = previous.get("candidate") or {}
+        candidate = row["candidate"] or {}
+        for key, axes in (("appearance", APPEARANCE), ("motion", MOTION)):
+            for axis in axes:
+                if row.get("change_since_review", {}).get(axis, 0) < 0 and previous_candidate:
+                    targets[axis] = max(targets.get(axis, 0), previous_candidate[key][axis])
+                if axis in targets and (candidate.get(key) or {}).get(axis, 0) >= targets[axis]:
+                    del targets[axis]
+        if targets:
+            # A failed retry must not become a lower target on the next attempt.
+            row["regression_targets"] = targets
+    open_ids = [row["id"] for row in report["objects"]
+                if row["status"] in ("missing", "improve", "review") or "regression_targets" in row]
+    report["checkpoint"] = {"stage": stage, "render_sha256": render_sha256,
+                            "open_ids": open_ids, "ready": not open_ids}
+    return report
 
 
 def retest_checklist(report):
@@ -138,7 +182,10 @@ def retest_checklist(report):
         shortfall = sum(-value for value in row["axis_deltas"].values() if value < 0)
         return row["status"] != "missing", -shortfall, row["id"]
 
-    open_rows = sorted((row for row in report["objects"] if row["status"] in ("missing", "improve", "review")), key=priority)
+    open_ids = set(report["checkpoint"]["open_ids"]) if "checkpoint" in report else {
+        row["id"] for row in report["objects"] if row["status"] in ("missing", "improve", "review")
+    }
+    open_rows = sorted((row for row in report["objects"] if row["id"] in open_ids), key=priority)
     total = len(open_rows)
     status_line = "1 object needs a retest." if total == 1 else f"{total} objects need a retest."
     lines = ["# Object retests", "", status_line, ""]
@@ -147,10 +194,14 @@ def retest_checklist(report):
         issues = [f"{axis} {row['axis_deltas'][axis]:+d}" for axis in row["deficits"]]
         if row.get("motion_review") == "unverified":
             issues.append("motion evidence pending")
-        deltas = ", ".join(issues)
-        revision = " ".join(row["revision"].split())
-        lines.append(f"- [ ] {title or row['id']} ({row['status']}, {deltas}). {revision}")
         regressed = [axis for axis, change in row.get("change_since_review", {}).items() if change < 0]
+        if row.get("review_note"):
+            issues.append(" ".join(row["review_note"].split()))
+        if row.get("regression_targets"):
+            issues.append("restore " + ", ".join(f"{axis} to {score}/5" for axis, score in row["regression_targets"].items()))
+        status = ", ".join([row["status"], *issues])
+        revision = " ".join(row.get("revision", "").split())
+        lines.append(f"- [ ] {title or row['id']} ({status}). {revision}".rstrip())
         if regressed:
             lines.append(f"  Lower than the preceding review on {', '.join(regressed)}.")
     return "\n".join(lines).rstrip() + "\n"
@@ -162,11 +213,24 @@ def main():
     cli.add_argument("--previous", type=Path)
     cli.add_argument("--out", required=True, type=Path)
     cli.add_argument("--retests", type=Path, help="Also write a ranked Markdown checklist for open objects.")
+    cli.add_argument("--checkpoint", choices=("proof", "master"))
+    cli.add_argument("--inventory", type=Path, help="Expected part and action IDs from the storyboard.")
+    cli.add_argument("--render", type=Path, help="Exact video reviewed in the ledger.")
     args = cli.parse_args()
     try:
         ledger = json.loads(args.ledger.read_text(encoding="utf-8-sig"))
         prior = json.loads(args.previous.read_text(encoding="utf-8-sig")) if args.previous else None
-        report = summarize(ledger, prior)
+        if args.checkpoint:
+            if not args.inventory or not args.render:
+                raise ValueError("A checkpoint requires --inventory and --render")
+            inventory = json.loads(args.inventory.read_text(encoding="utf-8-sig"))
+            with args.render.open("rb") as stream:
+                render_sha256 = hashlib.file_digest(stream, "sha256").hexdigest()
+            report = score_checkpoint(ledger, inventory, args.checkpoint, render_sha256, prior)
+        else:
+            if args.inventory or args.render:
+                raise ValueError("--inventory and --render require --checkpoint")
+            report = summarize(ledger, prior)
         if args.retests and (args.retests.exists() or args.retests.resolve() == args.out.resolve()):
             raise ValueError("Use a separate new file for the retest checklist")
         with args.out.open("x", encoding="utf-8") as stream:
@@ -178,6 +242,8 @@ def main():
     except (KeyError, TypeError, ValueError, OSError) as error:
         cli.exit(1, f"Object score failed: {error}\n")
     print(", ".join(f"{count} {status}" for status, count in report["counts"].items()))
+    if args.checkpoint and not report["checkpoint"]["ready"]:
+        cli.exit(2, f"{args.checkpoint} review open for: {', '.join(report['checkpoint']['open_ids'])}\n")
 
 
 if __name__ == "__main__":

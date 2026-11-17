@@ -35,7 +35,7 @@
       "id": "score-objects",
       "script": "scripts/score_objects.py",
       "status": "supported",
-      "review": "Rate each visible actor against paired evidence and retest lower appearance and motion axes."
+      "review": "Use the proof and master checkpoint modes to verify inventory coverage and the exact reviewed render. Rescore revised parts and actions against the same evidence."
     },
     {
       "id": "compare-actor",

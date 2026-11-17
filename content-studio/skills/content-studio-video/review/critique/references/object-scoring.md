@@ -2,6 +2,15 @@
 
 Give every visible actor a stable ID in the source inventory. Include hero objects, persistent props, faces and secondary actors that explain an action. Keep a reusable asset score for repeated artwork, then rate its animation for each distinct action and pose. Rate a genuinely absent actor as missing. Group incidental repeats only when they share the same art, movement, and purpose.
 
+## Production checkpoints
+
+1. **Storyboard.** Save an inventory of stable hero, moving-part, and action IDs. Record the reference and expected start, action, contact and settled states for each. Use separate IDs for independent joints, rotors, layers, or repeated actions with different cues. Name inherited motion under its parent. Use traceable real images for physical objects and people, including stylized treatments. For fictional designs or schematics, record visual sources for real features and use the reviewed design or documented behavior to define the comparison target.
+2. **Proof.** Inspect isolated assets at matching angles, then watch the full action in the narrated composition at delivery size. Score all in-scope IDs and save the report and retests. For 2D, inspect contours, anatomy, rig joints and overlaps. For 2.5D, inspect layer depth, parallax, masks and edge reveals through the camera move. For 3D, inspect pivots, contact, clearance, occlusion and surface response. All three use the same six axes.
+3. **Fix and rescore.** For each gap, record the ID, time or cue, observed problem, proposed source-level change and what visible result would pass. Within the approved plan, compare the smallest useful rerender with the previous cut and the original benchmark. Watch at normal speed and step through the entire affected action at native cadence. Keep the better version and repeat within the plan's iteration budget. Bring unresolved evidence, regressions or exhausted retries to the existing human review checkpoint with the last comparison and open fix.
+4. **Exact master.** Run the same scorer on the encoded export with the full delivery inventory. Compare intersecting IDs with the latest comparable proof or master report, check cue sync and seams, and rescore from the master frames. Report individual scores, changes and remaining issues alongside the package scorecard. A short proof covers its own inventory only.
+
+In the precheck, name `score-objects`, its exact checkpoint commands, output paths and acceptance criteria. Put the score report, retest checklist and source/previous/current evidence in the approved step outputs. At scene proof and exact-master human review, show those files and any unresolved issues.
+
 ## Rubric
 
 Use the same criteria and viewing conditions on both sides. Match the scale, action state and viewing area when judging craft, then inspect the real frame to judge staging and legibility. For motion, watch the complete action at real speed and step its anticipation, contact, transition and hold at native cadence. Faces and hands need separate evidence when they matter to the shot.
@@ -40,7 +49,16 @@ python scripts/score_objects.py --ledger objects.json --out scores.json
 python scripts/score_objects.py --ledger revised-objects.json --previous scores.json --out revised-scores.json --retests retests.md
 ```
 
-The JSON has an `objects` list. Each row has a stable `id`, `reference` and `candidate` (or `null` for an absent candidate), and a `revision` with a retest for any deficit. Each complete side has `evidence`, `observation`, `appearance` with `form`, `material` and `staging`, and `motion` with `mechanics`, `timing` and `continuity`. Use `motion: null` on both sides for an intentionally static prop. The script summarizes authored scores and flags any lower axis. It does not infer scores from pixel differences.
+The JSON has an `objects` list. Each row has a stable `id`, `reference` and `candidate` (or `null` for an absent candidate), and a `revision` with a retest for any deficit. Each complete side has `evidence`, `observation`, `appearance` with `form`, `material` and `staging`, and `motion` with `mechanics`, `timing` and `continuity`. Use `motion: null` on both sides for an intentionally static prop. Use `review_note` with a `revision` to keep a material open problem visible regardless of the scores. If the part is too obscured to score or has yet to be inspected, pair the note with `candidate: null`. The script summarizes reviewer-assigned scores.
+
+For a production checkpoint, add the storyboard inventory as JSON, for example `{"ids":["cooler-lift","bracket-fan-spin","far-fan-spin"]}`. Record the reviewed render's SHA-256 in the ledger's top-level `render_sha256`. Run the scorer on each proof or master file.
+
+```text
+python scripts/score_objects.py --checkpoint proof --inventory proof-parts.json --render proof.mp4 --ledger proof-objects.json --out proof-scores.json --retests proof-retests.md
+python scripts/score_objects.py --checkpoint master --inventory master-parts.json --render final.mp4 --ledger master-objects.json --previous proof-scores.json --out master-scores.json --retests master-retests.md
+```
+
+Use a new output path for each pass. The checkpoint rejects omitted inventory IDs and a mismatched render hash. A valid report with open parts or regressions exits with code `2` and still writes the report and checklist. Keep comparably reviewed axes stable across passes. The report carries an unresolved regression target into the next retry, even if the new score still meets the original benchmark. When a deliberate tradeoff requires human review, surface both versions and the open finding in the checkpoint evidence.
 
 The optional Markdown checklist starts with missing actors, then sorts open retests by the sum of their lower axes. It also flags any axis that fell since the preceding review. Use it to choose the next cut to revise, taking into account how long the actor remains on screen and whether the deficit changes what the viewer understands. Regenerate the checklist from the new evidence-backed ledger after each pass.
 

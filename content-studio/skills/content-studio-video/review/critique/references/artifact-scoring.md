@@ -6,7 +6,7 @@ Inventory the selected deliverables before review. Score each generated item aga
 | --- | --- |
 | Script | Verify facts. Record when the viewer gets a concrete question, what renews curiosity in each chapter, and whether the ending delivers what the opening promises. Timecode repetitive wording, examples, or transitions. |
 | Storyboard | Check cue timing, visible cause and effect, framing, and how often the representation changes when the idea calls for it. |
-| Hero and animation | Use [paired object scoring](object-scoring.md) for form, materials and staging. Watch motion at normal speed and inspect mechanics, timing, continuity and readability around key events. |
+| Hero and animation | Link the exact render's [object checkpoint report](object-scoring.md#production-checkpoints) and retest checklist. Keep per-part and per-action findings visible alongside package-level ratings. |
 | Narration | Listen to the isolated voice. Check intelligibility, pace, emphasis, pitch and pause variety, and sync with visible action. Mark monotony by locating runs of similar contour, energy, or sentence rhythm. |
 | Audio mix | Listen at delivery loudness on headphones and ordinary speakers when available. Check voice balance, noise, dynamics and continuity. Record loudness, peaks and dropouts when measured and review them with the listening evidence. |
 | Captions, music, SFX and thumbnail | Review generated items at delivery size or loudness. Check text accuracy, timing and legibility. Check music and SFX fit, cue and balance. Confirm the thumbnail makes a legible promise the video fulfills. |
