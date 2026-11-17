@@ -10,6 +10,14 @@ import narration
 
 
 class ValidateScriptTest(unittest.TestCase):
+    def test_detects_mixed_kannada_latin_tts_without_flagging_single_script(self):
+        segments = [
+            {"id": "raw", "text": "ಪಾಮ್ Jumeirah ಕಡೆ"},
+            {"id": "phonetic", "text": "ಪಾಮ್ ಜುಮೇರಾ ಕಡೆ"},
+            {"id": "english", "text": "Palm Jumeirah"},
+        ]
+        self.assertEqual(narration.mixed_kannada_latin_ids(segments), ["raw"])
+
     def test_normalizes_valid_segments(self):
         segments = narration.validate_script(
             {

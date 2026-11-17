@@ -79,6 +79,15 @@ The script JSON contains ordered `segments` with `id`, `start`, `end`, and
 Synthesis refuses to run without an affirmed consent note. `assemble` needs
 only FFmpeg; `synthesize` needs the IndicF5 environment.
 
+For a Kannada reference and Kannada-English copy, write English place names
+and loanwords phonetically in Kannada in the synthesis `text`, while retaining
+the approved source copy separately. In the Day 5 comparison, raw mixed-script
+`metro`/`Palm Jumeirah` yielded garbled words; `ಮೆಟ್ರೋ`/`ಪಾಮ್ ಜುಮೇರಾ`
+restored recognizable names. The default gate rejects cues containing both
+Kannada and Latin letters. `--allow-mixed-script` permits a bounded experiment
+only after a listening and round-trip transcription review. Do not use written
+words/sec or successful audio encoding as a pronunciation gate.
+
 ## Pipeline
 
 1. Enroll the speaker with `scripts/voice.py` and an explicit consent note.

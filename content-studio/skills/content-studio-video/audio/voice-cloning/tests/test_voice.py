@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 SOURCE=Path(__file__).resolve().parents[1]/"scripts"/"voice.py"
@@ -11,6 +12,28 @@ spec=importlib.util.spec_from_file_location("voice_bootstrap",SOURCE)
 voice=importlib.util.module_from_spec(spec);spec.loader.exec_module(voice)
 
 class VoiceBootstrapTests(unittest.TestCase):
+    def test_kannada_profile_rejects_unreviewed_mixed_script_before_model_load(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            profile = root / "profile"
+            profile.mkdir()
+            (profile / "sample.wav").write_bytes(b"sample")
+            (profile / "profile.json").write_text(json.dumps({
+                "language": "kn-en", "consent": {"affirmed": True},
+                "samples": [{"file": "sample.wav"}],
+            }), encoding="utf-8")
+            script = root / "script.json"
+            script.write_text(json.dumps({"segments": [
+                {"id": "p01", "start": 0, "end": 10,
+                 "text": "ಇವತ್ತು metro ಮೂಲಕ ಪಾಮ್ ಕಡೆ"},
+            ]}), encoding="utf-8")
+            args = SimpleNamespace(profile="rakshitha", script=str(script),
+                                   only="", allow_mixed_script=False)
+            with patch.object(voice, "profile_dir", return_value=profile):
+                with self.assertRaisesRegex(SystemExit, "p01.*phonetically"):
+                    voice.cmd_synthesize(root, args)
+            self.assertFalse((root / ".content-studio" / "voice" / "narration").exists())
+
     def test_assembly_target_accepts_voice_only_duration(self):
         self.assertEqual(voice.assembly_target(None, 952.0, False), (None, 952.0))
 

@@ -73,6 +73,16 @@ def validate_script(spec: dict) -> list[dict]:
     return segments
 
 
+def mixed_kannada_latin_ids(segments: list[dict]) -> list[str]:
+    """Flag Kannada cues whose Latin tokens need a pronunciation review."""
+    return [
+        segment["id"]
+        for segment in segments
+        if any("\u0c80" <= char <= "\u0cff" for char in segment["text"])
+        and any("A" <= char <= "Z" or "a" <= char <= "z" for char in segment["text"])
+    ]
+
+
 def is_reusable(
     entry: dict | None, text: str, params: dict, audio_path: Path
 ) -> bool:

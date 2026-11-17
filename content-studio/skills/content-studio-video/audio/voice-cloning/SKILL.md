@@ -47,6 +47,12 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
 - `--dry-run` lists reuse/render decisions. `--only v01,v02` limits the run. `--force` re-renders even when the text hash and settings match.
 - Synthesis refuses to run without an affirmed consent note in the profile.
 - The reference clip must be one speaker, free of music and noise, and its transcript must match exactly.
+- For Kannada speech containing English words, keep the approved source text and
+  write the IndicF5 synthesis text with those words phonetically in Kannada
+  script. The default synthesis gate stops mixed Kannada/Latin cues before model
+  loading; `--allow-mixed-script` is only for a bounded pronunciation sample
+  that is round-trip transcribed and heard. A matching text hash or words/sec
+  report proves timing and provenance, not intelligible speech.
 
 ## Assemble
 

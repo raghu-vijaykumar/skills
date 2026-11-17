@@ -120,7 +120,7 @@ def _fail(message):
 
 def cmd_synthesize(workspace, args):
     voice_root = Path(workspace).expanduser().resolve() / ".content-studio" / "voice"
-    require_consent(profile_dir(workspace, args.profile))
+    profile_data = require_consent(profile_dir(workspace, args.profile))
 
     script_path = Path(args.script).expanduser().resolve()
     if not script_path.is_file():
@@ -132,6 +132,19 @@ def cmd_synthesize(workspace, args):
         if unknown:
             _fail("Unknown segment ids: " + ", ".join(sorted(unknown)))
         segments = [segment for segment in segments if segment["id"] in wanted]
+
+    # IndicF5 can skip Latin tokens inside Kannada cues. Require a deliberate
+    # pronunciation sample before an editor opts into this risky script form.
+    if profile_data.get("language", "").lower().startswith("kn") and not args.allow_mixed_script:
+        risky = narration.mixed_kannada_latin_ids(segments)
+        if risky:
+            _fail(
+                f"IndicF5 Kannada TTS text mixes Kannada and Latin in {len(risky)} "
+                f"cue(s): {', '.join(risky[:8])}. Write English words phonetically "
+                "in Kannada for the synthesis script; keep the approved source "
+                "text separately. --allow-mixed-script is only for a bounded, "
+                "round-trip-reviewed pronunciation sample."
+            )
 
     reference = Path(args.reference).expanduser().resolve()
     if not reference.is_file():
@@ -491,6 +504,8 @@ def main():
     synth.add_argument("--force", action="store_true")
     synth.add_argument("--allow-partial-weights", action="store_true")
     synth.add_argument("--dry-run", action="store_true")
+    synth.add_argument("--allow-mixed-script", action="store_true",
+                       help="Permit mixed Kannada/Latin TTS only for a reviewed sample")
 
     assemble = sub.add_parser("assemble")
     assemble.add_argument("--script", required=True)
