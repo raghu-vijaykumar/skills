@@ -215,6 +215,22 @@ class VoiceoverTests(unittest.TestCase):
         self.assertEqual(report["status"], "review")
         self.assertTrue(report["segments"][0]["needs_review"])
 
+    def test_complete_cue_scene_review_supplies_frame_evidence(self):
+        script = self.script()
+        for segment in script["segments"]:
+            segment["evidence_frame_ids"] = []
+        review = {"cues": []}
+        for segment in script["segments"]:
+            review["cues"].append({
+                "id": segment["id"], "start": segment["start"], "end": segment["end"],
+                "visual_start": segment["start"], "visual_end": segment["end"],
+                "visual_description": "Reviewed pictured scene", "scene_match": "match",
+                "frames": [{"role": role} for role in
+                           ("before", "start", "middle", "end", "after")],
+            })
+        report = voiceover.validate(script, self.evidence(), reviewed_scenes=review)
+        self.assertEqual(report["status"], "pass")
+
     def test_render_writes_markdown_teleprompter_csv_and_report(self):
         with tempfile.TemporaryDirectory() as scratch:
             out = Path(scratch)

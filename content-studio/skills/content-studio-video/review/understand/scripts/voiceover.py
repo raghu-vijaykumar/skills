@@ -151,7 +151,8 @@ def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0,
         for frame_id in evidence_ids:
             if evidence_frames and frame_id not in evidence_frames:
                 errors.append(f"{segment_id}: unknown evidence frame {frame_id}")
-        if not evidence_ids:
+        # The exact per-cue scene review supersedes sparse legacy frame IDs.
+        if not evidence_ids and reviewed_scenes is None:
             warnings.append(f"{segment_id}: no evidence_frame_ids")
 
         needs_review = bool(segment.get("needs_review", True))
