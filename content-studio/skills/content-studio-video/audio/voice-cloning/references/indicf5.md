@@ -20,12 +20,12 @@ in the capability matrix is a failed text-gate example.
 | `nfe_step` | `32` | Quality default. `16` only for quick drafts or timing tests. |
 | `cfg_strength` | `2.0` | Classifier-free guidance. |
 | `sway_sampling_coef` | `-1.0` | Library default. |
-| `speed` | `1.0` | Do not bake pacing into synthesis. Fit timing separately with bounded `atempo`. |
+| `speed` | `1.0` | Keep the natural take; rewrite overlong cues. |
 | Sample rate | `24000` Hz mono | Model output rate. |
 | `target_rms` | `0.1` | Library default. |
 | Reference audio | 10-15 s, one speaker, clean | Must match the reference transcript exactly. |
 | Internal cross-fade | `0.15` s | Used when long text is split into inference chunks. |
-| Timeline tempo cap | `1.12` | Never exceed it to hide a script/runtime mismatch. |
+| Delivery tempo | `1.0` | Shorten and regenerate overlong lines. |
 
 Render at `nfe_step=32` unless the user explicitly asks for a draft. Doubling
 steps roughly doubles render time and is the accepted quality trade-off.
@@ -66,7 +66,8 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
 # Fit the rendered sections to the master and build a review preview.
 python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py \
   --workspace "/path/to/draft" assemble \
-  --script narration.json --video "/path/to/master.mp4" --preview
+  --script narration.json --scene-review "/path/to/scene-review.json" \
+  --video "/path/to/master.mp4" --preview
 ```
 
 When the delivery timeline is approved before picture rendering, replace
@@ -97,15 +98,11 @@ words/sec or successful audio encoding as a pronunciation gate.
    text hash and render parameters, so interrupted runs can continue.
 4. Round-trip transcribe the first sample and spot-check later sections. A
    clone that does not transcribe back to the input is not approved.
-5. Fit each section with `voice.py assemble`, which applies at most 12%
-   `atempo` and reports every overrun; do not silently speed up or trim the
-   script.
-   When the approved script fixes words/sec and limits silence, pass
-   `--fit-slot --min-tempo 0.88 --max-tempo 1.12`. This opt-in route adjusts
-   shorter as well as longer syntheses to their authored windows and reports
-   cue words/sec, pace deltas, and the maximum opening/intercue/ending gap.
-   A tempo-bound failure remains review-required; re-synthesize or reapprove
-   timing rather than forcing a larger stretch.
+5. Review frames around the beginning, middle, and end of **every** cue using
+   `scene_review.py`. Set a visual start/end and a concrete description, then
+   confirm the spoken text matches that beat. `voice.py assemble` probes the
+   real WAV durations and keeps tempo at 1.0x. If any cue exceeds its visual
+   end, shorten its script and resynthesize before mixing.
 6. `assemble` loudness-normalizes the track to `-16 LUFS`, true peak `-1.5 dBTP`.
 7. Render the 1080p review preview and require a human listening review before
    the production mux or publication.
@@ -115,9 +112,8 @@ words/sec or successful audio encoding as a pronunciation gate.
 - Consent is explicit and recorded in the profile manifest.
 - The reference clip and its transcript are aligned and free of music or noise.
 - Every generated section transcribes back to the intended words.
-- No clipping; no unexplained tempo change above 1.12.
-- Runtime overruns are listed with options: trim the script, extend the final
-  frame, or start the section earlier.
+- No clipping or speed changes in delivery.
+- Runtime overruns fail assembly; rewrite the line to fit the approved picture.
 - Synthetic speech is disclosed to viewers where appropriate.
 
 ## Known limits

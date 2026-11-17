@@ -106,6 +106,36 @@ class FitTimelineTest(unittest.TestCase):
         self.assertEqual(placed[1]["end"], 30.0)
         self.assertFalse(placed[0]["needs_review"])
 
+    def test_strict_scene_preserves_one_times_speed_and_exact_start(self):
+        segments = [
+            {"id": "a", "start": 2.0, "end": 10.0, "text": "one two"},
+            {"id": "b", "start": 11.0, "end": 20.0, "text": "three four"},
+        ]
+        placed = narration.fit_timeline(
+            segments, {"a": 7.25, "b": 8.0}, 21.0, strict_scene_slots=True
+        )
+        self.assertEqual([item["tempo"] for item in placed], [1.0, 1.0])
+        self.assertEqual(placed[0]["start"], 2.0)
+        self.assertEqual(placed[0]["end"], 9.25)
+        self.assertEqual(placed[1]["end"], 19.0)
+
+    def test_strict_scene_rejects_audio_even_when_next_cue_has_slack(self):
+        segments = [
+            {"id": "a", "start": 0.0, "end": 10.0, "text": "one two"},
+            {"id": "b", "start": 20.0, "end": 30.0, "text": "three four"},
+        ]
+        with self.assertRaisesRegex(ValueError, "after visual end.*shorten the script"):
+            narration.fit_timeline(
+                segments, {"a": 11.0, "b": 5.0}, 31.0, strict_scene_slots=True
+            )
+
+    def test_strict_scene_allows_final_cue_to_end_with_picture(self):
+        placed = narration.fit_timeline(
+            [{"id": "a", "start": 0.0, "end": 10.0, "text": "end"}],
+            {"a": 10.0}, 10.0, strict_scene_slots=True,
+        )
+        self.assertEqual(placed[0]["end"], 10.0)
+
     def test_caps_tempo_and_reports_overrun(self):
         placed = narration.fit_timeline(
             self.segments(), {"a": 30.0, "b": 10.0}, 40.0, max_tempo=1.12

@@ -12,6 +12,12 @@
       "script": "scripts/voiceover.py",
       "status": "supported",
       "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "cue-scene-review",
+      "script": "scripts/scene_review.py",
+      "status": "supported",
+      "review": "Review every cue against boundary and middle frames, then validate exact picture and script hashes"
     }
   ]
 }

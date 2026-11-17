@@ -100,8 +100,9 @@ def fit_timeline(
     gap: float = 0.3,
     fit_slot: bool = False,
     min_tempo: float = 0.88,
+    strict_scene_slots: bool = False,
 ) -> list[dict]:
-    """Place sections with bounded tempo; optionally fill their written slots."""
+    """Place sections; strict mode preserves 1x pace and rejects visual spill."""
     if max_tempo < 1.0:
         raise ValueError("max_tempo must be at least 1.0")
     if not 0 < min_tempo <= 1.0:
@@ -112,6 +113,36 @@ def fit_timeline(
     cursor = 0.0
     for index, segment in enumerate(segments):
         natural = float(durations[segment["id"]])
+        if not 0 < natural < float("inf"):
+            raise ValueError(f"{segment['id']}: generated audio duration is invalid")
+        if strict_scene_slots:
+            # A scene boundary is a hard end for the spoken cue. Rewriting and
+            # resynthesizing the text is preferable to speeding up a good take.
+            start = segment["start"]
+            end = start + natural
+            deadline = segment["end"]
+            next_start = segments[index + 1]["start"] if index + 1 < len(segments) else video_seconds
+            if end > deadline + 0.05:
+                raise ValueError(
+                    f"{segment['id']}: 1.0x audio ends at {end:.3f}s, after visual "
+                    f"end {deadline:.3f}s; shorten the script and resynthesize"
+                )
+            if index + 1 < len(segments) and end + gap > next_start + 0.05:
+                raise ValueError(f"{segment['id']}: 1.0x audio leaves less than {gap:.2f}s before the next cue")
+            if end > video_seconds + 0.05:
+                raise ValueError(f"{segment['id']}: 1.0x audio exceeds the video")
+            word_count = len(segment.get("text", "").split())
+            placed.append({
+                "id": segment["id"], "user_slot": [start, deadline],
+                "natural_seconds": round(natural, 3), "tempo": 1.0,
+                "start": round(start, 3), "end": round(end, 3),
+                "slot_seconds": round(deadline - start, 3),
+                "word_count": word_count,
+                "delivered_wps": round(word_count / natural, 3) if word_count else None,
+                "pace_delta_seconds": round(natural - (deadline - start), 3),
+                "overrun_seconds": 0.0, "needs_review": False,
+            })
+            continue
         start = max(segment["start"], cursor)
         next_start = (
             segments[index + 1]["start"]

@@ -81,6 +81,9 @@ frames cannot prove:
   scene land.
 - If a line does not fit, split it across two segments or cut detail. Do not
   speed up the read.
+- Treat frame-reviewed visual start/end as hard cue bounds. The approved
+  speaking speed is 1.0x; a generated take that overruns those bounds needs
+  shorter wording and a fresh take, not `atempo`.
 - Keep a segment within one scene or one clear visual idea. A 60-second segment
   is usually too broad; 8–25 seconds is easier to review and retime.
 - For a silent master, the voiceover can cover the whole timeline. For a master
@@ -120,9 +123,10 @@ frames cannot prove:
 ## Validate and review
 
 ```bash
-python content-studio/skills/content-studio-understand/scripts/voiceover.py \
+python content-studio/skills/content-studio-video/review/understand/scripts/voiceover.py \
   --input <workspace>/voiceover.json \
   --evidence <workspace>/evidence.json \
+  --scene-review <workspace>/cue-scene-review/scene-review.json \
   --out <workspace> \
   --title "Dubai Day 3"
 ```
@@ -132,7 +136,8 @@ The report status is:
 - `pass`: no schema, timing, or evidence errors and no review flags.
 - `review`: no hard errors, but at least one warning or `needs_review` flag.
 - `fail`: overlapping or out-of-range segments, unknown evidence frames, empty
-  text, or speech over the pace limit.
+  text, speech over the pace limit, an unreviewed scene, a changed source/script,
+  or a cue outside its frame-reviewed visual bounds.
 
 The command exits non-zero on `fail`. Use `--allow-errors` only when you
 deliberately want review files for a draft that still has errors.

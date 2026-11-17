@@ -24,7 +24,7 @@ Fill the brackets and change **No** to **Yes** for the options you want.
    - **Intro audio if used** — [keep | mute]
    - **Transitions** — No. [Joins and preferred effect]
 
-4. **Build audio on the locked cut** — **Human review** of script and timing before voice generation, then listen to the mix preview.
+4. **Build audio on the locked cut** — Extract boundary and middle frames for every cue, set frame-reviewed visual start/end, and check spoken meaning against the picture. **Human review** of script and timing before voice generation, then listen to every cue at 1.0x against its scene. Shorten and regenerate any line that runs past its visual end.
 
    - **Original dialogue and ambience** — Keep. [Keep | duck under narration | mute specific ranges]
    - **Source audio cleanup** — No

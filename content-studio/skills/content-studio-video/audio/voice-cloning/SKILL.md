@@ -56,24 +56,24 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
 
 ## Assemble
 
-Place the rendered sections on the video timeline with bounded tempo changes:
+Place the rendered sections on the frame-reviewed video timeline at their natural speed:
 
 ```bash
-python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "/path/to/vlog-draft" assemble --script narration.json --video "/path/to/master.mp4" --preview
+python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "/path/to/vlog-draft" assemble --script narration.json --scene-review "/path/to/cue-scene-review/scene-review.json" --video "/path/to/master.mp4" --preview
 ```
 
 For a timeline whose picture edit is planned but has not been rendered, use
-`assemble --script narration.json --duration 952` to create the aligned voice
+`assemble --script narration.json --scene-review /path/to/scene-review.json --duration 952` to create the aligned voice
 asset without a temporary full-length video. `--video` and `--duration` are
 mutually exclusive. The duration-only route does not create a picture preview;
 review bounded voice samples separately and use the approved delivery timeline
 for the final picture and audio export.
 
-- Keeps each section at its timestamp, applies at most `1.12` `atempo`, and reports every overrun in `timeline.json` instead of hiding it.
-- For an approved written pace, use `assemble --fit-slot --min-tempo 0.88 --max-tempo 1.12` to fit each cue to its authored window. The report records placed words/sec and the longest narration gap. Cues that need tempo beyond those bounds are marked for review; re-render or revise them before delivery.
+- Probes each actual generated WAV, keeps every cue at its approved start and **1.0x** speed, and stops before mixing when speech exceeds its frame-reviewed visual end or crowds the next cue. Shorten the line and resynthesize it; never force a fit by speeding words up.
+- Requires a completed `scene-review.json` for the exact script and picture. The review covers the meaning of the line as well as its start and end. A duration-only assembly validates the script review but needs later exact-picture verification.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
-- If narration extends past the video, the preview holds the final frame so the overrun is audible. Resolve it by trimming the script, extending the final frame, or moving the section earlier — do not raise the tempo cap.
+- An overlong cue fails before preview encoding. Change the script and regenerate that cue at the accepted pace.
 
 ## Compare Indic-Mio emotions with a script
 
@@ -99,6 +99,6 @@ production workflow before placing a voice in a video.
 
 - Consent is explicit and recorded; never treat possession of a recording as consent.
 - Round-trip transcribe the first section and spot-check later ones. A clone that does not transcribe back to the intended words is not approved.
-- Check for clipping, mispronounced names, and unexplained tempo changes above 1.12.
+- Check for clipping and mispronounced names; delivery tempo remains 1.0x.
 - A human listening review is required before the production mux or publication. Synthetic speech is disclosed to viewers where appropriate.
 - Only enroll voices owned by the user or cloned with explicit permission.

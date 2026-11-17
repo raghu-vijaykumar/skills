@@ -16,6 +16,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import narration  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "review" / "understand" / "scripts"))
+import scene_review  # noqa: E402
 
 SAMPLE_RATE = 24000
 
@@ -322,7 +324,8 @@ def cmd_assemble(workspace, args):
     script_path = Path(args.script).expanduser().resolve()
     if not script_path.is_file():
         _fail("Narration script not found: " + str(script_path))
-    segments = narration.validate_script(narration.load_json(script_path))
+    script = narration.load_json(script_path)
+    segments = narration.validate_script(script)
 
     missing = [
         segment["id"]
@@ -332,20 +335,34 @@ def cmd_assemble(workspace, args):
     ]
     if missing:
         _fail("Missing rendered segments: " + ", ".join(missing))
+    stale = [segment["id"] for segment in segments
+             if manifest["segments"][segment["id"]].get("text_hash") != narration.sha256_text(segment["text"])]
+    if stale:
+        _fail("Audio was generated for older text; resynthesize: " + ", ".join(stale))
 
     video, video_seconds = assembly_target(args.video, args.duration, args.preview)
+    review_path = Path(args.scene_review).expanduser().resolve()
+    review = narration.load_json(review_path)
+    review_errors = scene_review.validate(
+        review, script, scene_review.sha256(script_path),
+        scene_review.sha256(video) if video else None, review_path.parent,
+    )
+    if review_errors:
+        _fail("Scene review failed: " + "; ".join(review_errors))
     durations = {
-        segment["id"]: float(manifest["segments"][segment["id"]]["seconds"])
+        # Probe the real WAV; a stale manifest must not hide a cue overrun.
+        segment["id"]: probe(segments_dir / f"{segment['id']}.wav")
         for segment in segments
     }
     placed = narration.fit_timeline(
         segments,
         durations,
         video_seconds,
-        max_tempo=args.max_tempo,
+        max_tempo=1.0,
         gap=args.gap,
-        fit_slot=args.fit_slot,
-        min_tempo=args.min_tempo,
+        fit_slot=False,
+        min_tempo=1.0,
+        strict_scene_slots=True,
     )
     summary = narration.timeline_summary(placed, video_seconds)
 
@@ -364,8 +381,6 @@ def cmd_assemble(workspace, args):
         source = segments_dir / f"{item['id']}.wav"
         inputs.extend(["-i", str(source)])
         chain = [f"[{index}:a]"]
-        if abs(item["tempo"] - 1.0) > 1e-4:
-            chain.append(f"atempo={item['tempo']:.6f},")
         delay = int(round(item["start"] * 1000))
         if delay > 0:
             chain.append(f"adelay={delay},")
@@ -509,13 +524,11 @@ def main():
 
     assemble = sub.add_parser("assemble")
     assemble.add_argument("--script", required=True)
+    assemble.add_argument("--scene-review", required=True,
+                          help="approved frame-backed cue review for this exact script and picture")
     target = assemble.add_mutually_exclusive_group(required=True)
     target.add_argument("--video")
     target.add_argument("--duration", type=float)
-    assemble.add_argument("--max-tempo", type=float, default=1.12)
-    assemble.add_argument("--min-tempo", type=float, default=0.88)
-    assemble.add_argument("--fit-slot", action="store_true",
-                          help="Fit each cue to its approved written pace window")
     assemble.add_argument("--gap", type=float, default=0.3)
     assemble.add_argument("--lufs", type=float, default=-16.0)
     assemble.add_argument("--preview", action="store_true")

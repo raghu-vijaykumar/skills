@@ -10,7 +10,11 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import scene_review
 
 
 def timecode(seconds):
@@ -32,7 +36,9 @@ def count_words(text):
     )
 
 
-def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0):
+def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0,
+             reviewed_scenes=None, script_sha256=None, picture_sha256=None,
+             review_root=None):
     """Return a review report; never mutates the source script."""
     errors = []
     warnings = []
@@ -44,6 +50,13 @@ def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0):
             "warnings": [],
             "segments": [],
         }
+
+    if reviewed_scenes is not None:
+        # Semantic agreement is reviewed from frames; this check binds that
+        # decision to the exact cue windows and picture before synthesis.
+        errors.extend(scene_review.validate(
+            reviewed_scenes, script, script_sha256, picture_sha256, review_root
+        ))
 
     segments = script.get("segments")
     if not isinstance(segments, list) or not segments:
@@ -325,6 +338,8 @@ def main():
     )
     parser.add_argument("--input", required=True, help="authored voiceover JSON")
     parser.add_argument("--evidence", help="evidence.json from understand.py")
+    parser.add_argument("--scene-review", required=True,
+                        help="reviewed scene-review.json for the exact picture and script")
     parser.add_argument(
         "--out", help="output folder (defaults to the voiceover JSON folder)"
     )
@@ -342,12 +357,17 @@ def main():
     script_path = Path(args.input).resolve()
     script = load_json(script_path)
     evidence = load_json(args.evidence) if args.evidence else None
+    reviewed_scenes = load_json(args.scene_review)
     report = validate(
         script,
         evidence,
         max_wps=args.max_wps,
         min_wps=args.min_wps,
         max_gap=args.max_gap,
+        reviewed_scenes=reviewed_scenes,
+        script_sha256=scene_review.sha256(script_path),
+        picture_sha256=evidence.get("source_sha256") if isinstance(evidence, dict) else None,
+        review_root=Path(args.scene_review).resolve().parent,
     )
     out = Path(args.out).resolve() if args.out else script_path.parent
     outputs = write_outputs(script, report, out, title=args.title)

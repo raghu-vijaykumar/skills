@@ -12,6 +12,7 @@ extraction from a synthetic clip.
 | --- | --- | --- | --- | --- | --- |
 | `inspect` | Supported | Approved edit or review candidate → sampled frames + contact sheets + evidence.json | No | [Contact sheet](previews/contact-sheet.jpg) | Sparse frames only; timestamps approximate; never infer landmarks, identities, or events from filenames. |
 | `voiceover` | Supported | voiceover.json + evidence.json → voiceover.md + teleprompter + CSV + report | No | [Draft example](previews/example-voiceover.md) | Fails on overlap, out-of-range times, unknown frames, or pace; human approval before synthesis. |
+| `cue-scene-review` | Supported | Exact picture + script → cue boundary/middle frames, contact sheets, pending scene-review.json | No | Generated per draft | Frame extraction and hash checks are automatic; a vision reviewer must set the visual bounds and scene match for every cue. |
 
 ## Evidence note
 
