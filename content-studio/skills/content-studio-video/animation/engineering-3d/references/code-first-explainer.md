@@ -19,6 +19,13 @@ Use the [Animated Video form](../../../../../prompts/animated-video.md). Keep au
 
 For a project-authored entry point, use `blender --background --factory-startup --python-exit-code 1 --python <entry.py> -- <project-arguments>`. Define explicit input and output paths and a bounded shot or frame range. Check the expected resolution, frame count, and object IDs before accepting a generated proof.
 
+## Take proofs into a long render
+
+- Synthesize or record complete thoughts. Log the actual spoken cue positions inside the read, then drive scene events from those positions. Splitting at every visual cue can pause a sentence in the middle. Recheck timing after padding, trimming, or time-stretching.
+- Sample each shot at its initial state, main action, and held result with the [headless preview tool](headless-preview.md). Check screen-space labels through lens changes, legibility over lit geometry, and an underside or reverse view when it contains evidence that matters.
+- Store independently verified picture segments at one resolution, aspect ratio, frame rate and time base. Match source hashes before reuse. Keep one aligned narration master across all picture segments, then assemble and verify exact frame count and audio duration. Batch image-sequence storage per shot when the whole video would exceed working disk space.
+- Inspect the frame before and after each cut in the encoded master. Score the exact voice, lesson, model, and motion separately from the first proof.
+
 ## Critique a 3D render
 
 1. **Check physical accuracy first.** Use [photo matching](../../../review/critique/references/photo-reference.md) for the same model, view and assembled state. Check proportions, part count and placement, material, depth and visibility. Verify physical motion against real footage, photos of ordered states or technical documentation. Leave unsupported engineering details open, even if the shot is readable.
