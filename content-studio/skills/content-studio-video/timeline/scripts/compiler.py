@@ -208,7 +208,9 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
         metadata = media_info(source)
         if not metadata["audio"]:
             raise ValueError(f"No audio stream in {cue['id']}")
-        if cue["kind"] == "voice" and float(cue["start"]) + metadata["duration"] > duration + .08:
+        # Keep a short PCM tail inside the output trim; larger overruns could
+        # hide missing narration and must still stop before an expensive render.
+        if cue["kind"] == "voice" and float(cue["start"]) + metadata["duration"] > duration + .12:
             raise ValueError(f"Voice cue {cue['id']} extends past the picture")
         if cue.get("loop"):
             # Repeat the approved source in the decoder, then trim it before

@@ -49,6 +49,9 @@ seconds, measured from its `start`. Optional `fade_in` and `fade_out` seconds
 soften the bed edges. The renderer loops the hashed source at decode time and
 trims it before mixing, so the music stays on the one delivery timeline. Review
 the repeat seam and the music level against narration in bounded previews.
+Voice cues may have up to 0.12 seconds of source tail beyond the picture; the
+output graph trims that tail at the resolved picture duration. Longer voice
+overruns fail validation so incomplete narration is not silently dropped.
 
 Operation times are seconds on the resolved output timeline, after cuts and
 transition overlaps. Each operation and audio cue has a stable `id`, a

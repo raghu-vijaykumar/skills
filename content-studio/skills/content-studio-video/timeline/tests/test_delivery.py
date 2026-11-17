@@ -139,6 +139,34 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                                     self.root / "loop-preview.mp4", 0, 2.2)
         self.assertAlmostEqual(rendered["duration"], 2.2, delta=.15)
 
+    def test_short_voice_tail_is_trimmed_but_long_overrun_is_rejected(self):
+        self.timeline["operations"] = []
+        self.timeline["transitions"] = []
+        self.timeline["picture"] = [{
+            "id": "p1", "source": self.source.name,
+            "sha256": model.sha256_file(self.source),
+            "source_in": 0, "source_out": 2.2, "audio_gain": 0,
+        }]
+        voice = self.root / "long-voice.wav"
+        for length, accepted in ((2.3, True), (2.4, False)):
+            subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                "-f", "lavfi", "-i", f"sine=frequency=880:duration={length}",
+                str(voice),
+            ], check=True, capture_output=True, text=True)
+            self.timeline["audio"] = [{
+                "id": "voice1", "kind": "voice", "source": voice.name,
+                "sha256": model.sha256_file(voice), "start": 0,
+                "gain": 1, "review_status": "approved",
+            }]
+            resolved = model.validate(self.timeline)
+            if accepted:
+                _, graph = compiler.compile_graph(self.timeline, resolved)
+                self.assertIn("atrim=duration=2.200000", graph)
+            else:
+                with self.assertRaisesRegex(ValueError, "extends past the picture"):
+                    compiler.compile_graph(self.timeline, resolved)
+
     def _approved(self):
         record = {"actor": "human", "reviewer": "fixture editor",
                   "review_note": "Reviewed timing and voice",
