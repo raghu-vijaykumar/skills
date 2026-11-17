@@ -102,7 +102,8 @@ words/sec or successful audio encoding as a pronunciation gate.
    `scene_review.py`. Set a visual start/end and a concrete description, then
    confirm the spoken text matches that beat. `voice.py assemble` probes the
    real WAV durations and keeps tempo at 1.0x. If any cue exceeds its visual
-   end, shorten its script and resynthesize before mixing.
+   end or leaves an unplanned gap above five seconds, revise the script/timing
+   and resynthesize before mixing.
 6. `assemble` loudness-normalizes the track to `-16 LUFS`, true peak `-1.5 dBTP`.
 7. Render the 1080p review preview and require a human listening review before
    the production mux or publication.

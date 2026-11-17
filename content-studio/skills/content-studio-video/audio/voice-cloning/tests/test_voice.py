@@ -13,6 +13,46 @@ spec=importlib.util.spec_from_file_location("voice_bootstrap",SOURCE)
 voice=importlib.util.module_from_spec(spec);spec.loader.exec_module(voice)
 
 class VoiceBootstrapTests(unittest.TestCase):
+    def test_assembly_rejects_actual_silent_gap_before_mixing(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            script = {"segments": [{"id": "a", "start": 0, "end": 2, "text": "short line"}]}
+            script_path = root / "script.json"
+            script_path.write_text(json.dumps(script), encoding="utf-8")
+            narration_root = root / ".content-studio" / "voice" / "narration"
+            segments_dir = narration_root / "segments"
+            segments_dir.mkdir(parents=True)
+            with wave.open(str(segments_dir / "a.wav"), "wb") as audio:
+                audio.setnchannels(1)
+                audio.setsampwidth(2)
+                audio.setframerate(24000)
+                audio.writeframes(b"\0\0" * 24000)
+            (narration_root / "manifest.json").write_text(json.dumps({"segments": {
+                "a": {"text_hash": voice.narration.sha256_text("short line"), "seconds": 1.0}
+            }}), encoding="utf-8")
+            review_dir = root / "review"
+            review_dir.mkdir()
+            frames = []
+            for role in ("before", "start", "middle", "end", "after"):
+                path = Path("frames") / f"a-{role}.jpg"
+                (review_dir / path).parent.mkdir(exist_ok=True)
+                (review_dir / path).write_bytes(b"frame")
+                frames.append({"role": role, "path": str(path), "at_seconds": 1})
+            review_path = review_dir / "scene-review.json"
+            review_path.write_text(json.dumps({
+                "script_sha256": voice.scene_review.sha256(script_path),
+                "cues": [{"id": "a", "start": 0, "end": 2,
+                          "visual_start": 0, "visual_end": 2,
+                          "visual_description": "Reviewed shot", "scene_match": "match",
+                          "frames": frames}],
+            }), encoding="utf-8")
+            args = SimpleNamespace(script=str(script_path), scene_review=str(review_path),
+                                   video=None, duration=10.0, preview=False, gap=0.3,
+                                   max_narration_gap=5.0)
+            with self.assertRaisesRegex(SystemExit, "Actual narration gap 9.000s"):
+                voice.cmd_assemble(root, args)
+            self.assertFalse((narration_root / "narration-24k.wav").exists())
+
     def test_assembly_rejects_real_wav_overrun_before_mixing(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -47,7 +87,8 @@ class VoiceBootstrapTests(unittest.TestCase):
                           "frames": frames}],
             }), encoding="utf-8")
             args = SimpleNamespace(script=str(script_path), scene_review=str(review_path),
-                                   video=None, duration=4.0, preview=False, gap=0.3)
+                                   video=None, duration=4.0, preview=False, gap=0.3,
+                                   max_narration_gap=5.0)
             with self.assertRaisesRegex(ValueError, "after visual end.*shorten the script"):
                 voice.cmd_assemble(root, args)
             self.assertFalse((narration_root / "narration-24k.wav").exists())

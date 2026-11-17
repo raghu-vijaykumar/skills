@@ -365,6 +365,13 @@ def cmd_assemble(workspace, args):
         strict_scene_slots=True,
     )
     summary = narration.timeline_summary(placed, video_seconds)
+    # Continuous narration is checked from measured WAVs, not authored slots.
+    # A short rewrite can create a long silent gap even when every cue fits.
+    if summary["max_narration_gap_seconds"] > args.max_narration_gap + 0.05:
+        _fail(
+            f"Actual narration gap {summary['max_narration_gap_seconds']:.3f}s exceeds "
+            f"{args.max_narration_gap:.3f}s; revise cue text/timing at 1.0x"
+        )
 
     mix_seconds = summary["mix_seconds"]
     inputs = [
@@ -530,6 +537,8 @@ def main():
     target.add_argument("--video")
     target.add_argument("--duration", type=float)
     assemble.add_argument("--gap", type=float, default=0.3)
+    assemble.add_argument("--max-narration-gap", type=float, default=5.0,
+                          help="Reject longer actual opening, intercue, or ending silence")
     assemble.add_argument("--lufs", type=float, default=-16.0)
     assemble.add_argument("--preview", action="store_true")
     assemble.add_argument("--preview-height", type=int, default=1080)

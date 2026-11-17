@@ -70,6 +70,7 @@ review bounded voice samples separately and use the approved delivery timeline
 for the final picture and audio export.
 
 - Probes each actual generated WAV, keeps every cue at its approved start and **1.0x** speed, and stops before mixing when speech exceeds its frame-reviewed visual end or crowds the next cue. Shorten the line and resynthesize it; never force a fit by speeding words up.
+- Rejects an actual opening, intercue, or ending narration gap above five seconds by default. Use `--max-narration-gap` only when a longer music/ambience beat is explicitly planned and reviewed; cue duration estimates do not substitute for the measured WAV gap.
 - Requires a completed `scene-review.json` for the exact script and picture. The review covers the meaning of the line as well as its start and end. A duration-only assembly validates the script review but needs later exact-picture verification.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
