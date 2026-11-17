@@ -69,6 +69,26 @@ for the final picture and audio export.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
 - If narration extends past the video, the preview holds the final frame so the overrun is audible. Resolve it by trimming the script, extending the final frame, or moving the section earlier — do not raise the tempo cap.
 
+## Compare Indic-Mio emotions with a script
+
+For a bounded, non-production comparison of Rakshitha's consented voice, run:
+
+```powershell
+python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/indic_mio_compare.py
+```
+
+The script calls the open-source Speech Core LiteRT sidecar directly over
+newline-delimited JSON; the Speech Studio UI is not involved. Its defaults
+look for the sidecar and `libLiteRt.dll` together under
+`%LOCALAPPDATA%/ContentStudio/tools/speech-core-v0.0.10/` and the downloaded
+model under `%LOCALAPPDATA%/speech-core/soniqo__Indic-Mio-LiteRT/`.
+Use `--sidecar`, `--bundle`, `--profile`, or `--output` to override those paths.
+It checks consent and bundle completeness before rendering two fixed-seed
+neutral/emotion pairs, then stores four WAVs, hashes, timing, and a manifest
+in `%LOCALAPPDATA%/ContentStudio/voice-tests/indic-mio-rakshitha/<run>/`.
+This is review evidence only; use a human listening review and the approved
+production workflow before placing a voice in a video.
+
 ## Review gates
 
 - Consent is explicit and recorded; never treat possession of a recording as consent.

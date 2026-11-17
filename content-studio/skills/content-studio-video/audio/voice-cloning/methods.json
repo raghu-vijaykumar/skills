@@ -6,6 +6,12 @@
       "script": "scripts/voice.py",
       "status": "supported",
       "review": "Inspect the exact output and compare it with the approved plan"
+    },
+    {
+      "id": "compare-indic-mio-emotion",
+      "script": "scripts/indic_mio_compare.py",
+      "status": "supported",
+      "review": "Preview only: verify the wording and listen to each neutral/emotion pair before selecting a production voice"
     }
   ]
 }
