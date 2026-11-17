@@ -53,7 +53,7 @@
       "id": "score-artifacts",
       "script": "scripts/score_artifacts.py",
       "status": "supported",
-      "review": "Review each generated artifact with item-specific criteria and located evidence."
+      "review": "Use located evidence to rate artifacts and narration beats. Check required review IDs and export retests for low scores and regressions."
     }
   ]
 }

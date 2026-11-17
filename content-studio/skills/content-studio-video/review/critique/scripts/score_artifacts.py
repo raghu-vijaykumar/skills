@@ -9,6 +9,7 @@ from score_objects import has_text
 
 ARTIFACT_AXES = {
     "script": ("factual_accuracy", "hook", "rehooks", "clarity", "variety", "payoff"),
+    "script_beat": ("clarity", "story_progress", "cadence"),
     "storyboard": ("cue_design", "visible_causality", "framing", "visual_variety"),
     "hero": ("form", "material", "staging"),
     "animation": ("mechanics", "timing", "continuity", "motion_readability"),
@@ -60,6 +61,19 @@ def summarize(ledger, previous=None):
     rows = [assess_item(item) for item in ledger["artifacts"]]
     if not rows or len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Supply a nonempty inventory of unique artifact IDs")
+    previous_required = previous.get("required_ids", []) if previous else []
+    if "required_ids" in ledger or previous_required:
+        required = ledger.get("required_ids", previous_required)
+        if not isinstance(required, list) or not required or not all(map(has_text, required)):
+            raise ValueError("required_ids must list the expected review IDs")
+        if len(set(required)) != len(required):
+            raise ValueError("required_ids must be unique")
+        # Keep planned review windows visible on every rerender of this scope.
+        required = list(dict.fromkeys([*previous_required, *required]))
+        missing = sorted(set(required) - {row["id"] for row in rows})
+        if missing:
+            raise ValueError(f"Missing required reviews: {', '.join(missing)}")
+        ledger = {**ledger, "required_ids": required}
     if previous:
         if any(ledger[key] != previous[key] for key in ("scope", "audience")):
             raise ValueError("Keep the audience and scope stable when comparing scores")
@@ -79,19 +93,46 @@ def summarize(ledger, previous=None):
     return {**ledger, "artifacts": rows, "counts": counts}
 
 
+def retest_checklist(report):
+    lines = ["# Artifact retests", ""]
+    for row in report["artifacts"]:
+        regressed = [axis for axis, change in row.get("axis_change", {}).items() if change < 0]
+        if row["status"] == "pending":
+            lines.append(f"- [ ] {row['id']} — pending. {row['reason']}")
+        elif row["status"] == "revise" or (row["status"] == "ready_for_review" and regressed):
+            # A chapter can regress and still be above the package scoring floor.
+            axes = list(dict.fromkeys([*row["below_floor"], *regressed]))
+            reasons = [f"{axis} ({row['ratings'][axis]['score']}/5)" for axis in axes]
+            reasons.extend(row.get("blockers", []))
+            lines.append(f"- [ ] {row['id']} — {', '.join(reasons)}. Evidence: {row['evidence']}")
+            for axis in axes:
+                lines.append(f"  - {axis}: {row['ratings'][axis]['observation']}")
+            retest = row.get("retest") or "Compare this range with the retained version before replacing it."
+            lines.append(f"  - Retest: {retest}")
+    if len(lines) == 2:
+        lines.append("No open retests.")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger", required=True, type=Path)
     parser.add_argument("--previous", type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--retests", type=Path, help="Write a Markdown checklist of deficits, pending reviews, and regressions.")
     args = parser.parse_args()
     try:
         ledger = json.loads(args.ledger.read_text(encoding="utf-8-sig"))
         previous = json.loads(args.previous.read_text(encoding="utf-8-sig")) if args.previous else None
         report = summarize(ledger, previous)
+        if args.retests and (args.retests.exists() or args.retests.resolve() == args.out.resolve()):
+            raise ValueError("Use a separate new file for the retest checklist")
         with args.out.open("x", encoding="utf-8") as stream:
             json.dump(report, stream, ensure_ascii=False, indent=2)
             stream.write("\n")
+        if args.retests:
+            with args.retests.open("x", encoding="utf-8") as stream:
+                stream.write(retest_checklist(report))
     except (KeyError, TypeError, ValueError, AttributeError, OSError) as error:
         parser.exit(1, f"Artifact review failed: {error}\n")
     print(", ".join(f"{count} {state}" for state, count in report["counts"].items()))

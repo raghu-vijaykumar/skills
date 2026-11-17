@@ -23,8 +23,8 @@ Fill the brackets and change **No** to **Yes** for the options you want.
 
    For Blender, use the [code-first 3D workflow](../skills/content-studio-video/animation/engineering-3d/references/code-first-explainer.md). Give each beat a planned time, narration cue, part or pivot, move, camera, and visible end state.
 
-   **Human review · Script and storyboard** — Approve the words, visual beats, and planned assets before locking narration or building scenes. Stop here if this is the requested scope.
-3. **Lock narration and cues** — Align approved audio to on-screen actions. For Rapid Take, give every spoken word a visible action or state change and use vivid focal colors. Time music and effects against the cue sheet.
+   **Human review · Script and storyboard** — Review the words, visual beats, planned assets, and scores for the hook, rehooks, cadence, and payoff. Stop here if this is the requested scope.
+3. **Score narration and lock cues** — Use the [narration review loop](../skills/content-studio-video/review/critique/references/narration-scoring.md) to listen, fix weak passages and rescore. Align the retained take to the on-screen actions. For Rapid Take, give every spoken word a visible action or state change and use vivid focal colors. Time music and effects against the cue sheet.
 
    - **Narration** — No. [Recorded file | generated voice | consented clone], [delivery notes]
    - **Music** — No. [Cleared track or mood]

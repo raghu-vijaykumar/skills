@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from score_artifacts import ARTIFACT_AXES, summarize
+from score_artifacts import ARTIFACT_AXES, retest_checklist, summarize
 
 
 class ArtifactScoreTests(unittest.TestCase):
@@ -47,3 +47,38 @@ class ArtifactScoreTests(unittest.TestCase):
         self.ledger["scope"] = "Final master"
         with self.assertRaisesRegex(ValueError, "scope stable"):
             summarize(self.ledger, before)
+
+    def test_required_narration_windows_cannot_disappear_on_retest(self):
+        pending = {"id": "opening.voice", "kind": "narration", "state": "pending",
+                   "reason": "Listen to the recorded opening with picture."}
+        self.ledger["required_ids"] = [self.script["id"], pending["id"]]
+        self.ledger["artifacts"].append(pending)
+        before = summarize(self.ledger)
+        self.assertIn("opening.voice — pending", retest_checklist(before))
+        self.ledger["required_ids"] = [self.script["id"]]
+        self.ledger["artifacts"].remove(pending)
+        with self.assertRaisesRegex(ValueError, r"Missing required reviews: opening\.voice"):
+            summarize(self.ledger, before)
+
+    def test_retest_includes_weak_script_beat_and_above_floor_voice_regression(self):
+        beat = {
+            "id": "chapter-2.script", "kind": "script_beat", "state": "scored",
+            "evidence": "script.md:35", "retest": "Lead with the unanswered heat question.",
+            "ratings": {axis: {"score": 4, "observation": "Chapter 2 transition"}
+                        for axis in ARTIFACT_AXES["script_beat"]},
+        }
+        voice = {
+            "id": "chapter-2.voice", "kind": "narration", "state": "scored",
+            "evidence": "narrated-proof.mp4#02:16–02:31",
+            "ratings": {axis: {"score": 5, "observation": "02:16–02:31, reviewed"}
+                        for axis in ARTIFACT_AXES["narration"]},
+        }
+        self.ledger["artifacts"].extend([beat, voice])
+        before = summarize(copy.deepcopy(self.ledger))
+        beat["ratings"]["story_progress"].update(score=2, observation="Line 35 repeats the setup.")
+        voice["ratings"]["variety"].update(score=4, observation="02:20 and 02:24 have the same stress.")
+        retests = retest_checklist(summarize(self.ledger, before))
+        self.assertIn("story_progress (2/5)", retests)
+        self.assertIn("Lead with the unanswered heat question.", retests)
+        self.assertIn("chapter-2.voice — variety (4/5)", retests)
+        self.assertIn("02:20 and 02:24", retests)
