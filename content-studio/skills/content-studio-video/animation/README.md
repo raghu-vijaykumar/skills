@@ -44,3 +44,4 @@ The [`genre-shooter` rooftop](blender/shooter-review.md) adds a scored first-per
 The [`genre-rpg` hub](blender/rpg-review.md) adds a scored two-region quest scene with class-readable gear and an opening rarity chest.
 The [`genre-survival` shelter](blender/survival-review.md) adds a scored safe and unsafe zone scene with resources, a returning cart, and a campfire reveal.
 The [`genre-stealth` lane](blender/stealth-review.md) adds a scored concealment and patrol scene with noisy plates, a ladder, and an upper objective.
+The [`genre-puzzle-platformer` puzzle](blender/puzzle-review.md) adds a scored jump, pressure pad, hazard, bridge, and goal sequence with measured gaps.

@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "id": "puzzle-platformer-pressure-bridge",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Puzzle three-platform overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "start", "name": "SM_Puzzle_Start_Platform"},
+    {"id": "switch", "name": "SM_Puzzle_Switch_Platform"},
+    {"id": "goal", "name": "SM_Puzzle_Goal_Platform"},
+    {"id": "hazard", "name": "SM_Puzzle_Red_Spike_0"},
+    {"id": "pad", "name": "SM_Puzzle_Pressure_Pad"},
+    {"id": "ring", "name": "SM_Puzzle_Pad_Cyan_Ring"},
+    {"id": "bridge", "name": "SM_Puzzle_Extending_Bridge"},
+    {"id": "jumper", "name": "SM_Puzzle_Jumper_Rig"},
+    {"id": "arch", "name": "SM_Puzzle_Goal_Arch"},
+    {"id": "camera", "name": "Puzzle three-platform overview camera"}
+  ],
+  "beats": [
+    {"id": "read", "frame": 1, "label": "A small jumper faces a short gap and red spikes; the cyan switch and distant gold goal are visible", "object_ids": ["start", "switch", "hazard", "pad", "jumper", "arch"]},
+    {"id": "switch", "frame": 43, "label": "The jumper lands on the center platform's pressure pad after a clear jump arc", "object_ids": ["jumper", "switch", "pad", "ring"]},
+    {"id": "solve", "frame": 72, "label": "The cyan bridge spans the second gap and the jumper reaches the gold goal", "object_ids": ["bridge", "goal", "jumper", "arch"]}
+  ],
+  "review_states": ["read", "switch", "solve"],
+  "assets": [
+    {"id": "platform-puzzle", "origin": "procedural", "license": "Original Content Studio platform slabs, spike hazards, jumper, pressure switch, bridge, and goal"}
+  ]
+}

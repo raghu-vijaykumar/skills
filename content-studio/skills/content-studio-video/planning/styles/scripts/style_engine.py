@@ -37,6 +37,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "rpg", "jrpg", "quest", "guild", "rarity", "loot",
     "survival", "crafting", "refuge", "shelter", "salvage",
     "stealth", "infiltration", "patrol",
+    "puzzle", "platformer", "pressure pad", "spike gap",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

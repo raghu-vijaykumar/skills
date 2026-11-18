@@ -358,6 +358,13 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(stealth["scenes"][0]["blender"]["genre"], "genre-stealth")
         self.assertEqual(stealth["scenes"][0]["blender"]["builder"],
                          "examples/stealth_infiltration.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            puzzle = engine.plan({"scenes": [{"id": "jump", "duration_seconds": 3,
+                "visual_intent": "A puzzle platformer with a pressure pad bridge"}]})
+        self.assertEqual(puzzle["scenes"][0]["blender"]["genre"],
+                         "genre-puzzle-platformer")
+        self.assertEqual(puzzle["scenes"][0]["blender"]["builder"],
+                         "examples/puzzle_platformer.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

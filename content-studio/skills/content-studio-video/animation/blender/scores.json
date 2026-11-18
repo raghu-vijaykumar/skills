@@ -2019,6 +2019,50 @@
         }
       ]
     },
+    "genre-puzzle-platformer": {
+      "selected": "puzzle-platformer-v2",
+      "candidates": [
+        {
+          "id": "puzzle-platformer-v1",
+          "video_sha256": "4f9d1ce6f663c9857909586845a085671f36649f7ed82c03601cee649e9e2b79",
+          "gif_sha256": "46db72f096d3b05736fd355c70f7e989e726e8f5864c60e27103de9d02f24f36",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and platform-puzzle review",
+          "review_date": "2026-11-19",
+          "review_note": "Three separated platforms, a central pressure pad, red triangular spikes, and a gold goal are visible, but the jumper stays near the start and the bridge remains closed. Full MP4, GIF, isolated mechanism, and saved-scene audit passed."
+        },
+        {
+          "id": "puzzle-platformer-v2",
+          "video_sha256": "588d925fe3234d5042f4687ef698633e20f6d516bfd14da892a115939b8e02c8",
+          "gif_sha256": "6da7b4468c67ac8df6e4c6362b26c78441fdfb952e97f72f2e3c6a6679be9c7e",
+          "gif_path": "previews/puzzle-platformer.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and platform-puzzle review",
+          "review_date": "2026-11-19",
+          "review_note": "The jumper clears a measured short gap, lands on the central pad, activates a cyan bridge over the second gap, and reaches the gold goal. Small hazard silhouettes and simple actor geometry cap finish. Full MP4, GIF, isolated mechanism, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

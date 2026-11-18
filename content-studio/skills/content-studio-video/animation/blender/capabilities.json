@@ -1401,9 +1401,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/puzzle-platformer.gif",
+      "review": "puzzle-review.md",
+      "builder": "examples/puzzle_platformer.py",
+      "spec": "examples/puzzle_platformer.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["puzzle platformer", "jump puzzle", "pressure pad bridge", "spike platform"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-metroidvania-roguelike",

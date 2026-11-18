@@ -185,6 +185,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
         (r"\b(quest.hub|guild.board|loot.rarity|rpg.environment)\b", "environment-artist"),
         (r"\b(survival.shelter|survival.refuge|survival.crafting|crafting.bench)\b", "environment-artist"),
         (r"\b(stealth.lane|stealth.infiltration|infiltration.route|shadow.patrol)\b", "environment-artist"),
+        (r"\b(puzzle.platformer|jump.puzzle|pressure.pad.bridge|spike.platform)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -234,6 +235,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                                re.search(r"\b(survival.shelter|survival.refuge|survival.crafting|crafting.bench)\b", text)
                                else "genre-stealth" if
                                re.search(r"\b(stealth.lane|stealth.infiltration|infiltration.route|shadow.patrol)\b", text)
+                               else "genre-puzzle-platformer" if
+                               re.search(r"\b(puzzle.platformer|jump.puzzle|pressure.pad.bridge|spike.platform)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -346,7 +349,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
-                         selected_genre in {"genre-action-combat", "genre-shooter", "genre-rpg", "genre-survival", "genre-stealth"} else
+                         selected_genre in {"genre-action-combat", "genre-shooter", "genre-rpg", "genre-survival", "genre-stealth", "genre-puzzle-platformer"} else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

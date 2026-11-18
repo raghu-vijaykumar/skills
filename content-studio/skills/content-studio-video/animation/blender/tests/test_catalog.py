@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 51)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 52)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -302,6 +302,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(stealth["builder"], "examples/stealth_infiltration.py")
         self.assertIsNone(catalog_module.route("A stealth infiltration route",
                                                 style="anime-style")["builder"])
+        puzzle = catalog_module.route("A puzzle platformer with a pressure pad bridge")
+        self.assertEqual((puzzle["subject"], puzzle["style"], puzzle["genre"]),
+                         ("environment-artist", "stylized-style", "genre-puzzle-platformer"))
+        self.assertEqual(puzzle["builder"], "examples/puzzle_platformer.py")
+        self.assertIsNone(catalog_module.route("A puzzle platformer with a pressure pad bridge",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -340,7 +346,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 52)
+        self.assertEqual(len(catalog_module.scorebook(book)), 53)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -400,6 +406,10 @@ class CatalogTests(unittest.TestCase):
         stealth = book["routes"]["genre-stealth"]
         self.assertEqual(stealth["selected"], "stealth-infiltration-v2")
         self.assertEqual([candidate["score_total"] for candidate in stealth["candidates"]],
+                         [63, 78])
+        puzzle = book["routes"]["genre-puzzle-platformer"]
+        self.assertEqual(puzzle["selected"], "puzzle-platformer-v2")
+        self.assertEqual([candidate["score_total"] for candidate in puzzle["candidates"]],
                          [63, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
