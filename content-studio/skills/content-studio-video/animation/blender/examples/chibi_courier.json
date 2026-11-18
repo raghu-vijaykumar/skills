@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "id": "chibi-postal-courier",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Chibi portrait camera",
+  "objects": [
+    {"id": "root", "name": "Chibi courier root"},
+    {"id": "head", "name": "SM_Chibi_Head"},
+    {"id": "torso", "name": "SM_Chibi_Torso"},
+    {"id": "left-eye", "name": "SM_Chibi_Left_Eye"},
+    {"id": "right-eye", "name": "SM_Chibi_Right_Eye"},
+    {"id": "offer-arm", "name": "Chibi offer arm control"},
+    {"id": "envelope", "name": "SM_Chibi_Envelope"},
+    {"id": "left-boot", "name": "Chibi left boot"},
+    {"id": "right-boot", "name": "Chibi right boot"},
+    {"id": "camera", "name": "Chibi portrait camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "A huge-headed tiny courier waits with an envelope", "object_ids": ["head", "torso", "left-eye", "right-eye", "envelope"]},
+    {"id": "action", "frame": 36, "label": "The courier hops and lifts the envelope in a short offer", "object_ids": ["root", "offer-arm", "envelope"]},
+    {"id": "result", "frame": 72, "label": "The courier lands and holds the delivered letter forward", "object_ids": ["root", "envelope", "left-boot", "right-boot"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "chibi-courier", "origin": "procedural", "license": "Original Content Studio chibi character, letter, and animation"}
+  ]
+}

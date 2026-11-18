@@ -146,6 +146,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A butterfly flaps across a craft table"}]})
         self.assertEqual(paper["scenes"][0]["blender"]["builder"],
                          "examples/paper_butterfly.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            chibi = engine.plan({"scenes": [{"id": "chibi-postal", "duration_seconds": 3,
+                "visual_intent": "A tiny postal courier hops and offers a letter"}]})
+        self.assertEqual(chibi["scenes"][0]["blender"]["builder"],
+                         "examples/chibi_courier.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

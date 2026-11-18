@@ -805,9 +805,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/chibi-courier.gif",
+      "review": "chibi-review.md",
+      "builder": "examples/chibi_courier.py",
+      "spec": "examples/chibi_courier.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["courier", "postal", "letter", "envelope"],
+      "score_record": "scores.json"
     },
     {
       "id": "noir-style",

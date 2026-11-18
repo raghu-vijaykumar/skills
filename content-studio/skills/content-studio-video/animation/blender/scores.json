@@ -586,6 +586,50 @@
         }
       ]
     },
+    "chibi-style": {
+      "selected": "chibi-courier-v2",
+      "candidates": [
+        {
+          "id": "chibi-courier-v1",
+          "video_sha256": "72ad1b840fb1f329b48de57eff7fc02c1c96030f58e0065406ae369f2d75a5eb",
+          "gif_sha256": "fb3c8cc57c0856a4a4a103096383ce5963e8bb1f0d2445d5b4c70b18a0faae5a",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 2,
+            "evidence_integrity": 5
+          },
+          "score_total": 70,
+          "reviewer": "Content Studio exact-frame and chibi-proportion review",
+          "review_date": "2026-11-18",
+          "review_note": "The oversized head, tiny limbs, hop and letter offer read, but the plain stage and sparse postal details limit composition and finish. The full encode and saved-scene audit passed."
+        },
+        {
+          "id": "chibi-courier-v2",
+          "video_sha256": "6bbac99ab9bac058cf25fd8fdc6f575db37a387caf06d0cc8643a30d081cf763",
+          "gif_sha256": "6fdccf74cfd27ec93d9f40bff1eb0f45967c5be66bf02d4938ceed7900b79a3a",
+          "gif_path": "previews/chibi-courier.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and chibi-proportion review",
+          "review_date": "2026-11-18",
+          "review_note": "The cap badge, satchel, and postal roundel make the full-body character and letter action clearer. The head remains in frame throughout the hop. Simple surfaces and facial detail limit finish to 3/5. Full render, GIF decode, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
