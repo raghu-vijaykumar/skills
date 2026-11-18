@@ -6,14 +6,14 @@ Build an independently callable Content Studio image skill. This slice covers vi
 
 ## User stories
 
-### P1: Compare UI themes on identical content
+### P1: Choose a UI theme
 
-As a creator, I can view one unchanged example diagram rendered through distinct visual themes, including minimalism, Bento box, glassmorphism and neumorphism, so I can choose a look without confusing theme with topic or content layout.
+As a creator, I can choose a visual treatment, including minimalism, Bento box, glassmorphism and neumorphism, without confusing theme with topic or content layout.
 
 Acceptance:
 - The catalog stores UI treatment information, with no diagram or post format masquerading as a style.
-- Every theme has a README, PNG sample and editable SVG generated from the same source card.
-- A single gallery README shows every theme together.
+- Every theme has a concise README describing its treatment.
+- The catalog README lists every theme and contains no tech architecture sample diagram or replacement theme image.
 
 ### P1: Choose a character illustration style
 
@@ -35,4 +35,4 @@ Acceptance:
 
 ## Non-goals
 
-No presets planner, social platform export, carousel packaging or automatic publication in this slice.
+No presets planner, social platform export, carousel packaging or automatic publication in this slice. Tech architecture sample diagrams are handled separately and are absent from this theme catalog.

@@ -18,11 +18,11 @@ def module(name, file):
 
 render = module("social_image_render", ROOT / "scripts/render.py")
 characters = module("social_character_prompt", ROOT / "scripts/character_prompt.py")
-CARD = json.loads((ROOT / "examples/request-flow.json").read_text(encoding="utf-8"))
+CARD = {"title": "A simple note", "body": "One clear idea"}
 
 
 class RenderTests(unittest.TestCase):
-    def test_same_diagram_uses_every_theme(self):
+    def test_all_themes_render_without_gallery_diagrams(self):
         themes = json.loads(render.STYLES.read_text(encoding="utf-8"))["styles"]
         self.assertGreaterEqual(len(themes), 8)
         outputs = []
@@ -32,17 +32,21 @@ class RenderTests(unittest.TestCase):
             svg = render.svg_card(CARD, render.style_for(theme["id"]), 1080, 1350, 81)
             parsed = ElementTree.fromstring(svg)
             self.assertEqual(parsed.attrib["width"], "1080")
-            for label in ("Client", "API", "Store", "send", "write"):
-                self.assertIn(label, svg)
+            self.assertIn(CARD["title"], svg)
+            self.assertIn(CARD["body"], svg)
             outputs.append(svg)
             folder = ROOT / "styles" / theme["id"]
             self.assertTrue((folder / "README.md").is_file())
-            self.assertTrue((folder / "sample.png").is_file())
-            self.assertTrue((folder / "sample.svg").is_file())
+            self.assertFalse((folder / "sample.png").exists())
+            self.assertFalse((folder / "sample.svg").exists())
         self.assertEqual(len(outputs), len(set(outputs)))
+        self.assertFalse((ROOT / "themes-comparison.png").exists())
+        self.assertFalse((ROOT / "examples/request-flow.json").exists())
 
     def test_diagram_and_chart_validate_meaning(self):
-        broken = {**CARD, "edges": [{"from": "client", "to": "missing", "label": "calls"}]}
+        broken = {"title": "Abstract relationship",
+                  "nodes": [{"id": "a", "label": "A"}, {"id": "b", "label": "B"}],
+                  "edges": [{"from": "a", "to": "missing", "label": "links"}]}
         with self.assertRaisesRegex(ValueError, "unknown"):
             render.validate_content(broken)
         with self.assertRaisesRegex(ValueError, "unit and sourceNote"):
