@@ -426,8 +426,8 @@ node content-studio/scripts/music-library.mjs init
 node content-studio/scripts/music-library.mjs open
 node content-studio/scripts/music-library.mjs open --source pixabay
 node content-studio/scripts/music-library.mjs add "C:\path\track.mp3" --category cinematic --title "Track" --artist "Artist" --license youtube-audio-library
-python ../../content-studio-music/scripts/music.py review --channel out-of-office --draft <id> --category cinematic --count 5
-python ../../content-studio-music/scripts/music.py select --channel out-of-office --draft <id> --track "Track"
+python content-studio/skills/content-studio-video/audio/music/scripts/music.py review --channel out-of-office --draft <id> --category cinematic --count 5
+python content-studio/skills/content-studio-video/audio/music/scripts/music.py select --channel out-of-office --draft <id> --track "Track"
 ```
 
 Download manually from the selected source, then use `add` or `scan`. Use
@@ -443,7 +443,7 @@ sweep, scored idea selection, packaging before production, and a measurement loo
 the next run.
 
 ```powershell
-python ../../content-studio-ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
+python content-studio/skills/content-studio-video/planning/ideagen/scripts/plan.py --channel revise-labs --name "<idea>" --kind short
 ```
 
 That scaffolds `drafts/<idea>/` with `research.md`, `brief.md`, `packaging.md` and

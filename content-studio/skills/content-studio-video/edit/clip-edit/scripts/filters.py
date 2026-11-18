@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply creator-neutral color looks to selected video ranges with FFmpeg.
 
-Filter *choice* belongs to ``content-studio-styles``: profiles pick a look and
+Filter *choice* belongs to ``content-studio-video-styles``: profiles pick a look and
 look ranges pick a preset or LUT. This module owns the preset catalog and filter
 *application*: graph construction, HDR safety, and the FFmpeg render.
 """

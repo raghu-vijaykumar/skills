@@ -128,7 +128,7 @@ content-studio audio --folder <draft> --cleanup
 or, for a specific pipeline:
 
 ```powershell
-python <bundle>/skills/content-studio-audio/scripts/master.py `
+python <bundle>/skills/content-studio-video/audio/mastering/scripts/master.py `
   --folder <draft> --cleanup
 ```
 

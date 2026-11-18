@@ -15,10 +15,10 @@ This skill **does not download memes automatically**. The user will add meme fil
 Run from the repository root:
 
 ```bash
-python content-studio/skills/content-studio-memes/scripts/memes.py --library "D:/ContentStudio/memes" init
-python content-studio/skills/content-studio-memes/scripts/memes.py --library "D:/ContentStudio/memes" add --file "/path/to/approved-reaction.mp4" --name "Surprised reaction" --tags "surprise,travel,funny" --language kn --license "owned" --source "my-recording"
-python content-studio/skills/content-studio-memes/scripts/memes.py --library "D:/ContentStudio/memes" search --query surprise --category travel
-python content-studio/skills/content-studio-memes/scripts/memes.py --library "D:/ContentStudio/memes" list
+python content-studio/skills/content-studio-video/memes/scripts/memes.py --library "D:/ContentStudio/memes" init
+python content-studio/skills/content-studio-video/memes/scripts/memes.py --library "D:/ContentStudio/memes" add --file "/path/to/approved-reaction.mp4" --name "Surprised reaction" --tags "surprise,travel,funny" --language kn --license "owned" --source "my-recording"
+python content-studio/skills/content-studio-video/memes/scripts/memes.py --library "D:/ContentStudio/memes" search --query surprise --category travel
+python content-studio/skills/content-studio-video/memes/scripts/memes.py --library "D:/ContentStudio/memes" list
 ```
 
 Use `--license` with an accurate value (`owned`, `licensed`, `permission`, or `unknown`). Items with `unknown` rights are not eligible for publishing suggestions. The user is responsible for confirming authorization. Imports are SHA-256 deduplicated; source files are preserved and copied to the catalogue, not moved.

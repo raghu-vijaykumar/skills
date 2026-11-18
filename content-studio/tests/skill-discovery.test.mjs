@@ -46,6 +46,28 @@ test('Social exposes canonical platform operations without compatibility entrypo
   }
 });
 
+test('retired script folders are absent and their canonical helpers remain callable', () => {
+  const root = path.resolve('content-studio/skills');
+  // These targets used to be hidden behind top-level forwarding scripts.
+  const owners = {
+    'content-studio-audio': ['audio/mastering/scripts/master.py'],
+    'content-studio-autocut': ['edit/autocut/scripts/autocut.py', 'edit/autocut/scripts/timeline.py', 'edit/autocut/agents/openai.yaml'],
+    'content-studio-benchmark': ['review/benchmark/scripts/benchmark.py'],
+    'content-studio-ideagen': ['planning/ideagen/scripts/plan.py'],
+    'content-studio-memes': ['memes/scripts/memes.py'],
+    'content-studio-memory': ['memory/scripts/memory.py', 'memory/scripts/compare_kdenlive.py'],
+    'content-studio-motion-graphics': ['edit/motion-graphics/scripts/overlay.py', 'edit/motion-graphics/scripts/presets.py'],
+    'content-studio-music': ['audio/music/scripts/music.py'],
+    'content-studio-styles': ['planning/styles/scripts/list.mjs', 'planning/styles/scripts/style_engine.py', 'animation/engineering-3d/scripts/engineering_blender.py'],
+    'content-studio-understand': ['review/understand/scripts/understand.py', 'review/understand/scripts/voiceover.py'],
+    'content-studio-voice': ['audio/voice-cloning/scripts/voice.py', 'audio/voice-cloning/scripts/narration.py'],
+  };
+  for (const [retired, targets] of Object.entries(owners)) {
+    assert.equal(fs.existsSync(path.join(root, retired)), false, `${retired} must not be copied into a release`);
+    for (const target of targets) assert.ok(fs.existsSync(path.join(root, 'content-studio-video', target)), target);
+  }
+});
+
 test('supported methods need a real local script', (t) => {
   const root = scratch(t);
   const folder = path.join(root, 'upscale');
@@ -77,6 +99,7 @@ test('managed install links nested skills directly and refuses unmanaged destina
   }
   const source = discoverSkills(path.join(result.release, 'content-studio', 'skills'));
   assert.equal(result.skills.length, source.length);
+  assert.equal(fs.existsSync(path.join(result.release, 'content-studio', 'skills', 'content-studio-autocut')), false);
   const stock = path.join(result.release, 'content-studio', 'skills', 'content-studio-video', 'stock-library', 'assets');
   // A managed install can include owned CTA stock, but never local-only Reel excerpts.
   assert.ok(fs.existsSync(path.join(stock, 'media', 'cta')));

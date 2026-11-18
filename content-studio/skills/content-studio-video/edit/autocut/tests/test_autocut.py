@@ -1,4 +1,4 @@
-"""Fast tests for AutoCut's selection and input handling. Run: python -m unittest discover -s content-studio/skills/content-studio-autocut/tests"""
+"""Fast AutoCut tests. Run: python -m unittest discover -s content-studio/skills/content-studio-video/edit/autocut/tests"""
 import importlib.util
 import json
 import tempfile
