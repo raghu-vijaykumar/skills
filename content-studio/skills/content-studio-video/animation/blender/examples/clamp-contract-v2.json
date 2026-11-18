@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "id": "clamp-contract-smoke",
+  "width": 320,
+  "height": 240,
+  "fps": 24,
+  "frames": 3,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Hero camera",
+  "objects": [
+    {"id": "frame", "name": "Clamp frame"},
+    {"id": "screw", "name": "Lead screw"},
+    {"id": "pad", "name": "Pressure pad"},
+    {"id": "block", "name": "Demonstration block"},
+    {"id": "camera", "name": "Hero camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Screw below block", "object_ids": ["screw", "pad", "block"]},
+    {"id": "action", "frame": 2, "label": "Screw begins to rise", "object_ids": ["screw", "pad"]},
+    {"id": "result", "frame": 3, "label": "Held inspection state", "object_ids": ["screw", "pad", "block"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "clamp-geometry", "origin": "procedural", "license": "Original Content Studio procedural geometry"}
+  ]
+}
