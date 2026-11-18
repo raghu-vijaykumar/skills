@@ -710,9 +710,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/manga-gaze.gif",
+      "review": "manga-review.md",
+      "builder": "examples/manga_gaze.py",
+      "spec": "examples/manga_gaze.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["gaze"],
+      "score_record": "scores.json"
     },
     {
       "id": "pixel-art-style",

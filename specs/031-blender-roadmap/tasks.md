@@ -36,7 +36,8 @@
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
   - [x] T011a Render the cartoon ball mascot with a scored GIF and a squash/stretch audit.
   - [x] T011b Render the comic rocket panel with a scored GIF and a print, ink, and impact audit.
-  - [ ] T011c Complete the remaining thirteen extended treatments with distinct scored GIFs.
+  - [x] T011c Render the manga eye panel with a scored GIF and a grayscale, screentone, and gaze audit.
+  - [ ] T011d Complete the remaining twelve extended treatments with distinct scored GIFs.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

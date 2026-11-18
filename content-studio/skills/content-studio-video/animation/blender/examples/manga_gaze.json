@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "manga-ink-gaze-panel",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Manga panel camera",
+  "objects": [
+    {"id": "face", "name": "SM_Manga_Face"},
+    {"id": "eye", "name": "SM_Manga_Eye_White"},
+    {"id": "iris", "name": "SM_Manga_Iris"},
+    {"id": "hair", "name": "SM_Manga_Hair"},
+    {"id": "screentone", "name": "SM_Manga_Screentone"},
+    {"id": "emphasis", "name": "SM_Manga_Exclamation"},
+    {"id": "gaze-control", "name": "Manga gaze control"},
+    {"id": "camera", "name": "Manga panel camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Monochrome eye looks across an inked print panel", "object_ids": ["face", "eye", "iris", "screentone"]},
+    {"id": "action", "frame": 36, "label": "The iris snaps across and speed lines announce surprise", "object_ids": ["iris", "emphasis"]},
+    {"id": "result", "frame": 72, "label": "The eye settles beneath a dark fringe as the ink cue remains", "object_ids": ["eye", "iris", "hair", "emphasis"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "manga-eye", "origin": "procedural", "license": "Original Content Studio monochrome face, packed screentone, and ink panel"}
+  ]
+}

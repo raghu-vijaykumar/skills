@@ -18,10 +18,11 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Stylized windmill island | [Source](examples/stylized_windmill.py) | [Inputs](examples/stylized_windmill.json) | [GIF](previews/stylized-windmill.gif) |
 | Cartoon bouncy mascot | [Source](examples/cartoon_bounce.py) | [Inputs](examples/cartoon_bounce.json) | [GIF](previews/cartoon-bounce.gif) |
 | Comic rocket panel | [Source](examples/comic_rocket.py) | [Inputs](examples/comic_rocket.json) | [GIF](previews/comic-rocket.gif) |
+| Manga eye close-up | [Source](examples/manga_gaze.py) | [Inputs](examples/manga_gaze.json) | [GIF](previews/manga-gaze.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
-New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The [low-poly variant](lowpoly-review.md) has a distinct recipe and polygon-budget audit. The [voxel variant](voxel-review.md) adds an occupancy-grid and stepped-motion audit. The [isometric variant](isometric-review.md) locks camera axes and tile footprint. The [realistic variant](realistic-review.md) checks real-world scale and PBR values while documenting its illustrative limits. The [horror variant](horror-review.md) checks narrow spatial proportions, one practical light, fog, and a sparse reveal. The [PSX horror variant](psx-horror-review.md) checks native low resolution, a tiny nearest atlas, and flat geometry. The [anime variant](anime-review.md) checks hard cel bands, contours, proportions, and independent pose controls. The [stylized variant](stylized-review.md) checks exaggerated shape language, a packed painted roof, matte materials, and readable windmill motion. The [cartoon variant](cartoon-review.md) checks squash/stretch, bold contours, and contact-shadow timing. The [comic variant](comic-review.md) checks packed halftone print, ink staging, and timed impact. The original three gallery specs remain readable under the version 1 contract.
+New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The [low-poly variant](lowpoly-review.md) has a distinct recipe and polygon-budget audit. The [voxel variant](voxel-review.md) adds an occupancy-grid and stepped-motion audit. The [isometric variant](isometric-review.md) locks camera axes and tile footprint. The [realistic variant](realistic-review.md) checks real-world scale and PBR values while documenting its illustrative limits. The [horror variant](horror-review.md) checks narrow spatial proportions, one practical light, fog, and a sparse reveal. The [PSX horror variant](psx-horror-review.md) checks native low resolution, a tiny nearest atlas, and flat geometry. The [anime variant](anime-review.md) checks hard cel bands, contours, proportions, and independent pose controls. The [stylized variant](stylized-review.md) checks exaggerated shape language, a packed painted roof, matte materials, and readable windmill motion. The [cartoon variant](cartoon-review.md) checks squash/stretch, bold contours, and contact-shadow timing. The [comic variant](comic-review.md) checks packed halftone print, ink staging, and timed impact. The [manga variant](manga-review.md) checks a grayscale close-up, sparse screentone, and emphasis timing. The original three gallery specs remain readable under the version 1 contract.
 
 ## Score and select output artifacts
 
@@ -31,7 +32,7 @@ Select the highest-scoring candidate that passes technical review and scores at 
 
 ## Rebuild the showcases
 
-From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, or `comic_rocket` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
+From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, `comic_rocket`, or `manga_gaze` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 
 ```powershell
 $skill = 'content-studio/skills/content-studio-video/animation/blender'
@@ -60,6 +61,7 @@ Use `scripts/audit_anime.py` with the anime `.blend` for its cel bands, outline,
 Use `scripts/audit_stylized.py` with the windmill `.blend` for its exaggerated silhouettes, packed roof albedo, matte palette, and windmill/window motion.
 Use `scripts/audit_cartoon.py` with the mascot `.blend` for its proportions, squash/stretch, jump height, and contact shadow.
 Use `scripts/audit_comic.py` with the rocket `.blend` for its ink contour, packed halftone, panel frame, burst, lettering, and hero motion.
+Use `scripts/audit_manga.py` with the eye `.blend` for its grayscale palette, packed screentone, cropped close-up, gaze shift, and emphasis cues.
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 
