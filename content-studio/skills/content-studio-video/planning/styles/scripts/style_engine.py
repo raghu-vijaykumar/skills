@@ -16,7 +16,7 @@ STYLES = {
     "rapid-tech": {"label": "Rapid technical explainer", "keywords": ["code", "software", "api", "programming", "developer", "cloud"], "techniques": ["code-highlight", "kinetic-type", "rapid-cut"], "renderer": "remotion"},
     "editorial-map": {"label": "Editorial geography explainer", "keywords": ["map", "country", "geography", "history", "route", "border"], "techniques": ["route-trace", "map-camera", "data-overlay"], "renderer": "remotion"},
     # Include rendered subject and treatment cues so an unnamed visual style can still reach Blender planning.
-    "cinematic-3d": {"label": "Cinematic 3D reconstruction", "keywords": ["machine", "hardware", "engineering", "mechanism", "3d", "blender", "clamp", "corridor", "hall", "lamp", "courier", "heroine", "detective", "noir", "pendulum", "sculpture", "sprout", "flower", "spaceship", "asteroid", "fox", "waterfall", "traveler", "lantern", "bridge", "dashboard", "aqua", "bubble", "leaf", "aperture", "portal", "cosmic", "eldritch", "void", "hand", "finger", "flesh", "mutation", "training", "security", "vhs", "tape", "footage", "pool", "poolrooms", "liminal", "backrooms", "field", "village", "wicker", "effigy", "ritual", "puppet", "mascot", "felt", "playground", "nursery", "alphabet", "toy", "dreamcore", "weirdcore", "cabin", "trail", "flashlight", "forest", "windmill", "bouncy", "rocket", "gaze", "chest", "teacup", "river", "sailboat", "butterfly", "chibi", "pixel", "vehicle", "creature", "voxel", "isometric", "psx", "lowpoly"], "techniques": ["cutaway", "orbit-camera", "dramatic-light"], "renderer": "blender"},
+    "cinematic-3d": {"label": "Cinematic 3D reconstruction", "keywords": ["machine", "hardware", "engineering", "mechanism", "3d", "blender", "clamp", "corridor", "hall", "lamp", "courier", "heroine", "detective", "noir", "pendulum", "sculpture", "sprout", "flower", "spaceship", "asteroid", "fox", "waterfall", "traveler", "lantern", "bridge", "castle", "drawbridge", "medieval", "fantasy", "keep", "moat", "dashboard", "aqua", "bubble", "leaf", "aperture", "portal", "cosmic", "eldritch", "void", "hand", "finger", "flesh", "mutation", "training", "security", "vhs", "tape", "footage", "pool", "poolrooms", "liminal", "backrooms", "field", "village", "wicker", "effigy", "ritual", "puppet", "mascot", "felt", "playground", "nursery", "alphabet", "toy", "dreamcore", "weirdcore", "cabin", "trail", "flashlight", "forest", "windmill", "bouncy", "rocket", "gaze", "chest", "teacup", "river", "sailboat", "butterfly", "chibi", "pixel", "vehicle", "creature", "voxel", "isometric", "psx", "lowpoly"], "techniques": ["cutaway", "orbit-camera", "dramatic-light"], "renderer": "blender"},
     "engineering-cutaway": {"label": "3D engineering cutaway explainer", "keywords": ["processor", "chip", "engine", "circuit", "electronics", "inside", "assembly", "architecture", "mechanical"], "techniques": ["layered-exploded-view", "transparent-shell", "component-isolation", "cross-section", "assembly-sequence", "camera-dolly"], "renderer": "blender"},
     "documentary": {"label": "Evidence-led documentary", "keywords": ["investigation", "documentary", "evidence", "archive", "interview"], "techniques": ["archival-composite", "timeline", "source-callout"], "renderer": "remotion"},
     "travel-scrapbook": {"label": "Travel scrapbook", "keywords": ["travel", "vlog", "trip", "beach", "hotel", "journey"], "techniques": ["postcard", "photo-parallax", "travel-route"], "renderer": "remotion"},
@@ -81,12 +81,16 @@ def plan(data, selected="auto"):
         requested = scene.get("style", selected)
         blender_style_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
                              if item["category"] in blender_catalog().STYLE_CATEGORIES}
+        blender_world_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
+                             if item["category"] == blender_catalog().WORLD_CATEGORY}
         implicit_blender_style = requested if requested in blender_style_ids else None
+        implicit_blender_world = requested if requested in blender_world_ids else None
         if requested == "auto":
             style = ("cinematic-3d" if scene.get("blender_style") or scene.get("blender_subject")
+                     or scene.get("blender_world")
                      else recommend(text + " " + data.get("topic", "")))
         else:
-            style = "cinematic-3d" if implicit_blender_style else resolve(requested)
+            style = "cinematic-3d" if implicit_blender_style or implicit_blender_world else resolve(requested)
         definition = STYLES[style]
         renderer = definition["renderer"]
         available = renderer_executable(renderer) is not None
@@ -101,16 +105,20 @@ def plan(data, selected="auto"):
             explicit_blender_style = scene.get("blender_style", implicit_blender_style)
             if (implicit_blender_style and explicit_blender_style != implicit_blender_style):
                 raise ValueError(f"Conflicting Blender styles for scene {scene['id']}")
+            explicit_blender_world = scene.get("blender_world", implicit_blender_world)
+            if implicit_blender_world and explicit_blender_world != implicit_blender_world:
+                raise ValueError(f"Conflicting Blender worlds for scene {scene['id']}")
             # This is a proposal for review; only proven examples return a builder.
             selection = blender_catalog().route(text + " " + data.get("topic", ""),
                                                 explicit_blender_style,
-                                                scene.get("blender_subject"))
+                                                scene.get("blender_subject"),
+                                                explicit_blender_world)
             planned["blender"] = selection
             if not selection["render_method"]:
                 planned["status"] = "needs_builder"
                 output["warnings"].append(
                     f"No reviewed Blender builder matches scene {scene['id']} and its style")
-        elif scene.get("blender_style") or scene.get("blender_subject"):
+        elif scene.get("blender_style") or scene.get("blender_subject") or scene.get("blender_world"):
             raise ValueError(f"Blender overrides require a cinematic-3d scene: {scene['id']}")
         output["scenes"].append(planned)
         if not available:

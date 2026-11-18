@@ -29,3 +29,4 @@ The [`folk-horror-style` rite](blender/folk-review.md) adds a scored sunlit vill
 The [`mascot-puppet-horror` show](blender/puppet-review.md) adds a scored felt character, children's set, plastic gaze, fixed smile, and sick-light performance audit.
 The [`dream-weirdcore-style` playground](blender/dream-review.md) adds a scored pastel play space, oversized alphabet block, empty chair, and impossible opening audit.
 The [`indie-horror-aesthetics` cabin](blender/indie-review.md) adds a scored first-person forest lane with red trail markers, a practical window blackout, and exact frame review.
+The [`fantasy-worlds` gate](blender/fantasy-review.md) adds a scored medieval low-magic castle lane, a lowering drawbridge, heraldry, and a structural fit audit. World direction is selected separately from visual style.

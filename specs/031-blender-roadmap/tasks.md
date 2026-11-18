@@ -62,6 +62,8 @@
 ## Wave 5: Settings and genre direction
 
 - [ ] T013 [P4] Author ten worlds and moods, thirteen genre directions, and the console-era route with scored recognizable results.
+  - [x] T013a Render the low-magic fantasy castle gate with two scored full outputs, a drawbridge fit and motion audit, and a distinct best GIF.
+  - [ ] T013b Complete the other nine worlds and moods, thirteen genre directions, and console-era route.
 
 ## Wave 6: Delivery and QA
 

@@ -11,6 +11,8 @@ CONTENT_STUDIO = BLENDER.parents[3]
 REPO = CONTENT_STUDIO.parent
 MANIFEST = json.loads((BLENDER / "capabilities.json").read_text(encoding="utf-8"))
 STYLE_CATEGORIES = {"Core styles", "Extended styles", "Horror packs"}
+WORLD_CATEGORY = "Worlds and moods"
+VISUAL_CATEGORIES = STYLE_CATEGORIES | {WORLD_CATEGORY, "Genre direction", "Eras"}
 UPSTREAM = ("https://github.com/arjun988/blender-skills/blob/"
             f"{MANIFEST['upstream_commit']}/.claude/skills")
 STATUSES = {"Catalogued", "Prototype", "Rendered", "Integrated"}
@@ -119,7 +121,7 @@ def catalog():
             if (entry.get("score_record") != "scores.json" or not winner or
                     winner["gif_path"] != entry["evidence"]):
                 raise ValueError(f"Rendered route lacks a scored winning GIF: {name}")
-            if entry["category"] in STYLE_CATEGORIES:
+            if entry["category"] in VISUAL_CATEGORIES:
                 previous = visual_gifs.setdefault(entry["evidence"], name)
                 if previous != name:
                     raise ValueError(f"Visual styles need distinct GIFs: {previous}, {name}")
@@ -128,6 +130,13 @@ def catalog():
                                              or not allowed_subjects or
                                              any(subject not in subject_ids for subject in allowed_subjects)):
             raise ValueError(f"Invalid compatible subjects for {name}")
+        allowed_styles = entry.get("compatible_styles")
+        style_ids = {item["id"] for item in entries
+                     if item["category"] in STYLE_CATEGORIES}
+        if allowed_styles is not None and (not isinstance(allowed_styles, list)
+                                           or not allowed_styles or
+                                           any(style not in style_ids for style in allowed_styles)):
+            raise ValueError(f"Invalid compatible styles for {name}")
         if entry["status"] == "Integrated":
             proof = entry.get("integration_proof")
             if not proof or not (BLENDER / proof).is_file():
@@ -151,7 +160,7 @@ def catalog():
     return entries
 
 
-def route(prompt, style=None, subject=None):
+def route(prompt, style=None, subject=None, world=None):
     """Give an inspectable default; a catalogue route is never a render claim."""
     text = prompt.lower()
     entries = catalog()
@@ -160,7 +169,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
         # A first-person camera cue does not make its environment a character shot.
         (r"\b(character|human|mascot|puppet|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b|(?<!first[- ])\bperson\b", "character-artist"),
-        (r"\b(cabin|trail|woodland)\b", "environment-artist"),
+        (r"\b(cabin|trail|woodland|castle|keep|gate|drawbridge|moat)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -171,6 +180,13 @@ def route(prompt, style=None, subject=None):
         raise ValueError(f"Unknown Blender subject: {subject}")
     subject = subject or next((name for pattern, name in subject_rules if re.search(pattern, text)),
                               "blender-modeler")
+    worlds = {entry["id"] for entry in entries if entry["category"] == WORLD_CATEGORY}
+    if world is not None and world not in worlds:
+        raise ValueError(f"Unknown Blender world: {world}")
+    # World direction is independent of visual style; infer only the demonstrated lane.
+    selected_world = world or ("fantasy-worlds" if
+                               re.search(r"\b(castle|keep|drawbridge|moat)\b", text)
+                               else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
         if style not in styles:
@@ -261,6 +277,8 @@ def route(prompt, style=None, subject=None):
                          "indie-horror-aesthetics" if subject == "environment-artist" and
                          re.search(r"\b(cabin)\b", text) and
                          re.search(r"\b(forest|trail|flashlight|window)\b", text) else
+                         "stylized-style" if subject == "environment-artist" and
+                         re.search(r"\b(castle|keep|drawbridge|moat)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
@@ -286,17 +304,25 @@ def route(prompt, style=None, subject=None):
     # A rendered demo is reusable only for its declared subject, intent, and treatment.
     entry = next((item for item in entries if item["id"] == subject), None)
     style_entry = next((item for item in entries if item["id"] == chosen), None)
+    world_entry = next((item for item in entries if item["id"] == selected_world), None)
     cue_matches = lambda item: any(re.search(rf"\b{re.escape(cue)}\b", text)
                                    for cue in item.get("intent_cues", []))
-    # A demonstrated style-specific builder takes priority over a generic subject demo.
-    if (style_entry and style_entry["status"] in {"Rendered", "Integrated"}
+    # A matching world can select its own scene without pretending to be a style.
+    if (world_entry and world_entry["status"] in {"Rendered", "Integrated"}
+            and subject in world_entry.get("compatible_subjects", [])
+            and chosen in world_entry.get("compatible_styles", [])
+            and cue_matches(world_entry)):
+        entry = world_entry
+        matched = True
+    elif (style_entry and style_entry["status"] in {"Rendered", "Integrated"}
             and subject in style_entry.get("compatible_subjects", []) and cue_matches(style_entry)):
         entry = style_entry
         matched = True
     else:
         matched = (entry and entry["status"] in {"Rendered", "Integrated"}
                    and chosen in entry.get("compatible_styles", []) and cue_matches(entry))
-    return {"subject": subject, "style": chosen, "reason": reason,
+    return {"subject": subject, "style": chosen, "world": selected_world,
+            "reason": reason,
             "status": entry["status"] if matched else "Catalogued",
             "render_method": entry["method"] if matched else None,
             "builder": entry["builder"] if matched else None,

@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "fantasy-low-magic-gate",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Fantasy gate inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "keep", "name": "SM_Keep_Wall_Pier_-1"},
+    {"id": "tower", "name": "SM_Keep_Tower_1"},
+    {"id": "heraldry", "name": "Keep banner wool 1"},
+    {"id": "gate", "name": "SM_Keep_Gate_Lintel"},
+    {"id": "drawbridge", "name": "SM_Keep_Oak_Drawbridge"},
+    {"id": "moat", "name": "SM_Keep_Moat"},
+    {"id": "camera", "name": "Fantasy gate inspection camera"}
+  ],
+  "beats": [
+    {"id": "fortress", "frame": 1, "label": "A low-magic stone keep guards its raised oak bridge", "object_ids": ["keep", "tower", "heraldry", "drawbridge"]},
+    {"id": "mechanism", "frame": 48, "label": "The hinged timber bridge lowers toward the moat bank", "object_ids": ["drawbridge", "moat"]},
+    {"id": "crossing", "frame": 72, "label": "The bridge reaches the bank as the gate stays dark", "object_ids": ["drawbridge", "gate", "camera"]}
+  ],
+  "review_states": ["fortress", "mechanism", "crossing"],
+  "assets": [
+    {"id": "low-magic-keep", "origin": "procedural", "license": "Original Content Studio stone keep, wool heraldry, oak bridge, and moat"}
+  ]
+}

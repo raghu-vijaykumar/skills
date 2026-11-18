@@ -1101,9 +1101,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/fantasy-gate.gif",
+      "review": "fantasy-review.md",
+      "builder": "examples/fantasy_gate.py",
+      "spec": "examples/fantasy_gate.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["castle", "keep", "drawbridge", "moat"],
+      "score_record": "scores.json"
     },
     {
       "id": "sci-fi-punk-worlds",

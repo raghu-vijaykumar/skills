@@ -1325,6 +1325,40 @@
         }
       ]
     },
+    "fantasy-worlds": {
+      "selected": "fantasy-gate-v2",
+      "candidates": [
+        {
+          "id": "fantasy-gate-v1",
+          "video_sha256": "0baa612133ac1a91b04b6d9460b55bf804258331626a1d370d354758830fb414",
+          "gif_sha256": "145a3a1db4c6b09fc39335ad4f75c8c6c48847502344f3917995ce1441e37228",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and low-magic keep review",
+          "review_date": "2026-11-18",
+          "review_note": "A limestone keep with heraldic wool, oak bridge, iron fittings, and a moat establishes one medieval low-magic world, but the bridge scarcely lowers. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "fantasy-gate-v2",
+          "video_sha256": "b10e5d0a77d3d208f91feb610c8b3bc8f3ba8b60cb0e9f1968167c66dcdca94a",
+          "gif_sha256": "18f859518f3ed6cebee51c246710d796a90f60e4d2017943c574d8ecbfaade1a",
+          "gif_path": "previews/fantasy-gate.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and low-magic keep review",
+          "review_date": "2026-11-18",
+          "review_note": "The timber bridge lowers clearly through the fitted stone gateway and reaches the bank while towers and banners remain legible. Simple stone surfaces limit finish to 3/5. Full MP4, GIF, isolated bridge, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

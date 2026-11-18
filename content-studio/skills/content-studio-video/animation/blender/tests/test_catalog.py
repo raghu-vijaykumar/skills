@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 36)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 37)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -203,6 +203,14 @@ class CatalogTests(unittest.TestCase):
         self.assertIsNone(catalog_module.route("An indie horror car drives")["builder"])
         self.assertEqual(catalog_module.route("A person walks through a room")["subject"],
                          "character-artist")
+        fantasy = catalog_module.route("A stone castle lowers its oak drawbridge over a moat")
+        self.assertEqual((fantasy["subject"], fantasy["style"], fantasy["world"]),
+                         ("environment-artist", "stylized-style", "fantasy-worlds"))
+        self.assertEqual(fantasy["builder"], "examples/fantasy_gate.py")
+        self.assertIsNone(catalog_module.route("A castle lowers a drawbridge",
+                                                style="anime-style")["builder"])
+        with self.assertRaisesRegex(ValueError, "Unknown Blender world"):
+            catalog_module.route("A castle lowers a drawbridge", world="unknown-world")
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -241,7 +249,11 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 37)
+        self.assertEqual(len(catalog_module.scorebook(book)), 38)
+        fantasy = book["routes"]["fantasy-worlds"]
+        self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
+        self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
+                         [68, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -361,7 +373,7 @@ class CatalogTests(unittest.TestCase):
                      "vector-sprout", "retro8-ship", "retro16-fox", "hd2d-bridge",
                      "aero-dashboard", "cosmic-aperture", "mutating-hand",
                      "analog-training", "liminal-pool", "folk-ritual", "puppet-stage",
-                     "dream-playground", "indie-cabin"):
+                     "dream-playground", "indie-cabin", "fantasy-gate"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)
@@ -391,6 +403,8 @@ class CatalogTests(unittest.TestCase):
                       "content-studio-video/animation/blender/previews/dream-playground.gif)", readme)
         self.assertIn("![Best scored indie forest cabin horror animation](content-studio/skills/"
                       "content-studio-video/animation/blender/previews/indie-cabin.gif)", readme)
+        self.assertIn("![Best scored fantasy drawbridge animation](content-studio/skills/"
+                      "content-studio-video/animation/blender/previews/fantasy-gate.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

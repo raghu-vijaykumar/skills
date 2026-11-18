@@ -39,6 +39,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Uncanny puppet show | [Source](examples/puppet_stage.py) | [Inputs](examples/puppet_stage.json) | [GIF](previews/puppet-stage.gif) |
 | Dream playground | [Source](examples/dream_playground.py) | [Inputs](examples/dream_playground.json) | [GIF](previews/dream-playground.gif) |
 | Forest cabin indie horror | [Source](examples/indie_cabin.py) | [Inputs](examples/indie_cabin.json) | [GIF](previews/indie-cabin.gif) |
+| Low-magic fantasy gate | [Source](examples/fantasy_gate.py) | [Inputs](examples/fantasy_gate.json) | [GIF](previews/fantasy-gate.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -62,6 +63,7 @@ The [folk rite review](folk-review.md) records two scored outputs, an isolated w
 The [puppet show review](puppet-review.md) records two scored outputs, an isolated felt figure, hard-plastic eye and set audit, and the sick-light gaze performance.
 The [dream playground review](dream-review.md) records two scored outputs, isolated block and doorway previews, impossible geography, and levitation and door-motion audits.
 The [forest cabin review](indie-review.md) records two scored outputs, an isolated cabin preview, a first-person forest-lane audit, and the timed window blackout.
+The [fantasy gate review](fantasy-review.md) records two scored outputs, an isolated bridge preview, gateway fit, heraldry, and the lowering drawbridge audit.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
