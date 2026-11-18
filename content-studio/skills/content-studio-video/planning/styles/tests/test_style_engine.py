@@ -111,6 +111,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A windmill cottage turns on an island"}]})
         self.assertEqual(windmill["scenes"][0]["blender"]["builder"],
                          "examples/stylized_windmill.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            cartoon = engine.plan({"scenes": [{"id": "cartoon-mascot", "duration_seconds": 3,
+                "visual_intent": "A bouncy ball mascot jumps and squashes"}]})
+        self.assertEqual(cartoon["scenes"][0]["blender"]["builder"],
+                         "examples/cartoon_bounce.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

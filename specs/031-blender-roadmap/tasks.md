@@ -34,6 +34,8 @@
   - [x] T010g Render the anime heroine with a distinct scored GIF and a cel-band, outline, and pose-control audit.
   - [x] T010h Render the storybook windmill island with a distinct scored GIF and a shape/palette/paint audit.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
+  - [x] T011a Render the cartoon ball mascot with a scored GIF and a squash/stretch audit.
+  - [ ] T011b Complete the remaining fourteen extended treatments with distinct scored GIFs.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

@@ -672,9 +672,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cartoon-bounce.gif",
+      "review": "cartoon-review.md",
+      "builder": "examples/cartoon_bounce.py",
+      "spec": "examples/cartoon_bounce.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["ball"],
+      "score_record": "scores.json"
     },
     {
       "id": "comic-book-style",

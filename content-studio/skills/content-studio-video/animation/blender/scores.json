@@ -297,6 +297,31 @@
         }
       ]
     },
+    "cartoon-style": {
+      "selected": "cartoon-bounce-v1",
+      "candidates": [
+        {
+          "id": "cartoon-bounce-v1",
+          "video_sha256": "8c0f81a33061bfc6369f00951cb7778ce34e1ea382c598bbd913011744194e1e",
+          "gif_sha256": "9404ed02a1caed0e4b752841e9867465af869be1641af857c49175440bc92249",
+          "gif_path": "previews/cartoon-bounce.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 5,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 87,
+          "reviewer": "Content Studio exact-frame and cartoon-pose audit",
+          "review_date": "2026-11-18",
+          "review_note": "The original round mascot has large mitts, rubber-hose arms and a bold contour. A visible squash, airborne stretch, contracted shadow, landing squash and round recovery survive the compact GIF; the setting remains graphically minimal."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

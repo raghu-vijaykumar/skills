@@ -191,6 +191,9 @@ def route(prompt, style=None, subject=None):
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
         default_style = ("anime-style" if subject == "character-artist" and
                          re.search(r"\bheroine\b", text) else
+                         "cartoon-style" if subject == "character-artist" and
+                         re.search(r"\bbouncy\b", text) and
+                         re.search(r"\bball\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\bwindmill\b", text) else
                          "stylized-style" if subject in {"character-artist", "prop-artist"}

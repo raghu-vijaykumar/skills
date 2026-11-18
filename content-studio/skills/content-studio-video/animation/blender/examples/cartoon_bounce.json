@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "cartoon-bouncy-ball-mascot",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Cartoon mascot camera",
+  "objects": [
+    {"id": "body", "name": "SM_Cartoon_Body"},
+    {"id": "left-eye", "name": "SM_Cartoon_Left_Eye"},
+    {"id": "right-eye", "name": "SM_Cartoon_Right_Eye"},
+    {"id": "left-mitt", "name": "SM_Cartoon_Left_Mitt"},
+    {"id": "right-mitt", "name": "SM_Cartoon_Right_Mitt"},
+    {"id": "shadow", "name": "SM_Cartoon_Shadow"},
+    {"id": "bounce-control", "name": "Cartoon bounce control"},
+    {"id": "camera", "name": "Cartoon mascot camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Orange circular mascot settles above its blue graphic shadow", "object_ids": ["body", "left-eye", "right-eye", "shadow"]},
+    {"id": "action", "frame": 36, "label": "Mascot stretches as it jumps upward with wide mitts", "object_ids": ["body", "left-mitt", "right-mitt", "shadow"]},
+    {"id": "result", "frame": 72, "label": "Mascot lands, squashes briefly, then returns to its round pose", "object_ids": ["body", "shadow"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "cartoon-mascot", "origin": "procedural", "license": "Original Content Studio cartoon ball mascot and graphic scene"}
+  ]
+}
