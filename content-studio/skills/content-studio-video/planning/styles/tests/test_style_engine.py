@@ -66,6 +66,11 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(forced["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(forced["scenes"][0]["blender"]["builder"],
                          "examples/character.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            lowpoly = engine.plan({"scenes": [{"id": "lamp", "duration_seconds": 4,
+                "visual_intent": "A desk lamp switches on", "blender_style": "lowpoly-style"}]})
+        self.assertEqual(lowpoly["scenes"][0]["blender"]["builder"],
+                         "examples/lowpoly_lamp.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

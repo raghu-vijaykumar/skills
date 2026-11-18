@@ -87,7 +87,9 @@ def catalog():
             or len(names) != 94 or len(set(names)) != 94):
         raise ValueError("The capability manifest must contain 94 unique skill IDs")
     known = set(names)
+    subject_ids = {entry["id"] for entry in entries if entry["category"] == "Modeling"}
     winners = scorebook()
+    visual_gifs = {}
     for entry in entries:
         name = entry["id"]
         if not re.fullmatch(r"[a-z][a-z0-9-]*", name):
@@ -117,6 +119,15 @@ def catalog():
             if (entry.get("score_record") != "scores.json" or not winner or
                     winner["gif_path"] != entry["evidence"]):
                 raise ValueError(f"Rendered route lacks a scored winning GIF: {name}")
+            if entry["category"] in STYLE_CATEGORIES:
+                previous = visual_gifs.setdefault(entry["evidence"], name)
+                if previous != name:
+                    raise ValueError(f"Visual styles need distinct GIFs: {previous}, {name}")
+        allowed_subjects = entry.get("compatible_subjects")
+        if allowed_subjects is not None and (not isinstance(allowed_subjects, list)
+                                             or not allowed_subjects or
+                                             any(subject not in subject_ids for subject in allowed_subjects)):
+            raise ValueError(f"Invalid compatible subjects for {name}")
         if entry["status"] == "Integrated":
             proof = entry.get("integration_proof")
             if not proof or not (BLENDER / proof).is_file():
@@ -179,10 +190,17 @@ def route(prompt, style=None, subject=None):
         reason = "selected from subject and visual intent"
     # A rendered demo is reusable only for its declared subject, intent, and treatment.
     entry = next((item for item in entries if item["id"] == subject), None)
-    matched = (entry and entry["status"] in {"Rendered", "Integrated"}
-               and chosen in entry.get("compatible_styles", [])
-               and any(re.search(rf"\b{re.escape(cue)}\b", text)
-                       for cue in entry.get("intent_cues", [])))
+    style_entry = next((item for item in entries if item["id"] == chosen), None)
+    cue_matches = lambda item: any(re.search(rf"\b{re.escape(cue)}\b", text)
+                                   for cue in item.get("intent_cues", []))
+    # A demonstrated style-specific builder takes priority over a generic subject demo.
+    if (style_entry and style_entry["status"] in {"Rendered", "Integrated"}
+            and subject in style_entry.get("compatible_subjects", []) and cue_matches(style_entry)):
+        entry = style_entry
+        matched = True
+    else:
+        matched = (entry and entry["status"] in {"Rendered", "Integrated"}
+                   and chosen in entry.get("compatible_styles", []) and cue_matches(entry))
     return {"subject": subject, "style": chosen, "reason": reason,
             "status": entry["status"] if matched else "Catalogued",
             "render_method": entry["method"] if matched else None,

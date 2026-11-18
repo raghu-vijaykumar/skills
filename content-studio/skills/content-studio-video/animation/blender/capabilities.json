@@ -546,9 +546,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/lowpoly-lamp.gif",
+      "review": "lowpoly-review.md",
+      "builder": "examples/lowpoly_lamp.py",
+      "spec": "examples/lowpoly_lamp.json",
+      "compatible_subjects": ["prop-artist", "blender-modeler"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "anime-style",

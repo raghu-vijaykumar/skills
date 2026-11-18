@@ -59,6 +59,31 @@
         }
       ]
     },
+    "lowpoly-style": {
+      "selected": "lowpoly-lamp-v2",
+      "candidates": [
+        {
+          "id": "lowpoly-lamp-v2",
+          "video_sha256": "22e49f9366a85d47917d2278dc1776978925b6517585194b8a27d999ff218951",
+          "gif_sha256": "74cb5ccd7894aa61eeb1ec20d7f734a964c96433f733b6f7c8f88553fcb88b80",
+          "gif_path": "previews/lowpoly-lamp.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [1280, 720],
+          "scores": {
+            "subject_fidelity": 5,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 87,
+          "reviewer": "Content Studio frame and topology review",
+          "review_date": "2026-11-18",
+          "review_note": "A 184-triangle flat-shaded lamp has faceted joints and shade, simple materials, an orthographic camera, a visible head tilt and warm light cue. The notebook is deliberately minimal."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

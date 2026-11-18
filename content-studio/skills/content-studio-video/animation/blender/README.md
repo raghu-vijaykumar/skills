@@ -8,10 +8,11 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Cel character | [Source](examples/character.py) | [Inputs](examples/character.json) | [GIF](previews/character.gif) |
 | Atmospheric corridor | [Source](examples/corridor.py) | [Inputs](examples/corridor.json) | [GIF](previews/corridor.gif) |
 | Measured desk lamp | [Source](examples/lamp.py) | [Inputs](examples/lamp.json) | [GIF](previews/lamp.gif) |
+| Low-poly lamp treatment | [Source](examples/lowpoly_lamp.py) | [Inputs](examples/lowpoly_lamp.json) | [GIF](previews/lowpoly-lamp.gif) |
 
 The [render review](review.md) records the exact encoded assets, hashes, sampled frames, and limits behind these GIFs.
 
-New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The original three gallery specs remain readable under the version 1 contract.
+New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The [low-poly variant](lowpoly-review.md) has a distinct recipe and polygon-budget audit. The original three gallery specs remain readable under the version 1 contract.
 
 ## Score and select output artifacts
 
@@ -21,7 +22,7 @@ Select the highest-scoring candidate that passes technical review and scores at 
 
 ## Rebuild the showcases
 
-From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, or `lamp` and use a new output directory for each preview:
+From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, or `lowpoly_lamp` and use a new output directory for each preview:
 
 ```powershell
 $skill = 'content-studio/skills/content-studio-video/animation/blender'

@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "lowpoly-desk-lamp",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 96,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Lowpoly camera",
+  "objects": [
+    {"id": "base", "name": "SM_Lowpoly_Base"},
+    {"id": "lower-arm", "name": "SM_Lowpoly_Lower_Arm"},
+    {"id": "upper-arm", "name": "SM_Lowpoly_Upper_Arm"},
+    {"id": "shade", "name": "SM_Lowpoly_Shade"},
+    {"id": "bulb", "name": "SM_Lowpoly_Bulb"},
+    {"id": "notebook", "name": "SM_Lowpoly_Notebook"},
+    {"id": "pivot", "name": "Lowpoly lamp pivot"},
+    {"id": "camera", "name": "Lowpoly camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Faceted silhouette starts unlit", "object_ids": ["base", "upper-arm", "shade"]},
+    {"id": "action", "frame": 48, "label": "Lamp bends and lights a sharp pool", "object_ids": ["upper-arm", "shade", "bulb", "notebook"]},
+    {"id": "result", "frame": 96, "label": "Low-poly silhouette holds", "object_ids": ["base", "shade", "bulb"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "lowpoly-geometry", "origin": "procedural", "license": "Original Content Studio low-polygon mesh and materials"}
+  ]
+}

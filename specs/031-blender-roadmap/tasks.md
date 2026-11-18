@@ -25,6 +25,8 @@
 ## Wave 4: Visual treatments
 
 - [ ] T010 [P4] Author the eight core styles with distinct scored GIFs and explicit recipe differences.
+  - [x] T010a Render the low-poly lamp treatment with a distinct scored GIF and a 184-triangle flat-shading audit.
+  - [ ] T010b Complete the remaining seven core style treatments with distinct scored GIFs.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
@@ -40,4 +42,4 @@
 
 ## Dependency order
 
-T001–T006 enable the route builders. T007–T009 precede T010–T013. T014–T016 complete export and final audit. Each logical route may be committed and pushed before later waves finish.
+T001–T006 enable the route builders. The first audited craft benchmark in T007a supports an early T010a style treatment, reflecting the priority on distinct animation styles. Remaining T007–T009 and T010–T013 proceed in independently verified slices; a style example does not advance its standalone material or lighting dependencies. T014–T016 complete export and final audit. Each logical route may be committed and pushed before later waves finish.
