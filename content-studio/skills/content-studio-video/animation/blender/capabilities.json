@@ -974,9 +974,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/mutating-hand.gif",
+      "review": "hand-review.md",
+      "builder": "examples/mutating_hand.py",
+      "spec": "examples/mutating_hand.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["hand"],
+      "score_record": "scores.json"
     },
     {
       "id": "analog-found-footage-horror",

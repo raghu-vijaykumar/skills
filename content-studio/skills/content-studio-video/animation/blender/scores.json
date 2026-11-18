@@ -1045,6 +1045,68 @@
         }
       ]
     },
+    "body-horror-style": {
+      "selected": "mutating-hand-v3-diffusion",
+      "candidates": [
+        {
+          "id": "mutating-hand-v1",
+          "video_sha256": "7a1122b6125f7df7cb660d419bab8025906897dfe83fc0e68c82d8bd56d911c4",
+          "gif_sha256": "952fc0023393c930fab00140179024fc5bf78cae2f1b18e166b06608df5c56ce",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 3, "motion_readability": 3, "composition": 4,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 64,
+          "reviewer": "Content Studio encoded-frame and hand-anatomy review",
+          "review_date": "2026-11-18",
+          "review_note": "The hand opens, but seven total digits include two extras, the small branch holds one size, and its smooth surface feels toy-like. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "mutating-hand-v2",
+          "video_sha256": "3afac14bc4d7872ceab9cab50cfa48afa5d40e338e313bb1a1d4e0351433f98b",
+          "gif_sha256": "6a6bdd1a69949fbb9fc493355ef84e0cb82a120b88330c6284174d3b4a6e1635",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 3, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and hand-anatomy review",
+          "review_date": "2026-11-18",
+          "review_note": "A metal and ceramic branch grows as the fingers unfold and plates spread, but the palm still has two extra digits. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "mutating-hand-v3-bayer",
+          "video_sha256": "405580b2cdc53544889ed6d462370d56d4e2d83528fa94f732d868ee19ec1e5d",
+          "gif_sha256": "9983e5db5a268c4d91df009521ab4b71a0fae945120ba2e1a145d064a6ce7a24",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 74,
+          "reviewer": "Content Studio encoded-frame and hand-anatomy review",
+          "review_date": "2026-11-18",
+          "review_note": "Four ordinary fingers, one thumb, and one branch restore almost-human anatomy; ordered GIF dither makes the skin look checked. Exact MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "mutating-hand-v3-diffusion",
+          "video_sha256": "405580b2cdc53544889ed6d462370d56d4e2d83528fa94f732d868ee19ec1e5d",
+          "gif_sha256": "49f69624e454dc3606f3fd4d3bbbbc18daddf06674b1ecec7a88222eb1fe550c",
+          "gif_path": "previews/mutating-hand.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and hand-anatomy review",
+          "review_date": "2026-11-18",
+          "review_note": "The six-digit hand opens as a fused metal and ceramic branch grows; diffusion dither preserves smoother skin in the README GIF. The procedural forms remain stylized. Exact MP4, GIF decode, isolated hand, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

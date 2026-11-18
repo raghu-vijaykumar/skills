@@ -158,7 +158,7 @@ def route(prompt, style=None, subject=None):
     subject_rules = [
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
-        (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye|traveler|wanderer)\b", "character-artist"),
+        (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -178,6 +178,7 @@ def route(prompt, style=None, subject=None):
     else:
         style_rules = [
             (r"\b(cosmic.horror|eldritch|lovecraftian|void.horror)\b", "cosmic-eldritch-horror"),
+            (r"\b(body.horror|mutation|mutating|flesh.fusion)\b", "body-horror-style"),
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
@@ -231,6 +232,9 @@ def route(prompt, style=None, subject=None):
                          "cosmic-eldritch-horror" if subject == "environment-artist" and
                          re.search(r"\baperture\b", text) and
                          re.search(r"\b(giant|impossible|void|unknowable)\b", text) else
+                         "body-horror-style" if subject == "character-artist" and
+                         re.search(r"\bhand\b", text) and
+                         re.search(r"\b(extra|sixth|fused|metal|unfolds)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

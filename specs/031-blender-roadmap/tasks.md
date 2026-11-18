@@ -51,7 +51,8 @@
   - [x] T011o Render the Frutiger Aero dashboard with two scored candidates and a glossy-aqua, leaf, bubble-trail, and UI audit.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
   - [x] T012a Render the cosmic aperture with three scored candidates and a tiny-witness, broken-geometry, moving-iris, and void audit.
-  - [ ] T012b Complete the remaining seven horror packs with distinct scored GIFs.
+  - [x] T012b Render the body-horror hand with three full renders, four scored GIF outputs, and a corrected sixth-digit anatomy audit.
+  - [ ] T012c Complete the remaining six horror packs with distinct scored GIFs.
 
 ## Wave 5: Settings and genre direction
 

@@ -197,6 +197,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(cosmic["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(cosmic["scenes"][0]["blender"]["builder"],
                          "examples/cosmic_aperture.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            hand = engine.plan({"scenes": [{"id": "hand", "duration_seconds": 3,
+                "visual_intent": "A hand unfolds a fused metal sixth digit"}]})
+        self.assertEqual(hand["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(hand["scenes"][0]["blender"]["builder"],
+                         "examples/mutating_hand.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

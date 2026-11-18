@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "body-horror-mutating-hand",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Body horror hand camera",
+  "variant": 3,
+  "objects": [
+    {"id": "palm", "name": "SM_Body_Horror_Palm"},
+    {"id": "fusion", "name": "SM_Body_Horror_Fusion_0"},
+    {"id": "extra-digit", "name": "SM_Body_Horror_Extra_Digit knuckle control"},
+    {"id": "index", "name": "Hand digit 1 knuckle control"},
+    {"id": "camera", "name": "Body horror hand camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "A familiar curled hand rests in clinical light", "object_ids": ["palm", "index"]},
+    {"id": "mutate", "frame": 36, "label": "The fingers unfold as a steel and ceramic branch grows", "object_ids": ["fusion", "extra-digit"]},
+    {"id": "resolve", "frame": 72, "label": "Six digits hold open over the fused skin and metal palm", "object_ids": ["palm", "extra-digit"]}
+  ],
+  "review_states": ["establish", "mutate", "resolve"],
+  "assets": [
+    {"id": "mutating-hand", "origin": "procedural", "license": "Original Content Studio mutating hand, fusion materials, and motion"}
+  ]
+}
