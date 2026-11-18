@@ -160,7 +160,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(creature|monster|dragon|animal)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
-        (r"\b(room|corridor|environment|landscape|building)\b", "environment-artist"),
+        (r"\b(room|corridor|hallway|hall|environment|landscape|building)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
         (r"\b(prop|object|product|furniture|lamp|chair|bottle)\b", "prop-artist"),
     ]
@@ -177,6 +177,7 @@ def route(prompt, style=None, subject=None):
         reason = "explicit style"
     else:
         style_rules = [
+            (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),

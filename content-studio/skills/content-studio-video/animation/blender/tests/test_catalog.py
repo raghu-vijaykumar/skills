@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 10)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 11)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -68,6 +68,11 @@ class CatalogTests(unittest.TestCase):
                          ("environment-artist", "horror-style"))
         self.assertEqual(horror["builder"], "examples/horror_corridor.py")
         self.assertIsNone(catalog_module.route("A horror desk lamp")["builder"])
+        psx = catalog_module.route("A PSX horror hall with one CRT")
+        self.assertEqual((psx["subject"], psx["style"]),
+                         ("environment-artist", "psx-horror-style"))
+        self.assertEqual(psx["builder"], "examples/psx_horror.py")
+        self.assertIsNone(catalog_module.route("A PSX horror creature")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -106,7 +111,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 11)
+        self.assertEqual(len(catalog_module.scorebook(book)), 12)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -130,7 +135,7 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(generated, catalog_module.markdown_table(catalog_module.catalog()))
         for name in ("clamp", "character", "corridor", "lamp", "handoff",
                      "lowpoly-lamp", "voxel-lamp", "isometric-lamp", "realistic-lamp",
-                     "horror-corridor"):
+                     "horror-corridor", "psx-horror"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

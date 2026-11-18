@@ -184,6 +184,31 @@
         }
       ]
     },
+    "psx-horror-style": {
+      "selected": "psx-horror-v1",
+      "candidates": [
+        {
+          "id": "psx-horror-v1",
+          "video_sha256": "c5351a5adee92fe6cf4cd4f9cb1e383b1b25421092f8f71d123b70547571812a",
+          "gif_sha256": "5c2bbdd5064c7062bffe64e697cfda4839ba421b65e28d4c4a257e8d06cf4d1f",
+          "gif_path": "previews/psx-horror.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [320, 240],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and PSX-budget audit",
+          "review_date": "2026-11-18",
+          "review_note": "The low-resolution, nearest-textured, limited-palette hall advances toward one glowing analog CRT through fog. It has readable console-era crunch, but no affine vertex warp or VHS pass."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

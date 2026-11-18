@@ -539,9 +539,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/psx-horror.gif",
+      "review": "psx-horror-review.md",
+      "builder": "examples/psx_horror.py",
+      "spec": "examples/psx_horror.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["corridor", "hall"],
+      "score_record": "scores.json"
     },
     {
       "id": "lowpoly-style",

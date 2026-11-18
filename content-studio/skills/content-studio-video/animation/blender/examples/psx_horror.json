@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "psx-horror-crt-hall",
+  "width": 320,
+  "height": 240,
+  "fps": 24,
+  "frames": 72,
+  "texture_size_px": 64,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "Standard",
+  "codec": "H264",
+  "camera_object": "PSX eye camera",
+  "objects": [
+    {"id": "floor", "name": "SM_PSX_Floor"},
+    {"id": "left-wall", "name": "SM_PSX_Left_Wall"},
+    {"id": "right-wall", "name": "SM_PSX_Right_Wall"},
+    {"id": "crt", "name": "SM_PSX_CRT_Body"},
+    {"id": "screen", "name": "SM_PSX_CRT_Screen"},
+    {"id": "fog", "name": "PSX distance fog"},
+    {"id": "camera", "name": "PSX eye camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Blocky corridor hides a dormant CRT in the fog", "object_ids": ["floor", "crt", "fog"]},
+    {"id": "action", "frame": 38, "label": "Handheld push and CRT phosphor flicker", "object_ids": ["screen", "camera"]},
+    {"id": "result", "frame": 72, "label": "CRT glows brighter through the limited draw distance", "object_ids": ["screen", "fog", "camera"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "psx-texture", "origin": "procedural", "license": "Original Content Studio 64-pixel procedural atlas"},
+    {"id": "psx-set", "origin": "procedural", "license": "Original Content Studio low-poly corridor and CRT"}
+  ]
+}
