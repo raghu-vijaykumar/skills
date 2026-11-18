@@ -1,6 +1,6 @@
 # Structured image content
 
-The image renderer accepts one JSON card directly. It uses the card's content to choose a diagram, chart, comparison or list arrangement; the selected UI theme changes its visual treatment. The UI theme catalog does not prescribe a subject or provide sample diagrams.
+The image renderer accepts one JSON card directly. It uses the card's content to choose a diagram, chart, comparison or list arrangement; the selected UI theme changes its visual treatment. The [theme examples](../examples/post-themes/) use ten different nontechnical post ideas. They illustrate theme choices, not a fixed topic or required layout.
 
 - `title` is required. Optional `subtitle`, `sourceNote` and `altText` provide context and accessibility.
 - `nodes`: `{id,label,x?,y?,symbol?}`. Optional positions are normalized `0..1`. Symbols can be `terminal`, `service`, `queue`, `process`, `database` or `cloud`. `edges`: `{from,to,label}` with a meaningful relationship label.

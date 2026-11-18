@@ -1,9 +1,9 @@
 # Comic ink
 
-![Comic ink character sample](sample.png)
+![Comic ink character example](sample.png)
 
-Character style ID: `comic-ink`
+Family: **Animation and comics**
 
 Bold comic illustration with confident black ink contours, graphic shadows, restrained halftone texture, and punchy color blocks.
 
-This is an AI-generated sample of an original character. The same character brief and framing were used for every character style. For production, review the generated character, intended identity, rights and final crop.
+The same [original character brief](../../examples/character-brief.txt) is used across this catalog. This generated image demonstrates a treatment; review identity, rights and final crop for any real post.

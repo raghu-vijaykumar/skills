@@ -1,9 +1,9 @@
 # 3D animation
 
-![3D animation character sample](sample.png)
+![3D animation character example](sample.png)
 
-Character style ID: `3d-animation`
+Family: **Dimensional art**
 
 Polished original 3D animated character render with modeled volume, soft studio lighting, expressive features, and tactile materials.
 
-This is an AI-generated sample of an original character. The same character brief and framing were used for every character style. For production, review the generated character, intended identity, rights and final crop.
+The same [original character brief](../../examples/character-brief.txt) is used across this catalog. This generated image demonstrates a treatment; review identity, rights and final crop for any real post.

@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from xml.etree import ElementTree
 
+from PIL import Image
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -22,25 +24,32 @@ CARD = {"title": "A simple note", "body": "One clear idea"}
 
 
 class RenderTests(unittest.TestCase):
-    def test_all_themes_render_without_gallery_diagrams(self):
+    def test_distinct_post_examples_cover_every_theme(self):
         themes = json.loads(render.STYLES.read_text(encoding="utf-8"))["styles"]
-        self.assertGreaterEqual(len(themes), 8)
-        outputs = []
+        self.assertEqual(len(themes), 10)
+        titles = set()
+        structures = set()
         for theme in themes:
             self.assertIn("treatment", theme)
             self.assertNotIn("layout", theme)
-            svg = render.svg_card(CARD, render.style_for(theme["id"]), 1080, 1350, 81)
+            example = ROOT / "examples" / "post-themes" / f"{theme['id']}.json"
+            card = json.loads(example.read_text(encoding="utf-8"))
+            self.assertNotIn("nodes", card)
+            self.assertNotIn("edges", card)
+            self.assertNotIn(card["title"], titles)
+            titles.add(card["title"])
+            structures.add(next(key for key in ("body", "points", "steps", "comparison", "data") if key in card))
+            svg = render.svg_card(card, render.style_for(theme["id"]), 1080, 1350, 81)
             parsed = ElementTree.fromstring(svg)
             self.assertEqual(parsed.attrib["width"], "1080")
-            self.assertIn(CARD["title"], svg)
-            self.assertIn(CARD["body"], svg)
-            outputs.append(svg)
+            self.assertIn(card["title"], svg)
             folder = ROOT / "styles" / theme["id"]
             self.assertTrue((folder / "README.md").is_file())
-            self.assertFalse((folder / "sample.png").exists())
-            self.assertFalse((folder / "sample.svg").exists())
-        self.assertEqual(len(outputs), len(set(outputs)))
-        self.assertFalse((ROOT / "themes-comparison.png").exists())
+            with Image.open(folder / "sample.png") as image:
+                self.assertEqual(image.size, (432, 540))
+            self.assertEqual((folder / "sample.svg").read_text(encoding="utf-8"), svg)
+        self.assertTrue((ROOT / "post-theme-gallery.png").is_file())
+        self.assertGreaterEqual(len(structures), 3)
         self.assertFalse((ROOT / "examples/request-flow.json").exists())
 
     def test_diagram_and_chart_validate_meaning(self):
@@ -77,13 +86,19 @@ class RenderTests(unittest.TestCase):
     def test_character_styles_share_identity_brief(self):
         catalog = json.loads(characters.CATALOG.read_text(encoding="utf-8"))["styles"]
         brief = (ROOT / "examples/character-brief.txt").read_text(encoding="utf-8").strip()
-        self.assertGreaterEqual(len(catalog), 6)
+        self.assertEqual(len(catalog), 30)
+        self.assertEqual(len({style["id"] for style in catalog}), len(catalog))
         for style in catalog:
             prompt = characters.prompt_for(style["id"], brief)
             self.assertIn(brief, prompt)
             self.assertIn(style["prompt"], prompt)
-            self.assertTrue((ROOT / "character-styles" / style["id"] / "sample.png").is_file())
+            self.assertTrue(style["family"])
+            sample = ROOT / "character-styles" / style["id"] / "sample.png"
+            self.assertTrue(sample.is_file())
+            with Image.open(sample) as image:
+                self.assertEqual(image.size, (512, 512))
             self.assertTrue((ROOT / "character-styles" / style["id"] / "README.md").is_file())
+        self.assertTrue((ROOT / "character-style-gallery.jpg").is_file())
         with self.assertRaisesRegex(ValueError, "Unknown"):
             characters.prompt_for("no-such-style", brief)
 

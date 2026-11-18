@@ -1,9 +1,9 @@
 # Editorial collage
 
-![Editorial collage character sample](sample.png)
+![Editorial collage character example](sample.png)
 
-Character style ID: `editorial-collage`
+Family: **Mixed media**
 
 Layered editorial cut-paper collage with torn edges, printed textures, overlapping colored paper, and purposeful negative space.
 
-This is an AI-generated sample of an original character. The same character brief and framing were used for every character style. For production, review the generated character, intended identity, rights and final crop.
+The same [original character brief](../../examples/character-brief.txt) is used across this catalog. This generated image demonstrates a treatment; review identity, rights and final crop for any real post.

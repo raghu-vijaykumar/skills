@@ -304,13 +304,17 @@ def comparison(root, card, style, region):
     x0, y0, w, h = region
     gap = 25
     cw = (w - gap) / 2
+    # Keep short comparisons visually centered while allowing longer lists to grow.
+    needed = 180 + max(len(side.get("points", [])) for side in card["comparison"]) * 85
+    panel_h = min(h, max(480, needed))
+    panel_y = y0 + (h - panel_h) / 2
     for index, side in enumerate(card["comparison"]):
         x = x0 + index * (cw + gap)
-        panel(root, style, x, y0, cw, h, accent=index == 0)
-        element(root, "rect", x=x, y=y0, width=cw, height=13, fill=style["accent"] if index == 0 else style["muted"])
-        wrapped(root, side["label"], x + 28, y0 + 65, cw - 56, 34, style["ink"], style["font"], "bold", 2)
+        panel(root, style, x, panel_y, cw, panel_h, accent=index == 0)
+        element(root, "rect", x=x, y=panel_y, width=cw, height=13, fill=style["accent"] if index == 0 else style["muted"])
+        wrapped(root, side["label"], x + 28, panel_y + 65, cw - 56, 34, style["ink"], style["font"], "bold", 2)
         for number, point in enumerate(side.get("points", [])[:6]):
-            wrapped(root, f"{number+1}. {point}", x + 28, y0 + 145 + number * 85, cw - 56, 23, style["ink"], style["font"], max_lines=2)
+            wrapped(root, f"{number+1}. {point}", x + 28, panel_y + 145 + number * 85, cw - 56, 23, style["ink"], style["font"], max_lines=2)
 
 
 def list_panel(root, card, style, region):
@@ -320,18 +324,45 @@ def list_panel(root, card, style, region):
         raise ValueError("A non-diagram card needs steps, points, comparison, data or body")
     if len(points) > 7:
         raise ValueError("Too many points for one mobile frame; use a carousel")
+    if card.get("body") and not card.get("steps") and not card.get("points"):
+        # A single post thought is a typographic hero, not a numbered list with empty space.
+        if style["treatment"] == "minimal":
+            element(root, "rect", x=x0+12, y=y0+h*0.24, width=8, height=h*0.42, fill=style["accent"])
+            text_x, text_w = x0+62, w-110
+        else:
+            panel(root, style, x0+18, y0+h*0.13, w-36, h*0.70, accent=True)
+            text_x, text_w = x0+70, w-140
+        wrapped(root, card["body"], text_x, y0+h*0.43, text_w, 58,
+                style["ink"], style["font"], "bold", 4)
+        return
+    if style["treatment"] == "bento" and len(points) == 3:
+        gap = 24
+        slots = [(x0+15, y0+25, w-30, h*0.40),
+                 (x0+15, y0+h*0.46, (w-54)/2, h*0.40),
+                 (x0+39+(w-54)/2, y0+h*0.46, (w-54)/2, h*0.40)]
+        for index, (point, (x, y, tw, th)) in enumerate(zip(points, slots)):
+            value = point if isinstance(point, str) else point.get("text") or point.get("heading")
+            if not str(value or "").strip():
+                raise ValueError("Every point needs text")
+            panel(root, style, x, y, tw, th, accent=index != 1)
+            txt(root, f"0{index+1}", x+35, y+95, 32, style["accent"], "bold", style["font"])
+            wrapped(root, value, x+35, y+th*0.62, tw-70, 40 if index == 0 else 32,
+                    style["ink"], style["font"], "bold", 3)
+        return
     item_h = h / len(points)
     for index, point in enumerate(points):
         value = point if isinstance(point, str) else point.get("text") or point.get("heading")
         if not str(value or "").strip():
             raise ValueError("Every point needs text")
         y = y0 + index * item_h
-        element(root, "circle", cx=x0 + 24, cy=y + 31, r=23, fill=style["accent"])
-        txt(root, str(index + 1), x0 + 24, y + 40, 24, style["background"], "bold", style["font"], "middle")
-        wrapped(root, value, x0 + 75, y + 37, w - 80, 31, style["ink"], style["font"], "normal", 3)
-        if index < len(points) - 1:
-            element(root, "line", x1=x0, y1=y + item_h - 6, x2=x0 + w, y2=y + item_h - 6,
-                    stroke=style["line"], stroke_opacity="0.5", stroke_width=2)
+        panel(root, style, x0+12, y+10, w-24, item_h-25, accent=index % 2 == 0)
+        element(root, "circle", cx=x0 + 70, cy=y + item_h/2, r=27, fill=style["accent"])
+        txt(root, str(index + 1), x0 + 70, y + item_h/2 + 10, 27,
+            style["background"], "bold", style["font"], "middle")
+        text_size = min(37, max(22, item_h*0.20))
+        max_lines = min(3, max(1, int((item_h-42)/(text_size*1.25))))
+        wrapped(root, value, x0 + 125, y + item_h/2 + 12, w - 165, text_size,
+                style["ink"], style["font"], "bold", max_lines)
 
 
 def svg_card(card, style, width, height, margin, slide_number=None):
