@@ -73,6 +73,7 @@ for the final picture and audio export.
 - Rejects an actual opening, intercue, or ending narration gap above five seconds by default. Use `--max-narration-gap` only when a longer music/ambience beat is explicitly planned and reviewed; cue duration estimates do not substitute for the measured WAV gap.
 - Requires a completed `scene-review.json` for the exact script and picture. The review covers the meaning of the line as well as its start and end. A duration-only assembly validates the script review but needs later exact-picture verification.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
+- With `--video`, the assembled WAV ends at the picture duration after checking that the last spoken cue ends inside it. The duration-only route retains its short voice-only tail for review.
 - Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
 - An overlong cue fails before preview encoding. Change the script and regenerate that cue at the accepted pace.
 

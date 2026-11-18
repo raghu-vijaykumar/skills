@@ -209,3 +209,12 @@ def timeline_summary(placed: list[dict], video_seconds: float) -> dict:
             if item["needs_review"]
         ],
     }
+
+
+def picture_mix_seconds(placed: list[dict], video_seconds: float) -> float:
+    """End picture-backed audio with the picture without clipping spoken cues."""
+    if not placed:
+        raise ValueError("no placed segments")
+    if max(float(item["end"]) for item in placed) > video_seconds + 0.001:
+        raise ValueError("spoken voice extends past the picture")
+    return round(video_seconds, 3)

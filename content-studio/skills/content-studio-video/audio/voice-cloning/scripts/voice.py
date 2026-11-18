@@ -365,6 +365,10 @@ def cmd_assemble(workspace, args):
         strict_scene_slots=True,
     )
     summary = narration.timeline_summary(placed, video_seconds)
+    if video is not None:
+        # The planned 0.4 s voice-only tail is silence, not narration. Bound a
+        # picture-backed WAV to its video so the native timeline never discards speech.
+        summary["mix_seconds"] = narration.picture_mix_seconds(placed, video_seconds)
     # Continuous narration is checked from measured WAVs, not authored slots.
     # A short rewrite can create a long silent gap even when every cue fits.
     if summary["max_narration_gap_seconds"] > args.max_narration_gap + 0.05:

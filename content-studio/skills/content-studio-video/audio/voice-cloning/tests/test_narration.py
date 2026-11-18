@@ -136,6 +136,14 @@ class FitTimelineTest(unittest.TestCase):
         )
         self.assertEqual(placed[0]["end"], 10.0)
 
+    def test_picture_mix_ends_with_video_after_last_spoken_word(self):
+        placed = [{"id": "last", "end": 9.872}]
+        self.assertEqual(narration.picture_mix_seconds(placed, 10.0), 10.0)
+
+    def test_picture_mix_rejects_spoken_voice_after_video(self):
+        with self.assertRaisesRegex(ValueError, "spoken voice extends past the picture"):
+            narration.picture_mix_seconds([{"id": "last", "end": 10.02}], 10.0)
+
     def test_caps_tempo_and_reports_overrun(self):
         placed = narration.fit_timeline(
             self.segments(), {"a": 30.0, "b": 10.0}, 40.0, max_tempo=1.12
