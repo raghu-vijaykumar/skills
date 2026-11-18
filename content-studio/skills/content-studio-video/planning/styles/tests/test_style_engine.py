@@ -333,6 +333,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-action-combat")
         self.assertEqual(genre_override["scenes"][0]["blender"]["builder"],
                          "examples/action_arena.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            shooter = engine.plan({"scenes": [{"id": "range", "duration_seconds": 3,
+                "visual_intent": "An FPS shooter rooftop cover lane"}]})
+        self.assertEqual(shooter["scenes"][0]["blender"]["genre"],
+                         "genre-shooter")
+        self.assertEqual(shooter["scenes"][0]["blender"]["builder"],
+                         "examples/shooter_rooftop.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

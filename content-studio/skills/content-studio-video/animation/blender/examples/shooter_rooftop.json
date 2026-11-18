@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "shooter-rooftop-cover-lane",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Shooter human-height first-person camera",
+  "variant": 2,
+  "objects": [
+    {"id": "floor", "name": "SM_Shooter_Rooftop_Floor"},
+    {"id": "near-cover", "name": "SM_Shooter_Near_Chest_Cover"},
+    {"id": "mid-cover", "name": "SM_Shooter_Mid_Half_Cover"},
+    {"id": "landmark", "name": "SM_Shooter_Orange_Landmark_Tower"},
+    {"id": "target", "name": "SM_Shooter_Red_Target"},
+    {"id": "loot", "name": "SM_Shooter_Lime_Loot_Case"},
+    {"id": "gun", "name": "SM_Shooter_Visible_Gun_Body"},
+    {"id": "camera", "name": "Shooter human-height first-person camera"}
+  ],
+  "beats": [
+    {"id": "cover", "frame": 1, "label": "First-person camera surveys two safe covers and a distant red target", "object_ids": ["near-cover", "mid-cover", "target", "gun"]},
+    {"id": "peek", "frame": 51, "label": "A human-height peek opens a clear lane and the foreground gun flashes", "object_ids": ["camera", "near-cover", "target", "gun"]},
+    {"id": "pickup", "frame": 72, "label": "The red target tips away and a bright loot case opens near the orange landmark", "object_ids": ["target", "loot", "landmark"]}
+  ],
+  "review_states": ["cover", "peek", "pickup"],
+  "assets": [
+    {"id": "rooftop-range", "origin": "procedural", "license": "Original Content Studio rooftop, cover, landmarks, target, loot case, and foreground gun"}
+  ]
+}

@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 47)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 48)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -276,6 +276,12 @@ class CatalogTests(unittest.TestCase):
                                                 style="anime-style")["builder"])
         with self.assertRaisesRegex(ValueError, "Unknown Blender genre"):
             catalog_module.route("An arena", genre="unlisted-genre")
+        shooter = catalog_module.route("An FPS shooter rooftop cover lane")
+        self.assertEqual((shooter["subject"], shooter["style"], shooter["genre"]),
+                         ("environment-artist", "stylized-style", "genre-shooter"))
+        self.assertEqual(shooter["builder"], "examples/shooter_rooftop.py")
+        self.assertIsNone(catalog_module.route("An FPS shooter rooftop cover lane",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -314,7 +320,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 48)
+        self.assertEqual(len(catalog_module.scorebook(book)), 49)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -358,6 +364,10 @@ class CatalogTests(unittest.TestCase):
         combat = book["routes"]["genre-action-combat"]
         self.assertEqual(combat["selected"], "action-arena-v2")
         self.assertEqual([candidate["score_total"] for candidate in combat["candidates"]],
+                         [63, 78])
+        shooter = book["routes"]["genre-shooter"]
+        self.assertEqual(shooter["selected"], "shooter-rooftop-v2")
+        self.assertEqual([candidate["score_total"] for candidate in shooter["candidates"]],
                          [63, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)

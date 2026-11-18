@@ -1321,9 +1321,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/shooter-rooftop.gif",
+      "review": "shooter-review.md",
+      "builder": "examples/shooter_rooftop.py",
+      "spec": "examples/shooter_rooftop.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["shooter", "fps", "tps", "rooftop cover lane", "extraction shooter"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-rpg",

@@ -40,3 +40,4 @@ The [`dream-surreal-mood` tide](blender/dream-tide-review.md) adds a scored past
 The [`neon-retrofuturism` highway](blender/retrowave-review.md) adds a scored outrun lane with a perspective grid, striped sun, chrome coupe, and magenta light.
 The [`brutalist-mood` archive](blender/brutalist-review.md) adds a scored monumental concrete gateway with a tiny witness and a sliding shutter reveal.
 The [`genre-action-combat` arena](blender/action-review.md) adds a scored sword-and-shield clash with readable fight space and a breaking prop.
+The [`genre-shooter` rooftop](blender/shooter-review.md) adds a scored first-person cover peek with a target, navigation landmark, and readable loot case.

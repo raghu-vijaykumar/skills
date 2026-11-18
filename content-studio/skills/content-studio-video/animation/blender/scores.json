@@ -1843,6 +1843,50 @@
         }
       ]
     },
+    "genre-shooter": {
+      "selected": "shooter-rooftop-v2",
+      "candidates": [
+        {
+          "id": "shooter-rooftop-v1",
+          "video_sha256": "91d3c54d09df345138d8edcea93fe8ac0a6ba5e3579e6e0de3c44a4eb3d98e7d",
+          "gif_sha256": "29d0ea4cfce338e956601dab402c1bcf7290b8a3a746626817315f136c837638",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and shooter-lane review",
+          "review_date": "2026-11-19",
+          "review_note": "Human-height FPS camera, asymmetric cover, landmark, and bright loot are clear, but the camera barely peeks and the target stays hidden and upright. Complete MP4, GIF, isolated sightline, and saved-scene audit passed."
+        },
+        {
+          "id": "shooter-rooftop-v2",
+          "video_sha256": "d8bd4a7bc65d82c96d684c3ecc82273d19c5ed4d5de596d4c1f9db53e231dbd1",
+          "gif_sha256": "a56ff2409a5d73d7e38a549c4dcdcf4eadaf4f878a847013e3d7007cb7329094",
+          "gif_path": "previews/shooter-rooftop.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and shooter-lane review",
+          "review_date": "2026-11-19",
+          "review_note": "The human-height camera sidesteps from chest cover to center a red silhouette, flashes the foreground gun, then pushes while the target tips and a lime loot case opens. Simplified target and gun geometry cap finish. Complete MP4, GIF, isolated sightline, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

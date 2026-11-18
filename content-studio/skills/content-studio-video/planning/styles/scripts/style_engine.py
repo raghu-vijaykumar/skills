@@ -33,6 +33,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "outrun", "highway", "striped", "sunset", "chrome",
     "brutalist", "brutalism", "monumental", "concrete", "shutter",
     "combat", "arena", "sparring", "brawler", "shield", "sword",
+    "shooter", "fps", "tps", "rooftop", "sightline", "extraction",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.
