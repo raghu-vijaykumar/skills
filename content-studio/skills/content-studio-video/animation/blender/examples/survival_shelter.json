@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "id": "survival-shelter-crafting-beacon",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Survival safe-unsafe overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "safe", "name": "SM_Survival_Safe_Zone"},
+    {"id": "unsafe", "name": "SM_Survival_Unsafe_Zone"},
+    {"id": "boundary", "name": "SM_Survival_Safety_Boundary"},
+    {"id": "bench", "name": "SM_Survival_Iconic_Crafting_Bench"},
+    {"id": "wood", "name": "SM_Survival_Wood_Log_0"},
+    {"id": "water", "name": "SM_Survival_Water_Canteen"},
+    {"id": "metal", "name": "SM_Survival_Steel_Scrap_0"},
+    {"id": "cart", "name": "SM_Survival_Salvage_Cart_Rig"},
+    {"id": "fire", "name": "SM_Survival_Crafted_Fire"},
+    {"id": "watcher", "name": "SM_Survival_Hazard_Watcher_Rig"},
+    {"id": "camera", "name": "Survival safe-unsafe overview camera"}
+  ],
+  "beats": [
+    {"id": "scarcity", "frame": 1, "label": "Wood, water and metal sit on a bench behind the safe-zone boundary", "object_ids": ["safe", "unsafe", "boundary", "bench", "wood", "water", "metal"]},
+    {"id": "salvage", "frame": 52, "label": "A resource cart returns from the cold unsafe lane toward the bench", "object_ids": ["cart", "unsafe", "bench"]},
+    {"id": "beacon", "frame": 72, "label": "A crafted campfire lights the refuge as the hazard watcher withdraws", "object_ids": ["fire", "safe", "watcher", "camera"]}
+  ],
+  "review_states": ["scarcity", "salvage", "beacon"],
+  "assets": [
+    {"id": "survival-refuge", "origin": "procedural", "license": "Original Content Studio shelter, resource props, cart, hearth, and unsafe-zone markers"}
+  ]
+}

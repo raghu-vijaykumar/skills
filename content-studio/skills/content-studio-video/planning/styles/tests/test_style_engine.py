@@ -346,6 +346,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(rpg["scenes"][0]["blender"]["genre"], "genre-rpg")
         self.assertEqual(rpg["scenes"][0]["blender"]["builder"],
                          "examples/rpg_quest_hub.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            survival = engine.plan({"scenes": [{"id": "refuge", "duration_seconds": 3,
+                "visual_intent": "A survival shelter with a crafting bench"}]})
+        self.assertEqual(survival["scenes"][0]["blender"]["genre"], "genre-survival")
+        self.assertEqual(survival["scenes"][0]["blender"]["builder"],
+                         "examples/survival_shelter.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

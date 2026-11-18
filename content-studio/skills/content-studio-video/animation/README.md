@@ -42,3 +42,4 @@ The [`brutalist-mood` archive](blender/brutalist-review.md) adds a scored monume
 The [`genre-action-combat` arena](blender/action-review.md) adds a scored sword-and-shield clash with readable fight space and a breaking prop.
 The [`genre-shooter` rooftop](blender/shooter-review.md) adds a scored first-person cover peek with a target, navigation landmark, and readable loot case.
 The [`genre-rpg` hub](blender/rpg-review.md) adds a scored two-region quest scene with class-readable gear and an opening rarity chest.
+The [`genre-survival` shelter](blender/survival-review.md) adds a scored safe and unsafe zone scene with resources, a returning cart, and a campfire reveal.

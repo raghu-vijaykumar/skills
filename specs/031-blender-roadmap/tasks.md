@@ -75,7 +75,8 @@
   - [x] T013k Render one action-combat arena with two scored full outputs, an isolated fighter preview, fight-plane and clash audit, and a distinct best GIF.
   - [x] T013l Render one FPS rooftop cover lane with two scored full outputs, an isolated sightline preview, cover and camera-height audit, and a distinct best GIF.
   - [x] T013m Render one RPG quest hub with two scored full outputs, an isolated loot preview, region and class-gear audit, and a distinct best GIF.
-  - [ ] T013n Complete the ten remaining genre directions and console-era route.
+  - [x] T013n Render one survival shelter with two scored full outputs, isolated resource preview, safe and unsafe zone audit, and a distinct best GIF.
+  - [ ] T013o Complete the nine remaining genre directions and console-era route.
 
 ## Wave 6: Delivery and QA
 

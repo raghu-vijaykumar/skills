@@ -1931,6 +1931,50 @@
         }
       ]
     },
+    "genre-survival": {
+      "selected": "survival-shelter-v2",
+      "candidates": [
+        {
+          "id": "survival-shelter-v1",
+          "video_sha256": "351ff2915c08b4d999eb37d5ce5b3e0296f649630dff9270a5878f5bb42ca45f",
+          "gif_sha256": "334a4128178941bf1289a7160c9cc554c7a62a18685f9aca4d81727646daa3fc",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and survival-shelter review",
+          "review_date": "2026-11-19",
+          "review_note": "Warm safe and cold unsafe areas, stocked crafting bench, salvage cart, and unlit hearth read, but the cart barely moves and no crafted beacon appears. Full MP4, GIF, isolated shelter props, and saved-scene audit passed."
+        },
+        {
+          "id": "survival-shelter-v2",
+          "video_sha256": "9d520c43c70fa6007628716d8c9407d969688f13db8596255089e70bc6318d19",
+          "gif_sha256": "8e4fbb7bf476beff25d3eb22a13df41ec0c75700f63eba1117f20a11a9cf7dae",
+          "gif_path": "previews/survival-shelter.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and survival-shelter review",
+          "review_date": "2026-11-19",
+          "review_note": "The cart returns across the bright safety boundary, a small campfire lights, the hazard marker withdraws, and the camera pushes closer. Minimal prop geometry caps finish. Full MP4, GIF, isolated shelter props, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

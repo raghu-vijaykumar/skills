@@ -1361,9 +1361,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/survival-shelter.gif",
+      "review": "survival-review.md",
+      "builder": "examples/survival_shelter.py",
+      "spec": "examples/survival_shelter.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["survival shelter", "survival crafting", "crafting bench", "survival refuge"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-stealth",

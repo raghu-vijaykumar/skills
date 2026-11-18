@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 49)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 50)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -289,6 +289,12 @@ class CatalogTests(unittest.TestCase):
         self.assertIsNone(catalog_module.route("An RPG quest hub",
                                                 style="anime-style")["builder"])
         self.assertIsNone(catalog_module.route("An RPG character portrait")["builder"])
+        survival = catalog_module.route("A survival shelter with a crafting bench")
+        self.assertEqual((survival["subject"], survival["style"], survival["genre"]),
+                         ("environment-artist", "stylized-style", "genre-survival"))
+        self.assertEqual(survival["builder"], "examples/survival_shelter.py")
+        self.assertIsNone(catalog_module.route("A survival shelter with a crafting bench",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -327,7 +333,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 50)
+        self.assertEqual(len(catalog_module.scorebook(book)), 51)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -379,6 +385,10 @@ class CatalogTests(unittest.TestCase):
         rpg = book["routes"]["genre-rpg"]
         self.assertEqual(rpg["selected"], "rpg-quest-hub-v2")
         self.assertEqual([candidate["score_total"] for candidate in rpg["candidates"]],
+                         [63, 78])
+        survival = book["routes"]["genre-survival"]
+        self.assertEqual(survival["selected"], "survival-shelter-v2")
+        self.assertEqual([candidate["score_total"] for candidate in survival["candidates"]],
                          [63, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
