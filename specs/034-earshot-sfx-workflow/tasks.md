@@ -6,4 +6,4 @@
 - [x] T04 Export pending cues to timeline and Remotion declarations; require review for final use.
 - [x] T05 Add HDR/Dolby Vision audio-only picture-copy route with packet and metadata verification.
 - [x] T06 Add focused fixture tests, skill/method docs, and inspect rendered evidence.
-- [ ] T07 Push the reviewed feature commit; repository-wide capability gate has two preexisting documentation blockers outside this feature.
+- [x] T07 Push the reviewed feature commit; repository-wide capability gate has two preexisting documentation blockers outside this feature.

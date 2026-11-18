@@ -21,3 +21,5 @@
 - `npm run check:capabilities` with those two temporary corrections: passed (48 matrices, 146 methods). Without them, the first failure is the preexisting voice-cloning row marked `Supported preview` instead of `Supported`; the next is a preexisting scene-review row without a local evidence link.
 
 Automatic approval review rejected committing those unrelated table corrections directly to `main`, so they were restored and excluded from this feature. They need separate authorization or a separate maintenance task.
+
+Feature commit `4ba0297b6dee44f81d08550dcbd78898e4db4686` was pushed to `origin/main`; `git ls-remote` returned the same revision after the push.
