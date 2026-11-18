@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 70)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 72)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -397,6 +397,17 @@ class CatalogTests(unittest.TestCase):
                           dressing["capability"]),
                          ("environment-artist", "stylized-style", "set-dressing"))
         self.assertEqual(dressing["builder"], "examples/cozy_nook.py")
+        car = catalog_module.route("A race car model")
+        self.assertEqual((car["subject"], car["style"], car["builder"]),
+                         ("vehicle-artist", "stylized-style",
+                          "examples/circuit_sprint.py"))
+        kelp_model = catalog_module.route("A kelp frond vegetation")
+        self.assertEqual((kelp_model["subject"], kelp_model["style"],
+                          kelp_model["builder"]),
+                         ("vegetation-artist", "stylized-style",
+                          "examples/kelp_forest.py"))
+        self.assertIsNone(catalog_module.route("A kelp frond vegetation",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")

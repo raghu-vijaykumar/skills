@@ -76,9 +76,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/circuit-sprint.gif",
+      "review": "modeling-reuse-review.md",
+      "builder": "examples/circuit_sprint.py",
+      "spec": "examples/circuit_sprint.json",
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["race car model"],
+      "prefer_subject_cue": true,
+      "score_record": "scores.json",
+      "score_route": "genre-racing-sports"
     },
     {
       "id": "environment-artist",
@@ -110,9 +118,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/kelp-forest.gif",
+      "review": "modeling-reuse-review.md",
+      "builder": "examples/kelp_forest.py",
+      "spec": "examples/kelp_forest.json",
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["kelp frond vegetation"],
+      "prefer_subject_cue": true,
+      "score_record": "scores.json",
+      "score_route": "biome-worlds"
     },
     {
       "id": "character-artist",

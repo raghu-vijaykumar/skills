@@ -57,3 +57,4 @@ The [material and lighting lab](blender/material-light-review.md) adds a clay-to
 The [narrative technical evidence](blender/narrative-technical-review.md) connects the scored station shot to bounded camera, animation, and headless-rendering routes.
 The [Geometry Nodes walkway](blender/geometry-node-review.md) adds an audited parametric kit and organized set assembly with a scored traversal GIF.
 The [reading-nook set-dressing evidence](blender/set-dressing-review.md) reuses a scored interior GIF for its prop-cluster and clutter audit.
+The [vehicle and vegetation modeling evidence](blender/modeling-reuse-review.md) connects scored car and kelp shots to bounded asset craft routes.

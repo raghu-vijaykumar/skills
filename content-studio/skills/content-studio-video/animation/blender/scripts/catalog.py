@@ -170,6 +170,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
     text = prompt.lower()
     entries = catalog()
     subject_rules = [
+        (r"\bkelp.frond.vegetation\b", "vegetation-artist"),
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat|longship)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
         (r"(?=.*\b(?:alley|cyberpunk)\b)(?=.*\bdrone\b)", "environment-artist"),
@@ -321,7 +322,11 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
-        default_style = ("realistic-style" if
+        default_style = ("stylized-style" if subject == "vehicle-artist" and
+                         re.search(r"\brace.car.model\b", text) else
+                         "stylized-style" if subject == "vegetation-artist" and
+                         re.search(r"\bkelp.frond.vegetation\b", text) else
+                         "realistic-style" if
                          selected_capability in {"materials", "lookdev", "lighting"}
                          else "stylized-style" if
                          selected_capability in {"camera-cinematography", "rendering", "animation", "geometry-nodes", "procedural-modeling", "scene-assembly"}
@@ -456,6 +461,10 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
                    and subject in era_entry.get("compatible_subjects", [])
                    and chosen in era_entry.get("compatible_styles", [])
                    and (era is not None or cue_matches(era_entry)))
+    elif (entry and entry.get("prefer_subject_cue") and cue_matches(entry)):
+        # A named asset benchmark takes precedence over an inferred background world.
+        matched = (entry["status"] in {"Rendered", "Integrated"}
+                   and chosen in entry.get("compatible_styles", []))
     elif (world_entry and world_entry["status"] in {"Rendered", "Integrated"}
             and subject in world_entry.get("compatible_subjects", [])
             and chosen in world_entry.get("compatible_styles", [])

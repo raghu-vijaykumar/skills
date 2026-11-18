@@ -455,6 +455,15 @@ class StyleEngineTests(unittest.TestCase):
                          "set-dressing")
         self.assertEqual(dressing["scenes"][0]["blender"]["builder"],
                          "examples/cozy_nook.py")
+        for prompt, subject, builder in (
+                ("A race car model", "vehicle-artist", "examples/circuit_sprint.py"),
+                ("A kelp frond vegetation", "vegetation-artist",
+                 "examples/kelp_forest.py")):
+            with patch.object(engine, "renderer_executable", return_value=sys.executable):
+                asset = engine.plan({"scenes": [{"id": "asset", "duration_seconds": 3,
+                    "visual_intent": prompt}]})
+            self.assertEqual(asset["scenes"][0]["blender"]["subject"], subject)
+            self.assertEqual(asset["scenes"][0]["blender"]["builder"], builder)
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
