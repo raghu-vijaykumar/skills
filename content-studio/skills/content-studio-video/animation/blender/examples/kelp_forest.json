@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "underwater-kelp-biome",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Kelp forest inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "bed", "name": "SM_Kelp_Silt_Bed"},
+    {"id": "kelp", "name": "SM_Kelp_Blades_Rig_0"},
+    {"id": "coral", "name": "Kelp orange coral stalk 0"},
+    {"id": "fish", "name": "SM_Kelp_Fish_School_Rig"},
+    {"id": "bubbles", "name": "SM_Kelp_Bubble_Rig"},
+    {"id": "camera", "name": "Kelp forest inspection camera"}
+  ],
+  "beats": [
+    {"id": "biome", "frame": 1, "label": "A kelp forest grows over silt and algae-worn rock", "object_ids": ["bed", "kelp", "coral"]},
+    {"id": "school", "frame": 48, "label": "Amber fish cross swaying kelp and a bubble column", "object_ids": ["fish", "kelp", "bubbles"]},
+    {"id": "glide", "frame": 72, "label": "The school passes right as the camera glides into filtered light", "object_ids": ["fish", "camera"]}
+  ],
+  "review_states": ["biome", "school", "glide"],
+  "assets": [
+    {"id": "kelp-biome", "origin": "procedural", "license": "Original Content Studio kelp, rock, coral, fish, bubbles, and seabed"}
+  ]
+}

@@ -1461,6 +1461,40 @@
         }
       ]
     },
+    "biome-worlds": {
+      "selected": "kelp-forest-v2",
+      "candidates": [
+        {
+          "id": "kelp-forest-v1",
+          "video_sha256": "2e10ef842c624af4f65e1ef058d217ba9ddf84f518fea4e4e4c12153a5de3041",
+          "gif_sha256": "af5a571ffb78806b7f03fbae9bd04ba886fae9ea0b48fa70632ea9555aa96a29",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and underwater biome review",
+          "review_date": "2026-11-19",
+          "review_note": "The blue kelp bed, algae rocks, coral, bubbles, and fish establish an underwater biome, but most of the scene remains static. Full MP4, GIF decode, isolated fish school, and saved-scene audit passed."
+        },
+        {
+          "id": "kelp-forest-v2",
+          "video_sha256": "e650345132f311f062d068d46ffda441939dad5435557cbf1cb62d0732b401b2",
+          "gif_sha256": "9bb3cd22b144fbb1d76c41d8a9664073a73064d876bdb3749daeb0bd9adce45e",
+          "gif_path": "previews/kelp-forest.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and underwater biome review",
+          "review_date": "2026-11-19",
+          "review_note": "All seven amber fish move across the kelp field as a bubble column rises, the blades sway, and the camera advances. Stylized geometry and absent volumetric haze limit finish to 3/5. Full MP4, GIF, isolated fish, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

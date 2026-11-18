@@ -33,3 +33,4 @@ The [`fantasy-worlds` gate](blender/fantasy-review.md) adds a scored medieval lo
 The [`sci-fi-punk-worlds` alley](blender/cyberpunk-review.md) adds a scored cyberpunk lane with neon tower facades and a traversing parcel drone.
 The [`historical-worlds` longship](blender/viking-review.md) adds a scored Viking period lane with a wool sail, shields, and camera-follow crossing.
 The [`apocalypse-worlds` outpost](blender/wasteland-review.md) adds a scored roadside collapse lane with improvised repairs, a salvaged hauler, and a dust sweep.
+The [`biome-worlds` kelp forest](blender/kelp-review.md) adds a scored underwater lane with swaying plants, fish, bubbles, and a camera glide.

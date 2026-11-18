@@ -25,7 +25,8 @@ ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "firesh
 # Period cues can suggest Blender even when the scene never names a visual style.
 STYLES["cinematic-3d"]["keywords"].extend([
     "viking", "longship", "fjord", "apocalypse", "apocalyptic", "wasteland",
-    "scavenger", "outpost", "roadside", "fuel", "station",
+    "scavenger", "outpost", "roadside", "fuel", "station", "underwater",
+    "kelp", "reef", "seabed", "fish", "bubbles",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

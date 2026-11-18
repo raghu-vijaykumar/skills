@@ -1181,9 +1181,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/kelp-forest.gif",
+      "review": "kelp-review.md",
+      "builder": "examples/kelp_forest.py",
+      "spec": "examples/kelp_forest.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["underwater", "kelp", "reef", "seabed"],
+      "score_record": "scores.json"
     },
     {
       "id": "cozy-wholesome-mood",

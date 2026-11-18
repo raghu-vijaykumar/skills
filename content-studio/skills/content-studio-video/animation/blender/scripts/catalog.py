@@ -173,6 +173,7 @@ def route(prompt, style=None, subject=None, world=None):
         (r"\b(cabin|trail|woodland|castle|keep|gate|drawbridge|moat)\b", "environment-artist"),
         (r"\b(alley|cyberpunk)\b", "environment-artist"),
         (r"\b(wasteland|outpost|roadside|fuel.station|gas.station)\b", "environment-artist"),
+        (r"\b(underwater|kelp|reef|seabed)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -195,6 +196,8 @@ def route(prompt, style=None, subject=None, world=None):
                                re.search(r"\b(viking|longship)\b", text)
                                else "apocalypse-worlds" if
                                re.search(r"\b(post.apocalyptic|post.apoc|apocalypse|wasteland)\b", text)
+                               else "biome-worlds" if
+                               re.search(r"\b(underwater|kelp|reef|seabed)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -294,6 +297,8 @@ def route(prompt, style=None, subject=None, world=None):
                          re.search(r"\b(viking|longship)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\b(post.apocalyptic|post.apoc|apocalypse|wasteland)\b", text) else
+                         "stylized-style" if subject == "environment-artist" and
+                         re.search(r"\b(underwater|kelp|reef|seabed)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

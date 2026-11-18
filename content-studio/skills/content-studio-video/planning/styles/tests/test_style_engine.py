@@ -271,6 +271,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/wasteland_station.py")
         self.assertEqual(wasteland["scenes"][0]["blender"]["world"],
                          "apocalypse-worlds")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            kelp = engine.plan({"scenes": [{"id": "kelp", "duration_seconds": 3,
+                "visual_intent": "An underwater kelp forest with fish and rising bubbles"}]})
+        self.assertEqual(kelp["scenes"][0]["blender"]["builder"],
+                         "examples/kelp_forest.py")
+        self.assertEqual(kelp["scenes"][0]["blender"]["world"],
+                         "biome-worlds")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

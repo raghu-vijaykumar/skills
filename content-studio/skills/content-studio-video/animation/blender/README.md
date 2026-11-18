@@ -43,6 +43,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Cyberpunk courier alley | [Source](examples/cyberpunk_alley.py) | [Inputs](examples/cyberpunk_alley.json) | [GIF](previews/cyberpunk-alley.gif) |
 | Viking longship | [Source](examples/viking_longship.py) | [Inputs](examples/viking_longship.json) | [GIF](previews/viking-longship.gif) |
 | Wasteland fuel stop | [Source](examples/wasteland_station.py) | [Inputs](examples/wasteland_station.json) | [GIF](previews/wasteland-station.gif) |
+| Underwater kelp biome | [Source](examples/kelp_forest.py) | [Inputs](examples/kelp_forest.json) | [GIF](previews/kelp-forest.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -70,6 +71,7 @@ The [fantasy gate review](fantasy-review.md) records two scored outputs, an isol
 The [cyberpunk alley review](cyberpunk-review.md) records two scored outputs, an isolated parcel drone, neon architecture, and the drone crossing audit.
 The [Viking longship review](viking-review.md) records two scored outputs, an isolated ship, period material and silhouette cues, and the fjord crossing audit.
 The [wasteland fuel-stop review](wasteland-review.md) records two scored outputs, an isolated salvage cart, collapsed architecture, a fictional faded sign, and moving dust.
+The [underwater kelp review](kelp-review.md) records two scored outputs, an isolated seven-fish school, vegetation density, bubbles, and a camera glide.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
