@@ -182,6 +182,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
         (r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", "environment-artist"),
         (r"\b(combat.arena|sparring.arena|fight.arena|brawler.arena)\b", "environment-artist"),
         (r"\b(shooter|fps|tps|rooftop|cover.lane|sightline)\b", "environment-artist"),
+        (r"\b(quest.hub|guild.board|loot.rarity|rpg.environment)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -225,6 +226,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                                re.search(r"\b(combat.arena|sparring.arena|fight.arena|brawler.arena|hack.and.slash)\b", text)
                                else "genre-shooter" if
                                re.search(r"\b(shooter|fps|tps|rooftop.cover.lane|extraction.shooter)\b", text)
+                               else "genre-rpg" if
+                               re.search(r"\b(rpg|jrpg|crpg|arpg|mmorpg|quest.hub|loot.rarity)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -337,7 +340,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
-                         selected_genre in {"genre-action-combat", "genre-shooter"} else
+                         selected_genre in {"genre-action-combat", "genre-shooter", "genre-rpg"} else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

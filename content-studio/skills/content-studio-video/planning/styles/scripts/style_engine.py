@@ -34,6 +34,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "brutalist", "brutalism", "monumental", "concrete", "shutter",
     "combat", "arena", "sparring", "brawler", "shield", "sword",
     "shooter", "fps", "tps", "rooftop", "sightline", "extraction",
+    "rpg", "jrpg", "quest", "guild", "rarity", "loot",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

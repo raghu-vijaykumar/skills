@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "id": "rpg-quest-hub-rarity-reveal",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "RPG quest hub camera",
+  "variant": 2,
+  "objects": [
+    {"id": "base", "name": "SM_RPG_Quest_Hub_Base"},
+    {"id": "forest", "name": "SM_RPG_Forest_Region"},
+    {"id": "highland", "name": "SM_RPG_Highland_Region"},
+    {"id": "board", "name": "SM_RPG_Guild_Quest_Board"},
+    {"id": "marker", "name": "SM_RPG_Quest_Marker_Rig"},
+    {"id": "warrior", "name": "SM_RPG_Warrior_Sword"},
+    {"id": "mage", "name": "SM_RPG_Mage_Staff"},
+    {"id": "common", "name": "SM_RPG_Common_Loot_Pedestal"},
+    {"id": "rare", "name": "SM_RPG_Rare_Chest"},
+    {"id": "epic", "name": "SM_RPG_Epic_Loot_Pedestal"},
+    {"id": "lid", "name": "SM_RPG_Rare_Chest_Lid_Rig"},
+    {"id": "gem", "name": "SM_RPG_Rare_Loot_Gem"},
+    {"id": "camera", "name": "RPG quest hub camera"}
+  ],
+  "beats": [
+    {"id": "hub", "frame": 1, "label": "Warrior and mage meet at a two-region guild quest hub", "object_ids": ["forest", "highland", "board", "warrior", "mage"]},
+    {"id": "quest", "frame": 45, "label": "The golden quest marker rises above a common, rare, and epic loot line", "object_ids": ["marker", "common", "rare", "epic"]},
+    {"id": "rarity", "frame": 72, "label": "The rare blue chest opens to reveal a floating violet gem", "object_ids": ["lid", "gem", "camera"]}
+  ],
+  "review_states": ["hub", "quest", "rarity"],
+  "assets": [
+    {"id": "quest-hub", "origin": "procedural", "license": "Original Content Studio split-region hub, class figures, quest board, and rarity-coded loot"}
+  ]
+}

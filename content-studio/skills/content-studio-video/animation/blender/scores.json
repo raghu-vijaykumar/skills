@@ -1887,6 +1887,50 @@
         }
       ]
     },
+    "genre-rpg": {
+      "selected": "rpg-quest-hub-v2",
+      "candidates": [
+        {
+          "id": "rpg-quest-hub-v1",
+          "video_sha256": "f8d707867d8b7ab16c1dfc99e51650a0df6b3fa7bc268b0f795258564a1beeca",
+          "gif_sha256": "46d70cc63a3b0338189dcf73641b15fd26a4f339b18e029cbb3ef93d131d02b8",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and RPG quest-hub review",
+          "review_date": "2026-11-19",
+          "review_note": "Forest and highland regions, warrior and mage gear, a guild board, and three rarity colors read clearly, but the chest remains shut and the quest marker barely moves. Full MP4, GIF, isolated chest, and saved-scene audit passed."
+        },
+        {
+          "id": "rpg-quest-hub-v2",
+          "video_sha256": "eca4fdef21b9135c6d06d83532b3e29af50f0281830f7d3c598390fe33d2dc5f",
+          "gif_sha256": "ce195d874d780b389733741947ec6ccd3020f2013cf577fa2b25f8e505e74e8f",
+          "gif_path": "previews/rpg-quest-hub.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and RPG quest-hub review",
+          "review_date": "2026-11-19",
+          "review_note": "The quest marker rises, the blue rare chest opens, a violet gem lifts out, and the camera pushes closer through a split-region guild hub. Simple terrain, figures, and rarity props cap finish. Full MP4, GIF, isolated chest, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

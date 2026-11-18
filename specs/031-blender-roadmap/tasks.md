@@ -74,7 +74,8 @@
   - [x] T013j Render one monumental brutalist gateway with two scored full outputs, an isolated shutter preview, scale and material audit, and a distinct best GIF.
   - [x] T013k Render one action-combat arena with two scored full outputs, an isolated fighter preview, fight-plane and clash audit, and a distinct best GIF.
   - [x] T013l Render one FPS rooftop cover lane with two scored full outputs, an isolated sightline preview, cover and camera-height audit, and a distinct best GIF.
-  - [ ] T013m Complete the eleven remaining genre directions and console-era route.
+  - [x] T013m Render one RPG quest hub with two scored full outputs, an isolated loot preview, region and class-gear audit, and a distinct best GIF.
+  - [ ] T013n Complete the ten remaining genre directions and console-era route.
 
 ## Wave 6: Delivery and QA
 

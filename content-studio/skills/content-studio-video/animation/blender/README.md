@@ -51,6 +51,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Brutalist archive gateway | [Source](examples/brutalist_archive.py) | [Inputs](examples/brutalist_archive.json) | [GIF](previews/brutalist-archive.gif) |
 | Action combat arena | [Source](examples/action_arena.py) | [Inputs](examples/action_arena.json) | [GIF](previews/action-arena.gif) |
 | Shooter rooftop cover lane | [Source](examples/shooter_rooftop.py) | [Inputs](examples/shooter_rooftop.json) | [GIF](previews/shooter-rooftop.gif) |
+| RPG quest hub | [Source](examples/rpg_quest_hub.py) | [Inputs](examples/rpg_quest_hub.json) | [GIF](previews/rpg-quest-hub.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -86,6 +87,7 @@ The [retrowave highway review](retrowave-review.md) records two scored outputs, 
 The [brutalist archive review](brutalist-review.md) records two scored outputs, an isolated concrete shutter, monumental scale audit, and a dark aperture reveal.
 The [action combat review](action-review.md) records two scored outputs, an isolated sword fighter, clear fight-space audit, and a shield clash with breakable clay.
 The [shooter rooftop review](shooter-review.md) records two scored outputs, an isolated FPS sightline, cover and camera-height audit, and target and loot beats.
+The [RPG quest hub review](rpg-review.md) records two scored outputs, an isolated chest, region and class-gear audit, and a rarity reveal.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
