@@ -520,9 +520,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/horror-corridor.gif",
+      "review": "horror-review.md",
+      "builder": "examples/horror_corridor.py",
+      "spec": "examples/horror_corridor.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["corridor"],
+      "score_record": "scores.json"
     },
     {
       "id": "psx-horror-style",

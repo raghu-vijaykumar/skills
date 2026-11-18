@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "id": "psychological-horror-corridor",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "corridor_width_m": 1.44,
+  "ceiling_height_m": 2.3,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Horror eye camera",
+  "objects": [
+    {"id": "floor", "name": "SM_Horror_Floor"},
+    {"id": "left-wall", "name": "SM_Horror_Left_Wall"},
+    {"id": "right-wall", "name": "SM_Horror_Right_Wall"},
+    {"id": "tube", "name": "SM_Horror_Fluorescent_Tube"},
+    {"id": "chair", "name": "SM_Horror_Chair_Seat"},
+    {"id": "door", "name": "SM_Horror_Door"},
+    {"id": "door-pivot", "name": "Horror door hinge"},
+    {"id": "fog", "name": "Horror corridor fog"},
+    {"id": "camera", "name": "Horror eye camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Empty near hallway, solitary chair, closed far door", "object_ids": ["floor", "chair", "door"]},
+    {"id": "action", "frame": 38, "label": "Fluorescent light stutters during an eye-height push", "object_ids": ["tube", "fog", "camera"]},
+    {"id": "result", "frame": 72, "label": "Far door parts enough to reveal a warm light slit", "object_ids": ["door", "door-pivot", "camera"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "horror-set", "origin": "procedural", "license": "Original Content Studio narrow institutional corridor"}
+  ]
+}

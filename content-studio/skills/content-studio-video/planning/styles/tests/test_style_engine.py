@@ -86,6 +86,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A desk lamp adjusts", "blender_style": "realistic-style"}]})
         self.assertEqual(realistic["scenes"][0]["blender"]["builder"],
                          "examples/realistic_lamp.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            horror = engine.plan({"scenes": [{"id": "horror-hall", "duration_seconds": 3,
+                "visual_intent": "A horror corridor reveals a door"}]})
+        self.assertEqual(horror["scenes"][0]["blender"]["builder"],
+                         "examples/horror_corridor.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

@@ -29,7 +29,8 @@
   - [x] T010b Render the voxel lamp treatment with a distinct scored GIF and a 0.05 m occupancy-grid audit.
   - [x] T010c Render the isometric one-tile lamp treatment with a distinct scored GIF and a locked true-iso camera audit.
   - [x] T010d Render the measured realistic clamp lamp treatment with a distinct scored GIF and a PBR-scale audit; retain its documented photoreal limits.
-  - [ ] T010e Complete the remaining four core style treatments with distinct scored GIFs.
+  - [x] T010e Render the narrow psychological horror corridor with a distinct scored GIF and a fog/light/spatial audit.
+  - [ ] T010f Complete the remaining three core style treatments with distinct scored GIFs.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 

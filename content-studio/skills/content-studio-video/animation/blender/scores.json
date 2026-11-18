@@ -159,6 +159,31 @@
         }
       ]
     },
+    "horror-style": {
+      "selected": "horror-corridor-v1",
+      "candidates": [
+        {
+          "id": "horror-corridor-v1",
+          "video_sha256": "2bd19905220dc8ef77983a88bb809a94cddbec5edd6f8df8d329c5229084d495",
+          "gif_sha256": "2ab2408df3677333ac952302d016d9679208a6f64c872e9dffa7953548aec2c8",
+          "gif_path": "previews/horror-corridor.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio exact-frame and horror-scene audit",
+          "review_date": "2026-11-18",
+          "review_note": "A narrow fog corridor, lone wall-facing chair and a single unstable fluorescent source create tension. The eye-height push and door reveal read; the compressed GIF makes the brief flicker less evident than the exact MP4."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
