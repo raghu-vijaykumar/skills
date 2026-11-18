@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "frutiger-aero-dashboard",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Aero optimism camera",
+  "variant": 2,
+  "objects": [
+    {"id": "card", "name": "SM_Aero_Aqua_Card"},
+    {"id": "bubble", "name": "SM_Aero_Glass_Bubble"},
+    {"id": "leaf", "name": "SM_Aero_Leaf"},
+    {"id": "leaf-hinge", "name": "Aero leaf hinge"},
+    {"id": "small-bubble", "name": "SM_Aero_Bubble_0"},
+    {"id": "sweep", "name": "Aero sweep key"},
+    {"id": "camera", "name": "Aero optimism camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "Glossy aqua card and glass bubble sit above a green horizon", "object_ids": ["card", "bubble"]},
+    {"id": "open", "frame": 36, "label": "A leaf unfurls as bubbles rise and a soft highlight sweeps across the UI", "object_ids": ["leaf", "small-bubble", "sweep"]},
+    {"id": "resolve", "frame": 72, "label": "The nature-tech card rests with the open leaf and floating bubbles", "object_ids": ["card", "bubble", "leaf"]}
+  ],
+  "review_states": ["establish", "open", "resolve"],
+  "assets": [
+    {"id": "aero-dashboard", "origin": "procedural", "license": "Original Content Studio glossy aqua UI, glass bubble, leaf, and animation"}
+  ]
+}

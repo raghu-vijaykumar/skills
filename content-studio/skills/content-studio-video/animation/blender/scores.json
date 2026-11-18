@@ -963,6 +963,40 @@
         }
       ]
     },
+    "frutiger-aero-style": {
+      "selected": "aero-dashboard-v2",
+      "candidates": [
+        {
+          "id": "aero-dashboard-v1",
+          "video_sha256": "5f6cfc9b585c98e1f1b0ec662f15d9d7ebfaa64a31935a4ce80d33d70aa0a72e",
+          "gif_sha256": "6f0449ebf3103b878751cc5e1095312d56c16168381f3a2015f9734be4e81324",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and glossy-material review",
+          "review_date": "2026-11-18",
+          "review_note": "The glossy aqua card and glass bubble read, but the leaf holds one angle and only two small bubbles rise. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "aero-dashboard-v2",
+          "video_sha256": "9dff090ad351e76cf3a15a371f9dc2efc40530722f961c50350214c3672b8c7d",
+          "gif_sha256": "36a423bc4fbf1c6612ee958629e5a469898dc71c370cf325557955146d663e41",
+          "gif_path": "previews/aero-dashboard.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and glossy-material review",
+          "review_date": "2026-11-18",
+          "review_note": "The veined leaf opens, five glossy bubbles rise inside the composition, a soft key sweeps the aqua panel, and the isolated bubble retains its layered gloss. Full MP4, GIF decode, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

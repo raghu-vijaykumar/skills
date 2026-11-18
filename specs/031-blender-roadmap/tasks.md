@@ -33,7 +33,7 @@
   - [x] T010f Render the PSX horror CRT hall with a distinct scored GIF and a low-resolution texture/geometry audit.
   - [x] T010g Render the anime heroine with a distinct scored GIF and a cel-band, outline, and pose-control audit.
   - [x] T010h Render the storybook windmill island with a distinct scored GIF and a shape/palette/paint audit.
-- [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
+- [x] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
   - [x] T011a Render the cartoon ball mascot with a scored GIF and a squash/stretch audit.
   - [x] T011b Render the comic rocket panel with a scored GIF and a print, ink, and impact audit.
   - [x] T011c Render the manga eye panel with a scored GIF and a grayscale, screentone, and gaze audit.
@@ -48,7 +48,7 @@
   - [x] T011l Render the retro 8-bit ship with two scored candidates and a four-color, sprite-grid, and held-motion audit.
   - [x] T011m Render the retro 16-bit fox with two scored candidates and a packed-dither, palette, fox-walk, and waterfall audit.
   - [x] T011n Render the HD-2D lantern bridge with three scored candidates and a pixel-actor, painted-stage, lighting, and DOF audit.
-  - [ ] T011o Complete the remaining Frutiger Aero treatment with a distinct scored GIF.
+  - [x] T011o Render the Frutiger Aero dashboard with two scored candidates and a glossy-aqua, leaf, bubble-trail, and UI audit.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

@@ -30,6 +30,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Retro 8-bit arcade ship | [Source](examples/retro_8bit_ship.py) | [Inputs](examples/retro_8bit_ship.json) | [GIF](previews/retro8-ship.gif) |
 | Retro 16-bit fox landscape | [Source](examples/retro_16bit_fox.py) | [Inputs](examples/retro_16bit_fox.json) | [GIF](previews/retro16-fox.gif) |
 | HD-2D lantern bridge | [Source](examples/hd2d_bridge.py) | [Inputs](examples/hd2d_bridge.json) | [GIF](previews/hd2d-bridge.gif) |
+| Frutiger Aero dashboard | [Source](examples/aero_dashboard.py) | [Inputs](examples/aero_dashboard.json) | [GIF](previews/aero-dashboard.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -44,6 +45,7 @@ The [vector sprout review](vector-review.md) records three scored outputs, flat-
 The [retro 8-bit ship review](retro8-review.md) records two full scored outputs, four rejected GIF encoding probes, a four-color winner, and grid-aligned impact motion.
 The [retro 16-bit fox review](retro16-review.md) records two scored outputs, packed dither, a richer palette, held fox poses, and moving water glints.
 The [HD-2D bridge review](hd2d-review.md) records three scored outputs, an isolated pixel-actor preview, a painted 3D stage, and depth of field.
+The [Frutiger Aero review](aero-review.md) records two scored outputs, an isolated glossy bubble preview, aqua UI craft, and leaf-opening motion.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
@@ -58,6 +60,7 @@ They also accept `vector_sprout`.
 They also accept `retro_8bit_ship`.
 They also accept `retro_16bit_fox`.
 They also accept `hd2d_bridge`.
+They also accept `aero_dashboard`.
 
 From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, `comic_rocket`, `manga_gaze`, `pixel_chest`, `painted_teacup`, `watercolor_river`, or `paper_butterfly` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 
@@ -100,6 +103,7 @@ Use `scripts/audit_vector.py` with the sprout `.blend` for its five flat fills, 
 Use `scripts/audit_retro8.py` with the arcade ship `.blend` for its four emission colors, square-pixel meshes, fixed low raster, held location keys, and impact reveal. For its GIF, quantize from the full MP4 to the four render-sampled palette colors with no dithering.
 Use `scripts/audit_retro16.py` with the fox `.blend` for its packed nearest dithered image, square-pixel sprites, fixed raster, held walk, and waterfall glints. Its GIF uses a 32-slot palette to preserve the richer authored colors through H.264 compression.
 Use `scripts/audit_hd2d.py` with the lantern-bridge `.blend` for its pixel meshes, packed painted deck, 3D bridge span, warm keys, tilted orthographic camera with DOF, held walk, reeds, and ripples.
+Use `scripts/audit_aero.py` with the dashboard `.blend` for its layered glossy materials, pill controls, clouds, bubble trail, leaf, moving highlight, and camera.
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 

@@ -938,9 +938,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/aero-dashboard.gif",
+      "review": "aero-review.md",
+      "builder": "examples/aero_dashboard.py",
+      "spec": "examples/aero_dashboard.json",
+      "compatible_subjects": ["prop-artist"],
+      "intent_cues": ["dashboard"],
+      "score_record": "scores.json"
     },
     {
       "id": "cosmic-eldritch-horror",

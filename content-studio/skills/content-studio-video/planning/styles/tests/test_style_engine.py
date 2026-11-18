@@ -185,6 +185,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(hd2d["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(hd2d["scenes"][0]["blender"]["builder"],
                          "examples/hd2d_bridge.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            aero = engine.plan({"scenes": [{"id": "aero", "duration_seconds": 3,
+                "visual_intent": "A glossy aqua dashboard grows a leaf"}]})
+        self.assertEqual(aero["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(aero["scenes"][0]["blender"]["builder"],
+                         "examples/aero_dashboard.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
