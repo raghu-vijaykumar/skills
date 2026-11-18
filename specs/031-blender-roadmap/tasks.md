@@ -78,7 +78,8 @@
   - [x] T013n Render one survival shelter with two scored full outputs, isolated resource preview, safe and unsafe zone audit, and a distinct best GIF.
   - [x] T013o Render one stealth infiltration lane with two scored full outputs, an isolated actor and route preview, noise and vertical-route audit, and a distinct best GIF.
   - [x] T013p Render one puzzle platformer with two scored full outputs, isolated jump and switch previews, measured gap and hazard audit, and a distinct best GIF.
-  - [ ] T013q Complete the seven remaining genre directions and console-era route.
+  - [x] T013q Render one modular metroidvania and roguelike ability-gate lane with two scored full outputs, isolated room previews, biome and modifier audit, and a distinct best GIF.
+  - [ ] T013r Complete the six remaining genre directions and console-era route.
 
 ## Wave 6: Delivery and QA
 

@@ -38,6 +38,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "survival", "crafting", "refuge", "shelter", "salvage",
     "stealth", "infiltration", "patrol",
     "puzzle", "platformer", "pressure pad", "spike gap",
+    "metroidvania", "roguelike", "roguelite", "ability gate", "room modules",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

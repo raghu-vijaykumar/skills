@@ -365,6 +365,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-puzzle-platformer")
         self.assertEqual(puzzle["scenes"][0]["blender"]["builder"],
                          "examples/puzzle_platformer.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            modular = engine.plan({"scenes": [{"id": "gate", "duration_seconds": 3,
+                "visual_intent": "A metroidvania ability gate between room modules"}]})
+        self.assertEqual(modular["scenes"][0]["blender"]["genre"],
+                         "genre-metroidvania-roguelike")
+        self.assertEqual(modular["scenes"][0]["blender"]["builder"],
+                         "examples/modular_gate.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

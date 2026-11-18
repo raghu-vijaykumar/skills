@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 52)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 53)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -308,6 +308,13 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(puzzle["builder"], "examples/puzzle_platformer.py")
         self.assertIsNone(catalog_module.route("A puzzle platformer with a pressure pad bridge",
                                                 style="anime-style")["builder"])
+        modular = catalog_module.route("A metroidvania ability gate between room modules")
+        self.assertEqual((modular["subject"], modular["style"], modular["genre"]),
+                         ("environment-artist", "stylized-style",
+                          "genre-metroidvania-roguelike"))
+        self.assertEqual(modular["builder"], "examples/modular_gate.py")
+        self.assertIsNone(catalog_module.route("A metroidvania ability gate",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -346,7 +353,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 53)
+        self.assertEqual(len(catalog_module.scorebook(book)), 54)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -411,6 +418,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(puzzle["selected"], "puzzle-platformer-v2")
         self.assertEqual([candidate["score_total"] for candidate in puzzle["candidates"]],
                          [63, 78])
+        modular = book["routes"]["genre-metroidvania-roguelike"]
+        self.assertEqual(modular["selected"], "modular-gate-v2")
+        self.assertEqual([candidate["score_total"] for candidate in modular["candidates"]],
+                         [59, 74])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "id": "metroidvania-modular-ability-gate",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Run modular-room overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "moss-room", "name": "SM_Run_Moss_Room_Module"},
+    {"id": "stone-room", "name": "SM_Run_Stone_Room_Module"},
+    {"id": "crystal-room", "name": "SM_Run_Crystal_Room_Module"},
+    {"id": "ability", "name": "SM_Run_Dash_Ability_Orb"},
+    {"id": "gate-left", "name": "SM_Run_Ability_Gate_Left"},
+    {"id": "gate-right", "name": "SM_Run_Ability_Gate_Right"},
+    {"id": "curse", "name": "SM_Run_Curse_Modifier"},
+    {"id": "shield", "name": "SM_Run_Shield_Modifier"},
+    {"id": "runner", "name": "SM_Run_Traveler_Rig"},
+    {"id": "camera", "name": "Run modular-room overview camera"}
+  ],
+  "beats": [
+    {"id": "rooms", "frame": 1, "label": "A traveler surveys three equal room modules, distinct moss and crystal biomes, and two modifiers", "object_ids": ["moss-room", "stone-room", "crystal-room", "curse", "shield", "runner"]},
+    {"id": "ability", "frame": 39, "label": "The traveler collects the cyan dash ability beside the still-locked gate", "object_ids": ["ability", "gate-left", "gate-right", "runner"]},
+    {"id": "new-biome", "frame": 72, "label": "The gate has opened and the traveler crosses into the crystal biome as the shield modifier grows", "object_ids": ["gate-left", "gate-right", "crystal-room", "shield", "runner"]}
+  ],
+  "review_states": ["rooms", "ability", "new-biome"],
+  "assets": [
+    {"id": "modular-run", "origin": "procedural", "license": "Original Content Studio room modules, foliage, crystals, gate, ability, traveler, and modifier props"}
+  ]
+}

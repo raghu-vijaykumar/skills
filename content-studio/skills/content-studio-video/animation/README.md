@@ -45,3 +45,4 @@ The [`genre-rpg` hub](blender/rpg-review.md) adds a scored two-region quest scen
 The [`genre-survival` shelter](blender/survival-review.md) adds a scored safe and unsafe zone scene with resources, a returning cart, and a campfire reveal.
 The [`genre-stealth` lane](blender/stealth-review.md) adds a scored concealment and patrol scene with noisy plates, a ladder, and an upper objective.
 The [`genre-puzzle-platformer` puzzle](blender/puzzle-review.md) adds a scored jump, pressure pad, hazard, bridge, and goal sequence with measured gaps.
+The [`genre-metroidvania-roguelike` run](blender/modular-run-review.md) adds scored modular rooms, a collected ability, an opening biome gate, and two modifier symbols.

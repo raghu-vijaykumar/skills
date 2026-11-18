@@ -1421,9 +1421,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/modular-gate.gif",
+      "review": "modular-run-review.md",
+      "builder": "examples/modular_gate.py",
+      "spec": "examples/modular_gate.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["metroidvania ability gate", "roguelike room modules", "roguelite biome gate", "modular ability gate"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-soulslike",

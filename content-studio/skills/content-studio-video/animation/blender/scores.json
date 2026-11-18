@@ -2063,6 +2063,50 @@
         }
       ]
     },
+    "genre-metroidvania-roguelike": {
+      "selected": "modular-gate-v2",
+      "candidates": [
+        {
+          "id": "modular-gate-v1",
+          "video_sha256": "5634623601c0dce845f4301744aeafb27ed3d5ae9b50ebbb585cda2c4f0f7bd3",
+          "gif_sha256": "847ad610abb344ddb370a742bc38b2017880db1dbaefc0a1586cae8a6ce449a3",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 59,
+          "reviewer": "Content Studio encoded-frame and modular-run review",
+          "review_date": "2026-11-19",
+          "review_note": "Three equal room modules, moss and crystal biomes, cyan ability lock, and red and gold modifier props read, but the traveler stays near the start and the gate never opens. Wide negative space reduces composition. Full MP4, GIF, isolated route, and saved-scene audit passed."
+        },
+        {
+          "id": "modular-gate-v2",
+          "video_sha256": "7efed7a8f8e792245c4c9622af7751bc03eaaefd325c1bc15185563af4e1e1ff",
+          "gif_sha256": "c91f61a63c20736ed13ff4bbdfcf065d2d233a11752c2a78bd390632477026c1",
+          "gif_path": "previews/modular-gate.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio encoded-frame and modular-run review",
+          "review_date": "2026-11-19",
+          "review_note": "The traveler collects the cyan ability, a matching gate opens, then the traveler crosses into the crystal room beside differently shaped curse and boon modifiers. Wide negative space and simple props cap composition and finish. Full MP4, GIF, isolated route, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [
