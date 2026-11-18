@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "styles": [
+    {"id":"minimalism","name":"Minimalism","treatment":"minimal","background":"#fafaf7","surface":"#ffffff","ink":"#17212b","muted":"#5e6870","accent":"#1c7865","accent2":"#e4efe9","line":"#aeb9b5","font":"Arial","detail":"Quiet whitespace, few rules, precise labels and one restrained accent."},
+    {"id":"bento-box","name":"Bento box","treatment":"bento","background":"#e9edf3","surface":"#ffffff","ink":"#182c3c","muted":"#536675","accent":"#fb6b45","accent2":"#d8e6f0","line":"#b3c3cf","font":"Arial","detail":"Modular rounded tiles, contrasting tile sizes and strong information grouping."},
+    {"id":"glassmorphism","name":"Glassmorphism","treatment":"glass","background":"#24396a","surface":"#c6dcf6","ink":"#f7fbff","muted":"#d8e5f9","accent":"#8af3df","accent2":"#4569bc","line":"#edf5ff","font":"Arial","detail":"Translucent frosted panels, soft color fields and bright edge highlights."},
+    {"id":"neumorphism","name":"Neumorphism","treatment":"neumorphic","background":"#e4eaf1","surface":"#e4eaf1","ink":"#26384a","muted":"#677789","accent":"#3b7fa4","accent2":"#d4dfe9","line":"#bac7d4","font":"Arial","detail":"Raised soft surfaces with paired light and dark edges; keep text contrast high."},
+    {"id":"isometric","name":"Isometric","treatment":"isometric","background":"#e9f3f6","surface":"#ffffff","ink":"#17394e","muted":"#567384","accent":"#1889a3","accent2":"#bde0e5","line":"#7caeb8","font":"Arial","detail":"Consistent shallow extrusions and angled planes applied to information surfaces."},
+    {"id":"brutalism","name":"Brutalism","treatment":"brutalist","background":"#f8f4df","surface":"#ffffff","ink":"#171717","muted":"#3e3e3e","accent":"#f15431","accent2":"#ffdf37","line":"#171717","font":"Arial Black","detail":"Hard black borders, loud blocks, offset shadows and unapologetic type."},
+    {"id":"swiss-grid","name":"Swiss grid","treatment":"swiss","background":"#f5f4f0","surface":"#ffffff","ink":"#161b1c","muted":"#596163","accent":"#df322f","accent2":"#eae8e1","line":"#8c9696","font":"Arial","detail":"Disciplined grid, asymmetric red markers and clean typographic hierarchy."},
+    {"id":"editorial","name":"Editorial","treatment":"editorial","background":"#f4efe7","surface":"#fffdf9","ink":"#302b29","muted":"#756a62","accent":"#a74635","accent2":"#ead6ca","line":"#af9e91","font":"Georgia","detail":"Magazine typography, warm paper, fine rules and a deliberate pull quote feel."},
+    {"id":"hand-drawn","name":"Hand drawn","treatment":"handdrawn","background":"#fffdf4","surface":"#fffef8","ink":"#26343c","muted":"#647077","accent":"#d06048","accent2":"#f4e5c8","line":"#526c78","font":"Comic Sans MS","detail":"Sketch-like double strokes, uneven outlines and friendly annotation marks."},
+    {"id":"dark-glow","name":"Dark glow","treatment":"glow","background":"#0b1224","surface":"#18284b","ink":"#f4f8ff","muted":"#acbddb","accent":"#6bf4ce","accent2":"#294b72","line":"#65a6b9","font":"Arial","detail":"Deep navy surfaces, luminous accents and restrained technical light."}
+  ]
+}

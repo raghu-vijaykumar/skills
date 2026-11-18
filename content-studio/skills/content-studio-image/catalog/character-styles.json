@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "styles": [
+    {"id":"anime","name":"Anime","prompt":"Original anime illustration with expressive eyes, clean contour lines, clear cel shading, and vivid but controlled colors."},
+    {"id":"watercolor","name":"Watercolor","prompt":"Traditional watercolor illustration with translucent pigment blooms, textured cold-press paper, soft edges, and visible brush variation."},
+    {"id":"comic-ink","name":"Comic ink","prompt":"Bold comic illustration with confident black ink contours, graphic shadows, restrained halftone texture, and punchy color blocks."},
+    {"id":"3d-animation","name":"3D animation","prompt":"Polished original 3D animated character render with modeled volume, soft studio lighting, expressive features, and tactile materials."},
+    {"id":"pixel-art","name":"Pixel art","prompt":"Deliberate pixel art with a consistent pixel grid, limited palette, stepped edges, and readable silhouette; no smooth gradients."},
+    {"id":"editorial-collage","name":"Editorial collage","prompt":"Layered editorial cut-paper collage with torn edges, printed textures, overlapping colored paper, and purposeful negative space."}
+  ]
+}

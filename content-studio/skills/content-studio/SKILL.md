@@ -7,6 +7,8 @@ description: Route a Content Studio idea or supplied media through approved prod
 
 For YouTube, LinkedIn or Instagram authoring, publishing or analytics, start with [Content Studio Social](../content-studio-social/SKILL.md). It separates platform operations while routing to the existing video and LinkedIn implementations. A personal LinkedIn idea goes to [Social LinkedIn Author](../content-studio-social/linkedin/author/SKILL.md).
 
+For a standalone image or character illustration, use [Content Studio Image](../content-studio-image/SKILL.md). Its UI themes and character styles have visual comparisons in the skill README.
+
 Start every production request, including a direct specialist request, with the mandatory [workflow precheck](../content-studio-workflow/SKILL.md). Inspect the channel, draft, source media, and system; present an editable plan with exact skill, method script, inputs, outputs, estimate, fallback, and review criterion. Obtain explicit approval of the current revision before editing, then record checklist evidence. Changed plans require reapproval.
 
 For a raw camera folder, route to [video source preprocessing](../content-studio-video/source/preprocess/SKILL.md) and stop after handing off individual prepared clips and capture order for the user's manual edit. [AutoCut](../content-studio-video/edit/autocut/SKILL.md) is experimental and runs only on explicit request. Do not automatically join clips or remove blur spans.
