@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "realistic-task-lamp",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "shade_diameter_m": 0.17,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Realistic product camera",
+  "objects": [
+    {"id": "desk", "name": "SM_Real_Desk"},
+    {"id": "clamp", "name": "SM_Real_Clamp_Top"},
+    {"id": "lower-arm", "name": "SM_Real_Lower_Arm_A"},
+    {"id": "upper-arm", "name": "SM_Real_Upper_Arm_A"},
+    {"id": "shade", "name": "SM_Real_Shade"},
+    {"id": "notebook", "name": "SM_Real_Notebook"},
+    {"id": "pivot", "name": "Real lamp upper hinge"},
+    {"id": "camera", "name": "Realistic product camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Steel clamp lamp starts above the desk with its bulb off", "object_ids": ["desk", "clamp", "shade"]},
+    {"id": "action", "frame": 38, "label": "Upper hinge adjusts and the task lamp lights the notebook", "object_ids": ["upper-arm", "shade", "notebook"]},
+    {"id": "result", "frame": 72, "label": "Measured 17 cm shade holds over the work surface", "object_ids": ["desk", "shade", "notebook"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "realistic-geometry", "origin": "procedural", "license": "Original Content Studio steel task-lamp product visualization"}
+  ]
+}

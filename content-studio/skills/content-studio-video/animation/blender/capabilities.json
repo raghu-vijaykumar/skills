@@ -629,9 +629,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/realistic-lamp.gif",
+      "review": "realistic-review.md",
+      "builder": "examples/realistic_lamp.py",
+      "spec": "examples/realistic_lamp.json",
+      "compatible_subjects": ["prop-artist", "blender-modeler"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "cartoon-style",

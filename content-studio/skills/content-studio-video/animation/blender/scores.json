@@ -134,6 +134,31 @@
         }
       ]
     },
+    "realistic-style": {
+      "selected": "realistic-lamp-v1",
+      "candidates": [
+        {
+          "id": "realistic-lamp-v1",
+          "video_sha256": "e653ea8b2e33b9c44d3bb7eb9a2ff5dd74b368d13eb42c1d2e7f45d186586df9",
+          "gif_sha256": "0c07435f1e7570595d8ffec174f3bc8b83f2565c0d42a157ff3b8c473ecee9ee",
+          "gif_path": "previews/realistic-lamp.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and material audit",
+          "review_date": "2026-11-18",
+          "review_note": "The meter-scale steel clamp lamp has a measured 17 cm shade, PBR material values, spring detail and a visible aiming/light change. Its simplified surfaces and paper keep it below a photoreal finish."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

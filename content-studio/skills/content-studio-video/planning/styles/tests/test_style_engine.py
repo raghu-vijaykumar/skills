@@ -81,6 +81,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A desk lamp switches on", "blender_style": "isometric-style"}]})
         self.assertEqual(isometric["scenes"][0]["blender"]["builder"],
                          "examples/isometric_lamp.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            realistic = engine.plan({"scenes": [{"id": "real-lamp", "duration_seconds": 3,
+                "visual_intent": "A desk lamp adjusts", "blender_style": "realistic-style"}]})
+        self.assertEqual(realistic["scenes"][0]["blender"]["builder"],
+                         "examples/realistic_lamp.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
