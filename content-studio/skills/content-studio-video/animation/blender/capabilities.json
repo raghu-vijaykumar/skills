@@ -919,9 +919,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/hd2d-bridge.gif",
+      "review": "hd2d-review.md",
+      "builder": "examples/hd2d_bridge.py",
+      "spec": "examples/hd2d_bridge.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["lantern"],
+      "score_record": "scores.json"
     },
     {
       "id": "frutiger-aero-style",

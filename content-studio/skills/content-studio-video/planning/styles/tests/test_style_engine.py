@@ -179,6 +179,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(retro16["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(retro16["scenes"][0]["blender"]["builder"],
                          "examples/retro_16bit_fox.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            hd2d = engine.plan({"scenes": [{"id": "bridge", "duration_seconds": 3,
+                "visual_intent": "A traveler carries a lantern across a bridge"}]})
+        self.assertEqual(hd2d["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(hd2d["scenes"][0]["blender"]["builder"],
+                         "examples/hd2d_bridge.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

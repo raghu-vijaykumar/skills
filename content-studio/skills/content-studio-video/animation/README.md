@@ -19,3 +19,4 @@ The [`minimalist-style` pendulum](blender/minimal-review.md) adds a scored three
 The [`vector-style` sprout](blender/vector-review.md) adds a scored flat-fill, staged-growth, and polygon-path audit.
 The [`retro-8bit-style` ship](blender/retro8-review.md) adds a scored four-color sprite, held-motion, and impact audit.
 The [`retro-16bit-style` fox](blender/retro16-review.md) adds a scored packed-dither landscape, held walk, and waterfall audit.
+The [`hd-2d-style` lantern bridge](blender/hd2d-review.md) adds a scored pixel actor, painted 3D stage, and depth-of-field audit.

@@ -47,7 +47,8 @@
   - [x] T011k Render the vector sprout with three scored candidates and a flat-fill, growth, and polygon-path audit.
   - [x] T011l Render the retro 8-bit ship with two scored candidates and a four-color, sprite-grid, and held-motion audit.
   - [x] T011m Render the retro 16-bit fox with two scored candidates and a packed-dither, palette, fox-walk, and waterfall audit.
-  - [ ] T011n Complete the remaining two extended treatments with distinct scored GIFs.
+  - [x] T011n Render the HD-2D lantern bridge with three scored candidates and a pixel-actor, painted-stage, lighting, and DOF audit.
+  - [ ] T011o Complete the remaining Frutiger Aero treatment with a distinct scored GIF.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

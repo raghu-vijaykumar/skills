@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "hd2d-lantern-bridge",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "HD2D tilted camera",
+  "variant": 3,
+  "objects": [
+    {"id": "bridge", "name": "SM_HD2D_Stone_Bridge"},
+    {"id": "deck", "name": "SM_HD2D_Painted_Deck"},
+    {"id": "traveler", "name": "SM_HD2D_Pixel_Traveler"},
+    {"id": "traveler-control", "name": "HD2D traveler control"},
+    {"id": "lantern", "name": "SM_HD2D_Bridge_Lantern"},
+    {"id": "water", "name": "SM_HD2D_Stream"},
+    {"id": "camera", "name": "HD2D tilted camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "A pixel lantern carrier enters a painted 3D bridge stage", "object_ids": ["bridge", "deck", "traveler"]},
+    {"id": "crossing", "frame": 35, "label": "The carrier walks through warm theatrical bridge light", "object_ids": ["traveler-control", "lantern"]},
+    {"id": "arrival", "frame": 72, "label": "The carrier reaches the far end above moving water", "object_ids": ["traveler", "water"]}
+  ],
+  "review_states": ["establish", "crossing", "arrival"],
+  "assets": [
+    {"id": "hd2d-bridge", "origin": "procedural", "license": "Original Content Studio pixel actor, painted bridge texture, 3D geometry, and animation"}
+  ]
+}

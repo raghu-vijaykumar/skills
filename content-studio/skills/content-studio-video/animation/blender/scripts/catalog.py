@@ -158,7 +158,7 @@ def route(prompt, style=None, subject=None):
     subject_rules = [
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
-        (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye)\b", "character-artist"),
+        (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye|traveler|wanderer)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -190,6 +190,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(vector|flat.design|svg.like)\b", "vector-style"),
             (r"\b(8.bit|8bit|nes|four.color)\b", "retro-8bit-style"),
             (r"\b(16.bit|16bit|snes|genesis|mega.drive)\b", "retro-16bit-style"),
+            (r"\b(hd.2d|hd2d|octopath|pixel.3d.hybrid)\b", "hd-2d-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -219,6 +220,9 @@ def route(prompt, style=None, subject=None):
                          "retro-16bit-style" if subject == "creature-artist" and
                          re.search(r"\bfox\b", text) and
                          re.search(r"\bwaterfall\b", text) else
+                         "hd-2d-style" if subject == "character-artist" and
+                         re.search(r"\b(traveler|wanderer)\b", text) and
+                         re.search(r"\blantern\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

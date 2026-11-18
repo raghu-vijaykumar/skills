@@ -915,6 +915,54 @@
         }
       ]
     },
+    "hd-2d-style": {
+      "selected": "hd2d-bridge-v3",
+      "candidates": [
+        {
+          "id": "hd2d-bridge-v1",
+          "video_sha256": "005687ae2529a40e0c804c287cb3a1e5a60a352eaa340e83b4fe03fe0f755351",
+          "gif_sha256": "fff9eb17615fc2c30940cfc50f6dff7ab82bcb4d74e58fa2c23a84e1b4a65331",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio exact-frame and HD-2D stage review",
+          "review_date": "2026-11-18",
+          "review_note": "The pixel actor crosses a painted 3D bridge under a tilted depth-of-field camera, but the feet hold one pose and the water is static. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "hd2d-bridge-v2",
+          "video_sha256": "68b67fba6bf0887e143631ef7296b6c6d4ac8a6c0f8e6e0fd4f3df9d53d7ac4f",
+          "gif_sha256": "f4170671a652e3f58d8d64ee8f175245df56e5d49c7cc54d460143f75f7d78a1",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and HD-2D stage review",
+          "review_date": "2026-11-18",
+          "review_note": "Held alternate foot poses, reeds, and animated water ripples add layered motion; the isolated actor still has an undetailed face and hat. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "hd2d-bridge-v3",
+          "video_sha256": "8dbe8966b0da1d0dea5c556344e24f07277002b74f6dc3cd3acd6336c4406db7",
+          "gif_sha256": "734c92bb30bbdb10a651dde677b368aad2e7b3f399b4e871cd2fb9caf3ef56b0",
+          "gif_path": "previews/hd2d-bridge.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and HD-2D stage review",
+          "review_date": "2026-11-18",
+          "review_note": "An eye, hat band, cloak trim, and stronger lantern accent make the pixel actor read while the warm-key 3D bridge, painted deck, DOF, held walk, reeds, and ripples remain clear. Exact MP4, GIF, hero preview, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
