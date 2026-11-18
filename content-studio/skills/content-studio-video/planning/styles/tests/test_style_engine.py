@@ -448,6 +448,13 @@ class StyleEngineTests(unittest.TestCase):
             self.assertEqual(modular["scenes"][0]["blender"]["capability"], skill)
             self.assertEqual(modular["scenes"][0]["blender"]["builder"],
                              "examples/geometry_node_walkway.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            dressing = engine.plan({"scenes": [{"id": "room", "duration_seconds": 3,
+                "visual_intent": "A reading nook storytelling props"}]})
+        self.assertEqual(dressing["scenes"][0]["blender"]["capability"],
+                         "set-dressing")
+        self.assertEqual(dressing["scenes"][0]["blender"]["builder"],
+                         "examples/cozy_nook.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

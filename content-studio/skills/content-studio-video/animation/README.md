@@ -56,3 +56,4 @@ The [`visual-console-eras` comparison](blender/console-era-review.md) adds score
 The [material and lighting lab](blender/material-light-review.md) adds a clay-to-beauty review loop with three PBR masters and a moving three-point key.
 The [narrative technical evidence](blender/narrative-technical-review.md) connects the scored station shot to bounded camera, animation, and headless-rendering routes.
 The [Geometry Nodes walkway](blender/geometry-node-review.md) adds an audited parametric kit and organized set assembly with a scored traversal GIF.
+The [reading-nook set-dressing evidence](blender/set-dressing-review.md) reuses a scored interior GIF for its prop-cluster and clutter audit.

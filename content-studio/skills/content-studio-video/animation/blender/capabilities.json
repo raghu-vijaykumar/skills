@@ -470,9 +470,17 @@
         "scene-assembly"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cozy-nook.gif",
+      "review": "set-dressing-review.md",
+      "builder": "examples/cozy_nook.py",
+      "spec": "examples/cozy_nook.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["reading nook storytelling props"],
+      "score_record": "scores.json",
+      "score_route": "cozy-wholesome-mood"
     },
     {
       "id": "asset-optimization",
