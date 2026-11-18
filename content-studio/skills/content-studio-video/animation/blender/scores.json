@@ -1189,6 +1189,40 @@
         }
       ]
     },
+    "folk-horror-style": {
+      "selected": "folk-ritual-v2",
+      "candidates": [
+        {
+          "id": "folk-ritual-v1",
+          "video_sha256": "72b3065f48c2aed84d58d593efdf5c2986b3bcc37654127b61ee018b71c00fb7",
+          "gif_sha256": "541fd3122ad0d3b8f5b37e5d3b1e1384d12155669c5bcf048ce23f68c6544a71",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and folk-rite review",
+          "review_date": "2026-11-18",
+          "review_note": "The sunlit field, handmade wicker sun, repeating marked stones, six red offerings, and shut village establish the rural rite, but the short move and fixed ribbons leave weak animation. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "folk-ritual-v2",
+          "video_sha256": "4cd253807e13bcc21c56347e655630d4770ee4a7d022ef57ad1d22553122a47b",
+          "gif_sha256": "ca254b1ea00f7de489feec6a21b34a1af2d7d3788f96901eb1e4fc1b68e1efd4",
+          "gif_path": "previews/folk-ritual.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and folk-rite review",
+          "review_date": "2026-11-18",
+          "review_note": "The longer move holds the wicker sun in view as crimson ribbons sway through an open field framed by closed village huts. The low-detail modeled grass and huts keep finish at 3/5. Full MP4, GIF, isolated hero, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

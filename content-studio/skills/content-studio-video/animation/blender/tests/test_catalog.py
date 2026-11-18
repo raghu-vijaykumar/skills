@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 32)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 33)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -181,6 +181,11 @@ class CatalogTests(unittest.TestCase):
                          ("environment-artist", "liminal-space-style"))
         self.assertEqual(liminal["builder"], "examples/liminal_pool.py")
         self.assertIsNone(catalog_module.route("A liminal car drives")["builder"])
+        folk = catalog_module.route("A sunlit village field surrounds a wicker effigy")
+        self.assertEqual((folk["subject"], folk["style"]),
+                         ("environment-artist", "folk-horror-style"))
+        self.assertEqual(folk["builder"], "examples/folk_ritual.py")
+        self.assertIsNone(catalog_module.route("A folk horror car drives")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -219,7 +224,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 33)
+        self.assertEqual(len(catalog_module.scorebook(book)), 34)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -296,6 +301,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(liminal["selected"], "liminal-pool-v2")
         self.assertEqual([candidate["score_total"] for candidate in liminal["candidates"]],
                          [68, 82])
+        folk = book["routes"]["folk-horror-style"]
+        self.assertEqual(folk["selected"], "folk-ritual-v2")
+        self.assertEqual([candidate["score_total"] for candidate in folk["candidates"]],
+                         [68, 78])
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -322,7 +331,7 @@ class CatalogTests(unittest.TestCase):
                      "chibi-courier", "noir-detective", "minimal-pendulum",
                      "vector-sprout", "retro8-ship", "retro16-fox", "hd2d-bridge",
                      "aero-dashboard", "cosmic-aperture", "mutating-hand",
-                     "analog-training", "liminal-pool"):
+                     "analog-training", "liminal-pool", "folk-ritual"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)
@@ -344,6 +353,8 @@ class CatalogTests(unittest.TestCase):
                       "content-studio-video/animation/blender/previews/analog-training.gif)", readme)
         self.assertIn("![Best scored liminal poolrooms animation](content-studio/skills/"
                       "content-studio-video/animation/blender/previews/liminal-pool.gif)", readme)
+        self.assertIn("![Best scored folk horror rite animation](content-studio/skills/"
+                      "content-studio-video/animation/blender/previews/folk-ritual.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

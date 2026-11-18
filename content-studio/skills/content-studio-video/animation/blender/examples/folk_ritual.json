@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "folk-daylight-rite",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Folk horror field camera",
+  "variant": 2,
+  "objects": [
+    {"id": "field", "name": "SM_Rite_Field"},
+    {"id": "wicker", "name": "SM_Rite_Wicker_Sun_Disk"},
+    {"id": "spine", "name": "SM_Rite_Wicker_Spine"},
+    {"id": "stone", "name": "SM_Rite_Standing_Stone_0"},
+    {"id": "ribbon", "name": "SM_Rite_Red_Ribbon_0"},
+    {"id": "camera", "name": "Folk horror field camera"}
+  ],
+  "beats": [
+    {"id": "pastoral", "frame": 1, "label": "A warm rural field surrounds a handmade offering circle", "object_ids": ["field", "stone"]},
+    {"id": "custom", "frame": 36, "label": "Repeated crimson ribbons sway around the too-large wicker sun", "object_ids": ["ribbon", "wicker"]},
+    {"id": "wrongness", "frame": 72, "label": "The camera closes on the ritual while the village stays shut", "object_ids": ["spine", "camera"]}
+  ],
+  "review_states": ["pastoral", "custom", "wrongness"],
+  "assets": [
+    {"id": "field-rite", "origin": "procedural", "license": "Original Content Studio field, village, wicker, stones, and ribbons"}
+  ]
+}

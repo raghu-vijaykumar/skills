@@ -215,6 +215,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(liminal["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(liminal["scenes"][0]["blender"]["builder"],
                          "examples/liminal_pool.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            folk = engine.plan({"scenes": [{"id": "rite", "duration_seconds": 3,
+                "visual_intent": "A sunlit village field surrounds a wicker effigy"}]})
+        self.assertEqual(folk["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(folk["scenes"][0]["blender"]["builder"],
+                         "examples/folk_ritual.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

@@ -54,7 +54,8 @@
   - [x] T012b Render the body-horror hand with three full renders, four scored GIF outputs, and a corrected sixth-digit anatomy audit.
   - [x] T012c Render the analog training tape with three scored candidates and a scanline, signal-loss, security-camera, and doorway audit.
   - [x] T012d Render the empty poolrooms with two scored candidates and a modular-bay, fluorescent, water, and inspection-push audit.
-  - [ ] T012e Complete the remaining four horror packs with distinct scored GIFs.
+  - [x] T012e Render the sunlit folk rite with two scored candidates and a wicker, repeated-symbol, village, and ribbon-motion audit.
+  - [ ] T012f Complete the remaining three horror packs with distinct scored GIFs.
 
 ## Wave 5: Settings and genre direction
 

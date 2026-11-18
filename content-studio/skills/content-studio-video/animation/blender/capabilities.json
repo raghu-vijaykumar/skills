@@ -1028,9 +1028,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/folk-ritual.gif",
+      "review": "folk-review.md",
+      "builder": "examples/folk_ritual.py",
+      "spec": "examples/folk_ritual.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["village", "field", "wicker", "ritual"],
+      "score_record": "scores.json"
     },
     {
       "id": "mascot-puppet-horror",
