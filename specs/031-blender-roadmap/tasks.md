@@ -22,6 +22,7 @@
 ## Wave 3: Technical motion and rendering
 
 - [ ] T009 [P4] Implement Geometry Nodes, camera, lighting, rendering, compositing, animation, rigging, VFX, and physics examples with baked-cache or structural checks where applicable.
+  - [x] T009a Audit the scored station shot as a bounded camera push, keyed prop animation, and exact headless EEVEE render; reuse its selected GIF without duplicating media.
 
 ## Wave 4: Visual treatments
 

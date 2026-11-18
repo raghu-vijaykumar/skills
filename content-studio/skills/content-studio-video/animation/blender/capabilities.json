@@ -313,9 +313,17 @@
         "scene-assembly"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/station-letter.gif",
+      "review": "narrative-technical-review.md",
+      "builder": "examples/station_letter.py",
+      "spec": "examples/station_letter.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["emotional camera push"],
+      "score_record": "scores.json",
+      "score_route": "genre-narrative-vn"
     },
     {
       "id": "rendering",
@@ -326,9 +334,17 @@
         "camera-cinematography"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/station-letter.gif",
+      "review": "narrative-technical-review.md",
+      "builder": "examples/station_letter.py",
+      "spec": "examples/station_letter.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["headless eevee narrative render"],
+      "score_record": "scores.json",
+      "score_route": "genre-narrative-vn"
     },
     {
       "id": "compositing",
@@ -350,9 +366,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/station-letter.gif",
+      "review": "narrative-technical-review.md",
+      "builder": "examples/station_letter.py",
+      "spec": "examples/station_letter.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["sealed letter keyframe rise"],
+      "score_record": "scores.json",
+      "score_route": "genre-narrative-vn"
     },
     {
       "id": "rigging",

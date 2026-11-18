@@ -112,6 +112,7 @@ The [card-table review](card-table-review.md) records two scored outputs, isolat
 The [open-world review](open-world-review.md) records two scored outputs, isolated traveler and tower previews, a biome-border and traversal audit, and the diorama scope.
 The [console-era review](console-era-review.md) records two scored outputs, isolated ships, a topology and texture-filter audit, and the PS1/PS5 comparison limit.
 The [material-light review](material-light-review.md) records one clay and one beauty output, isolated swatches, a PBR and three-point audit, and the visible key sweep. Its single winning GIF supports the audited materials, lookdev, and lighting routes.
+The [narrative technical review](narrative-technical-review.md) reuses the already scored station GIF for its audited camera push, keyframed prop motion, and exact headless EEVEE render.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

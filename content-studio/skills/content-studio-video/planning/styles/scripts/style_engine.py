@@ -45,6 +45,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "novel", "narrative", "letter", "deck", "card", "idle",
     "sandbox", "exploration", "traversable", "biome", "ps1", "ps5",
     "material", "lookdev", "lighting", "swatch", "ceramic",
+    "camera", "keyframe", "eevee",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

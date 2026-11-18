@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 63)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 66)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -372,6 +372,16 @@ class CatalogTests(unittest.TestCase):
                                                     style="anime-style")["builder"])
         with self.assertRaisesRegex(ValueError, "Unknown Blender capability"):
             catalog_module.route("A swatch", capability="unknown-craft")
+        for prompt, skill in (("An emotional camera push", "camera-cinematography"),
+                              ("A headless Eevee narrative render", "rendering"),
+                              ("A sealed letter keyframe rise", "animation")):
+            result = catalog_module.route(prompt)
+            self.assertEqual((result["subject"], result["style"],
+                              result["capability"]),
+                             ("environment-artist", "stylized-style", skill))
+            self.assertEqual(result["builder"], "examples/station_letter.py")
+            self.assertIsNone(catalog_module.route(prompt,
+                                                    style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")

@@ -430,6 +430,15 @@ class StyleEngineTests(unittest.TestCase):
             self.assertEqual(craft["scenes"][0]["blender"]["capability"], skill)
             self.assertEqual(craft["scenes"][0]["blender"]["builder"],
                              "examples/material_light_lab.py")
+        for prompt, skill in (("An emotional camera push", "camera-cinematography"),
+                              ("A headless Eevee narrative render", "rendering"),
+                              ("A sealed letter keyframe rise", "animation")):
+            with patch.object(engine, "renderer_executable", return_value=sys.executable):
+                technical = engine.plan({"scenes": [{"id": "tech", "duration_seconds": 3,
+                    "visual_intent": prompt}]})
+            self.assertEqual(technical["scenes"][0]["blender"]["capability"], skill)
+            self.assertEqual(technical["scenes"][0]["blender"]["builder"],
+                             "examples/station_letter.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
