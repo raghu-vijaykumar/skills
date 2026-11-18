@@ -165,7 +165,7 @@ def route(prompt, style=None, subject=None, world=None):
     text = prompt.lower()
     entries = catalog()
     subject_rules = [
-        (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
+        (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat|longship)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
         (r"(?=.*\b(?:alley|cyberpunk)\b)(?=.*\bdrone\b)", "environment-artist"),
         # A first-person camera cue does not make its environment a character shot.
@@ -190,6 +190,8 @@ def route(prompt, style=None, subject=None, world=None):
                                re.search(r"\b(castle|keep|drawbridge|moat)\b", text)
                                else "sci-fi-punk-worlds" if
                                re.search(r"\bcyberpunk\b|\bneon alley\b", text)
+                               else "historical-worlds" if
+                               re.search(r"\b(viking|longship)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -285,6 +287,8 @@ def route(prompt, style=None, subject=None, world=None):
                          re.search(r"\b(castle|keep|drawbridge|moat)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\bcyberpunk\b|\bneon alley\b", text) else
+                         "stylized-style" if subject == "vehicle-artist" and
+                         re.search(r"\b(viking|longship)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

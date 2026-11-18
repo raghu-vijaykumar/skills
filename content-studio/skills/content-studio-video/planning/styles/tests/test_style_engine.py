@@ -257,6 +257,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/cyberpunk_alley.py")
         self.assertEqual(cyberpunk["scenes"][0]["blender"]["world"],
                          "sci-fi-punk-worlds")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            viking = engine.plan({"scenes": [{"id": "longship", "duration_seconds": 3,
+                "visual_intent": "A Viking longship crosses a rocky fjord"}]})
+        self.assertEqual(viking["scenes"][0]["blender"]["builder"],
+                         "examples/viking_longship.py")
+        self.assertEqual(viking["scenes"][0]["blender"]["world"],
+                         "historical-worlds")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

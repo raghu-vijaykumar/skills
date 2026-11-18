@@ -1393,6 +1393,40 @@
         }
       ]
     },
+    "historical-worlds": {
+      "selected": "viking-longship-v2",
+      "candidates": [
+        {
+          "id": "viking-longship-v1",
+          "video_sha256": "972f48d3df0107111f70dcb1c0d14fc1a4d9b748c64bbf845ccd10f7b8486926",
+          "gif_sha256": "22778a892220eb6077db62d9772accfb5c8b27f647840665511e86f5ce8dd1be",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 64,
+          "reviewer": "Content Studio encoded-frame and Viking period-lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The square sail, shield line, oars, and narrow hull establish a historically inspired Viking ship, but motion is slight. Simplified rocks and flat water limit finish. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "viking-longship-v2",
+          "video_sha256": "c35e82609d744f603161d414d2151d54c956c8ca908c3fca2f1193895463f2f3",
+          "gif_sha256": "21347c4bbf126b0eb8c20edb7fc5f67e74309e7b991cba5fd3bcaf76da7f538b",
+          "gif_path": "previews/viking-longship.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 5,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and Viking period-lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The ship glides across the fjord as the camera follows and holds its full shield line in frame. Camera tracking reduces relative displacement, so motion is 3/5. Simplified shore and water limit finish. Full MP4, GIF, isolated ship, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

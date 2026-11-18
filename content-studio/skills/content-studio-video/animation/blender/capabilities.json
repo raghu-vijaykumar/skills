@@ -1141,9 +1141,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/viking-longship.gif",
+      "review": "viking-review.md",
+      "builder": "examples/viking_longship.py",
+      "spec": "examples/viking_longship.json",
+      "compatible_subjects": ["vehicle-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["viking", "longship", "fjord"],
+      "score_record": "scores.json"
     },
     {
       "id": "apocalypse-worlds",

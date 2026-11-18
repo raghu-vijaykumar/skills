@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "viking-fjord-longship",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Viking fjord inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "water", "name": "SM_Viking_Fjord_Water"},
+    {"id": "ship", "name": "SM_Viking_Longship_Rig"},
+    {"id": "hull", "name": "SM_Viking_Clinker_Hull"},
+    {"id": "mast", "name": "SM_Viking_Timber_Mast"},
+    {"id": "sail", "name": "SM_Viking_Wool_Square_Sail"},
+    {"id": "shield", "name": "Viking round shield -1 0"},
+    {"id": "camera", "name": "Viking fjord inspection camera"}
+  ],
+  "beats": [
+    {"id": "period", "frame": 1, "label": "A shield-lined Viking longship carries a wool square sail", "object_ids": ["ship", "hull", "sail", "shield"]},
+    {"id": "crossing", "frame": 48, "label": "The longship glides across a rocky fjord", "object_ids": ["ship", "water"]},
+    {"id": "arrival", "frame": 72, "label": "The camera follows the longship past the rocky shore", "object_ids": ["ship", "camera"]}
+  ],
+  "review_states": ["period", "crossing", "arrival"],
+  "assets": [
+    {"id": "viking-fjord", "origin": "procedural", "license": "Original Content Studio longship, shore, and water"}
+  ]
+}

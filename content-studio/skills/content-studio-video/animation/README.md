@@ -31,3 +31,4 @@ The [`dream-weirdcore-style` playground](blender/dream-review.md) adds a scored 
 The [`indie-horror-aesthetics` cabin](blender/indie-review.md) adds a scored first-person forest lane with red trail markers, a practical window blackout, and exact frame review.
 The [`fantasy-worlds` gate](blender/fantasy-review.md) adds a scored medieval low-magic castle lane, a lowering drawbridge, heraldry, and a structural fit audit. World direction is selected separately from visual style.
 The [`sci-fi-punk-worlds` alley](blender/cyberpunk-review.md) adds a scored cyberpunk lane with neon tower facades and a traversing parcel drone.
+The [`historical-worlds` longship](blender/viking-review.md) adds a scored Viking period lane with a wool sail, shields, and camera-follow crossing.
