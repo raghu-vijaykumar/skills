@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "voxel-desk-lamp",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "voxel_size_m": 0.05,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Voxel camera",
+  "objects": [
+    {"id": "base", "name": "SM_Voxel_Base"},
+    {"id": "lower-arm", "name": "SM_Voxel_Lower_Arm"},
+    {"id": "upper-arm", "name": "SM_Voxel_Upper_Arm"},
+    {"id": "shade", "name": "SM_Voxel_Shade"},
+    {"id": "bulb", "name": "SM_Voxel_Bulb"},
+    {"id": "notebook", "name": "SM_Voxel_Notebook"},
+    {"id": "pivot", "name": "Voxel head control"},
+    {"id": "camera", "name": "Voxel camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Grid-built lamp starts raised and unlit", "object_ids": ["base", "upper-arm", "shade"]},
+    {"id": "action", "frame": 38, "label": "Head moves in grid steps and bulb switches on", "object_ids": ["upper-arm", "shade", "bulb", "notebook"]},
+    {"id": "result", "frame": 72, "label": "Voxel lamp holds over the notebook", "object_ids": ["base", "shade", "bulb"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "voxel-geometry", "origin": "procedural", "license": "Original Content Studio grid occupancy and palette"}
+  ]
+}

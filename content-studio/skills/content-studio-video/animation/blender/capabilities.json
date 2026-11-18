@@ -578,9 +578,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/voxel-lamp.gif",
+      "review": "voxel-review.md",
+      "builder": "examples/voxel_lamp.py",
+      "spec": "examples/voxel_lamp.json",
+      "compatible_subjects": ["prop-artist", "blender-modeler"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "isometric-style",

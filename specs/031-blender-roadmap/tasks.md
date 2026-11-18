@@ -26,7 +26,8 @@
 
 - [ ] T010 [P4] Author the eight core styles with distinct scored GIFs and explicit recipe differences.
   - [x] T010a Render the low-poly lamp treatment with a distinct scored GIF and a 184-triangle flat-shading audit.
-  - [ ] T010b Complete the remaining seven core style treatments with distinct scored GIFs.
+  - [x] T010b Render the voxel lamp treatment with a distinct scored GIF and a 0.05 m occupancy-grid audit.
+  - [ ] T010c Complete the remaining six core style treatments with distinct scored GIFs.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 

@@ -182,6 +182,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
             (r"\b(pixel|sprite)\b", "pixel-art-style"),
+            (r"\b(voxel|minecraft|blocky)\b", "voxel-style"),
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         chosen = next((name for pattern, name in style_rules if re.search(pattern, text)),

@@ -71,6 +71,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A desk lamp switches on", "blender_style": "lowpoly-style"}]})
         self.assertEqual(lowpoly["scenes"][0]["blender"]["builder"],
                          "examples/lowpoly_lamp.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            voxel = engine.plan({"scenes": [{"id": "voxel-lamp", "duration_seconds": 3,
+                "visual_intent": "A desk lamp switches on", "blender_style": "voxel-style"}]})
+        self.assertEqual(voxel["scenes"][0]["blender"]["builder"],
+                         "examples/voxel_lamp.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

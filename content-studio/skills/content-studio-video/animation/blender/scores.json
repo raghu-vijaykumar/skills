@@ -84,6 +84,31 @@
         }
       ]
     },
+    "voxel-style": {
+      "selected": "voxel-lamp-v1",
+      "candidates": [
+        {
+          "id": "voxel-lamp-v1",
+          "video_sha256": "9e2a0e78ce8b7db7e29effb6c908aff9807d2e9bdde7a2296d0b1229fb78eae6",
+          "gif_sha256": "bff9bab3c1aafe29d1fea4a7a5ab41ae1e9b6b82045b3549c0622b04d55f5c66",
+          "gif_path": "previews/voxel-lamp.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 5,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 87,
+          "reviewer": "Content Studio frame and voxel-grid review",
+          "review_date": "2026-11-18",
+          "review_note": "The 0.05 m occupancy-grid lamp has a stepped silhouette, five-color palette, two readable whole-voxel head steps, and a warm light pool. The notebook remains simple."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
