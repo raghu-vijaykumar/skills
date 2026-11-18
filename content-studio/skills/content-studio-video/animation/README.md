@@ -60,3 +60,4 @@ The [reading-nook set-dressing evidence](blender/set-dressing-review.md) reuses 
 The [vehicle and vegetation modeling evidence](blender/modeling-reuse-review.md) connects scored car and kelp shots to bounded asset craft routes.
 The [detective archetype evidence](blender/archetype-review.md) connects one scored noir shot to an audited character role.
 The [Blender QA evidence](blender/qa-review.md) records exact-output hash, mesh, budget, angle, and beauty checks with an explicit verdict.
+The [measured studio archviz evidence](blender/archviz-review.md) compares a greybox and furnished walkthrough with audited dimensions and camera motion.

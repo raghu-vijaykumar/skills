@@ -47,6 +47,8 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "material", "lookdev", "lighting", "swatch", "ceramic",
     "camera", "keyframe", "eevee", "nodes", "post", "kit",
     "parametric", "walkway", "modular", "assembly",
+    # A measured interior walkthrough is a Blender scene, not an engineering cutaway.
+    "archviz", "studio walkthrough",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

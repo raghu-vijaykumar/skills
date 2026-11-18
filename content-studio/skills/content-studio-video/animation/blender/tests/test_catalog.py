@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 74)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 75)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -420,6 +420,15 @@ class CatalogTests(unittest.TestCase):
                          ("qa-review", "realistic-style", "examples/material_light_lab.py"))
         self.assertIsNone(catalog_module.route("A material swatch QA review",
                                                 style="anime-style")["builder"])
+        archviz = catalog_module.route("A measured studio archviz walkthrough")
+        self.assertEqual((archviz["subject"], archviz["style"],
+                          archviz["capability"], archviz["builder"]),
+                         ("environment-artist", "realistic-style", "archviz",
+                          "examples/archviz_studio.py"))
+        self.assertIsNone(catalog_module.route("An architectural visualization of a cathedral",
+                                                capability="archviz")["builder"])
+        self.assertIsNone(catalog_module.route("A measured studio archviz walkthrough",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -458,7 +467,11 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 63)
+        self.assertEqual(len(catalog_module.scorebook(book)), 64)
+        archviz = book["routes"]["archviz"]
+        self.assertEqual(archviz["selected"], "archviz-studio-v2")
+        self.assertEqual([candidate["score_total"] for candidate in archviz["candidates"]],
+                         [50, 73])
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -690,7 +703,7 @@ class CatalogTests(unittest.TestCase):
                      "analog-training", "liminal-pool", "folk-ritual", "puppet-stage",
                      "dream-playground", "indie-cabin", "fantasy-gate",
                      "cyberpunk-alley", "viking-longship", "wasteland-station",
-                     "kelp-forest"):
+                     "kelp-forest", "archviz-studio"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

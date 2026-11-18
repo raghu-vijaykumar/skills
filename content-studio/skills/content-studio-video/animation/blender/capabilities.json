@@ -619,9 +619,17 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/archviz-studio.gif",
+      "review": "archviz-review.md",
+      "builder": "examples/archviz_studio.py",
+      "spec": "examples/archviz_studio.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["realistic-style"],
+      "intent_cues": ["measured studio archviz walkthrough"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json"
     },
     {
       "id": "horror-style",

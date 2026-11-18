@@ -2522,6 +2522,50 @@
         }
       ]
     },
+    "archviz": {
+      "selected": "archviz-studio-v2",
+      "candidates": [
+        {
+          "id": "archviz-studio-v1",
+          "video_sha256": "6663b0abf88058274ae0e0f9719eacd1affa693799adbd309cc418ff2b1a3204",
+          "gif_sha256": "0ca11d497c4c4866612c21c27612a20cd10cfdc6563e13313688307869472607",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 3,
+            "finish": 2,
+            "evidence_integrity": 5
+          },
+          "score_total": 50,
+          "reviewer": "Content Studio encoded-frame and archviz review",
+          "review_date": "2026-11-19",
+          "review_note": "Measured greybox and window opening pass structure, but the view is static, monochrome, and bare. Exact MP4 and GIF decode, saved-scene audit, and sampled encoded frames passed."
+        },
+        {
+          "id": "archviz-studio-v2",
+          "video_sha256": "7a254f410ce1e5ea678131102987a7ad90746f6542ed715080827d374fbc866e",
+          "gif_sha256": "6bafaae7b60249a6f1b5b3bc10d2eed7989f4f5bfcc2afd5976c41346c61dd85",
+          "gif_path": "previews/archviz-studio.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and archviz review",
+          "review_date": "2026-11-19",
+          "review_note": "The 5.6 m measured room, separate furniture, wood and linen treatment, motivated daylight and pendant, and level eye-height camera push read as a bounded interior walkthrough. The furniture and exterior are illustrative, not photoreal or CAD matched. Full MP4, GIF, isolated sofa, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

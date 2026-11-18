@@ -170,6 +170,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
     text = prompt.lower()
     entries = catalog()
     subject_rules = [
+        (r"\b(archviz|architectural.visualization|studio.interior.walkthrough)\b", "environment-artist"),
         (r"\bdetective.archetype\b", "character-archetypes"),
         (r"\bkelp.frond.vegetation\b", "vegetation-artist"),
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat|longship)\b", "vehicle-artist"),
@@ -330,7 +331,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
                          "stylized-style" if subject == "vegetation-artist" and
                          re.search(r"\bkelp.frond.vegetation\b", text) else
                          "realistic-style" if
-                         selected_capability in {"materials", "lookdev", "lighting", "qa-review"}
+                         selected_capability in {"materials", "lookdev", "lighting", "qa-review", "archviz"}
                          else "stylized-style" if
                          selected_capability in {"camera-cinematography", "rendering", "animation", "geometry-nodes", "procedural-modeling", "scene-assembly"}
                          else "stylized-style" if subject == "vehicle-artist" and
@@ -451,7 +452,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
         matched = (entry["status"] in {"Rendered", "Integrated"}
                    and subject in entry.get("compatible_subjects", [])
                    and chosen in entry.get("compatible_styles", [])
-                   and (capability is not None or cue_matches(entry)))
+                   and (cue_matches(entry) if entry.get("narrow_cue_required")
+                        else capability is not None or cue_matches(entry)))
     elif selected_genre:
         entry = genre_entry
         matched = (genre_entry["status"] in {"Rendered", "Integrated"}

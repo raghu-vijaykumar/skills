@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "measured-studio-archviz",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Archviz eye-level camera",
+  "variant": 2,
+  "objects": [
+    {"id": "room", "name": "SM_Studio_Floor"},
+    {"id": "window", "name": "SM_Window_Exterior_Sky"},
+    {"id": "sofa", "name": "SM_Sofa_Base"},
+    {"id": "table", "name": "SM_Coffee_Table_Top"},
+    {"id": "shelf", "name": "SM_Shelf_1.00"},
+    {"id": "daylight", "name": "LGT_Window_Daylight"},
+    {"id": "practical", "name": "LGT_Pendant_Practical"},
+    {"id": "camera", "name": "Archviz eye-level camera"}
+  ],
+  "beats": [
+    {"id": "entry", "frame": 1, "label": "Eye-level entry shows measured room, window, furniture, and straight verticals", "object_ids": ["room", "window", "sofa", "camera"]},
+    {"id": "walk", "frame": 36, "label": "Camera pushes toward the furnished room while daylight and practicals separate materials", "object_ids": ["camera", "daylight", "practical", "table"]},
+    {"id": "inspect", "frame": 72, "label": "Held closer view keeps sofa, table, shelf, and window readable", "object_ids": ["sofa", "table", "shelf", "window"]}
+  ],
+  "review_states": ["entry", "walk", "inspect"],
+  "assets": [
+    {"id": "studio-interior", "origin": "procedural", "license": "Original Content Studio measured interior and furnishings"}
+  ]
+}
