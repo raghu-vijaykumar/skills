@@ -1223,6 +1223,40 @@
         }
       ]
     },
+    "mascot-puppet-horror": {
+      "selected": "puppet-stage-v2",
+      "candidates": [
+        {
+          "id": "puppet-stage-v1",
+          "video_sha256": "10b754eee71bf6e14cc344ba8720dc71d4933f7ba320a8fbd2d13fc3a89545f0",
+          "gif_sha256": "82bcad9df6cea96641fd8ec7218bf821fb0ecae3763035d2f428c6406c7311bf",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 72,
+          "reviewer": "Content Studio encoded-frame and puppet-performance review",
+          "review_date": "2026-11-18",
+          "review_note": "The felt body, plastic eyes, stitched smile, bright brand banner, and pink curtains read clearly, but the tiny pose and camera shift never make the performance uncanny. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "puppet-stage-v2",
+          "video_sha256": "7d9727e79ef39c9d0fff8bd1250b1b4950c1469838b7f5efc4affd2fec922ce9",
+          "gif_sha256": "b1d13f4443b80e72e8b83efe3750c4155cd52149390b20034350b4ea77f411c7",
+          "gif_path": "previews/puppet-stage.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and puppet-performance review",
+          "review_date": "2026-11-18",
+          "review_note": "One hard plastic pupil slides off alignment as the warm children's-show key dims, a green light rises, and the felt puppet tilts toward the camera without changing its stitched smile. Full MP4, GIF, isolated hero, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

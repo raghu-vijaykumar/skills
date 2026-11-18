@@ -26,3 +26,4 @@ The [`body-horror-style` hand](blender/hand-review.md) adds a scored six-digit m
 The [`analog-found-footage-horror` tape](blender/analog-review.md) adds a scored security-room recording, tracking-line, monitor-signal, and implied-figure audit.
 The [`liminal-space-style` poolrooms](blender/liminal-review.md) add a scored empty modular hall, fluorescent flicker, and long inspection-push audit.
 The [`folk-horror-style` rite](blender/folk-review.md) adds a scored sunlit village, handmade wicker symbol, repeated offerings, and camera and ribbon motion audit.
+The [`mascot-puppet-horror` show](blender/puppet-review.md) adds a scored felt character, children's set, plastic gaze, fixed smile, and sick-light performance audit.

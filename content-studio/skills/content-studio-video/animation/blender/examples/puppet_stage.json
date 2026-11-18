@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "puppet-sick-show",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Puppet stage camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_Puppet_Stage_Floor"},
+    {"id": "felt", "name": "SM_Puppet_Felt_Body"},
+    {"id": "head", "name": "SM_Puppet_Felt_Head"},
+    {"id": "eye", "name": "SM_Puppet_Black_Pupil_1"},
+    {"id": "curtain", "name": "SM_Puppet_Curtain_-1"},
+    {"id": "sick-light", "name": "SM_Puppet_Sick_Light"},
+    {"id": "camera", "name": "Puppet stage camera"}
+  ],
+  "beats": [
+    {"id": "friendly", "frame": 1, "label": "A cheerful felt show character smiles under warm stage light", "object_ids": ["felt", "head", "stage"]},
+    {"id": "shift", "frame": 43, "label": "One dead plastic eye drifts as the set becomes sick green", "object_ids": ["eye", "sick-light"]},
+    {"id": "uncanny", "frame": 72, "label": "The smile stays fixed while the head and gaze turn wrong", "object_ids": ["head", "eye", "camera"]}
+  ],
+  "review_states": ["friendly", "shift", "uncanny"],
+  "assets": [
+    {"id": "puppet-set", "origin": "procedural", "license": "Original Content Studio felt puppet, branded stage, and light performance"}
+  ]
+}

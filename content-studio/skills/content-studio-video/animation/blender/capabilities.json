@@ -1046,9 +1046,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/puppet-stage.gif",
+      "review": "puppet-review.md",
+      "builder": "examples/puppet_stage.py",
+      "spec": "examples/puppet_stage.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["puppet", "mascot", "felt"],
+      "score_record": "scores.json"
     },
     {
       "id": "dream-weirdcore-style",
