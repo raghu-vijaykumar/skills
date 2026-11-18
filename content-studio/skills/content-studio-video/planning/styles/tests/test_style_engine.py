@@ -264,6 +264,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/viking_longship.py")
         self.assertEqual(viking["scenes"][0]["blender"]["world"],
                          "historical-worlds")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            wasteland = engine.plan({"scenes": [{"id": "fuel-stop", "duration_seconds": 3,
+                "visual_intent": "A scavenger cart crosses a post-apocalyptic wasteland fuel station"}]})
+        self.assertEqual(wasteland["scenes"][0]["blender"]["builder"],
+                         "examples/wasteland_station.py")
+        self.assertEqual(wasteland["scenes"][0]["blender"]["world"],
+                         "apocalypse-worlds")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

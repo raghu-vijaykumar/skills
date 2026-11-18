@@ -1161,9 +1161,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/wasteland-station.gif",
+      "review": "wasteland-review.md",
+      "builder": "examples/wasteland_station.py",
+      "spec": "examples/wasteland_station.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["wasteland", "fuel station", "gas station", "roadside", "outpost"],
+      "score_record": "scores.json"
     },
     {
       "id": "biome-worlds",

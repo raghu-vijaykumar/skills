@@ -32,3 +32,4 @@ The [`indie-horror-aesthetics` cabin](blender/indie-review.md) adds a scored fir
 The [`fantasy-worlds` gate](blender/fantasy-review.md) adds a scored medieval low-magic castle lane, a lowering drawbridge, heraldry, and a structural fit audit. World direction is selected separately from visual style.
 The [`sci-fi-punk-worlds` alley](blender/cyberpunk-review.md) adds a scored cyberpunk lane with neon tower facades and a traversing parcel drone.
 The [`historical-worlds` longship](blender/viking-review.md) adds a scored Viking period lane with a wool sail, shields, and camera-follow crossing.
+The [`apocalypse-worlds` outpost](blender/wasteland-review.md) adds a scored roadside collapse lane with improvised repairs, a salvaged hauler, and a dust sweep.

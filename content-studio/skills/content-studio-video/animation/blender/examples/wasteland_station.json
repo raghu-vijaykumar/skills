@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "wasteland-fuel-stop",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Wasteland station inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "road", "name": "SM_Waste_Cracked_Road"},
+    {"id": "canopy", "name": "SM_Waste_Fuel_Canopy"},
+    {"id": "brace", "name": "SM_Waste_Improvised_Brace"},
+    {"id": "pump", "name": "SM_Waste_Fuel_Pump"},
+    {"id": "sign", "name": "SM_Waste_Faded_Sign"},
+    {"id": "cart", "name": "SM_Waste_Scavenger_Cart_Rig"},
+    {"id": "dust", "name": "SM_Waste_Dust_Gust_Rig"},
+    {"id": "camera", "name": "Wasteland station inspection camera"}
+  ],
+  "beats": [
+    {"id": "collapse", "frame": 1, "label": "A broken roadside fuel stop is held together with scrap", "object_ids": ["canopy", "brace", "pump", "sign"]},
+    {"id": "approach", "frame": 48, "label": "A patched hauler crosses the road through blown dust", "object_ids": ["cart", "road", "dust"]},
+    {"id": "arrival", "frame": 72, "label": "The hauler reaches the station as the camera advances", "object_ids": ["cart", "canopy", "camera"]}
+  ],
+  "review_states": ["collapse", "approach", "arrival"],
+  "assets": [
+    {"id": "wasteland-station", "origin": "procedural", "license": "Original Content Studio roadside outpost, hauler, and dust geometry"}
+  ]
+}

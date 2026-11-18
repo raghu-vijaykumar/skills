@@ -1427,6 +1427,40 @@
         }
       ]
     },
+    "apocalypse-worlds": {
+      "selected": "wasteland-station-v2",
+      "candidates": [
+        {
+          "id": "wasteland-station-v1",
+          "video_sha256": "7d0cf3f70178d0eea575f38f320e25e4206c014773548b89e80b42fd5758b464",
+          "gif_sha256": "8c24e617f6e049728331ed85f6bc751bbae83b183e2b2c0a0250eda5605b690b",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and wasteland lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The collapsed fuel stop, faded sign, rust patches, and braced canopy establish a post-apoc lane, but the salvaged cart and dust barely move. Full MP4, GIF decode, isolated cart, and saved-scene audit passed."
+        },
+        {
+          "id": "wasteland-station-v2",
+          "video_sha256": "7347a4dc8ac39fbffae9dd531eda0155e4195f93c1d6e5e58424dab3fda4e10a",
+          "gif_sha256": "d2aec2a63183e43b52f599ed42c7bca94e796c6d4063f406b7ba43bc678b2a7e",
+          "gif_path": "previews/wasteland-station.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and wasteland lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The four-wheel scavenger cart crosses the road as a dust sweep passes the braced station, with the broken canopy still legible. Simplified sand and architecture limit finish to 3/5. Full MP4, GIF, isolated cart, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
