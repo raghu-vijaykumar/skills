@@ -691,9 +691,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/comic-rocket.gif",
+      "review": "comic-review.md",
+      "builder": "examples/comic_rocket.py",
+      "spec": "examples/comic_rocket.json",
+      "compatible_subjects": ["vehicle-artist"],
+      "intent_cues": ["rocket"],
+      "score_record": "scores.json"
     },
     {
       "id": "manga-style",

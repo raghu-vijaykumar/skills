@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "comic-rocket-panel",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Comic panel camera",
+  "objects": [
+    {"id": "rocket-body", "name": "SM_Comic_Rocket_Body"},
+    {"id": "rocket-nose", "name": "SM_Comic_Rocket_Nose"},
+    {"id": "rocket-window", "name": "SM_Comic_Rocket_Window"},
+    {"id": "flame", "name": "SM_Comic_Flame"},
+    {"id": "halftone", "name": "SM_Comic_Halftone_Backdrop"},
+    {"id": "burst", "name": "SM_Comic_Impact_Burst"},
+    {"id": "lettering", "name": "SM_Comic_Whoosh_Lettering"},
+    {"id": "rocket-control", "name": "Comic rocket control"},
+    {"id": "camera", "name": "Comic panel camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Ink-contoured rocket enters a cool halftone panel", "object_ids": ["rocket-body", "rocket-nose", "halftone"]},
+    {"id": "action", "frame": 36, "label": "Rocket crosses the burst with speed lines and bright flame", "object_ids": ["rocket-body", "flame", "burst"]},
+    {"id": "result", "frame": 72, "label": "Rocket holds near the panel edge beside the WHOOSH lettering", "object_ids": ["rocket-body", "lettering"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "comic-rocket", "origin": "procedural", "license": "Original Content Studio rocket, packed halftone print, and panel design"}
+  ]
+}

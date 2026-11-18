@@ -156,7 +156,7 @@ def route(prompt, style=None, subject=None):
     text = prompt.lower()
     entries = catalog()
     subject_rules = [
-        (r"\b(vehicle|car|truck|aircraft|spaceship)\b", "vehicle-artist"),
+        (r"\b(vehicle|car|truck|aircraft|spaceship|rocket)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
@@ -179,6 +179,7 @@ def route(prompt, style=None, subject=None):
         style_rules = [
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
+            (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -189,7 +190,9 @@ def route(prompt, style=None, subject=None):
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
-        default_style = ("anime-style" if subject == "character-artist" and
+        default_style = ("comic-book-style" if subject == "vehicle-artist" and
+                         re.search(r"\brocket\b", text) else
+                         "anime-style" if subject == "character-artist" and
                          re.search(r"\bheroine\b", text) else
                          "cartoon-style" if subject == "character-artist" and
                          re.search(r"\bbouncy\b", text) and

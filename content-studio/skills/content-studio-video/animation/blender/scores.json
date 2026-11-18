@@ -322,6 +322,31 @@
         }
       ]
     },
+    "comic-book-style": {
+      "selected": "comic-rocket-v1",
+      "candidates": [
+        {
+          "id": "comic-rocket-v1",
+          "video_sha256": "b6fa33ddddb85883336922df31edbf212495b01bd75773f6f02e941648e48d68",
+          "gif_sha256": "e0d2913c87096117d2017f3fbff534861d9c725f525ba785a602618c5136e924",
+          "gif_path": "previews/comic-rocket.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and comic-print audit",
+          "review_date": "2026-11-18",
+          "review_note": "An original ink-contoured rocket moves across a packed halftone panel. Speed lines, a timed burst and filled WHOOSH lettering survive the compact GIF, while the vehicle and print treatment remain simple illustrations."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
