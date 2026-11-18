@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "geometry-node-walkway-traversal",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "GN walkway overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_GN_Walkway_Stage"},
+    {"id": "deck", "name": "SM_GN_Walkway_Deck"},
+    {"id": "near-kit", "name": "SM_GN_Post_Row_near"},
+    {"id": "far-kit", "name": "SM_GN_Post_Row_far"},
+    {"id": "drone", "name": "SM_GN_Traveler_Drone"},
+    {"id": "door", "name": "SM_GN_Gate_Door_1"},
+    {"id": "camera", "name": "GN walkway overview camera"}
+  ],
+  "beats": [
+    {"id": "orient", "frame": 1, "label": "Two repeated post rows frame a modular walkway and closed gate", "object_ids": ["deck", "near-kit", "far-kit", "door"]},
+    {"id": "travel", "frame": 38, "label": "The drone travels between the repeated kits", "object_ids": ["drone", "near-kit", "far-kit"]},
+    {"id": "gate", "frame": 72, "label": "The gate leaves open and the drone reaches the destination", "object_ids": ["drone", "door"]}
+  ],
+  "review_states": ["orient", "travel", "gate"],
+  "assets": [
+    {"id": "walkway-kit", "origin": "procedural", "license": "Original Content Studio Geometry Nodes post kit and walkway"}
+  ]
+}

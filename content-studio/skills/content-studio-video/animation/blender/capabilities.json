@@ -281,9 +281,17 @@
         "procedural-modeling"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "review": "geometry-node-review.md",
+      "builder": "examples/geometry_node_walkway.py",
+      "spec": "examples/geometry_node_walkway.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["geometry nodes post kit"],
+      "score_record": "scores.json",
+      "score_route": "geometry-node-walkway"
     },
     {
       "id": "lighting",
@@ -422,9 +430,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "review": "geometry-node-review.md",
+      "builder": "examples/geometry_node_walkway.py",
+      "spec": "examples/geometry_node_walkway.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["parametric post walkway"],
+      "score_record": "scores.json",
+      "score_route": "geometry-node-walkway"
     },
     {
       "id": "scene-assembly",
@@ -434,9 +450,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "review": "geometry-node-review.md",
+      "builder": "examples/geometry_node_walkway.py",
+      "spec": "examples/geometry_node_walkway.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["modular walkway assembly"],
+      "score_record": "scores.json",
+      "score_route": "geometry-node-walkway"
     },
     {
       "id": "set-dressing",

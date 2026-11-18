@@ -2478,6 +2478,50 @@
         }
       ]
     },
+    "geometry-node-walkway": {
+      "selected": "geometry-node-walkway-v2",
+      "candidates": [
+        {
+          "id": "geometry-node-walkway-v1",
+          "video_sha256": "009d36363c1b993750fce4f6336ef148c3a11f801459a1665368f0d10dc88b76",
+          "gif_sha256": "ba87d21f87cf9c02c89b6e9c54f102281ff1970d085a25bb8bbfa61bf2cab676",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and node-walkway review",
+          "review_date": "2026-11-19",
+          "review_note": "Two four-post procedural rows and an organized modular stage read clearly, but the drone and gate remain static and the kit density is low. Full MP4, GIF, isolated post and drone previews, and saved-scene audit passed."
+        },
+        {
+          "id": "geometry-node-walkway-v2",
+          "video_sha256": "55d26509a6144b04abab05b72825a8c409fa448b963854d0572986f0cedcda56",
+          "gif_sha256": "45a485bea41a92abad820079afdc038898df61f7ad8e8425f82666eae608dbee",
+          "gif_path": "previews/geometry-node-walkway.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and node-walkway review",
+          "review_date": "2026-11-19",
+          "review_note": "Two ten-post Geometry Nodes rows frame a traversing drone; the gate retracts near its approach. The scene uses organized collections and an adjustable repeated kit. Drone and gate geometry are illustrative, and collection linking/override workflows are outside this lane. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

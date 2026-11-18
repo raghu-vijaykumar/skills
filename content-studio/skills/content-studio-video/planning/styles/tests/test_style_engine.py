@@ -439,6 +439,15 @@ class StyleEngineTests(unittest.TestCase):
             self.assertEqual(technical["scenes"][0]["blender"]["capability"], skill)
             self.assertEqual(technical["scenes"][0]["blender"]["builder"],
                              "examples/station_letter.py")
+        for prompt, skill in (("A geometry nodes post kit", "geometry-nodes"),
+                              ("A parametric post walkway", "procedural-modeling"),
+                              ("A modular walkway assembly", "scene-assembly")):
+            with patch.object(engine, "renderer_executable", return_value=sys.executable):
+                modular = engine.plan({"scenes": [{"id": "kit", "duration_seconds": 3,
+                    "visual_intent": prompt}]})
+            self.assertEqual(modular["scenes"][0]["blender"]["capability"], skill)
+            self.assertEqual(modular["scenes"][0]["blender"]["builder"],
+                             "examples/geometry_node_walkway.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

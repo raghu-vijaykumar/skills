@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 66)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 69)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -382,6 +382,16 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(result["builder"], "examples/station_letter.py")
             self.assertIsNone(catalog_module.route(prompt,
                                                     style="anime-style")["builder"])
+        for prompt, skill in (("A geometry nodes post kit", "geometry-nodes"),
+                              ("A parametric post walkway", "procedural-modeling"),
+                              ("A modular walkway assembly", "scene-assembly")):
+            result = catalog_module.route(prompt)
+            self.assertEqual((result["subject"], result["style"],
+                              result["capability"]),
+                             ("environment-artist", "stylized-style", skill))
+            self.assertEqual(result["builder"], "examples/geometry_node_walkway.py")
+            self.assertIsNone(catalog_module.route(prompt,
+                                                    style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -420,7 +430,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 62)
+        self.assertEqual(len(catalog_module.scorebook(book)), 63)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -521,6 +531,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(material["selected"], "material-light-v2")
         self.assertEqual([candidate["score_total"] for candidate in material["candidates"]],
                          [58, 77])
+        geometry = book["routes"]["geometry-node-walkway"]
+        self.assertEqual(geometry["selected"], "geometry-node-walkway-v2")
+        self.assertEqual([candidate["score_total"] for candidate in geometry["candidates"]],
+                         [58, 73])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

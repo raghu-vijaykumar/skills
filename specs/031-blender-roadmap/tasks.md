@@ -18,11 +18,13 @@
   - [x] T007c Render a clay-to-beauty material lab with two scored outputs, three isolated PBR swatches, and an audited three-point light sweep for materials, lookdev, and lighting.
   - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
 - [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
+  - [x] T008a Render a Geometry Nodes repeated-post walkway with two scored outputs, isolated kit and drone previews, and collection and traversal audits for procedural modeling and scene assembly.
 
 ## Wave 3: Technical motion and rendering
 
 - [ ] T009 [P4] Implement Geometry Nodes, camera, lighting, rendering, compositing, animation, rigging, VFX, and physics examples with baked-cache or structural checks where applicable.
   - [x] T009a Audit the scored station shot as a bounded camera push, keyed prop animation, and exact headless EEVEE render; reuse its selected GIF without duplicating media.
+  - [x] T009b Audit the repeated post node graph, four versus ten instances per row, and the scored gate traversal as a Geometry Nodes lane.
 
 ## Wave 4: Visual treatments
 

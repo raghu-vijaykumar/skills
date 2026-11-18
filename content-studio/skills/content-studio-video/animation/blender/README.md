@@ -64,6 +64,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Open-world crossing | [Source](examples/open_world_crossing.py) | [Inputs](examples/open_world_crossing.json) | [GIF](previews/open-world-crossing.gif) |
 | Console-era flight | [Source](examples/console_era_flight.py) | [Inputs](examples/console_era_flight.json) | [GIF](previews/console-era-flight.gif) |
 | Material and light lab | [Source](examples/material_light_lab.py) | [Inputs](examples/material_light_lab.json) | [GIF](previews/material-light-lab.gif) |
+| Geometry Nodes walkway | [Source](examples/geometry_node_walkway.py) | [Inputs](examples/geometry_node_walkway.json) | [GIF](previews/geometry-node-walkway.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -113,6 +114,7 @@ The [open-world review](open-world-review.md) records two scored outputs, isolat
 The [console-era review](console-era-review.md) records two scored outputs, isolated ships, a topology and texture-filter audit, and the PS1/PS5 comparison limit.
 The [material-light review](material-light-review.md) records one clay and one beauty output, isolated swatches, a PBR and three-point audit, and the visible key sweep. Its single winning GIF supports the audited materials, lookdev, and lighting routes.
 The [narrative technical review](narrative-technical-review.md) reuses the already scored station GIF for its audited camera push, keyframed prop motion, and exact headless EEVEE render.
+The [Geometry Nodes review](geometry-node-review.md) records two scored outputs, isolated posts and drone, node graph and collection audits, and a gate traversal.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

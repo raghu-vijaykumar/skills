@@ -198,6 +198,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
         (r"\b(card.table.choice|deck.builder.card.table|idle.reward.card.table|shield.card.choice)\b", "prop-artist"),
         (r"\b(open.world.biome.crossing|sandbox.exploration.bridge|traversable.biome.border|open.world.river.bridge)\b", "environment-artist"),
         (r"\b(emotional.camera.push|headless.eevee.narrative.render|sealed.letter.keyframe.rise)\b", "environment-artist"),
+        (r"\b(geometry.nodes.post.kit|parametric.post.walkway|modular.walkway.assembly)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -323,7 +324,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
         default_style = ("realistic-style" if
                          selected_capability in {"materials", "lookdev", "lighting"}
                          else "stylized-style" if
-                         selected_capability in {"camera-cinematography", "rendering", "animation"}
+                         selected_capability in {"camera-cinematography", "rendering", "animation", "geometry-nodes", "procedural-modeling", "scene-assembly"}
                          else "stylized-style" if subject == "vehicle-artist" and
                          selected_era == "visual-console-eras" else
                          "comic-book-style" if subject == "vehicle-artist" and
