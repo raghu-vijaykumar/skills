@@ -1301,9 +1301,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/action-arena.gif",
+      "review": "action-review.md",
+      "builder": "examples/action_arena.py",
+      "spec": "examples/action_arena.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["combat arena", "sparring arena", "fight arena", "brawler arena", "hack and slash"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-shooter",

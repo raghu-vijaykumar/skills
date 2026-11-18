@@ -313,6 +313,26 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/brutalist_archive.py")
         self.assertEqual(brutalist["scenes"][0]["blender"]["world"],
                          "brutalist-mood")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            combat = engine.plan({"scenes": [{"id": "duel", "duration_seconds": 3,
+                "visual_intent": "A sword duel in a combat arena"}]})
+        self.assertEqual(combat["scenes"][0]["blender"]["builder"],
+                         "examples/action_arena.py")
+        self.assertEqual(combat["scenes"][0]["blender"]["genre"],
+                         "genre-action-combat")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            explicit_combat = engine.plan({"scenes": [{"id": "duel", "duration_seconds": 3,
+                "style": "genre-action-combat", "visual_intent": "A sparring arena"}]})
+        self.assertEqual(explicit_combat["scenes"][0]["blender"]["builder"],
+                         "examples/action_arena.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            genre_override = engine.plan({"scenes": [{"id": "duel", "duration_seconds": 3,
+                "blender_genre": "genre-action-combat",
+                "visual_intent": "A sparring arena"}]})
+        self.assertEqual(genre_override["scenes"][0]["blender"]["genre"],
+                         "genre-action-combat")
+        self.assertEqual(genre_override["scenes"][0]["blender"]["builder"],
+                         "examples/action_arena.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

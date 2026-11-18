@@ -1799,6 +1799,50 @@
         }
       ]
     },
+    "genre-action-combat": {
+      "selected": "action-arena-v2",
+      "candidates": [
+        {
+          "id": "action-arena-v1",
+          "video_sha256": "edc3d6429732701bb37dfa2782d6eb2a267ce92d768445108f3775b06f1f768a",
+          "gif_sha256": "46200c55a1bf795f634838d2376b76562c6079f960dd127c9c5fb7697044d861",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and action-arena review",
+          "review_date": "2026-11-19",
+          "review_note": "The fight plane and opposing sword/shield silhouettes are clear, but the fighters barely move and the prop stays intact. Complete MP4, GIF, isolated fighter, and saved-scene audit passed."
+        },
+        {
+          "id": "action-arena-v2",
+          "video_sha256": "539362b8a75a9edd36fedead0c2aa9db66843f427a5c0c07f27a3877910a318c",
+          "gif_sha256": "e3597b021156b4a8b3f592696c18c729f016dcaa3e5afca8e2d8b7e1b0503cac",
+          "gif_path": "previews/action-arena.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and action-arena review",
+          "review_date": "2026-11-19",
+          "review_note": "The blue fighter crosses the open ring, swings the cyan blade into a raised shield, and a brief impact leads to a rival recoil and four flying clay chunks. Simple actor geometry and symbolic prop break limit finish. Complete MP4, GIF, isolated fighter, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

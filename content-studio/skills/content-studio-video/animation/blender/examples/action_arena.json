@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "action-combat-sparring-arena",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Arena unobstructed combat camera",
+  "variant": 2,
+  "objects": [
+    {"id": "ring", "name": "SM_Arena_Readable_Octagonal_Ring"},
+    {"id": "hero", "name": "SM_Arena_Hero_Rig"},
+    {"id": "sword", "name": "SM_Arena_Sword_Pivot"},
+    {"id": "rival", "name": "SM_Arena_Rival_Rig"},
+    {"id": "shield", "name": "SM_Arena_Shield_Pivot"},
+    {"id": "breakables", "name": "SM_Arena_Breakable_Clay_Chunk_0"},
+    {"id": "impact", "name": "SM_Arena_Impact_Burst_Rig"},
+    {"id": "camera", "name": "Arena unobstructed combat camera"}
+  ],
+  "beats": [
+    {"id": "spacing", "frame": 1, "label": "Blue sword fighter and coral shield rival face off in a clear arena", "object_ids": ["ring", "hero", "sword", "rival", "shield"]},
+    {"id": "clash", "frame": 53, "label": "The blade strikes the raised shield with a short impact burst", "object_ids": ["hero", "sword", "rival", "shield", "impact"]},
+    {"id": "aftermath", "frame": 72, "label": "The rival recoils and the nearby clay prop breaks into distinct chunks", "object_ids": ["rival", "breakables", "camera"]}
+  ],
+  "review_states": ["spacing", "clash", "aftermath"],
+  "assets": [
+    {"id": "arena", "origin": "procedural", "license": "Original Content Studio arena, fighters, weapons, and breakable prop"}
+  ]
+}

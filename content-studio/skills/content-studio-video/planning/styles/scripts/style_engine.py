@@ -32,6 +32,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "doorway", "levitating", "tide", "retrowave", "synthwave",
     "outrun", "highway", "striped", "sunset", "chrome",
     "brutalist", "brutalism", "monumental", "concrete", "shutter",
+    "combat", "arena", "sparring", "brawler", "shield", "sword",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.
@@ -94,14 +95,18 @@ def plan(data, selected="auto"):
                              if item["category"] in blender_catalog().STYLE_CATEGORIES}
         blender_world_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
                              if item["category"] == blender_catalog().WORLD_CATEGORY}
+        blender_genre_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
+                             if item["category"] == blender_catalog().GENRE_CATEGORY}
         implicit_blender_style = requested if requested in blender_style_ids else None
         implicit_blender_world = requested if requested in blender_world_ids else None
+        implicit_blender_genre = requested if requested in blender_genre_ids else None
         if requested == "auto":
             style = ("cinematic-3d" if scene.get("blender_style") or scene.get("blender_subject")
-                     or scene.get("blender_world")
+                     or scene.get("blender_world") or scene.get("blender_genre")
                      else recommend(text + " " + data.get("topic", "")))
         else:
-            style = "cinematic-3d" if implicit_blender_style or implicit_blender_world else resolve(requested)
+            style = ("cinematic-3d" if (implicit_blender_style or implicit_blender_world
+                                      or implicit_blender_genre) else resolve(requested))
         definition = STYLES[style]
         renderer = definition["renderer"]
         available = renderer_executable(renderer) is not None
@@ -119,17 +124,22 @@ def plan(data, selected="auto"):
             explicit_blender_world = scene.get("blender_world", implicit_blender_world)
             if implicit_blender_world and explicit_blender_world != implicit_blender_world:
                 raise ValueError(f"Conflicting Blender worlds for scene {scene['id']}")
+            explicit_blender_genre = scene.get("blender_genre", implicit_blender_genre)
+            if implicit_blender_genre and explicit_blender_genre != implicit_blender_genre:
+                raise ValueError(f"Conflicting Blender genres for scene {scene['id']}")
             # This is a proposal for review; only proven examples return a builder.
             selection = blender_catalog().route(text + " " + data.get("topic", ""),
                                                 explicit_blender_style,
                                                 scene.get("blender_subject"),
-                                                explicit_blender_world)
+                                                explicit_blender_world,
+                                                explicit_blender_genre)
             planned["blender"] = selection
             if not selection["render_method"]:
                 planned["status"] = "needs_builder"
                 output["warnings"].append(
                     f"No reviewed Blender builder matches scene {scene['id']} and its style")
-        elif scene.get("blender_style") or scene.get("blender_subject") or scene.get("blender_world"):
+        elif (scene.get("blender_style") or scene.get("blender_subject") or
+              scene.get("blender_world") or scene.get("blender_genre")):
             raise ValueError(f"Blender overrides require a cinematic-3d scene: {scene['id']}")
         output["scenes"].append(planned)
         if not available:

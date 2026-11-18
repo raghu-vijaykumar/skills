@@ -12,6 +12,7 @@ REPO = CONTENT_STUDIO.parent
 MANIFEST = json.loads((BLENDER / "capabilities.json").read_text(encoding="utf-8"))
 STYLE_CATEGORIES = {"Core styles", "Extended styles", "Horror packs"}
 WORLD_CATEGORY = "Worlds and moods"
+GENRE_CATEGORY = "Genre direction"
 VISUAL_CATEGORIES = STYLE_CATEGORIES | {WORLD_CATEGORY, "Genre direction", "Eras"}
 UPSTREAM = ("https://github.com/arjun988/blender-skills/blob/"
             f"{MANIFEST['upstream_commit']}/.claude/skills")
@@ -160,7 +161,7 @@ def catalog():
     return entries
 
 
-def route(prompt, style=None, subject=None, world=None):
+def route(prompt, style=None, subject=None, world=None, genre=None):
     """Give an inspectable default; a catalogue route is never a render claim."""
     text = prompt.lower()
     entries = catalog()
@@ -179,6 +180,7 @@ def route(prompt, style=None, subject=None, world=None):
         (r"\b(doorway|floating.stair|mirror.sea)\b", "environment-artist"),
         (r"\b(highway|grid.horizon|retrowave|synthwave|outrun)\b", "environment-artist"),
         (r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", "environment-artist"),
+        (r"\b(combat.arena|sparring.arena|fight.arena|brawler.arena)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -213,6 +215,13 @@ def route(prompt, style=None, subject=None, world=None):
                                re.search(r"\b(retrowave|synthwave|outrun|neon.retrofutur|striped sunset)\b", text)
                                else "brutalist-mood" if
                                re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text)
+                               else None)
+    genres = {entry["id"] for entry in entries if entry["category"] == GENRE_CATEGORY}
+    if genre is not None and genre not in genres:
+        raise ValueError(f"Unknown Blender genre: {genre}")
+    # Genre direction is a separate scene axis, so unnamed combat cues can reach a reviewed arena.
+    selected_genre = genre or ("genre-action-combat" if
+                               re.search(r"\b(combat.arena|sparring.arena|fight.arena|brawler.arena|hack.and.slash)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -324,6 +333,8 @@ def route(prompt, style=None, subject=None, world=None):
                          re.search(r"\b(retrowave|synthwave|outrun|neon.retrofutur|striped sunset)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text) else
+                         "stylized-style" if subject == "environment-artist" and
+                         selected_genre == "genre-action-combat" else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
@@ -350,10 +361,17 @@ def route(prompt, style=None, subject=None, world=None):
     entry = next((item for item in entries if item["id"] == subject), None)
     style_entry = next((item for item in entries if item["id"] == chosen), None)
     world_entry = next((item for item in entries if item["id"] == selected_world), None)
+    genre_entry = next((item for item in entries if item["id"] == selected_genre), None)
     cue_matches = lambda item: any(re.search(rf"\b{re.escape(cue)}\b", text)
                                    for cue in item.get("intent_cues", []))
     # A matching world can select its own scene without pretending to be a style.
-    if (world_entry and world_entry["status"] in {"Rendered", "Integrated"}
+    if selected_genre:
+        entry = genre_entry
+        matched = (genre_entry["status"] in {"Rendered", "Integrated"}
+                   and subject in genre_entry.get("compatible_subjects", [])
+                   and chosen in genre_entry.get("compatible_styles", [])
+                   and (genre is not None or cue_matches(genre_entry)))
+    elif (world_entry and world_entry["status"] in {"Rendered", "Integrated"}
             and subject in world_entry.get("compatible_subjects", [])
             and chosen in world_entry.get("compatible_styles", [])
             and cue_matches(world_entry)):
@@ -367,6 +385,7 @@ def route(prompt, style=None, subject=None, world=None):
         matched = (entry and entry["status"] in {"Rendered", "Integrated"}
                    and chosen in entry.get("compatible_styles", []) and cue_matches(entry))
     return {"subject": subject, "style": chosen, "world": selected_world,
+            "genre": selected_genre,
             "reason": reason,
             "status": entry["status"] if matched else "Catalogued",
             "render_method": entry["method"] if matched else None,
@@ -411,6 +430,8 @@ def main():
     plan.add_argument("prompt")
     plan.add_argument("--style")
     plan.add_argument("--subject")
+    plan.add_argument("--world")
+    plan.add_argument("--genre")
     sub.add_parser("readme-table")
     sub.add_parser("sync-readme")
     sub.add_parser("scores")
@@ -419,7 +440,8 @@ def main():
     if args.action == "list":
         print(json.dumps(entries, indent=2))
     elif args.action == "plan":
-        print(json.dumps(route(args.prompt, args.style, args.subject), indent=2))
+        print(json.dumps(route(args.prompt, args.style, args.subject,
+                               args.world, args.genre), indent=2))
     elif args.action == "readme-table":
         print(markdown_table(entries))
     elif args.action == "scores":
