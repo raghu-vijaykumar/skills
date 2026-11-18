@@ -1481,9 +1481,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/circuit-sprint.gif",
+      "review": "circuit-review.md",
+      "builder": "examples/circuit_sprint.py",
+      "spec": "examples/circuit_sprint.json",
+      "compatible_subjects": ["vehicle-artist", "environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["circuit sprint", "racing track finish", "stadium race", "team color race"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-narrative-vn",

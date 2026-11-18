@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "racing-circuit-sprint",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Circuit sprint overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "circuit", "name": "SM_Circuit_Track"},
+    {"id": "finish", "name": "SM_Circuit_Finish_Marker"},
+    {"id": "grandstand", "name": "SM_Circuit_Grandstand"},
+    {"id": "pit", "name": "SM_Circuit_Pit_Tower"},
+    {"id": "cyan", "name": "SM_Circuit_Cyan_Car_Rig"},
+    {"id": "red", "name": "SM_Circuit_Red_Car_Rig"},
+    {"id": "camera", "name": "Circuit sprint overview camera"}
+  ],
+  "beats": [
+    {"id": "grid", "frame": 1, "label": "Two team-color cars line up on a bounded track beside modular stands and a pit tower", "object_ids": ["circuit", "grandstand", "pit", "cyan", "red"]},
+    {"id": "pass", "frame": 42, "label": "The cyan car draws past the red car toward the high-contrast finish landmark", "object_ids": ["cyan", "red", "finish"]},
+    {"id": "finish", "frame": 72, "label": "The cyan car crosses the checkerboard finish first", "object_ids": ["cyan", "red", "finish", "camera"]}
+  ],
+  "review_states": ["grid", "pass", "finish"],
+  "assets": [
+    {"id": "circuit-kit", "origin": "procedural", "license": "Original Content Studio track, cars, pit tower, rails, and grandstand"}
+  ]
+}

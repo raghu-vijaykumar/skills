@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 55)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 56)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -327,6 +327,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(strategy["builder"], "examples/strategy_settlement.py")
         self.assertIsNone(catalog_module.route("A strategy tile settlement",
                                                 style="anime-style")["builder"])
+        circuit = catalog_module.route("A circuit sprint with two team color cars")
+        self.assertEqual((circuit["subject"], circuit["style"], circuit["genre"]),
+                         ("vehicle-artist", "stylized-style", "genre-racing-sports"))
+        self.assertEqual(circuit["builder"], "examples/circuit_sprint.py")
+        self.assertIsNone(catalog_module.route("A circuit sprint",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -365,7 +371,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 56)
+        self.assertEqual(len(catalog_module.scorebook(book)), 57)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -441,6 +447,10 @@ class CatalogTests(unittest.TestCase):
         strategy = book["routes"]["genre-strategy-sim"]
         self.assertEqual(strategy["selected"], "strategy-settlement-v2")
         self.assertEqual([candidate["score_total"] for candidate in strategy["candidates"]],
+                         [58, 73])
+        circuit = book["routes"]["genre-racing-sports"]
+        self.assertEqual(circuit["selected"], "circuit-sprint-v2")
+        self.assertEqual([candidate["score_total"] for candidate in circuit["candidates"]],
                          [58, 73])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)

@@ -2195,6 +2195,50 @@
         }
       ]
     },
+    "genre-racing-sports": {
+      "selected": "circuit-sprint-v2",
+      "candidates": [
+        {
+          "id": "circuit-sprint-v1",
+          "video_sha256": "d14ca185a2e1268f1950cb536fce04eb453b693e7f117698a1ad39ef4b71abc5",
+          "gif_sha256": "b8ed2d2201dfeae58f7fd63d9c39f31096d37e356f6f435e67677c9792488fc2",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and circuit-sprint review",
+          "review_date": "2026-11-19",
+          "review_note": "Separate cyan and red car silhouettes, rails, pit tower, seven modular stands, and checker finish read from the overview, but the cars barely travel. Simplified vehicles and static venue limit finish. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "circuit-sprint-v2",
+          "video_sha256": "d210a2a6a07745fa66c9e319391f0ffff0b3bb28e33bf64014eb82beacd79c81",
+          "gif_sha256": "07cf143a655e6d9db0516b68304a50d0d6236c52b2450e4df5747ff4e1b969da",
+          "gif_path": "previews/circuit-sprint.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and circuit-sprint review",
+          "review_date": "2026-11-19",
+          "review_note": "Both team-colored cars cross the clear track with cyan overtaking red and crossing the checker line first, verified at frame 57. The near finish upright briefly occludes the vehicles, and the venue and cars use simple geometry. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

@@ -386,6 +386,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-strategy-sim")
         self.assertEqual(strategy["scenes"][0]["blender"]["builder"],
                          "examples/strategy_settlement.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            circuit = engine.plan({"scenes": [{"id": "race", "duration_seconds": 3,
+                "visual_intent": "A circuit sprint with two team color cars"}]})
+        self.assertEqual(circuit["scenes"][0]["blender"]["genre"],
+                         "genre-racing-sports")
+        self.assertEqual(circuit["scenes"][0]["blender"]["builder"],
+                         "examples/circuit_sprint.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

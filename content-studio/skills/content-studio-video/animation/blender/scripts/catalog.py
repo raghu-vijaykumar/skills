@@ -189,6 +189,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
         (r"\b(metroidvania.ability.gate|roguelike.room.modules|roguelite.biome.gate|modular.ability.gate)\b", "environment-artist"),
         (r"\b(soulslike.fog.gate|bonfire.causeway|ruined.soulslike|monumental.fog.gate)\b", "environment-artist"),
         (r"\b(strategy.tile.settlement|strategy.resource.dispatch|isometric.colony.sim|tower.defense.settlement)\b", "environment-artist"),
+        (r"\b(circuit.sprint|racing.track.finish|stadium.race|team.color.race)\b", "vehicle-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -246,6 +247,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                                re.search(r"\b(soulslike.fog.gate|bonfire.causeway|ruined.soulslike|monumental.fog.gate)\b", text)
                                else "genre-strategy-sim" if
                                re.search(r"\b(strategy.tile.settlement|strategy.resource.dispatch|isometric.colony.sim|tower.defense.settlement)\b", text)
+                               else "genre-racing-sports" if
+                               re.search(r"\b(circuit.sprint|racing.track.finish|stadium.race|team.color.race)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -359,6 +362,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                          re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          selected_genre in {"genre-action-combat", "genre-shooter", "genre-rpg", "genre-survival", "genre-stealth", "genre-puzzle-platformer", "genre-metroidvania-roguelike", "genre-soulslike", "genre-strategy-sim"} else
+                         "stylized-style" if subject in {"vehicle-artist", "environment-artist"} and
+                         selected_genre == "genre-racing-sports" else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
