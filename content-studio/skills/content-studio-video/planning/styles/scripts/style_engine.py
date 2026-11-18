@@ -43,6 +43,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "strategy tile settlement", "strategy resource dispatch", "isometric colony sim", "tower defense settlement",
     "sprint", "race", "racing", "stadium", "cars",
     "novel", "narrative", "letter", "deck", "card", "idle",
+    "sandbox", "exploration", "traversable", "biome",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

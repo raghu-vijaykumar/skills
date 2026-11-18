@@ -61,6 +61,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Circuit sprint | [Source](examples/circuit_sprint.py) | [Inputs](examples/circuit_sprint.json) | [GIF](previews/circuit-sprint.gif) |
 | Station letter | [Source](examples/station_letter.py) | [Inputs](examples/station_letter.json) | [GIF](previews/station-letter.gif) |
 | Card table choice | [Source](examples/card_table.py) | [Inputs](examples/card_table.json) | [GIF](previews/card-table.gif) |
+| Open-world crossing | [Source](examples/open_world_crossing.py) | [Inputs](examples/open_world_crossing.json) | [GIF](previews/open-world-crossing.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -106,6 +107,7 @@ The [strategy-settlement review](strategy-review.md) records two scored outputs,
 The [circuit-sprint review](circuit-review.md) records two scored outputs, isolated cars and venue previews, a finish-order audit, and the near-post occlusion limit.
 The [station-letter review](narrative-review.md) records three scored outputs, isolated plate and letter previews, a cue and camera audit, and the stylized witness limit.
 The [card-table review](card-table-review.md) records two scored outputs, isolated hand and reward previews, a selected-card and reward-stack audit, and the authored-gameplay limit.
+The [open-world review](open-world-review.md) records two scored outputs, isolated traveler and tower previews, a biome-border and traversal audit, and the diorama scope.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

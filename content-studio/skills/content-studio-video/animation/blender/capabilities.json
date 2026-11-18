@@ -1541,9 +1541,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/open-world-crossing.gif",
+      "review": "open-world-review.md",
+      "builder": "examples/open_world_crossing.py",
+      "spec": "examples/open_world_crossing.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["open world biome crossing", "sandbox exploration bridge", "traversable biome border", "open world river bridge"],
+      "score_record": "scores.json"
     },
     {
       "id": "visual-console-eras",

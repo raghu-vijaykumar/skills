@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "id": "open-world-biome-crossing",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Crossing overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_Crossing_World_Stage"},
+    {"id": "meadow", "name": "SM_Crossing_Meadow_Biome"},
+    {"id": "badlands", "name": "SM_Crossing_Badlands_Biome"},
+    {"id": "river", "name": "SM_Crossing_River"},
+    {"id": "bridge", "name": "SM_Crossing_Bridge_Deck"},
+    {"id": "traveler", "name": "SM_Crossing_Traveler_Rig"},
+    {"id": "tower", "name": "SM_Crossing_Landmark_Tower"},
+    {"id": "beacon", "name": "SM_Crossing_Landmark_Beacon"},
+    {"id": "cache", "name": "SM_Crossing_Discovery_Cache"},
+    {"id": "camera", "name": "Crossing overview camera"}
+  ],
+  "beats": [
+    {"id": "orient", "frame": 1, "label": "Meadow, badlands, bridge, and distant tower mark a traversable route", "object_ids": ["meadow", "badlands", "river", "bridge", "tower"]},
+    {"id": "cross", "frame": 40, "label": "The explorer crosses the river bridge between biome colors", "object_ids": ["traveler", "bridge"]},
+    {"id": "discover", "frame": 72, "label": "The explorer reaches the badlands cache as the tower beacon brightens", "object_ids": ["traveler", "cache", "beacon"]}
+  ],
+  "review_states": ["orient", "cross", "discover"],
+  "assets": [
+    {"id": "crossing-kit", "origin": "procedural", "license": "Original Content Studio biomes, bridge, traveler, tower, and finds"}
+  ]
+}

@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 58)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 59)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -345,6 +345,13 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(card["builder"], "examples/card_table.py")
         self.assertIsNone(catalog_module.route("A deck builder card table choice",
                                                 style="anime-style")["builder"])
+        crossing = catalog_module.route("An open world biome crossing")
+        self.assertEqual((crossing["subject"], crossing["style"], crossing["genre"]),
+                         ("environment-artist", "stylized-style",
+                          "genre-open-world-sandbox"))
+        self.assertEqual(crossing["builder"], "examples/open_world_crossing.py")
+        self.assertIsNone(catalog_module.route("An open world biome crossing",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -383,7 +390,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 59)
+        self.assertEqual(len(catalog_module.scorebook(book)), 60)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -471,6 +478,10 @@ class CatalogTests(unittest.TestCase):
         card = book["routes"]["genre-card-party-idle"]
         self.assertEqual(card["selected"], "card-table-v2")
         self.assertEqual([candidate["score_total"] for candidate in card["candidates"]],
+                         [58, 78])
+        crossing = book["routes"]["genre-open-world-sandbox"]
+        self.assertEqual(crossing["selected"], "open-world-crossing-v2")
+        self.assertEqual([candidate["score_total"] for candidate in crossing["candidates"]],
                          [58, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)

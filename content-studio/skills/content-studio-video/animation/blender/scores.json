@@ -2346,6 +2346,50 @@
         }
       ]
     },
+    "genre-open-world-sandbox": {
+      "selected": "open-world-crossing-v2",
+      "candidates": [
+        {
+          "id": "open-world-crossing-v1",
+          "video_sha256": "722413f8c54cd7c2f776f27b341b2bb4b6f5fc61c3813f3e5cf005b6ea583313",
+          "gif_sha256": "f365617c65bf282dd255995505481930f9c13ee1f3347692f443fc4d4ed74190",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and biome-crossing review",
+          "review_date": "2026-11-19",
+          "review_note": "Two color-coded biomes, a bridged water border, landmark tower, sparse discovery props, and explorer are legible. The static explorer never demonstrates traversal or discovery. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "open-world-crossing-v2",
+          "video_sha256": "d2744550e5bd4b4ab2ac8682d34cc718dd77348ffe7e939c0bc2d6408d93452b",
+          "gif_sha256": "69b73375d032230f8a6147c7359dce9aa7e9286bf71d6a5417e583e824a95397",
+          "gif_path": "previews/open-world-crossing.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and biome-crossing review",
+          "review_date": "2026-11-19",
+          "review_note": "The blue explorer crosses the bridge from meadow to badlands toward a cache while the tower beacon grows. The border, landmark, and sparse breadcrumbs remain readable. The diorama demonstrates travel direction, not an actual streaming world or game logic. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [
