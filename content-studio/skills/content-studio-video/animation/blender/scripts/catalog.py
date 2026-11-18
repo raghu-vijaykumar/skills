@@ -160,7 +160,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(creature|monster|dragon|animal)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
-        (r"\b(room|corridor|hallway|hall|environment|landscape|building)\b", "environment-artist"),
+        (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
         (r"\b(prop|object|product|furniture|lamp|chair|bottle)\b", "prop-artist"),
     ]
@@ -188,9 +188,11 @@ def route(prompt, style=None, subject=None):
             (r"\b(voxel|minecraft|blocky)\b", "voxel-style"),
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
-        # The demonstrated heroine has an anime default when the prompt omits a treatment.
+        # Demonstrated subjects can choose a reviewed treatment when no style is named.
         default_style = ("anime-style" if subject == "character-artist" and
                          re.search(r"\bheroine\b", text) else
+                         "stylized-style" if subject == "environment-artist" and
+                         re.search(r"\bwindmill\b", text) else
                          "stylized-style" if subject in {"character-artist", "prop-artist"}
                          or (subject == "blender-modeler" and "lamp" in text) else
                          "realistic-style")

@@ -24,7 +24,7 @@
 
 ## Wave 4: Visual treatments
 
-- [ ] T010 [P4] Author the eight core styles with distinct scored GIFs and explicit recipe differences.
+- [x] T010 [P4] Author the eight core styles with distinct scored GIFs and explicit recipe differences.
   - [x] T010a Render the low-poly lamp treatment with a distinct scored GIF and a 184-triangle flat-shading audit.
   - [x] T010b Render the voxel lamp treatment with a distinct scored GIF and a 0.05 m occupancy-grid audit.
   - [x] T010c Render the isometric one-tile lamp treatment with a distinct scored GIF and a locked true-iso camera audit.
@@ -32,7 +32,7 @@
   - [x] T010e Render the narrow psychological horror corridor with a distinct scored GIF and a fog/light/spatial audit.
   - [x] T010f Render the PSX horror CRT hall with a distinct scored GIF and a low-resolution texture/geometry audit.
   - [x] T010g Render the anime heroine with a distinct scored GIF and a cel-band, outline, and pose-control audit.
-  - [ ] T010h Complete the remaining stylized core style with a distinct scored GIF.
+  - [x] T010h Render the storybook windmill island with a distinct scored GIF and a shape/palette/paint audit.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 

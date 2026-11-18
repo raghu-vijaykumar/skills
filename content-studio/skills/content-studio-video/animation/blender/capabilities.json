@@ -634,9 +634,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/stylized-windmill.gif",
+      "review": "stylized-review.md",
+      "builder": "examples/stylized_windmill.py",
+      "spec": "examples/stylized_windmill.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["windmill"],
+      "score_record": "scores.json"
     },
     {
       "id": "realistic-style",

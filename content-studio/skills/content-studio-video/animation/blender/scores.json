@@ -253,6 +253,50 @@
         }
       ]
     },
+    "stylized-style": {
+      "selected": "stylized-windmill-v2",
+      "candidates": [
+        {
+          "id": "stylized-windmill-v1",
+          "video_sha256": "6f4ac69349db20b3294f715d6f7b247335f4f4f54501de1f99bdc9b642be6646",
+          "gif_sha256": "dd7c9456499805659819b1d5fd5654954fb6980c196a4ef3cf45b5d45fd375a2",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and stylized-scene audit",
+          "review_date": "2026-11-18",
+          "review_note": "The packed painted roof, broad friendly silhouettes, rotating blades and dark-to-warm window read, but the island base touches the lower frame edge. Its candidate GIF remains in ignored tmp evidence."
+        },
+        {
+          "id": "stylized-windmill-v2",
+          "video_sha256": "b7a48d47da3abce71e5e031a13dcbdd37cdfcdab884604d9bd577d79dfb0ecc5",
+          "gif_sha256": "9b67db3fcef052ee8d7da8d1d05e25f9bb4324935aaf0d57b43b8e2ab3ff0ab6",
+          "gif_path": "previews/stylized-windmill.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and stylized-scene audit",
+          "review_date": "2026-11-18",
+          "review_note": "The complete floating island now has margin while the windmill turns clearly and the window warms. A packed 64 px painted albedo, exaggerated roof and tree, four-color direction and matte contours make a coherent storybook treatment."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

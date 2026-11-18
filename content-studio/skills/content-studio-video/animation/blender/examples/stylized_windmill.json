@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "stylized-windmill-island",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Stylized island camera",
+  "objects": [
+    {"id": "island", "name": "SM_Stylized_Island"},
+    {"id": "cottage", "name": "SM_Stylized_Cottage"},
+    {"id": "painted-roof", "name": "SM_Stylized_Painted_Roof"},
+    {"id": "windmill", "name": "SM_Stylized_Windmill"},
+    {"id": "tree", "name": "SM_Stylized_Tree_Canopy"},
+    {"id": "window", "name": "SM_Stylized_Glow_Window"},
+    {"id": "windmill-control", "name": "Stylized windmill control"},
+    {"id": "camera", "name": "Stylized island camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Oversized painted roof and round tree establish a friendly island silhouette", "object_ids": ["island", "cottage", "painted-roof", "tree"]},
+    {"id": "action", "frame": 36, "label": "Windmill turns and the cottage window warms", "object_ids": ["windmill", "window"]},
+    {"id": "result", "frame": 72, "label": "Windmill settles against the lit storybook cottage", "object_ids": ["windmill", "window", "tree"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "windmill-island", "origin": "procedural", "license": "Original Content Studio diorama and generated packed roof albedo"}
+  ]
+}
