@@ -37,6 +37,25 @@
   conversational timing. Report replaced cues and remaining review flags to
   the creator before synthesis.
 
+## Spoken rhythm pass
+
+- For a short Reel, alternate information with a brief question, decision,
+  complication, or payoff when the footage supports it. A five-word line can
+  create a useful turn; a strict long-short alternation is not required.
+- For a vlog, identify what the creator sought in each location, what happened,
+  and what changed. Use a short spoken pivot at a real turn, and let dialogue,
+  action, or place ambience carry parts of the story without narration.
+- For a long explainer, vary sentence length within a teaching beat, then check
+  the larger chapter rhythm: question, evidence, answer, and the next question.
+  Give a mechanism enough uninterrupted explanation to remain clear.
+- Read adjacent cues aloud. Revise runs of similarly long lines or repeated
+  openings when they sound flat. Do not invent a setback, personal reaction,
+  or fact just to make a short line. A necessary long explanation may stay.
+- `voiceover-report.json` records rhythm observations under `rhythm`. These are
+  editorial suggestions, separate from timing/evidence errors and approval.
+  Check the performed take at normal speed; pauses and emphasis must carry the
+  intended turn against the picture and natural sound.
+
 ## Context file
 
 `--context` accepts a JSON object. Use it for creator-supplied facts that the

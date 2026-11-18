@@ -2,8 +2,10 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 
 const video = process.argv[2];
+const rhythmOnly = process.argv.includes('--rhythm-only');
 if (!video) {
   console.error('Usage: videogen narration <video-id>');
   process.exit(1);
@@ -18,6 +20,8 @@ const generatedNarration = path.join(root, 'assets', 'generated', 'narration.ts'
 const cacheFile = path.join(outDir, '.narration-cache.json');
 const MAX_WORDS_PER_PHRASE = 10;
 const CACHE_VERSION = 4;
+const python = process.platform === 'win32' ? 'python' : 'python3';
+const rhythmScript = fileURLToPath(new URL('../../../review/understand/scripts/script_rhythm.py', import.meta.url));
 
 if (!fs.existsSync(yamlFile)) {
   console.error(`Video YAML not found: ${yamlFile}`);
@@ -162,6 +166,26 @@ if (errors.length > 0) {
 
 fs.mkdirSync(outDir, {recursive: true});
 
+// Review authored phrase cadence before the cache or synthesis path. This
+// report is advisory and cannot change narration text, timing, or approval.
+const rhythmFile = path.join(outDir, 'narration-rhythm.json');
+try {
+  const report = JSON.parse(execFileSync(python, [rhythmScript, '--stdin'], {
+    input: JSON.stringify({mode: 'narration', passages: phrases.map(({id, text}) => ({id, text}))}),
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+  }));
+  fs.writeFileSync(rhythmFile, `${JSON.stringify(report, null, 2)}\n`);
+  if (rhythmOnly) {
+    console.log(JSON.stringify({rhythmReport: rhythmFile, observations: report.observations.length}));
+    process.exit(0);
+  }
+} catch (error) {
+  fs.rmSync(rhythmFile, {force: true});
+  if (rhythmOnly) throw error;
+  console.warn(`Narration rhythm review unavailable: ${error.message}`);
+}
+
 const cachePayload = JSON.stringify({version: CACHE_VERSION, source: narrationSource, voice, maxWords, globalRate, targetWpm});
 const cacheKey = crypto.createHash('sha256').update(cachePayload).digest('hex');
 
@@ -190,7 +214,6 @@ const tempDir = path.join(outDir, '.phrases');
 fs.rmSync(tempDir, {recursive: true, force: true});
 fs.mkdirSync(tempDir, {recursive: true});
 
-const python = process.platform === 'win32' ? 'python' : 'python3';
 const generated = [];
 const phraseFile = (i) => path.join(tempDir, `${String(i).padStart(4, '0')}.mp3`);
 

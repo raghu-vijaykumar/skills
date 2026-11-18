@@ -9,7 +9,7 @@ cue and verification example, not a rendered scene.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `narration` | Supported | Script + project configuration → timed cue JSON + narration assets | Specialist only | [Cue example](previews/example-cues.json) | Changed script or voice invalidates the cue cache. |
+| `narration` | Supported | Script + project configuration → advisory rhythm report, timed cue JSON + narration assets; `--rhythm-only` skips synthesis | Specialist only | [Cue example](previews/example-cues.json) | Changed script or voice invalidates the cue cache; rhythm notes do not change approval. |
 | `verify-narration` | Supported | Authored phrases + recorded audio → pass/fail synchronization report | Specialist only | [Verification example](previews/example-verify-report.md) | Checks exact phrases and timing, not subjective delivery. |
 | `align-narration` | Supported | One phrase per planned scene + generated speech → frame-aligned audio and cue cache | Specialist only | [Cue example](previews/example-cues.json) | Overlong phrases may accelerate up to 1.7×; listen to the result. |
 

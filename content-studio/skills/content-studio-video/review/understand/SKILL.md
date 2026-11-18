@@ -36,6 +36,8 @@ Use `context.json` for human-supplied names, itinerary, language, tone, pronunci
 
 Write `voiceover.json` with `{id,start,end,text,evidence_frame_ids,needs_review,direction,notes}` segments. Keep the text in the requested language mix; read [voiceover guidance](references/voiceover.md) before writing.
 
+After the first draft, map each scene's question, progress, turn, and payoff. Read adjacent cues aloud and vary sentence length where the meaning benefits. A line of five words or fewer can sharpen a real question or setback, but do not insert one merely to alternate lengths. For long vlogs, review the change in story across locations as well as cadence within a cue; leave meaningful dialogue and natural sound uncovered.
+
 After a first draft, sample the **exact locked picture** around both boundaries and the middle of every cue:
 
 ```bash
@@ -58,7 +60,7 @@ python content-studio/skills/content-studio-video/review/understand/scripts/voic
   --title "Dubai Day 3"
 ```
 
-Writes `voiceover.md`, `voiceover-teleprompter.txt`, `voiceover.csv`, and `voiceover-report.json`. The validator fails on overlapping segments, out-of-range times, unknown evidence frames, speech over the pace limit, missing scene reviews, or cue windows outside reviewed picture bounds. Fix the errors, then present the markdown, cue sheets, and timing report for human review.
+Writes `voiceover.md`, `voiceover-teleprompter.txt`, `voiceover.csv`, and `voiceover-report.json`. The report includes advisory rhythm suggestions for runs of long lines, repeated openings, and cues with little speaking room. They do not change the validation status or rewrite text. The validator fails on overlapping segments, out-of-range times, unknown evidence frames, speech over the pace limit, missing scene reviews, or cue windows outside reviewed picture bounds. Fix the errors, then present the markdown, cue sheets, and timing report for human review.
 
 Voiceover must fit the **approved timeline**; use scene times in the rendered master, not raw source timestamps. Leave room for original dialogue where requested. Obtain explicit human approval of the final narration text and timing before synthesizing or recording audio. A changed final master invalidates the approval and requires regeneration or retiming.
 

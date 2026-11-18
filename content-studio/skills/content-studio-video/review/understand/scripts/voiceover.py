@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import scene_review
+import script_rhythm
 
 
 def timecode(seconds):
@@ -196,6 +197,9 @@ def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0,
     status = "fail" if errors else (
         "review" if warnings or review_segments else "pass"
     )
+    # Cadence is an editorial suggestion. Keep it out of the structural
+    # pass/review/fail result and preserve the authored cue text verbatim.
+    rhythm = script_rhythm.analyze(details, mode="voiceover")
     return {
         "status": status,
         "errors": errors,
@@ -212,6 +216,7 @@ def validate(script, evidence=None, max_wps=3.4, min_wps=0.4, max_gap=30.0,
         if duration
         else None,
         "review_segments": review_segments,
+        "rhythm": rhythm,
         "segments": details,
     }
 
@@ -251,6 +256,16 @@ def render_markdown(script, report, title=None):
         lines += ["## Errors", ""] + [f"- {item}" for item in report["errors"]] + [""]
     if report.get("warnings"):
         lines += ["## Warnings", ""] + [f"- {item}" for item in report["warnings"]] + [""]
+    observations = report.get("rhythm", {}).get("observations", [])
+    if observations:
+        lines += ["## Rhythm suggestions", "",
+                  "Editorial notes only; keep necessary explanations and natural sound.", ""]
+        for item in observations:
+            cue = ", ".join(item["cue_ids"])
+            when = (f" ({timecode(item['start'])}-{timecode(item['end'])})"
+                    if "start" in item and "end" in item else "")
+            lines.append(f"- {cue}{when}: {item['message']}")
+        lines.append("")
 
     for segment in report.get("segments", []):
         heading = (

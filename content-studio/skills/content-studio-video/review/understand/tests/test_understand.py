@@ -215,6 +215,24 @@ class VoiceoverTests(unittest.TestCase):
         self.assertEqual(report["status"], "review")
         self.assertTrue(report["segments"][0]["needs_review"])
 
+    def test_rhythm_suggestions_do_not_change_validation_status(self):
+        script = self.script(segments=[
+            {"id": "v01", "start": 0, "end": 10,
+             "text": "We searched every street near the station for the last open library.",
+             "evidence_frame_ids": ["f0000"], "needs_review": False},
+            {"id": "v02", "start": 10, "end": 20,
+             "text": "The first building looked promising but its doors were already locked.",
+             "evidence_frame_ids": ["f0001"], "needs_review": False},
+            {"id": "v03", "start": 20, "end": 30,
+             "text": "Another place across town stayed open later according to the sign outside.",
+             "evidence_frame_ids": ["f0002"], "needs_review": False},
+        ])
+        report = voiceover.validate(script, self.evidence(duration=30))
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["rhythm"]["observations"][0]["cue_ids"],
+                         ["v01", "v02", "v03"])
+        self.assertIn("## Rhythm suggestions", voiceover.render_markdown(script, report))
+
     def test_complete_cue_scene_review_supplies_frame_evidence(self):
         script = self.script()
         for segment in script["segments"]:
