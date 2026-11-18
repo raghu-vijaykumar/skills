@@ -46,7 +46,8 @@
   - [x] T011j Render the minimalist pendulum with two scored candidates and a palette, negative-space, and swing audit.
   - [x] T011k Render the vector sprout with three scored candidates and a flat-fill, growth, and polygon-path audit.
   - [x] T011l Render the retro 8-bit ship with two scored candidates and a four-color, sprite-grid, and held-motion audit.
-  - [ ] T011m Complete the remaining three extended treatments with distinct scored GIFs.
+  - [x] T011m Render the retro 16-bit fox with two scored candidates and a packed-dither, palette, fox-walk, and waterfall audit.
+  - [ ] T011n Complete the remaining two extended treatments with distinct scored GIFs.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

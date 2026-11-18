@@ -900,9 +900,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/retro16-fox.gif",
+      "review": "retro16-review.md",
+      "builder": "examples/retro_16bit_fox.py",
+      "spec": "examples/retro_16bit_fox.json",
+      "compatible_subjects": ["creature-artist"],
+      "intent_cues": ["waterfall"],
+      "score_record": "scores.json"
     },
     {
       "id": "hd-2d-style",

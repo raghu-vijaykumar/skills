@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "retro-16bit-fox",
+  "width": 320,
+  "height": 240,
+  "fps": 12,
+  "frames": 48,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "Standard",
+  "codec": "H264",
+  "camera_object": "16bit locked camera",
+  "variant": 2,
+  "objects": [
+    {"id": "backdrop", "name": "SM_16bit_Dithered_Backdrop"},
+    {"id": "fox", "name": "SM_16bit_Fox"},
+    {"id": "fox-control", "name": "16bit fox control"},
+    {"id": "water", "name": "SM_16bit_Water_Highlight"},
+    {"id": "camera", "name": "16bit locked camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "A dithered sunset mountain and waterfall frame a fox", "object_ids": ["backdrop", "fox"]},
+    {"id": "cross", "frame": 25, "label": "The fox walks across layered pixel ground as water flickers", "object_ids": ["fox-control", "water"]},
+    {"id": "arrive", "frame": 48, "label": "The fox reaches the waterfall in a held sprite pose", "object_ids": ["fox", "water"]}
+  ],
+  "review_states": ["establish", "cross", "arrive"],
+  "assets": [
+    {"id": "retro-fox", "origin": "procedural", "license": "Original Content Studio packed dithered backdrop, pixel fox, and waterfall animation"}
+  ]
+}

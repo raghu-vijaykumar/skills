@@ -881,6 +881,40 @@
         }
       ]
     },
+    "retro-16bit-style": {
+      "selected": "retro16-fox-v2",
+      "candidates": [
+        {
+          "id": "retro16-fox-v1",
+          "video_sha256": "7c92bc32e5ca9082734368fa86d01277126188b4d609e79ec54ffb07401dca89",
+          "gif_sha256": "f77b77ef0a5b70ca52b69cc5f8550d8705e0d1c880200650ede51524f5a591d6",
+          "technical_pass": true,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and 16-bit sprite review",
+          "review_date": "2026-11-18",
+          "review_note": "The fox crosses a dithered waterfall scene but holds one foot pose and the single glint is small. Full MP4, GIF decode, and packed-scene audit passed."
+        },
+        {
+          "id": "retro16-fox-v2",
+          "video_sha256": "0d39978a322a251603f20b3bc5fa73ede8c312ad6d129eab62fe7cb478c50466",
+          "gif_sha256": "22f735a31bb8604c2fbff21f8a5b4d042b7382ef7ae1327b314cf03cc5592dc7",
+          "gif_path": "previews/retro16-fox.gif",
+          "technical_pass": true,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and 16-bit sprite review",
+          "review_date": "2026-11-18",
+          "review_note": "Alternating held fox poses and three descending water glints read over the packed dithered 160x120 landscape. Full MP4, GIF decode, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
