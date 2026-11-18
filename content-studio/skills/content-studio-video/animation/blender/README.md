@@ -117,6 +117,7 @@ The [narrative technical review](narrative-technical-review.md) reuses the alrea
 The [Geometry Nodes review](geometry-node-review.md) records two scored outputs, isolated posts and drone, node graph and collection audits, and a gate traversal.
 The [set-dressing review](set-dressing-review.md) reuses the scored cozy-nook GIF for its audited chair, tea, plant, rug, and restrained bookshelf cluster.
 The [vehicle and vegetation modeling review](modeling-reuse-review.md) reuses scored circuit and kelp GIFs for audited car rigs and swaying kelp stands.
+The [detective archetype review](archetype-review.md) reuses the selected noir GIF for one audited role silhouette and walk; other character families remain unproven.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

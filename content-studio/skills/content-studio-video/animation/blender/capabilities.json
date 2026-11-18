@@ -172,9 +172,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/noir-detective.gif",
+      "review": "archetype-review.md",
+      "builder": "examples/noir_detective.py",
+      "spec": "examples/noir_detective.json",
+      "compatible_styles": ["noir-style"],
+      "intent_cues": ["detective archetype"],
+      "prefer_subject_cue": true,
+      "score_record": "scores.json",
+      "score_route": "noir-style"
     },
     {
       "id": "sculpting",

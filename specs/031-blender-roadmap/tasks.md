@@ -17,6 +17,7 @@
   - [x] T007a Render and structurally audit the measured desk lamp for `blender-modeler` and `prop-artist`; score and publish its best GIF.
   - [x] T007c Render a clay-to-beauty material lab with two scored outputs, three isolated PBR swatches, and an audited three-point light sweep for materials, lookdev, and lighting.
   - [x] T007d Audit the existing scored circuit cars and kelp stands as narrow vehicle and vegetation modeling lanes, reusing their best inline GIFs.
+  - [x] T007e Audit the scored noir detective as one role archetype, reusing its best inline GIF while leaving other character families unclaimed.
   - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
 - [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
   - [x] T008a Render a Geometry Nodes repeated-post walkway with two scored outputs, isolated kit and drone previews, and collection and traversal audits for procedural modeling and scene assembly.

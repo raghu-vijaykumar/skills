@@ -170,6 +170,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
     text = prompt.lower()
     entries = catalog()
     subject_rules = [
+        (r"\bdetective.archetype\b", "character-archetypes"),
         (r"\bkelp.frond.vegetation\b", "vegetation-artist"),
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat|longship)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
@@ -322,7 +323,9 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
-        default_style = ("stylized-style" if subject == "vehicle-artist" and
+        default_style = ("noir-style" if subject == "character-archetypes" and
+                         re.search(r"\bdetective.archetype\b", text) else
+                         "stylized-style" if subject == "vehicle-artist" and
                          re.search(r"\brace.car.model\b", text) else
                          "stylized-style" if subject == "vegetation-artist" and
                          re.search(r"\bkelp.frond.vegetation\b", text) else
