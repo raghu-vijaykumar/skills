@@ -1,5 +1,7 @@
 # Content Studio bundle
 
+Personal LinkedIn opinions use the independently callable [LinkedIn skill](skills/content-studio-linkedin/SKILL.md). Its file-backed draft can resume in another chat, and the `content-studio linkedin` CLI enforces angle, draft, final package and publication gates for text, image, animated GIF, document carousel or video. Project presets and per-post production methods keep visual choices flexible.
+
 The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. The `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` names are retired; other top-level `content-studio-*` names are compatibility routes.
 
 ## Stage routes

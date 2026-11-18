@@ -16,6 +16,7 @@ export type CardProps = {
         capturedAt?: string;
         method?: string;
     };
+    mediaOrigin?: 'evidence' | 'original-illustration';
     startSeconds?: number;
     durationSeconds?: number;
     width?: number;

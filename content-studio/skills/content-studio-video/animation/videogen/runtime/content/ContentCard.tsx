@@ -16,6 +16,7 @@ export type CardProps = {
   claimKind?: 'observed' | 'inference' | 'limitation' | 'contradicted';
   mediaAsset?: string;
   evidence?: {id: string; attribution: string; capturedAt?: string; method?: string};
+  mediaOrigin?: 'evidence' | 'original-illustration';
   startSeconds?: number;
   durationSeconds?: number;
   width?: number;
@@ -54,8 +55,8 @@ export function ContentCard(props: CardProps) {
         {props.kind === 'image' ? <Img src={media!} style={{width: '100%', height: '100%', objectFit: 'contain'}} /> : <OffthreadVideo src={media!} muted startFrom={Math.round((props.startSeconds ?? 0) * fps)} style={{width: '100%', height: '100%', objectFit: 'contain'}} />}
       </div>
       <div style={{position: 'absolute', left: mediaX, right: mediaX, top: height * 0.855, fontFamily: props.theme?.fonts.mono ?? FONT_MONO, fontSize: 22 * s, color: palette?.muted ?? MUTED, lineHeight: 1.28}}>
-        <div style={{color: palette?.text ?? TEXT, fontWeight: 800}}>SOURCE {source?.id ?? 'UNREGISTERED'}{source?.capturedAt ? ` · ${source.capturedAt}` : ''}</div>
-        <div>{source?.attribution ?? ''}{source?.method ? ` · ${source.method}` : ''}</div>
+        <div style={{color: palette?.text ?? TEXT, fontWeight: 800}}>{props.mediaOrigin === 'original-illustration' ? 'ORIGINAL ILLUSTRATION' : `SOURCE ${source?.id ?? 'UNREGISTERED'}`}{source?.capturedAt ? ` · ${source.capturedAt}` : ''}</div>
+        <div>{props.mediaOrigin === 'original-illustration' ? (source?.method ?? '') : `${source?.attribution ?? ''}${source?.method ? ` · ${source.method}` : ''}`}</div>
       </div>
     </> : <div style={{position: 'absolute', left: 72 * s, right: 72 * s, top: height * 0.43, borderLeft: `${7 * s}px solid ${accent}`, paddingLeft: 30 * s, fontSize: 46 * s, lineHeight: 1.22, fontWeight: 700}}>{props.body}</div>}
     <div style={{position: 'absolute', left: 64 * s, right: 64 * s, bottom: 45 * s, height: 1 * s, background: palette?.border ?? BORDER}} />

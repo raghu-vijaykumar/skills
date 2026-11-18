@@ -9,6 +9,7 @@ import {transcribeDraft, probeMaster} from './transcribe.mjs';
 import {publishYoutube} from '../skills/content-studio-video/animation/videogen/scripts/publish-youtube.mjs';
 import {publishInstagram} from '../skills/content-studio-video/animation/videogen/scripts/publish-instagram.mjs';
 import {installSkills} from './install-skills.mjs';
+import {runLinkedinCommand} from './linkedin-workflow.mjs';
 
 const bundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command, ...argv] = process.argv.slice(2);
@@ -59,6 +60,10 @@ function remotionCheck(root, id) {
   if (result.status !== 0) throw new Error(`Remotion check failed: ${(result.stderr || result.stdout).trim().split(/\r?\n/).slice(-8).join('\n')}`);
 }
 async function main() {
+  if (command === 'linkedin') {
+    console.log(JSON.stringify(await runLinkedinCommand(argv), null, 2));
+    return;
+  }
   if (command === 'enhance') {
     const script = path.join(bundle, 'skills', 'content-studio-video', 'edit', 'clip-edit', 'scripts', 'enhance.py');
     const result = spawnSync(process.env.PYTHON ?? 'python', [script, ...argv], {stdio: 'inherit'});
@@ -84,7 +89,7 @@ async function main() {
     return;
   }
   if (!command || command === '--help' || command === '-h' || flag('help') || command === 'help') {
-    console.log('Usage: content-studio <install-skills|enhance|upscale|polish|match|quality|refine|benchmark|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
+    console.log('Usage: content-studio <linkedin|install-skills|enhance|upscale|polish|match|quality|refine|benchmark|transcribe|approve|publish> [--channel slug --draft id | --folder path]');
     return;
   }
   if (command === 'install-skills') {

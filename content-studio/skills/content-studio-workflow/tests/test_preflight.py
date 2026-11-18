@@ -124,6 +124,21 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(steps[4]["title"], "Render approved timeline once")
         self.assertEqual(steps[-1]["title"], "Review exact final render")
 
+    def test_linkedin_precheck_is_media_optional_and_requires_package_review(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            draft = Path(scratch)
+            report = preflight.profile(draft, None, None, None, social=True)
+            self.assertNotIn("No sample supplied", " ".join(report["recommendations"]))
+            preflight.write_json(preflight.paths(draft)[0], report)
+            with contextlib.redirect_stdout(io.StringIO()):
+                preflight.main(["--folder", str(draft), "init", "--kind", "linkedin", "--goal", "Share an opinion",
+                                "--input", "idea.md", "--deliverable", "LinkedIn package"])
+            plan = preflight.read_json(preflight.paths(draft)[1])
+            self.assertEqual(plan["stage"], "linkedin")
+            self.assertEqual(plan["steps"][-1]["title"], "Review exact LinkedIn package")
+            self.assertTrue(all(step["required"] for step in plan["steps"]))
+            preflight.validate_plan(plan)
+
     def test_new_plan_reads_same_confirmed_memory_database(self):
         with tempfile.TemporaryDirectory() as scratch:
             database = Path(scratch) / "editing-memory.sqlite"

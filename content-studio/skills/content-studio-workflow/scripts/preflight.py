@@ -129,7 +129,7 @@ def timed_ffmpeg(sample: Path, filter_graph: str | None, seconds: float = 2.0) -
 
 
 def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
-            ai_seconds_per_frame: float | None) -> dict:
+            ai_seconds_per_frame: float | None, social: bool = False) -> dict:
     # The bounded FFmpeg runs characterize this machine; AI inference needs its own representative pilot.
     tools = {name: shutil.which(name) for name in ("ffmpeg", "ffprobe", "nvidia-smi", "realesrgan-ncnn-vulkan")}
     disk = shutil.disk_usage(draft)
@@ -170,14 +170,26 @@ def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
             report["recommendations"].append("If the completed edited video needs 4K, compare short Lanczos and live-action AI previews on that master; do not upscale the raw clips.")
         else:
             report["recommendations"].append("Source is already 4K width; diagnose detail before proposing upscale.")
-    else:
+    elif not social:
         report["recommendations"].append("No sample supplied; media-specific routes and time estimates remain unverified.")
-    report["recommendations"].append("Diagnose color first; preview a bounded correction and compare the exact affected output before committing to a grade.")
-    report["recommendations"].append("For review, produce a small contact sheet or short frame/clip preview; streaming frames is an optional review route, never the sole quality gate.")
+    if social:
+        report["recommendations"].append("Text-only posts need no media benchmark. Profile a representative asset when an image, GIF, document carousel or video is selected.")
+    else:
+        report["recommendations"].append("Diagnose color first; preview a bounded correction and compare the exact affected output before committing to a grade.")
+        report["recommendations"].append("For review, produce a small contact sheet or short frame/clip preview; streaming frames is an optional review route, never the sole quality gate.")
     return report
 
 
 def default_steps(kind: str, stage: str | None = None) -> list[dict]:
+    if kind == "linkedin":
+        # A text-only opinion has no camera source or rendered master.
+        return [
+            {"id": "S01", "title": "Review sources and rights", "route": "Record the original stance, factual claims, source links and asset rights", "estimated_time": "Estimate after intake", "output": "idea.md and sources.json", "acceptance": "No invented personal experience; factual claims and rights are reviewable", "required": True},
+            {"id": "S02", "title": "Approve angle and format", "route": "Compare text, image, GIF, document carousel and video; select audience, preset, narration and exact production method", "estimated_time": "Estimate after format proposal", "output": "brief.json and reviewed plan", "acceptance": "User approved the plan revision, stance and format", "required": True},
+            {"id": "S03", "title": "Review copy and visual draft", "route": "Draft first-person copy and the chosen image, animation, slide or video concept", "estimated_time": "Estimate from research and chosen format", "output": "post.md and creative.json", "acceptance": "User approved the exact draft and factual framing", "required": True},
+            {"id": "S04", "title": "Produce chosen edition", "route": "Export the selected text, 1080x1350 image or GIF, portrait PDF document carousel, or 45-90 second video; inspect each slide or motion beat, mobile framing and captions", "estimated_time": "Text is immediate; benchmark media after format choice", "output": "final copy and optional media", "acceptance": "Required format checks and exact-output review evidence passed", "required": True},
+            {"id": "S05", "title": "Review exact LinkedIn package", "route": "Review final copy, sources, alt text and exact media before separate publication authorization", "estimated_time": "At least full media runtime plus inspection", "output": "final package approval", "acceptance": "Approved hashes match every delivered file", "required": True},
+        ]
     if kind == "edited" and stage != "edited-render":
         # Raw footage yields evidence and originals for manual editing;
         # permanent changes belong to the later approved delivery timeline.
@@ -210,8 +222,8 @@ def default_steps(kind: str, stage: str | None = None) -> list[dict]:
 
 
 def validate_plan(plan: dict) -> None:
-    if plan.get("schema_version") != 1 or plan.get("kind") not in {"edited", "remotion"}:
-        raise ValueError("Plan needs schema_version 1 and kind edited or remotion")
+    if plan.get("schema_version") != 1 or plan.get("kind") not in {"edited", "remotion", "linkedin"}:
+        raise ValueError("Plan needs schema_version 1 and kind edited, remotion or linkedin")
     for field in ("goal", "inputs", "deliverables", "steps", "system_profile"):
         if not plan.get(field):
             raise ValueError(f"Plan needs {field}")
@@ -227,8 +239,8 @@ def validate_plan(plan: dict) -> None:
                                   not all(isinstance(arg, str) and arg for arg in step["command"])):
             raise ValueError(f"Step {step['id']} command must be a nonempty argv array")
         ids.add(step["id"])
-    required_review = ("Review source handoff" if plan.get("stage") == "source-prep"
-                       else "Review exact final render")
+    required_review = ("Review exact LinkedIn package" if plan.get("kind") == "linkedin" else
+                       "Review source handoff" if plan.get("stage") == "source-prep" else "Review exact final render")
     for title in ("Review sources and rights", required_review):
         if not any(step["title"] == title and step.get("required") is True for step in plan["steps"]):
             raise ValueError(f"Required review step missing: {title}")
@@ -258,8 +270,9 @@ def main(argv: list[str] | None = None) -> int:
     profile_parser.add_argument("--sample", type=Path)
     profile_parser.add_argument("--planned-minutes", type=float)
     profile_parser.add_argument("--ai-seconds-per-frame", type=float)
+    profile_parser.add_argument("--social", action="store_true", help="skip video-only advice for text-first plans")
     init = sub.add_parser("init")
-    init.add_argument("--kind", required=True, choices=("edited", "remotion"))
+    init.add_argument("--kind", required=True, choices=("edited", "remotion", "linkedin"))
     init.add_argument("--stage", choices=("source-prep", "edited-render"),
                       help="edited kind: raw-folder handoff (default) or supplied-render continuation")
     init.add_argument("--category", choices=("global", "travel", "cooking", "daily"), default="global")
@@ -288,7 +301,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.ai_seconds_per_frame is not None and args.ai_seconds_per_frame <= 0:
             raise ValueError("--ai-seconds-per-frame must be positive")
         report = profile(draft, args.sample.expanduser().resolve() if args.sample else None,
-                         args.planned_minutes, args.ai_seconds_per_frame)
+                         args.planned_minutes, args.ai_seconds_per_frame, args.social)
         write_json(system_file, report)
         print(json.dumps(report, indent=2))
         return 0
@@ -296,10 +309,10 @@ def main(argv: list[str] | None = None) -> int:
         if plan_file.exists():
             raise ValueError(f"Plan exists: {plan_file}; edit it and request another review")
         system = read_json(system_file)
-        if args.kind == "remotion" and args.stage:
+        if args.kind != "edited" and args.stage:
             raise ValueError("--stage applies only to edited plans")
         plan = {"schema_version": 1, "kind": args.kind,
-                "stage": args.stage or ("source-prep" if args.kind == "edited" else "remotion"),
+                "stage": args.stage or ("source-prep" if args.kind == "edited" else args.kind),
                 "goal": args.goal.strip(),
                 "inputs": args.inputs, "deliverables": args.deliverables,
                 "system_profile": system,

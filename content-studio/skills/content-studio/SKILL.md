@@ -5,6 +5,8 @@ description: Route a Content Studio idea or supplied media through approved prod
 
 # Content Studio
 
+For a personal LinkedIn idea or opinion, route to [Content Studio LinkedIn](../content-studio-linkedin/SKILL.md). It supports text, image, animated GIF, document carousel and video editions with reusable project presets, durable reviews and a separate publication decision.
+
 Start every production request, including a direct specialist request, with the mandatory [workflow precheck](../content-studio-workflow/SKILL.md). Inspect the channel, draft, source media, and system; present an editable plan with exact skill, method script, inputs, outputs, estimate, fallback, and review criterion. Obtain explicit approval of the current revision before editing, then record checklist evidence. Changed plans require reapproval.
 
 For a raw camera folder, route to [video source preprocessing](../content-studio-video/source/preprocess/SKILL.md) and stop after handing off individual prepared clips and capture order for the user's manual edit. [AutoCut](../content-studio-video/edit/autocut/SKILL.md) is experimental and runs only on explicit request. Do not automatically join clips or remove blur spans.

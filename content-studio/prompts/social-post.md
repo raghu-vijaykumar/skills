@@ -1,11 +1,13 @@
 # Social post workflow form
 
+For a personal LinkedIn opinion, use [the LinkedIn workflow](../skills/content-studio-linkedin/SKILL.md) so a draft can resume in any chat and publication remains a separate review gate.
+
 Fill the brackets and change **No** to **Yes** for the options you want.
 
 - **Idea or source** — [notes, links, approved assets, or finished video]
 - **Purpose** — [explain | share evidence | promote | other]
 - **Platform and audience** — [platform, who it’s for]
-- **Format** — [text | single image | GIF | silent MP4 | image carousel | GIF carousel | recommend]
+- **Format** — [text | single image | animated GIF | document carousel | narrated video | silent video | recommend]
 - **Preset** — [Core Explainer | Tech Dispatch | Evidence Lab | project preset | recommend]
 - **Brand and tone** — [palette, type, language, voice]
 
