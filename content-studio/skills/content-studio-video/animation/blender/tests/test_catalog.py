@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 54)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 55)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -321,6 +321,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(soulslike["builder"], "examples/soulslike_causeway.py")
         self.assertIsNone(catalog_module.route("A soulslike fog gate",
                                                 style="anime-style")["builder"])
+        strategy = catalog_module.route("An isometric colony sim with resource dispatch")
+        self.assertEqual((strategy["subject"], strategy["style"], strategy["genre"]),
+                         ("environment-artist", "isometric-style", "genre-strategy-sim"))
+        self.assertEqual(strategy["builder"], "examples/strategy_settlement.py")
+        self.assertIsNone(catalog_module.route("A strategy tile settlement",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -359,7 +365,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 55)
+        self.assertEqual(len(catalog_module.scorebook(book)), 56)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -432,6 +438,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(soulslike["selected"], "soulslike-causeway-v2")
         self.assertEqual([candidate["score_total"] for candidate in soulslike["candidates"]],
                          [58, 78])
+        strategy = book["routes"]["genre-strategy-sim"]
+        self.assertEqual(strategy["selected"], "strategy-settlement-v2")
+        self.assertEqual([candidate["score_total"] for candidate in strategy["candidates"]],
+                         [58, 73])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

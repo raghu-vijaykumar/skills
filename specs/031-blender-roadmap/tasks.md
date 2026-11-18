@@ -80,7 +80,8 @@
   - [x] T013p Render one puzzle platformer with two scored full outputs, isolated jump and switch previews, measured gap and hazard audit, and a distinct best GIF.
   - [x] T013q Render one modular metroidvania and roguelike ability-gate lane with two scored full outputs, isolated room previews, biome and modifier audit, and a distinct best GIF.
   - [x] T013r Render one Soulslike ruined causeway with two scored full outputs, isolated gate and bonfire previews, ruin and threat audit, and a distinct best GIF.
-  - [ ] T013s Complete the five remaining genre directions and console-era route.
+  - [x] T013s Render one strategy/sim settlement with two scored full outputs, isolated building and unit previews, a tile and resource audit, and a distinct best GIF.
+  - [ ] T013t Complete the four remaining genre directions and console-era route.
 
 ## Wave 6: Delivery and QA
 

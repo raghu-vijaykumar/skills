@@ -2151,6 +2151,50 @@
         }
       ]
     },
+    "genre-strategy-sim": {
+      "selected": "strategy-settlement-v2",
+      "candidates": [
+        {
+          "id": "strategy-settlement-v1",
+          "video_sha256": "d67e5194d1a6437a3e71009db5ce9213825b887a03b05f45892b280e515f0635",
+          "gif_sha256": "ef1b1ed7d402614c69189155b1afa6620730808d91291e2347dd0124140eff98",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and strategy-settlement review",
+          "review_date": "2026-11-19",
+          "review_note": "Twelve clear tiles and four distinct building or resource sites read from the fixed strategy camera, but unit dispatch and construction are absent. The units and structures remain simple markers. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "strategy-settlement-v2",
+          "video_sha256": "2e3586aef1b81c82d98e16ec181b71fdcd61487a32fe3548ef14cfd561398cb1",
+          "gif_sha256": "dd211e2b855561d713770ae9f5dfd62515b70e3c2f082306a9d5d4a8948bb35f",
+          "gif_path": "previews/strategy-settlement.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and strategy-settlement review",
+          "review_date": "2026-11-19",
+          "review_note": "Blue and amber worker markers leave the command hall for ore and crops while a watchtower rises. Tiles and system props remain identifiable at camera distance. The farmer crosses partly behind the hall and there is no gameplay simulation; buildings and units are simplified. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

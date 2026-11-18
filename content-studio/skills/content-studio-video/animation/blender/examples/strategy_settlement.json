@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "strategy-tile-settlement",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Strategy settlement overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "tile", "name": "SM_Strategy_Tile_1_1"},
+    {"id": "hall", "name": "SM_Strategy_Command_Hall"},
+    {"id": "farm", "name": "SM_Strategy_Farm"},
+    {"id": "mine", "name": "SM_Strategy_Mine"},
+    {"id": "tower", "name": "SM_Strategy_Watch_Tower"},
+    {"id": "miner", "name": "SM_Strategy_Miner_Rig"},
+    {"id": "farmer", "name": "SM_Strategy_Farmer_Rig"},
+    {"id": "camera", "name": "Strategy settlement overview camera"}
+  ],
+  "beats": [
+    {"id": "plan", "frame": 1, "label": "A grid settlement shows command hall, crops, mine, and tower site", "object_ids": ["tile", "hall", "farm", "mine", "tower"]},
+    {"id": "dispatch", "frame": 42, "label": "Two color-coded workers travel from the hall to different resource sites", "object_ids": ["miner", "farmer", "hall", "farm", "mine"]},
+    {"id": "settle", "frame": 72, "label": "Workers reach their sites and the tower grows above the grid", "object_ids": ["miner", "farmer", "tower", "camera"]}
+  ],
+  "review_states": ["plan", "dispatch", "settle"],
+  "assets": [
+    {"id": "tile-settlement", "origin": "procedural", "license": "Original Content Studio settlement, buildings, crops, mine, tower, and unit markers"}
+  ]
+}

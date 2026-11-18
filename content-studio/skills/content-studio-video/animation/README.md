@@ -47,3 +47,4 @@ The [`genre-stealth` lane](blender/stealth-review.md) adds a scored concealment 
 The [`genre-puzzle-platformer` puzzle](blender/puzzle-review.md) adds a scored jump, pressure pad, hazard, bridge, and goal sequence with measured gaps.
 The [`genre-metroidvania-roguelike` run](blender/modular-run-review.md) adds scored modular rooms, a collected ability, an opening biome gate, and two modifier symbols.
 The [`genre-soulslike` causeway](blender/soulslike-review.md) adds a scored ruined route with a bonfire landmark, opening pale gate, and revealed enemy silhouette.
+The [`genre-strategy-sim` settlement](blender/strategy-review.md) adds a scored tile grid with distinct resource sites, dispatched workers, and a growing watchtower.

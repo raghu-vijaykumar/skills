@@ -379,6 +379,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-soulslike")
         self.assertEqual(soulslike["scenes"][0]["blender"]["builder"],
                          "examples/soulslike_causeway.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            strategy = engine.plan({"scenes": [{"id": "settlement", "duration_seconds": 3,
+                "visual_intent": "An isometric colony sim with resource dispatch"}]})
+        self.assertEqual(strategy["scenes"][0]["blender"]["genre"],
+                         "genre-strategy-sim")
+        self.assertEqual(strategy["scenes"][0]["blender"]["builder"],
+                         "examples/strategy_settlement.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

@@ -1461,9 +1461,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/strategy-settlement.gif",
+      "review": "strategy-review.md",
+      "builder": "examples/strategy_settlement.py",
+      "spec": "examples/strategy_settlement.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style", "isometric-style"],
+      "intent_cues": ["strategy tile settlement", "strategy resource dispatch", "isometric colony sim", "tower defense settlement"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-racing-sports",
