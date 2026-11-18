@@ -157,7 +157,7 @@ def route(prompt, style=None, subject=None):
     entries = catalog()
     subject_rules = [
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
-        (r"\b(creature|monster|dragon|animal)\b", "creature-artist"),
+        (r"\b(creature|monster|dragon|animal|butterfly)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine|face|eye)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake)\b", "environment-artist"),
@@ -183,6 +183,7 @@ def route(prompt, style=None, subject=None):
             (r"\bmanga\b", "manga-style"),
             (r"\b(hand.painted|painted texture|brushwork)\b", "hand-painted-style"),
             (r"\b(painterly|watercolor|oil.painting|impressionist|gouache)\b", "painterly-style"),
+            (r"\b(stop.motion|claymation|paper.craft|papercraft|handmade)\b", "stop-motion-craft-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -195,6 +196,8 @@ def route(prompt, style=None, subject=None):
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
         default_style = ("comic-book-style" if subject == "vehicle-artist" and
                          re.search(r"\brocket\b", text) else
+                         "stop-motion-craft-style" if subject == "creature-artist" and
+                         re.search(r"\bbutterfly\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

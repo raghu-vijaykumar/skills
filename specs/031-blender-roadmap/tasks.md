@@ -40,7 +40,8 @@
   - [x] T011d Render the pixel treasure chest with three scored outputs and a texel, palette, and motion audit.
   - [x] T011e Render the hand-painted wildflower teacup with two scored candidates and a painted UV, matte material, and steam audit.
   - [x] T011f Render the scene-wide watercolor river with three scored candidates and a pigment, paper, sail, and motion audit.
-  - [ ] T011g Complete the remaining nine extended treatments with distinct scored GIFs.
+  - [x] T011g Render the paper-craft butterfly with two scored candidates and a fiber, layer, seam, and held-pose audit.
+  - [ ] T011h Complete the remaining eight extended treatments with distinct scored GIFs.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

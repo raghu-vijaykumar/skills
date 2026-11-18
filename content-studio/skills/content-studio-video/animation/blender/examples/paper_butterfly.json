@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "stop-motion-paper-butterfly",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Paper butterfly camera",
+  "objects": [
+    {"id": "butterfly", "name": "Paper butterfly root"},
+    {"id": "body", "name": "SM_Paper_Butterfly_Body"},
+    {"id": "left-wing", "name": "SM_Paper_Left_Upper_Wing"},
+    {"id": "right-wing", "name": "SM_Paper_Right_Upper_Wing"},
+    {"id": "left-hinge", "name": "Paper left wing hinge"},
+    {"id": "right-hinge", "name": "Paper right wing hinge"},
+    {"id": "craft-table", "name": "SM_Paper_Craft_Table"},
+    {"id": "camera", "name": "Paper butterfly camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "A layered paper butterfly holds an open-wing pose above a craft table", "object_ids": ["butterfly", "body", "left-wing", "right-wing", "craft-table"]},
+    {"id": "action", "frame": 36, "label": "The wings fold and open in held stop-motion poses", "object_ids": ["left-hinge", "right-hinge", "butterfly"]},
+    {"id": "result", "frame": 72, "label": "The butterfly settles farther across the table with its cut paper wings open", "object_ids": ["butterfly", "left-wing", "right-wing"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "paper-butterfly", "origin": "procedural", "license": "Original Content Studio cut-paper geometry, packed fiber textures, and stepped animation"}
+  ]
+}

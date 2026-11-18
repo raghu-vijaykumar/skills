@@ -786,9 +786,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/paper-butterfly.gif",
+      "review": "paper-review.md",
+      "builder": "examples/paper_butterfly.py",
+      "spec": "examples/paper_butterfly.json",
+      "compatible_subjects": ["creature-artist"],
+      "intent_cues": ["butterfly"],
+      "score_record": "scores.json"
     },
     {
       "id": "chibi-style",

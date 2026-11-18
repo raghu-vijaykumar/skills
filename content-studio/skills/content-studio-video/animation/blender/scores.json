@@ -542,6 +542,50 @@
         }
       ]
     },
+    "stop-motion-craft-style": {
+      "selected": "paper-butterfly-v2",
+      "candidates": [
+        {
+          "id": "paper-butterfly-v1",
+          "video_sha256": "e9c039aa92bee42af6b4854016a94daccd6735489d6ec6ad1f913ee000ad5b97",
+          "gif_sha256": "ac11d2d59720779d51b24aa1a0fc655cd5de526c6b9a894acf653f110a7ae2f7",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio exact-frame and paper-puppet review",
+          "review_date": "2026-11-18",
+          "review_note": "Layered cut-paper wings and held six-frame flap poses read, but the plain studio background and absent table shadow make the puppet float. The full encode and saved-scene audit passed."
+        },
+        {
+          "id": "paper-butterfly-v2",
+          "video_sha256": "9651783f5abd7d80d6e8cc5c86e599399068f91b95abbedab7275f456429aa4f",
+          "gif_sha256": "1399de1e12b6905336d2522324f2b8c60432b6c3d152a31a9217be11eb63a035",
+          "gif_path": "previews/paper-butterfly.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and paper-puppet review",
+          "review_date": "2026-11-18",
+          "review_note": "The warm packed stock backdrop, tracked craft-table shadow, physical layered paper, fold seams and fasteners support a readable held-pose butterfly flap in the compact GIF. The full render and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
