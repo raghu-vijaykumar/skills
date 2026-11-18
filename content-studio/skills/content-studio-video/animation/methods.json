@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "blender-catalog", "script": "blender/scripts/catalog.py", "status": "supported", "review": "Check all 94 source IDs and truthful statuses"},
+    {"id": "blender-plan", "script": "blender/scripts/catalog.py", "status": "supported", "review": "Review suggested subject and style before scene authoring"},
+    {"id": "blender-shot", "script": "blender/scripts/render_shot.py", "status": "supported", "review": "Inspect encoded motion, required objects, frame count, and exact output"}
+  ]
+}

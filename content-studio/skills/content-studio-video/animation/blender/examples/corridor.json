@@ -1,0 +1,11 @@
+{
+  "id": "atmospheric-corridor",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 96,
+  "description": "Original modular corridor with a slow camera push, practical lamps, and one flickering light.",
+  "asset_origin": "procedural",
+  "required_objects": ["Corridor floor", "Hero camera", "End door", "Flicker light"],
+  "review_frames": [1, 36, 72, 96]
+}

@@ -1,6 +1,6 @@
 # Video capability matrices
 
-Every leaf video skill, plus the [Styles](planning/styles/README.md) router, has a
+Every leaf video skill, plus parent routes with declared methods, has a
 capability matrix that states what the skill claims, how it reaches the delivery
 timeline, and which committed evidence supports the claim. The same tables are
 validated by `npm run check:capabilities`.
@@ -8,7 +8,7 @@ validated by `npm run check:capabilities`.
 - **Template:** [CAPABILITY-MATRIX-TEMPLATE.md](CAPABILITY-MATRIX-TEMPLATE.md)
 - **Checker:** [check-capability-matrices.mjs](../../scripts/check-capability-matrices.mjs)
 - **Evidence review:** [CAPABILITY-EVIDENCE-AUDIT.md](CAPABILITY-EVIDENCE-AUDIT.md)
-- **Current coverage:** 45 matrices, 124 declared methods, and 6 explicitly
+- **Current coverage:** 47 matrices, 137 declared methods, and 6 explicitly
   unsupported methods.
 
 `Supported` means the manifest provides a runnable script. `Unsupported` means the
@@ -21,7 +21,8 @@ approved result forward. Gallery examples are illustrative, not masters.
 
 | Skill | Matrix | Declared methods |
 | --- | --- | --- |
-| Engineering 3D | [README](animation/engineering-3d/README.md) | 1 |
+| Animation Blender route | [README](animation/README.md) | 3 |
+| Engineering 3D | [README](animation/engineering-3d/README.md) | 2 |
 | Content output | [README](animation/videogen/content-output/README.md) | 2 |
 | Narration timing | [README](animation/videogen/narration-timing/README.md) | 3 |
 | Project setup | [README](animation/videogen/project-setup/README.md) | 2 |
@@ -37,7 +38,7 @@ approved result forward. Gallery examples are illustrative, not masters.
 | Music | [README](audio/music/README.md) | 1 |
 | Narration placement | [README](audio/narration/README.md) | 1 |
 | Source cleanup | [README](audio/source-cleanup/README.md) | 3 |
-| Voice cloning | [README](audio/voice-cloning/README.md) | 1 |
+| Voice cloning | [README](audio/voice-cloning/README.md) | 2 |
 
 ## Delivery
 

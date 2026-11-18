@@ -1,0 +1,11 @@
+# Headless Blender craft and style
+
+This Content Studio route adapts useful ideas from [Blender Skills at pinned commit 904f095](https://github.com/arjun988/blender-skills/tree/904f095d8f36a6e72adaebb08d07f884a074743d), licensed under [MIT](https://github.com/arjun988/blender-skills/blob/904f095d8f36a6e72adaebb08d07f884a074743d/LICENSE). The upstream skills are guidance, not executable scene builders. Content Studio's production precheck, evidence, rights, and human review gates control actual work.
+
+Choose a subject discipline first: prop/hard surface, character/creature, vegetation, vehicle, or environment. Block the silhouette and scale before details. Keep moving parts independent, name their pivots and parent relations, and match real references when physical accuracy matters. Record when internals or motion are illustrative.
+
+Choose one dominant visual style, then optional mood, world, genre, and era cues. A style may require different geometry, materials, light response, animation timing, camera, or compositing. Show the resulting proposal to the user in the editable production plan. Use `python blender/scripts/catalog.py plan "<request>" [--style <id>]` to shortlist guidance when the user did not name a style; the result is always `Catalogued` until a tested builder exists.
+
+For video output, author trusted Blender Python exposing `make_scene(spec, spec_dir)`. Use the [existing frame preview](../engineering-3d/references/headless-preview.md) for initial, action, and held result frames. Render the same builder through `blender/scripts/render_shot.py`, which saves an editable `.blend`, encoded MP4, and hash report. Compare the exact motion and the narrated composition with [object scoring](../../review/critique/references/object-scoring.md) where appropriate. Short showcase GIFs derive from the reviewed MP4 and link to rebuild instructions.
+
+Import meshes, textures, or rigs only with approved rights and recorded provenance. The three [gallery examples](../blender/README.md) use original procedural assets. A rendered example establishes its described action, not every craft or style named in the catalog. Unity, Unreal, and Godot exports remain roadmap entries until their adapters and round-trip checks exist.

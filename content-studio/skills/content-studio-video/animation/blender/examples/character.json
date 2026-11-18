@@ -1,0 +1,11 @@
+{
+  "id": "cel-character",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 96,
+  "description": "Original cel-shaded courier character turns toward camera and waves.",
+  "asset_origin": "procedural",
+  "required_objects": ["Character root", "Head control", "Wave arm control", "Hero camera"],
+  "review_frames": [1, 36, 64, 96]
+}

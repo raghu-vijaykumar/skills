@@ -1,0 +1,11 @@
+{
+  "id": "realistic-clamp",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 96,
+  "description": "Original illustrative adjustable clamp. The screw turns and advances a pressure pad toward a small block.",
+  "asset_origin": "procedural",
+  "required_objects": ["Clamp frame", "Lead screw", "Pressure pad", "Demonstration block", "Hero camera"],
+  "review_frames": [1, 48, 96]
+}
