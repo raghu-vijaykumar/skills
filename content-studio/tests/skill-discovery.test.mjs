@@ -26,6 +26,19 @@ test('nested skills are discovered by their unique frontmatter names', (t) => {
   assert.throws(() => discoverSkills(root), /Duplicate skill name/);
 });
 
+test('Social exposes each platform operation while preserving the LinkedIn entrypoint', () => {
+  // The compatibility name must remain visible alongside independently callable Social leaves.
+  const root = path.resolve('content-studio/skills');
+  const names = new Set(discoverSkills(root).map(({name}) => name));
+  for (const name of ['content-studio-social', 'content-studio-linkedin',
+    'content-studio-social-youtube-publish', 'content-studio-social-youtube-analytics',
+    'content-studio-social-linkedin-author', 'content-studio-social-linkedin-publish',
+    'content-studio-social-linkedin-analytics', 'content-studio-social-instagram-publish',
+    'content-studio-social-instagram-analytics']) {
+    assert.ok(names.has(name), `${name} must be independently callable`);
+  }
+});
+
 test('supported methods need a real local script', (t) => {
   const root = scratch(t);
   const folder = path.join(root, 'upscale');

@@ -1,11 +1,23 @@
-# Content Studio video structure and workflow
+# Content Studio skill structure and workflow
 
-This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. The three retired names `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` have no top-level entrypoints; other old `content-studio-*` names remain thin compatibility entrypoints. Source implementations, references, and tests live under [`content-studio-video/`](skills/content-studio-video/). `methods.json` distinguishes working scripts from unsupported requests.
+This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. [Social](skills/content-studio-social/SKILL.md) groups platform authoring, publishing and analytics; [video](skills/content-studio-video/SKILL.md) retains production methods. The three retired names `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` have no top-level entrypoints; other old `content-studio-*` names remain thin compatibility entrypoints. `methods.json` distinguishes working scripts from unsupported requests.
 
 ```text
 content-studio/skills/
   content-studio/                    lifecycle router
   content-studio-workflow/           mandatory precheck and checklist
+  content-studio-social/
+    SKILL.md                         platform and operation router
+    youtube/
+      publish/                      approved upload or schedule
+      analytics/                    owned-channel collector and interpretation
+    linkedin/
+      author/                       idea to reviewed text/image/GIF/PDF/video
+      publish/                      exact-package personal-profile post
+      analytics/                    supplied account data interpretation
+    instagram/
+      publish/                      approved Reel upload
+      analytics/                    supplied account data interpretation
   content-studio-video/
     SKILL.md                         stage router
     shared/dispatch.py              method-to-backend dispatch
@@ -61,6 +73,8 @@ content-studio/skills/
       publish/                      explicit request only
       archive/                      independent public-upload backup
 ```
+
+The Social publishing leaves use the existing YouTube/Instagram video publisher and LinkedIn CLI. The YouTube analytics leaf uses the existing owned-channel collector. LinkedIn and Instagram have no live analytics collector in this release; their leaves analyze supplied authorized data and label unavailable fields. The old `content-studio-linkedin` name routes to Social LinkedIn Author.
 
 ## Default camera-footage path
 

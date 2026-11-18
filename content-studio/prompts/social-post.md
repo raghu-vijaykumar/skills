@@ -1,6 +1,6 @@
 # Social post workflow form
 
-For a personal LinkedIn opinion, use [the LinkedIn workflow](../skills/content-studio-linkedin/SKILL.md) so a draft can resume in any chat and publication remains a separate review gate.
+Use [Content Studio Social](../skills/content-studio-social/SKILL.md) to select the platform and operation. For a personal LinkedIn opinion, use [LinkedIn Author](../skills/content-studio-social/linkedin/author/SKILL.md) so a draft can resume in any chat and publication remains a separate review gate.
 
 Fill the brackets and change **No** to **Yes** for the options you want.
 

@@ -5,7 +5,7 @@ description: Route a Content Studio idea or supplied media through approved prod
 
 # Content Studio
 
-For a personal LinkedIn idea or opinion, route to [Content Studio LinkedIn](../content-studio-linkedin/SKILL.md). It supports text, image, animated GIF, document carousel and video editions with reusable project presets, durable reviews and a separate publication decision.
+For YouTube, LinkedIn or Instagram authoring, publishing or analytics, start with [Content Studio Social](../content-studio-social/SKILL.md). It separates platform operations while routing to the existing video and LinkedIn implementations. A personal LinkedIn idea goes to [Social LinkedIn Author](../content-studio-social/linkedin/author/SKILL.md).
 
 Start every production request, including a direct specialist request, with the mandatory [workflow precheck](../content-studio-workflow/SKILL.md). Inspect the channel, draft, source media, and system; present an editable plan with exact skill, method script, inputs, outputs, estimate, fallback, and review criterion. Obtain explicit approval of the current revision before editing, then record checklist evidence. Changed plans require reapproval.
 
@@ -19,4 +19,4 @@ When asked to judge a new cut against a creative reference, use [video critique]
 
 Create or resume the lifecycle checklist with `python <this-skill>/scripts/checklist.py --channel <slug> --draft <id> --kind edited init` (use `remotion` for code-driven work). Record evidence per item, run `verify --phase pre_publish` before package approval and `verify --phase all` before closing. A direct specialist call follows the precheck but need not initialize the full lifecycle checklist. Read [the fixed lifecycle items](references/lifecycle-checklist.md).
 
-[Publication](../content-studio-video/delivery/publish/SKILL.md) requires approved package hashes and a separate explicit user request. [Archive](../content-studio-video/delivery/archive/SKILL.md) is independent. Keep drafts, media, analytics, private voice assets, and credentials outside this skill bundle.
+[Social publication](../content-studio-social/SKILL.md) requires approved package hashes and a separate explicit user request. [Archive](../content-studio-video/delivery/archive/SKILL.md) is independent. Keep drafts, media, analytics, private voice assets, and credentials outside this skill bundle.

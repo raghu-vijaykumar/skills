@@ -5,7 +5,7 @@ description: Find and research a short or long video idea using a channel's own 
 
 # Content Studio Ideas
 
-Choose a channel from `content-studio-video/edit/clip-edit/config.json` and its ignored local override. Refresh that channel's owned analytics with `python <bundle>/skills/content-studio-video/edit/clip-edit/scripts/content.py insights --channel <slug> --refresh --vtr-count 20`. Read its `analysis/analytics/insights.json`, dataset and retention report; note unavailable CTR, VTR, or retention explicitly. Use [measurement guidance](references/measurement.md) to turn the data into reviewable recommendations.
+Choose a channel from `content-studio-video/edit/clip-edit/config.json` and its ignored local override. Use [Social YouTube Analytics](../../../content-studio-social/youtube/analytics/SKILL.md) to refresh and interpret the channel's owned measurements before planning an idea. Read its `analysis/analytics/insights.json`, dataset and retention report; note unavailable CTR, VTR, or retention explicitly. Use [measurement guidance](references/measurement.md) to turn the data into reviewable recommendations.
 
 Run the bundled [digest](references/digest.md) for dated leads, and use agentic web research to check primary sources. Find public comparison videos relevant to this topic, then collect their observable statistics with `python <bundle>/skills/content-studio-video/edit/clip-edit/scripts/content.py competitors --channel <slug> --topic "<topic>"`. Public views, likes, comments, publication dates, and titles are comparison signals; do not infer private CTR, VTR, or retention. Record source URLs and collection time.
 
