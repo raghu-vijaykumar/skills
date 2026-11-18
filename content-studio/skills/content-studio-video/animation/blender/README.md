@@ -24,6 +24,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Painterly watercolor river | [Source](examples/watercolor_river.py) | [Inputs](examples/watercolor_river.json) | [GIF](previews/watercolor-river.gif) |
 | Stop-motion paper butterfly | [Source](examples/paper_butterfly.py) | [Inputs](examples/paper_butterfly.json) | [GIF](previews/paper-butterfly.gif) |
 | Chibi postal courier | [Source](examples/chibi_courier.py) | [Inputs](examples/chibi_courier.json) | [GIF](previews/chibi-courier.gif) |
+| Noir rain detective | [Source](examples/noir_detective.py) | [Inputs](examples/noir_detective.json) | [GIF](previews/noir-detective.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -32,6 +33,7 @@ New routes use the [version 2 shot contract](shot-contract.md) for object and be
 ## Score and select output artifacts
 
 The [chibi courier review](chibi-review.md) records the full-body ratio, two scored outputs, and the selected GIF.
+The [noir detective review](noir-review.md) records the hard light, wet ground, walk audit, and two scored outputs.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
@@ -40,6 +42,7 @@ Select the highest-scoring candidate that passes technical review and scores at 
 ## Rebuild the showcases
 
 The same rebuild commands also accept `chibi_courier`.
+They also accept `noir_detective`.
 
 From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, `comic_rocket`, `manga_gaze`, `pixel_chest`, `painted_teacup`, `watercolor_river`, or `paper_butterfly` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 
@@ -76,6 +79,7 @@ Use `scripts/audit_painted.py` with the teacup `.blend` for its 48-segment UV su
 Use `scripts/audit_watercolor.py` with the river `.blend` for its packed 512×288 pigment and paper canvas, packed 128×128 sail wash, layered strokes, fixed camera, boat travel, and swaying reeds.
 Use `scripts/audit_paper.py` with the butterfly `.blend` for its packed fiber stock, six physical paper layers, fold seams and fasteners, practical craft table, and held wing and travel poses.
 Use `scripts/audit_chibi.py` with the courier `.blend` for its 59.5% head-height ratio, tiny limbs, letter, blink, hop, and offer. The selected variant adds a cap, satchel, and postal roundel.
+Use `scripts/audit_noir.py` with the detective `.blend` for its fedora silhouette, two lights, six blind slats, 18 rain streaks, wet asphalt, haze, and walk. The selected variant adds three animated puddle ripples.
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 

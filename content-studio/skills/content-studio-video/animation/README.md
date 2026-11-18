@@ -14,3 +14,4 @@ Code-driven video uses [videogen](videogen/SKILL.md); original Blender shots use
 | `blender-handoff` | Supported | Reviewed Blender report and MP4, narration WAV, cue → hashed videogen project and Remotion source | No | [Scored composed render](blender/handoff-review.md) · [Handoff tests](blender/tests/test_handoff.py) | Code-driven video path only; production drafts need approved precheck. |
 
 The [`chibi-style` courier](blender/chibi-review.md) is another scored `blender-shot` treatment with a distinct full-body proportion and motion audit.
+The [`noir-style` detective](blender/noir-review.md) adds scored hard-light, silhouette, and wet-street evidence.

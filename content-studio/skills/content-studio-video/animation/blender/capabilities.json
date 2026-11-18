@@ -824,9 +824,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/noir-detective.gif",
+      "review": "noir-review.md",
+      "builder": "examples/noir_detective.py",
+      "spec": "examples/noir_detective.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["detective", "fedora"],
+      "score_record": "scores.json"
     },
     {
       "id": "minimalist-style",

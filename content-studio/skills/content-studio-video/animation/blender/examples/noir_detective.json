@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "noir-rain-detective",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Noir alley camera",
+  "objects": [
+    {"id": "detective", "name": "Noir detective root"},
+    {"id": "coat", "name": "SM_Noir_Trench_Coat"},
+    {"id": "hat", "name": "SM_Noir_Fedora_Brim"},
+    {"id": "briefcase", "name": "SM_Noir_Briefcase"},
+    {"id": "left-leg", "name": "Noir left leg control"},
+    {"id": "right-leg", "name": "Noir right leg control"},
+    {"id": "wet-street", "name": "SM_Noir_Wet_Street"},
+    {"id": "blinds", "name": "SM_Noir_Blinds_Light_0"},
+    {"id": "camera", "name": "Noir alley camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Fedora and trench-coat silhouette enters a rain-dark street", "object_ids": ["detective", "coat", "hat", "wet-street"]},
+    {"id": "action", "frame": 36, "label": "The detective walks through hard slashes of light with a swinging case", "object_ids": ["detective", "left-leg", "right-leg", "briefcase", "blinds"]},
+    {"id": "result", "frame": 72, "label": "The detective stops under the alley key light", "object_ids": ["detective", "coat", "hat", "briefcase"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "noir-detective", "origin": "procedural", "license": "Original Content Studio alley, detective, rain and keyed walk"}
+  ]
+}

@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 21)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 22)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -126,6 +126,11 @@ class CatalogTests(unittest.TestCase):
                          ("character-artist", "chibi-style"))
         self.assertEqual(chibi["builder"], "examples/chibi_courier.py")
         self.assertIsNone(catalog_module.route("A chibi dragon carries mail")["builder"])
+        noir = catalog_module.route("A fedora detective walks through rainy light")
+        self.assertEqual((noir["subject"], noir["style"]),
+                         ("character-artist", "noir-style"))
+        self.assertEqual(noir["builder"], "examples/noir_detective.py")
+        self.assertIsNone(catalog_module.route("A noir bicycle turns")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -164,7 +169,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 22)
+        self.assertEqual(len(catalog_module.scorebook(book)), 23)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -193,6 +198,11 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(chibi["selected"], "chibi-courier-v2")
         self.assertEqual([candidate["score_total"] for candidate in chibi["candidates"]],
                          [70, 78])
+        noir = book["routes"]["noir-style"]
+        self.assertEqual(len(noir["candidates"]), 2)
+        self.assertEqual(noir["selected"], "noir-detective-v2")
+        self.assertEqual([candidate["score_total"] for candidate in noir["candidates"]],
+                         [69, 77])
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -216,7 +226,7 @@ class CatalogTests(unittest.TestCase):
                      "horror-corridor", "psx-horror", "anime-heroine", "stylized-windmill",
                      "cartoon-bounce", "comic-rocket", "manga-gaze", "pixel-chest",
                      "painted-teacup", "watercolor-river", "paper-butterfly",
-                     "chibi-courier"):
+                     "chibi-courier", "noir-detective"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

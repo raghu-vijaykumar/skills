@@ -151,6 +151,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A tiny postal courier hops and offers a letter"}]})
         self.assertEqual(chibi["scenes"][0]["blender"]["builder"],
                          "examples/chibi_courier.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            noir = engine.plan({"scenes": [{"id": "noir-walk", "duration_seconds": 3,
+                "visual_intent": "A fedora detective walks through rainy light"}]})
+        self.assertEqual(noir["scenes"][0]["blender"]["builder"],
+                         "examples/noir_detective.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

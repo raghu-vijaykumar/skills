@@ -630,6 +630,50 @@
         }
       ]
     },
+    "noir-style": {
+      "selected": "noir-detective-v2",
+      "candidates": [
+        {
+          "id": "noir-detective-v1",
+          "video_sha256": "9bc3d9d918b2d170f531f5c53be42e6c76f6c134810108d0d123dc7fe5860bf1",
+          "gif_sha256": "550c4d1fa6853224175fb70ff519bb8e15c86ab3e4c481060fb80d1fb2e96950",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 69,
+          "reviewer": "Content Studio exact-frame and noir-lighting review",
+          "review_date": "2026-11-18",
+          "review_note": "The fedora and trench silhouette cross hard window light, but four rectangular floor highlights resemble painted bars instead of puddles. Foot placement is illustrative. Full encode, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "noir-detective-v2",
+          "video_sha256": "9835d3ba8c607169c3bd4960e29f1e221c8a7ddcd99009b44440071bed0e65b1",
+          "gif_sha256": "eb59ede8fef3891b0b332e0289308b03dbe404241313557a44859e33a835debd",
+          "gif_path": "previews/noir-detective.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio exact-frame and noir-lighting review",
+          "review_date": "2026-11-18",
+          "review_note": "Uneven specular pools and three expanding ripples make the wet street more plausible. The limited palette, hard key, cold slats, warm practical and moving silhouette remain readable. Simple foot placement keeps motion at 3/5. Full render and structural audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
