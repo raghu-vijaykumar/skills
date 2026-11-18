@@ -2107,6 +2107,50 @@
         }
       ]
     },
+    "genre-soulslike": {
+      "selected": "soulslike-causeway-v2",
+      "candidates": [
+        {
+          "id": "soulslike-causeway-v1",
+          "video_sha256": "75bdf3ffab00e62586540089ff0086cb8f938fbdeed9466cf858ecf390371376",
+          "gif_sha256": "dbcf779618ee44554be999d756878094a1e878c4e43ea2f70fbf115ab3ec0fd0",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and ruined-causeway review",
+          "review_date": "2026-11-19",
+          "review_note": "Large broken columns, a warm bonfire landmark, and a pale sealed gate read, but the traveler barely moves and no adversary appears. Solid fog stand-ins and simple stone geometry cap finish. Full MP4, GIF, isolated hero and gate, and saved-scene audit passed."
+        },
+        {
+          "id": "soulslike-causeway-v2",
+          "video_sha256": "2c2cf1750cae28373f9488e4fed1accd390ab7dc28ea85f1853623b30a3a72ec",
+          "gif_sha256": "9845525b46309062cf536ed7bcd3ff3886a9879833b306c48f542220ff294046",
+          "gif_path": "previews/soulslike-causeway.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and ruined-causeway review",
+          "review_date": "2026-11-19",
+          "review_note": "The small traveler passes the bonfire, pale gate panels part, a much larger red adversary and blade appear, and the camera pushes closer. Fog is represented by solid pale panels and the actors remain simple silhouettes. Full MP4, GIF, isolated hero and gate, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

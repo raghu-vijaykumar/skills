@@ -56,6 +56,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Stealth infiltration | [Source](examples/stealth_infiltration.py) | [Inputs](examples/stealth_infiltration.json) | [GIF](previews/stealth-infiltration.gif) |
 | Puzzle platformer | [Source](examples/puzzle_platformer.py) | [Inputs](examples/puzzle_platformer.json) | [GIF](previews/puzzle-platformer.gif) |
 | Modular ability gate | [Source](examples/modular_gate.py) | [Inputs](examples/modular_gate.json) | [GIF](previews/modular-gate.gif) |
+| Soulslike ruined causeway | [Source](examples/soulslike_causeway.py) | [Inputs](examples/soulslike_causeway.json) | [GIF](previews/soulslike-causeway.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -96,6 +97,7 @@ The [survival shelter review](survival-review.md) records two scored outputs, is
 The [stealth infiltration review](stealth-review.md) records two scored outputs, isolated actor and route previews, concealment and noise audit, and the ladder approach.
 The [puzzle platformer review](puzzle-review.md) records two scored outputs, an isolated jumper and switch preview, measured gaps, distinct spikes, and bridge extension.
 The [modular ability-gate review](modular-run-review.md) records two scored outputs, isolated room and traveler previews, biome and modifier audits, and the unlocking gate.
+The [ruined-causeway review](soulslike-review.md) records two scored outputs, isolated bonfire and gate previews, ruin and threat audits, and the red silhouette reveal.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

@@ -1441,9 +1441,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/soulslike-causeway.gif",
+      "review": "soulslike-review.md",
+      "builder": "examples/soulslike_causeway.py",
+      "spec": "examples/soulslike_causeway.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["soulslike fog gate", "bonfire causeway", "ruined soulslike", "monumental fog gate"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-strategy-sim",
