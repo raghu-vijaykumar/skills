@@ -1121,9 +1121,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cyberpunk-alley.gif",
+      "review": "cyberpunk-review.md",
+      "builder": "examples/cyberpunk_alley.py",
+      "spec": "examples/cyberpunk_alley.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["cyberpunk", "neon", "alley", "courier drone"],
+      "score_record": "scores.json"
     },
     {
       "id": "historical-worlds",

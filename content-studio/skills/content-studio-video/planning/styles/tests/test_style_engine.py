@@ -250,6 +250,13 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(explicit["scenes"][0]["blender"]["world"], "fantasy-worlds")
         self.assertEqual(explicit["scenes"][0]["blender"]["builder"],
                          "examples/fantasy_gate.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            cyberpunk = engine.plan({"scenes": [{"id": "alley", "duration_seconds": 3,
+                "visual_intent": "A parcel drone crosses a cyberpunk alley"}]})
+        self.assertEqual(cyberpunk["scenes"][0]["blender"]["builder"],
+                         "examples/cyberpunk_alley.py")
+        self.assertEqual(cyberpunk["scenes"][0]["blender"]["world"],
+                         "sci-fi-punk-worlds")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

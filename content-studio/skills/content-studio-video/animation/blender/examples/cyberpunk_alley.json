@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "cyberpunk-courier-alley",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Cyberpunk alley inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "street", "name": "SM_Cyber_Street"},
+    {"id": "tower", "name": "SM_Cyber_Tower_-1_0"},
+    {"id": "sign", "name": "SM_Cyber_Suspended_Sign"},
+    {"id": "drone", "name": "SM_Cyber_Courier_Drone_Rig"},
+    {"id": "parcel", "name": "Cyber courier parcel"},
+    {"id": "camera", "name": "Cyberpunk alley inspection camera"}
+  ],
+  "beats": [
+    {"id": "alley", "frame": 1, "label": "Cyan and magenta towers frame a wet cyberpunk street", "object_ids": ["street", "tower", "sign"]},
+    {"id": "crossing", "frame": 48, "label": "A parcel drone crosses the foreground", "object_ids": ["drone", "parcel"]},
+    {"id": "departure", "frame": 72, "label": "The drone nears the opposite tower as the camera advances", "object_ids": ["drone", "camera"]}
+  ],
+  "review_states": ["alley", "crossing", "departure"],
+  "assets": [
+    {"id": "cyberpunk-lane", "origin": "procedural", "license": "Original Content Studio alley, neon architecture, and courier drone"}
+  ]
+}

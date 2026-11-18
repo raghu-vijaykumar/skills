@@ -1359,6 +1359,40 @@
         }
       ]
     },
+    "sci-fi-punk-worlds": {
+      "selected": "cyberpunk-alley-v2",
+      "candidates": [
+        {
+          "id": "cyberpunk-alley-v1",
+          "video_sha256": "a96dca106e0cfcc3e5d4392e00a178c8c7c377de85d72a002210b45041a3cf5f",
+          "gif_sha256": "0f8477b551ec47c2a5ecd1bb420a82f43ffa02546221eab694d953e925bdb995",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 64,
+          "reviewer": "Content Studio encoded-frame and cyberpunk lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The cyan and magenta alley establishes a cyberpunk lane, but the courier drone barely crosses the frame. The simple facades and unconvincing street reflections limit finish. Full MP4, GIF decode, and scene audit passed."
+        },
+        {
+          "id": "cyberpunk-alley-v2",
+          "video_sha256": "9bc3e2cf4afa641204d8a70741dfbac177884d1cf6e4968279a659df9cfefbec",
+          "gif_sha256": "b8a39bcaf7fb52b1ad58ce8be670e152f80722797f16f5816c50335a4d634d0e",
+          "gif_path": "previews/cyberpunk-alley.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 2, "evidence_integrity": 5},
+          "score_total": 74,
+          "reviewer": "Content Studio encoded-frame and cyberpunk lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The parcel drone clearly traverses the neon canyon while the camera advances. Facades and street reflections remain simple, so this demonstrates one stylized cyberpunk lane rather than high-end production finish. Full MP4, GIF, isolated drone, and scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
