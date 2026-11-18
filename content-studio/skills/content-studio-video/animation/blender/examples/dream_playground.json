@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "dream-sky-door",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Dream playground camera",
+  "variant": 2,
+  "objects": [
+    {"id": "playground", "name": "SM_Dream_Empty_Playground"},
+    {"id": "block", "name": "SM_Dream_Giant_Alphabet_Block"},
+    {"id": "letter", "name": "SM_Dream_Block_Letter_A"},
+    {"id": "chair", "name": "SM_Dream_Empty_Chair_Seat"},
+    {"id": "door", "name": "SM_Dream_Impossible_Door"},
+    {"id": "void", "name": "SM_Dream_Sky_Door_Void"},
+    {"id": "camera", "name": "Dream playground camera"}
+  ],
+  "beats": [
+    {"id": "nostalgia", "frame": 1, "label": "An empty pastel play space holds oversized blocks and a suspended door", "object_ids": ["playground", "block", "chair", "door"]},
+    {"id": "wrongness", "frame": 50, "label": "The alphabet block floats and the door opens into blank space", "object_ids": ["block", "letter", "door"]},
+    {"id": "unresolved", "frame": 72, "label": "The camera approaches but the nursery geometry still does not connect", "object_ids": ["void", "camera"]}
+  ],
+  "review_states": ["nostalgia", "wrongness", "unresolved"],
+  "assets": [
+    {"id": "dream-play-space", "origin": "procedural", "license": "Original Content Studio playground, blocks, chair, and doorway"}
+  ]
+}

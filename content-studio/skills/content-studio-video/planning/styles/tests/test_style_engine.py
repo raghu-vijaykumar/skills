@@ -227,6 +227,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(puppet["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(puppet["scenes"][0]["blender"]["builder"],
                          "examples/puppet_stage.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            dream = engine.plan({"scenes": [{"id": "play", "duration_seconds": 3,
+                "visual_intent": "An oversized alphabet block floats above an empty playground as a door opens"}]})
+        self.assertEqual(dream["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(dream["scenes"][0]["blender"]["builder"],
+                         "examples/dream_playground.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

@@ -37,6 +37,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Empty liminal poolrooms | [Source](examples/liminal_pool.py) | [Inputs](examples/liminal_pool.json) | [GIF](previews/liminal-pool.gif) |
 | Sunlit folk rite | [Source](examples/folk_ritual.py) | [Inputs](examples/folk_ritual.json) | [GIF](previews/folk-ritual.gif) |
 | Uncanny puppet show | [Source](examples/puppet_stage.py) | [Inputs](examples/puppet_stage.json) | [GIF](previews/puppet-stage.gif) |
+| Dream playground | [Source](examples/dream_playground.py) | [Inputs](examples/dream_playground.json) | [GIF](previews/dream-playground.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -58,6 +59,7 @@ The [analog tape review](analog-review.md) records three scored outputs, the iso
 The [liminal pool review](liminal-review.md) records two scored outputs, an isolated modular bay, an empty repetition audit, and the slow camera push.
 The [folk rite review](folk-review.md) records two scored outputs, an isolated wicker hero, a repeated-symbol and village audit, and the stronger camera and ribbon motion.
 The [puppet show review](puppet-review.md) records two scored outputs, an isolated felt figure, hard-plastic eye and set audit, and the sick-light gaze performance.
+The [dream playground review](dream-review.md) records two scored outputs, isolated block and doorway previews, impossible geography, and levitation and door-motion audits.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

@@ -1064,9 +1064,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/dream-playground.gif",
+      "review": "dream-review.md",
+      "builder": "examples/dream_playground.py",
+      "spec": "examples/dream_playground.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["playground", "nursery", "alphabet", "toy"],
+      "score_record": "scores.json"
     },
     {
       "id": "indie-horror-aesthetics",

@@ -56,7 +56,8 @@
   - [x] T012d Render the empty poolrooms with two scored candidates and a modular-bay, fluorescent, water, and inspection-push audit.
   - [x] T012e Render the sunlit folk rite with two scored candidates and a wicker, repeated-symbol, village, and ribbon-motion audit.
   - [x] T012f Render the puppet show with two scored candidates and a felt, plastic gaze, staged brand, and sick-light audit.
-  - [ ] T012g Complete the remaining two horror packs with distinct scored GIFs.
+  - [x] T012g Render the dream playground with two scored candidates and an oversized toy, disconnected nursery, and impossible-door audit.
+  - [ ] T012h Complete the remaining indie horror pack with its own scored GIF.
 
 ## Wave 5: Settings and genre direction
 

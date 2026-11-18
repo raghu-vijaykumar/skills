@@ -1257,6 +1257,40 @@
         }
       ]
     },
+    "dream-weirdcore-style": {
+      "selected": "dream-playground-v2",
+      "candidates": [
+        {
+          "id": "dream-playground-v1",
+          "video_sha256": "402c4959ae2ce3c433c9e6e6b5328edbcbe1eb15b5cf529ada48557b01d2e857",
+          "gif_sha256": "af53015205b4541e1e0546289f2deba6d79a3d03ff898e4b9596f8265119843d",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and dream-play-space review",
+          "review_date": "2026-11-18",
+          "review_note": "The soft pastel childhood objects, vacant chair, disconnected nursery walls, and unsupported door establish dreamlike wrongness, but the block and door barely move. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "dream-playground-v2",
+          "video_sha256": "edb9dc2f33ebc7c6dafd2222a6fd42e3c9b5b10e218c6ec80aece323ba29400c",
+          "gif_sha256": "1136c267ab0094e7e028d918dcbf67045633a511e99e4e538bd9f26317b37a0e",
+          "gif_path": "previews/dream-playground.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and dream-play-space review",
+          "review_date": "2026-11-18",
+          "review_note": "The giant alphabet block levitates and tilts while the unsupported sky door opens toward a blank purple beyond. The empty chair and disconnected walls hold the nostalgic scale. Simple surfaces and no volumetric fog limit finish to 3/5. Full MP4, GIF, isolated-hero, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
