@@ -14,6 +14,7 @@
     {"id": "sharpen-medium", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect halos"},
     {"id": "title", "script": "scripts/timeline.py", "status": "supported", "review": "Review text, font, position, and occlusion"},
     {"id": "text-behind-subject", "script": "scripts/timeline.py", "status": "supported", "review": "Review the person and foreground matte through motion, title reveal, timing, and exact export"},
+    {"id": "object-blur", "script": "scripts/timeline.py", "status": "supported", "review": "Require full-frame human coverage review, matching lossless mask and exact SDR export"},
     {"id": "highpass", "script": "scripts/timeline.py", "status": "supported", "review": "Listen to processed audio"},
     {"id": "audio-denoise", "script": "scripts/timeline.py", "status": "supported", "review": "Listen for speech damage"},
     {"id": "compress", "script": "scripts/timeline.py", "status": "supported", "review": "Listen for pumping"},

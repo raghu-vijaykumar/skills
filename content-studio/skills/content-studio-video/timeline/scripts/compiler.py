@@ -306,14 +306,14 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
             inputs.extend(["-i", str(source)])
     matte_inputs: dict[str, int] = {}
     for item in resolved["operations"]:
-        if item["method"] != "text-behind-subject":
+        if item["method"] not in {"text-behind-subject", "object-blur"}:
             continue
-        matte = asset_path(resolved["root"], item["matte_source"])
+        matte = asset_path(resolved["root"], item.get("matte_source") or item.get("mask_source"))
         metadata = media_info(matte)
         if not metadata["video"]:
-            raise ValueError(f"No video stream in foreground matte {item['id']}")
+            raise ValueError(f"No video stream in mask {item['id']}")
         if matte.suffix.lower() != ".png" and metadata["duration"] + .08 < item["end"] - item["start"]:
-            raise ValueError(f"Foreground matte is shorter than cue {item['id']}")
+            raise ValueError(f"Mask is shorter than cue {item['id']}")
         matte_inputs[item["id"]] = len(clips) + len(resolved["audio"]) + len(matte_inputs)
         if matte.suffix.lower() == ".png":
             inputs.extend(["-loop", "1", "-framerate", _fmt(fps)])
@@ -433,6 +433,21 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                          f"format=yuv420p[fullmask{index}]")
             graph.append(f"[lettered{index}][plain{index}][fullmask{index}]"
                          f"maskedmerge[{target}]")
+        elif method == "object-blur":
+            # The lossless gray sidecar supplies alpha only. Blur the picture
+            # in this graph so there is still one video encode for delivery.
+            index_in = matte_inputs[item["id"]]
+            sigma = max(24, round(min(width, height) * .04))
+            graph.append(f"[{index_in}:v:0]trim=duration={_fmt(duration)},"
+                         f"setpts=PTS-STARTPTS,scale={width}:{height},"
+                         f"fps={_fmt(fps)},format=gray[blurmask{index}]")
+            graph.append(f"[{current_v}]split=2[plain{index}][blurbase{index}]")
+            graph.append(f"[blurbase{index}]gblur=sigma={sigma}:steps=2,"
+                         f"format=rgba[blurred{index}]")
+            graph.append(f"[blurred{index}][blurmask{index}]"
+                         f"alphamerge[bluralpha{index}]")
+            graph.append(f"[plain{index}][bluralpha{index}]"
+                         f"overlay=shortest=1:format=auto,format=yuv420p[{target}]")
         elif method == "cross-blur":
             # Ease the blur in and out around the source cut; start/end remain
             # editable timeline times and the picture/audio duration is fixed.
@@ -521,10 +536,10 @@ def _export(timeline: dict, resolved: dict, output: Path,
     if output in [asset_path(resolved["root"], cue["source"])
                   for cue in resolved["audio"]]:
         raise ValueError("Output cannot overwrite an audio source")
-    if output in [asset_path(resolved["root"], op["matte_source"])
+    if output in [asset_path(resolved["root"], op.get("matte_source") or op.get("mask_source"))
                   for op in resolved["operations"]
-                  if op["method"] == "text-behind-subject"]:
-        raise ValueError("Output cannot overwrite a foreground matte")
+                  if op["method"] in {"text-behind-subject", "object-blur"}]:
+        raise ValueError("Output cannot overwrite a mask")
     inputs, graph = compile_graph(timeline, resolved)
     expected = resolved["duration"]
     seek_args: list[str] = []

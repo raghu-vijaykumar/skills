@@ -42,6 +42,7 @@ content-studio/skills/
       color/                         correction and range presets
       restoration/                   denoise, deflicker, lens, sharpen
       reflection/                    detect, conservative glare/veil fix, preview, benchmark, DSRNet AI review pass
+      object-blur/                   named-object masks, coverage review, native timeline blur
       upscale/                       compare, Lanczos, Real-ESRGAN, PyTorch
       transitions/                   point effects and explicit clip joins
       motion-graphics/               scene-cued overlays and transitions

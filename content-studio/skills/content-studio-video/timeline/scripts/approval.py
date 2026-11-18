@@ -63,6 +63,13 @@ def fingerprint(timeline_path: Path, timeline: dict) -> str:
                 asset = asset_path(result["root"], item[name])
                 parts.append(asset.as_posix().encode())
                 parts.append(bytes.fromhex(sha256_file(asset)))
+        if item["method"] == "object-blur":
+            # Both the matte and the human frame-coverage decision belong to
+            # the approved render identity.
+            for name in ("mask_source", "analysis_source", "coverage_review_source"):
+                asset = asset_path(result["root"], item[name])
+                parts.append(asset.as_posix().encode())
+                parts.append(bytes.fromhex(sha256_file(asset)))
     digest = hashlib.sha256()
     for part in parts:
         digest.update(len(part).to_bytes(8, "big"))

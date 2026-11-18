@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "analyze", "script": "scripts/object_blur.py", "status": "supported", "review": "Inspect every source and mask frame; model misses and uncertain regions block concealment approval"},
+    {"id": "changes", "script": "scripts/object_blur.py", "status": "supported", "review": "Requires a matching human coverage record and separate timeline approval before final render"}
+  ]
+}

@@ -6,6 +6,8 @@ import copy
 import hashlib
 import json
 import math
+import subprocess
+from fractions import Fraction
 from pathlib import Path
 
 SCHEMA = "content-studio.delivery-timeline.v1"
@@ -16,7 +18,7 @@ PICTURE_METHODS = {
     "denoise-light", "denoise-medium", "deflicker",
     "upscale-lanczos", "color-eq", "sharpen-light", "sharpen-medium",
 }
-GRAPHIC_METHODS = {"title", "motion-graphics-ass", "text-behind-subject"}
+GRAPHIC_METHODS = {"title", "motion-graphics-ass", "text-behind-subject", "object-blur"}
 AUDIO_METHODS = {"highpass", "audio-denoise", "compress", "loudnorm"}
 # Keep the single-export join vocabulary aligned with the specialist catalog.
 # Native variants map to FFmpeg xfade; eight authored expressions use custom.
@@ -337,6 +339,72 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                 overlap = by_after.get(clip["id"], {}).get("duration", 0)
                 if overlap and start < clip["end"] and end > clip["end"] - overlap:
                     raise ValueError(f"Foreground matte cue overlaps a join: {op_id}")
+        if kind == "object-blur":
+            # A reviewed full-frame matte aligns only to the untouched manual
+            # render. Reject remapped pictures rather than blur the wrong pixels.
+            if (len(resolved) != 1 or resolved[0]["source_in"] != 0
+                    or by_after or abs(start) > 1e-6 or abs(end - duration) > 1e-6
+                    or video_policy != "encode" or timeline["color_policy"] != "sdr"
+                    or any(other is not item and other["method"] not in AUDIO_METHODS
+                           for other in operations)):
+                raise ValueError("Object blur needs one uncut SDR picture without other picture effects")
+            mask = asset_path(root, item.get("mask_source"))
+            analysis_path = asset_path(root, item.get("analysis_source"))
+            if (mask.suffix.lower() != ".mkv"
+                    or sha256_file(mask) != item.get("mask_sha256")
+                    or sha256_file(analysis_path) != item.get("analysis_sha256")):
+                raise ValueError(f"Object-blur mask or analysis changed: {op_id}")
+            analysis = load(analysis_path)
+            expected_frames = round(duration * fps)
+            if (analysis.get("schema") != "content-studio.object-blur.v1"
+                    or analysis.get("source_sha256") != resolved[0]["sha256"]
+                    or analysis.get("mask_sha256") != item["mask_sha256"]
+                    or analysis.get("target") != item.get("target")
+                    or analysis.get("frames") != expected_frames
+                    or analysis.get("width") != width or analysis.get("height") != height
+                    or abs(float(analysis.get("fps", -1)) - fps) > 1e-6
+                    or abs(float(analysis.get("duration", -1)) - duration) > .01):
+                raise ValueError(f"Object-blur analysis does not match the picture: {op_id}")
+            if (analysis.get("detections_sha256") != sha256_file(
+                    analysis_path.with_name("detections.jsonl"))
+                    or analysis.get("frames_sha256") != sha256_file(
+                        analysis_path.with_name("frames.jsonl"))):
+                raise ValueError(f"Object-blur frame evidence changed: {op_id}")
+            flags = analysis.get("flagged_frames")
+            if (not isinstance(flags, list)
+                    or any(not isinstance(frame, int) or not 0 <= frame < expected_frames
+                           for frame in flags)
+                    or flags != sorted(set(flags))):
+                raise ValueError(f"Object-blur uncertainty list is invalid: {op_id}")
+            # Probe the mask's actual stream; a manifest cannot make a short or
+            # mismatched sidecar safe for a full-length redaction.
+            probe = subprocess.run([
+                "ffprobe", "-v", "error", "-show_streams", "-show_format",
+                "-of", "json", str(mask)], capture_output=True, text=True, check=True)
+            media = json.loads(probe.stdout)
+            stream = next((part for part in media["streams"]
+                           if part.get("codec_type") == "video"), None)
+            if (not stream or stream.get("codec_name") != "ffv1"
+                    or stream.get("width") != width or stream.get("height") != height
+                    or abs(float(Fraction(stream.get("r_frame_rate", "0/1"))) - fps) > 1e-6
+                    or float(media["format"].get("duration", 0)) + 1 / fps + .002 < duration):
+                raise ValueError(f"Object-blur mask stream is incomplete: {op_id}")
+            review_path = item.get("coverage_review_source")
+            if review_path:
+                review = asset_path(root, review_path)
+                if sha256_file(review) != item.get("coverage_review_sha256"):
+                    raise ValueError(f"Object-blur coverage review changed: {op_id}")
+                evidence = load(review)
+                if (evidence.get("actor") != "human" or not evidence.get("reviewer")
+                        or not evidence.get("review_note")
+                        or evidence.get("source_sha256") != resolved[0]["sha256"]
+                        or evidence.get("analysis_sha256") != item["analysis_sha256"]
+                        or evidence.get("mask_sha256") != item["mask_sha256"]
+                        or evidence.get("frames_reviewed") != expected_frames
+                        or evidence.get("resolved_frames") != flags):
+                    raise ValueError(f"Object-blur coverage review is incomplete: {op_id}")
+            elif require_review:
+                raise ValueError(f"Object-blur full-frame coverage review is missing: {op_id}")
         if kind == "motion-graphics-ass":
             # ASS cues carry their own times, so the sidecar spans the full edit.
             if abs(start) > 1e-6 or abs(end - duration) > 1e-6:
@@ -403,6 +471,11 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                     if o["method"] == "text-behind-subject"]
     input_paths += [asset_path(root, o["font_source"]) for o in operations
                     if o["method"] == "text-behind-subject"]
+    input_paths += [asset_path(root, o[key]) for o in operations
+                    if o["method"] == "object-blur"
+                    for key in ("mask_source", "analysis_source")]
+    input_paths += [asset_path(root, o["coverage_review_source"]) for o in operations
+                    if o["method"] == "object-blur" and o.get("coverage_review_source")]
     if output in input_paths or output == plan:
         raise ValueError("Output cannot overwrite an input")
     return {"clips": resolved, "transitions": by_after, "operations": operations,

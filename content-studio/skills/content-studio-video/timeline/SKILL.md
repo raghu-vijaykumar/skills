@@ -13,6 +13,8 @@ Current delivery adapters are deliberately narrower than the specialist catalog.
 
 `text-behind-subject` is a supported SDR graphic operation. It draws a rising title behind a hashed foreground matte generated locally for each shot; see the [motion graphics preset](../edit/motion-graphics/references/text-behind-subject.md). The cue must stay within one picture shot and outside join overlaps. Review the matte and moving composite before human timeline approval.
 
+`object-blur` is a supported SDR concealment operation for one uncut finished edit. The [object blur skill](../edit/object-blur/SKILL.md) detects the named target on each frame and supplies a hashed lossless mask. The timeline requires a matching human full-frame coverage record before approval and composites blur in the final encode.
+
 ## Draft and review a timeline
 
 The production plan at `.content-studio/preflight/plan.json` must already have
