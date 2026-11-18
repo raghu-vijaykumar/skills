@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "cosmic-eldritch-aperture",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Cosmic impossible scale camera",
+  "variant": 3,
+  "objects": [
+    {"id": "witness", "name": "SM_Cosmic_Witness"},
+    {"id": "void", "name": "SM_Cosmic_Void"},
+    {"id": "aperture", "name": "SM_Cosmic_Broken_Aperture"},
+    {"id": "slit", "name": "SM_Cosmic_Gold_Slit"},
+    {"id": "camera", "name": "Cosmic impossible scale camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "A tiny witness faces an oversized void aperture", "object_ids": ["witness", "aperture"]},
+    {"id": "shift", "frame": 36, "label": "Misregistered stone and the hidden iris rotate around a narrow gold wound", "object_ids": ["void", "slit"]},
+    {"id": "resolve", "frame": 72, "label": "The aperture stays unknowable as the camera closes on the witness", "object_ids": ["witness", "camera"]}
+  ],
+  "review_states": ["establish", "shift", "resolve"],
+  "assets": [
+    {"id": "cosmic-aperture", "origin": "procedural", "license": "Original Content Studio cosmic stage, witness, and animation"}
+  ]
+}

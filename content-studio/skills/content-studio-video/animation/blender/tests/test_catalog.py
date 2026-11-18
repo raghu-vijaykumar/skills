@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 28)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 29)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -161,6 +161,11 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(aero["style"], "frutiger-aero-style")
         self.assertEqual(aero["builder"], "examples/aero_dashboard.py")
         self.assertIsNone(catalog_module.route("A Frutiger Aero car drives")["builder"])
+        cosmic = catalog_module.route("An impossible aperture looms over a tiny witness")
+        self.assertEqual((cosmic["subject"], cosmic["style"]),
+                         ("environment-artist", "cosmic-eldritch-horror"))
+        self.assertEqual(cosmic["builder"], "examples/cosmic_aperture.py")
+        self.assertIsNone(catalog_module.route("An eldritch car drives")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -199,7 +204,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 29)
+        self.assertEqual(len(catalog_module.scorebook(book)), 30)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -260,6 +265,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(aero["selected"], "aero-dashboard-v2")
         self.assertEqual([candidate["score_total"] for candidate in aero["candidates"]],
                          [73, 82])
+        cosmic = book["routes"]["cosmic-eldritch-horror"]
+        self.assertEqual(cosmic["selected"], "cosmic-aperture-v3")
+        self.assertEqual([candidate["score_total"] for candidate in cosmic["candidates"]],
+                         [63, 73, 78])
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -285,7 +294,7 @@ class CatalogTests(unittest.TestCase):
                      "painted-teacup", "watercolor-river", "paper-butterfly",
                      "chibi-courier", "noir-detective", "minimal-pendulum",
                      "vector-sprout", "retro8-ship", "retro16-fox", "hd2d-bridge",
-                     "aero-dashboard"):
+                     "aero-dashboard", "cosmic-aperture"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)
@@ -299,6 +308,8 @@ class CatalogTests(unittest.TestCase):
                       "content-studio-video/animation/blender/previews/hd2d-bridge.gif)", readme)
         self.assertIn("![Best scored Frutiger Aero dashboard animation](content-studio/skills/"
                       "content-studio-video/animation/blender/previews/aero-dashboard.gif)", readme)
+        self.assertIn("![Best scored cosmic eldritch aperture animation](content-studio/skills/"
+                      "content-studio-video/animation/blender/previews/cosmic-aperture.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

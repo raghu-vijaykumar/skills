@@ -160,7 +160,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye|traveler|wanderer)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
-        (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake)\b", "environment-artist"),
+        (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
         (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup|dashboard|widget)\b", "prop-artist"),
     ]
@@ -177,6 +177,7 @@ def route(prompt, style=None, subject=None):
         reason = "explicit style"
     else:
         style_rules = [
+            (r"\b(cosmic.horror|eldritch|lovecraftian|void.horror)\b", "cosmic-eldritch-horror"),
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
@@ -227,6 +228,9 @@ def route(prompt, style=None, subject=None):
                          "frutiger-aero-style" if subject == "prop-artist" and
                          re.search(r"\bdashboard\b", text) and
                          re.search(r"\b(aqua|bubble|leaf|glossy)\b", text) else
+                         "cosmic-eldritch-horror" if subject == "environment-artist" and
+                         re.search(r"\baperture\b", text) and
+                         re.search(r"\b(giant|impossible|void|unknowable)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

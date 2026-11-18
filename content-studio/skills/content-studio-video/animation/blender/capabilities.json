@@ -956,9 +956,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cosmic-aperture.gif",
+      "review": "cosmic-review.md",
+      "builder": "examples/cosmic_aperture.py",
+      "spec": "examples/cosmic_aperture.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["aperture"],
+      "score_record": "scores.json"
     },
     {
       "id": "body-horror-style",

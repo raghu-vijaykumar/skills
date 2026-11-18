@@ -50,6 +50,8 @@
   - [x] T011n Render the HD-2D lantern bridge with three scored candidates and a pixel-actor, painted-stage, lighting, and DOF audit.
   - [x] T011o Render the Frutiger Aero dashboard with two scored candidates and a glossy-aqua, leaf, bubble-trail, and UI audit.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
+  - [x] T012a Render the cosmic aperture with three scored candidates and a tiny-witness, broken-geometry, moving-iris, and void audit.
+  - [ ] T012b Complete the remaining seven horror packs with distinct scored GIFs.
 
 ## Wave 5: Settings and genre direction
 

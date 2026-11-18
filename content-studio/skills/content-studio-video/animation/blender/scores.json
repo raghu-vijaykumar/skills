@@ -997,6 +997,54 @@
         }
       ]
     },
+    "cosmic-eldritch-horror": {
+      "selected": "cosmic-aperture-v3",
+      "candidates": [
+        {
+          "id": "cosmic-aperture-v1",
+          "video_sha256": "49ef8e0d7b2268389e512a8c26ee9576b9d447fa594618404d5798738ec827e2",
+          "gif_sha256": "43c33eeff2aaec628e556c1e536b529564cab6bdb1a0ef8e264a44dcc86c6529",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 3, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and cosmic-scale review",
+          "review_date": "2026-11-18",
+          "review_note": "The witness and oversized aperture are clear, but the unbroken gold rings look like a portal and only the camera moves. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "cosmic-aperture-v2",
+          "video_sha256": "e46041cdb37e34faa03e3d14eda89fe186d6894eb6d7f9b8a5c805e3f6406297",
+          "gif_sha256": "2a1b8aa960ab35fa7e393fee585dbbcac198e62909f0984ed060adba286573dd",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and cosmic-scale review",
+          "review_date": "2026-11-18",
+          "review_note": "Partial tendrils, depth glints, and iris bars make the void less explicit; the camera and iris change remain subtle. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "cosmic-aperture-v3",
+          "video_sha256": "db7f721c47fca7423e32abbb458bdbc1881e57d02afc81ef4fdcfbe53279a80e",
+          "gif_sha256": "4c6b654268371f9299502e89b2116efa3e3dd4a5924aa4d4232798dbdc105509",
+          "gif_path": "previews/cosmic-aperture.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and cosmic-scale review",
+          "review_date": "2026-11-18",
+          "review_note": "The inner ring turns, the narrow wound opens then closes, detached shards orbit, and a slow inspection push makes the scale shift legible. The aperture is still cleaner than a full creature reveal. Exact MP4, GIF, isolated aperture, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
