@@ -38,3 +38,4 @@ The [`cozy-wholesome-mood` nook](blender/cozy-review.md) adds a scored reading-r
 The [`dark-gritty-mood` depot](blender/gritty-review.md) adds a scored industrial lane with oxidized structure, patched metal, low-key light, and a crossing crane load.
 The [`dream-surreal-mood` tide](blender/dream-tide-review.md) adds a scored pastel threshold lane with unsupported stairs, an oversized key, a tiny boat, and an opening door.
 The [`neon-retrofuturism` highway](blender/retrowave-review.md) adds a scored outrun lane with a perspective grid, striped sun, chrome coupe, and magenta light.
+The [`brutalist-mood` archive](blender/brutalist-review.md) adds a scored monumental concrete gateway with a tiny witness and a sliding shutter reveal.

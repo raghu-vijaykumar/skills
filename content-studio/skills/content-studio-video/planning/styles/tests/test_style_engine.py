@@ -306,6 +306,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/retrowave_highway.py")
         self.assertEqual(retrowave["scenes"][0]["blender"]["world"],
                          "neon-retrofuturism")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            brutalist = engine.plan({"scenes": [{"id": "archive", "duration_seconds": 3,
+                "visual_intent": "A brutalist concrete archive gateway opens"}]})
+        self.assertEqual(brutalist["scenes"][0]["blender"]["builder"],
+                         "examples/brutalist_archive.py")
+        self.assertEqual(brutalist["scenes"][0]["blender"]["world"],
+                         "brutalist-mood")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

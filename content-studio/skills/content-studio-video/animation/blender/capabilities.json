@@ -1281,9 +1281,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/brutalist-archive.gif",
+      "review": "brutalist-review.md",
+      "builder": "examples/brutalist_archive.py",
+      "spec": "examples/brutalist_archive.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["brutalist", "monumental concrete", "concrete archive", "austere architecture"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-action-combat",

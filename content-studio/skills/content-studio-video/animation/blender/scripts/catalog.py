@@ -178,6 +178,7 @@ def route(prompt, style=None, subject=None, world=None):
         (r"\b(depot|freight.bay|rail.workshop)\b", "environment-artist"),
         (r"\b(doorway|floating.stair|mirror.sea)\b", "environment-artist"),
         (r"\b(highway|grid.horizon|retrowave|synthwave|outrun)\b", "environment-artist"),
+        (r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -210,6 +211,8 @@ def route(prompt, style=None, subject=None, world=None):
                                re.search(r"\b(dreamlike|surreal|floating doorway|mirror sea)\b", text)
                                else "neon-retrofuturism" if
                                re.search(r"\b(retrowave|synthwave|outrun|neon.retrofutur|striped sunset)\b", text)
+                               else "brutalist-mood" if
+                               re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text)
                                else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
@@ -319,6 +322,8 @@ def route(prompt, style=None, subject=None, world=None):
                          re.search(r"\b(dreamlike|surreal|floating doorway|mirror sea)\b", text) else
                          "stylized-style" if subject in {"environment-artist", "vehicle-artist"} and
                          re.search(r"\b(retrowave|synthwave|outrun|neon.retrofutur|striped sunset)\b", text) else
+                         "stylized-style" if subject == "environment-artist" and
+                         re.search(r"\b(brutalist|brutalism|monumental.concrete|concrete.archive|austere.architecture)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

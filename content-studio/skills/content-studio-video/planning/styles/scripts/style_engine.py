@@ -31,6 +31,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "freight", "depot", "gantry", "dreamlike", "surreal",
     "doorway", "levitating", "tide", "retrowave", "synthwave",
     "outrun", "highway", "striped", "sunset", "chrome",
+    "brutalist", "brutalism", "monumental", "concrete", "shutter",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

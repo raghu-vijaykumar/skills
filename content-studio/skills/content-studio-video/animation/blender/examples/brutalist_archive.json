@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "brutalist-archive-gateway",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Archive low witness camera",
+  "variant": 2,
+  "objects": [
+    {"id": "plaza", "name": "SM_Archive_Empty_Plaza"},
+    {"id": "left", "name": "SM_Archive_Left_Monolith"},
+    {"id": "right", "name": "SM_Archive_Right_Monolith"},
+    {"id": "crown", "name": "SM_Archive_Cantilever_Crown"},
+    {"id": "gate", "name": "SM_Archive_Sliding_Gate_Rig"},
+    {"id": "witness", "name": "SM_Archive_Tiny_Witness_Rig"},
+    {"id": "camera", "name": "Archive low witness camera"}
+  ],
+  "beats": [
+    {"id": "weight", "frame": 1, "label": "A tiny witness faces an austere raw-concrete gateway", "object_ids": ["left", "right", "crown", "witness"]},
+    {"id": "aperture", "frame": 48, "label": "The monumental concrete shutter slides along its tracks", "object_ids": ["gate", "left", "right"]},
+    {"id": "approach", "frame": 72, "label": "The witness nears the dark opening as the low camera advances", "object_ids": ["witness", "gate", "camera"]}
+  ],
+  "review_states": ["weight", "aperture", "approach"],
+  "assets": [
+    {"id": "archive-gateway", "origin": "procedural", "license": "Original Content Studio monoliths, concrete shutter, tracks, plaza, and witness"}
+  ]
+}

@@ -1755,6 +1755,50 @@
         }
       ]
     },
+    "brutalist-mood": {
+      "selected": "brutalist-archive-v2",
+      "candidates": [
+        {
+          "id": "brutalist-archive-v1",
+          "video_sha256": "76552c3c6126d06a4009ea248b06958313ba667ed3be68d1cb8d3b174cf1a578",
+          "gif_sha256": "6715291680b53429dfbb76f7945d30baa18218ec34fb64527950b831ab93a169",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and brutalist mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The concrete mass, board seams, and tiny witness read well, but the shutter barely moves and the dark opening remains hidden. Complete MP4, GIF, isolated gateway, and saved-scene audit passed."
+        },
+        {
+          "id": "brutalist-archive-v2",
+          "video_sha256": "28027b597fdeae0d565ba627b0020a13eed294e0b17334917b3288e8cd81d55b",
+          "gif_sha256": "07871ca0f210715b8c3e77ed1b949eb02b087eeeb09d1856844c3b13bf81af82",
+          "gif_path": "previews/brutalist-archive.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and brutalist mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The concrete shutter reveals the dark aperture while the small amber witness approaches and the low camera advances. Flat human geometry and simple concrete detail cap finish at 3/5. Complete MP4, GIF, isolated gateway, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [
