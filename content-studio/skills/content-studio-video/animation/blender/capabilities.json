@@ -1521,9 +1521,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/card-table.gif",
+      "review": "card-table-review.md",
+      "builder": "examples/card_table.py",
+      "spec": "examples/card_table.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["card table choice", "deck builder card table", "idle reward card table", "shield card choice"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-open-world-sandbox",

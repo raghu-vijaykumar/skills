@@ -2302,6 +2302,50 @@
         }
       ]
     },
+    "genre-card-party-idle": {
+      "selected": "card-table-v2",
+      "candidates": [
+        {
+          "id": "card-table-v1",
+          "video_sha256": "cf0fd31ceec77abb6db9ce9744b78154fe336ca5b0d9716063d077c33415fa76",
+          "gif_sha256": "35a19dcb669e6ab3ad7970b1c1bb9905d94d32213d6c450f66410be9a3467c90",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and card-table review",
+          "review_date": "2026-11-19",
+          "review_note": "Three icon cards, a deck, and a small coin stack remain readable on a low-distraction table. The static hand never communicates a card choice or idle reward. Full MP4, GIF, isolated hero, and saved-scene audit passed."
+        },
+        {
+          "id": "card-table-v2",
+          "video_sha256": "a8aa5626a2f7d234af8960f3a9f79599113e4d9ac968221dbbd1f073ebb780e8",
+          "gif_sha256": "7444b56b49a7e54a485aa7eda88ff32816cf193412ff71bef37ca86743ec294f",
+          "gif_path": "previews/card-table.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and card-table review",
+          "review_date": "2026-11-19",
+          "review_note": "The cyan shield card lifts and settles ahead of the hand; the idle reward stack grows from two to five coins. The three icon cards and deck stay distinct. Geometry is illustrative and there is no playable card-game logic. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

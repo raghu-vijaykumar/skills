@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "card-party-table-choice",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Card table overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_Card_Table_Stage"},
+    {"id": "sword", "name": "SM_Card_Sword_Rig"},
+    {"id": "shield", "name": "SM_Card_Shield_Rig"},
+    {"id": "coin", "name": "SM_Card_Coin_Rig"},
+    {"id": "reward", "name": "SM_Card_Reward_Coin_4"},
+    {"id": "camera", "name": "Card table overview camera"}
+  ],
+  "beats": [
+    {"id": "choose", "frame": 1, "label": "Three distinct icon cards and a small coin stack sit on an uncluttered table", "object_ids": ["stage", "sword", "shield", "coin"]},
+    {"id": "play", "frame": 42, "label": "The cyan shield card lifts above the remaining hand", "object_ids": ["shield", "sword", "coin"]},
+    {"id": "reward", "frame": 72, "label": "The selected shield card settles forward and the reward stack grows", "object_ids": ["shield", "reward", "camera"]}
+  ],
+  "review_states": ["choose", "play", "reward"],
+  "assets": [
+    {"id": "card-kit", "origin": "procedural", "license": "Original Content Studio table, cards, icons, and coins"}
+  ]
+}

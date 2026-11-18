@@ -50,3 +50,4 @@ The [`genre-soulslike` causeway](blender/soulslike-review.md) adds a scored ruin
 The [`genre-strategy-sim` settlement](blender/strategy-review.md) adds a scored tile grid with distinct resource sites, dispatched workers, and a growing watchtower.
 The [`genre-racing-sports` sprint](blender/circuit-review.md) adds scored team-color cars, clear track boundaries, a modular grandstand, and a verified finish order.
 The [`genre-narrative-vn` station](blender/narrative-review.md) adds a scored quiet background plate, emotional camera push, and one letter interaction cue.
+The [`genre-card-party-idle` table](blender/card-table-review.md) adds a scored three-icon card hand, selected-card lift, and growing idle reward stack.

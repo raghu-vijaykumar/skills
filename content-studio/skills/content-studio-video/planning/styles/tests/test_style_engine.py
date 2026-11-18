@@ -400,6 +400,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-narrative-vn")
         self.assertEqual(narrative["scenes"][0]["blender"]["builder"],
                          "examples/station_letter.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            card = engine.plan({"scenes": [{"id": "card", "duration_seconds": 3,
+                "visual_intent": "A deck builder card table choice"}]})
+        self.assertEqual(card["scenes"][0]["blender"]["genre"],
+                         "genre-card-party-idle")
+        self.assertEqual(card["scenes"][0]["blender"]["builder"],
+                         "examples/card_table.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
