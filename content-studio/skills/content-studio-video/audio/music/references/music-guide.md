@@ -49,6 +49,8 @@ content-studio/assets/music/
 ```
 
 The catalog is shared across channels. Keep one copy and reference tracks by their relative file path in `library.json`.
+Metadata-only candidates have no file path, duration, hash, or confirmed license.
+They remain discoverable by category and mood but cannot be selected or mixed.
 
 When the skill is installed globally, the versioned bundle does not contain your local audio. Set:
 
@@ -59,6 +61,21 @@ $env:CONTENT_STUDIO_MUSIC = "C:\workspace\skills\content-studio\assets\music"
 or pass `--catalog` to `music.py`.
 
 ## Importing downloads
+
+Record a potential YouTube Audio Library track before downloading:
+
+```powershell
+node <bundle>/scripts/music-library.mjs candidate `
+  --title "Crimson Fly" --artist "Huma-Huma" `
+  --category "Pop" --mood "bright, upbeat" `
+  --preview-url "https://www.youtube.com/watch?v=Sn6z_5NcPnA"
+```
+
+The preview link is a listening reference, not a download source. Check the
+current Studio listing and license when choosing the track for a video. Then
+manually download the MP3 and run `add` with the same title and artist plus
+the Studio license. For a Creative Commons track, supply the exact attribution
+text. `add` promotes the candidate into a ready local track.
 
 Single file with accurate metadata:
 
@@ -110,7 +127,7 @@ python <this-skill>/scripts/music.py review `
   --category cinematic --mood inspirational --count 5
 ```
 
-The review page is written to `analysis/music-review.html` and uses `file:///` audio players, so it works without a server. Present the page, let the user listen, and wait for an exact title. Do not infer approval from silence or from a preference stated in an earlier draft.
+The review page is written to `analysis/music-review.html`. Ready tracks have local audio players; candidates have reference links and a pending-license label. Present the page, let the user listen, and wait for an exact title. Before selecting a candidate, attach its manually downloaded Studio file and license. Do not infer approval from silence or from a preference stated in an earlier draft.
 
 ## Selection record
 

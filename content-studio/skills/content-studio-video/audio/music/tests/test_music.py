@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import music
@@ -72,6 +73,40 @@ class MusicSelectionTest(unittest.TestCase):
             self.assertNotIn("Night Drive", [track["title"] for track in visible])
             all_tracks = music.filter_tracks(tracks, available_only=False)
             self.assertIn("Night Drive", [track["title"] for track in all_tracks])
+
+    def test_candidate_is_discoverable_but_cannot_be_selected_or_mixed(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:
+            root = Path(scratch)
+            draft = root / "draft"
+            draft.mkdir()
+            candidate = {
+                "status": "candidate", "file": None,
+                "title": "Crimson Fly", "artist": "Huma-Huma",
+                "category": "pop", "mood": "bright, upbeat",
+                "duration_seconds": None, "license": None,
+                "attribution_required": None, "sha256": None,
+                "preview_url": "https://www.youtube.com/watch?v=Sn6z_5NcPnA",
+            }
+            (root / "library.json").write_text(
+                json.dumps({"tracks": [candidate]}), encoding="utf-8")
+            _, tracks = music.load_catalog(root)
+            selected = music.filter_tracks(tracks, category="Pop", mood="bright")
+            self.assertEqual([track["title"] for track in selected], ["Crimson Fly"])
+            self.assertFalse(selected[0]["available"])
+            self.assertEqual(selected[0]["absolute_path"], "")
+            self.assertIsNone(selected[0]["duration_seconds"])
+            self.assertEqual(music.filter_tracks(tracks, min_duration=60), [])
+            review = music.write_review(draft, selected, root, draft / "music-review.html")
+            page = review.read_text(encoding="utf-8")
+            self.assertIn("Reference preview", page)
+            self.assertIn("License pending Studio check", page)
+            self.assertNotIn("<audio", page)
+            with mock.patch.object(music, "draft_for", return_value=("out-of-office", draft)):
+                with self.assertRaisesRegex(SystemExit, "download it in YouTube Studio"):
+                    music.run(["select", "--catalog", str(root),
+                               "--channel", "out-of-office", "--draft", "day5",
+                               "--track", "Crimson Fly"])
+            self.assertFalse((draft / "music-selection.json").exists())
 
     def test_resolve_track_handles_exact_and_ambiguous_titles(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as scratch:

@@ -12,7 +12,7 @@ that licensing rule; it only helps with media that is legally redistributable.
 
 Only these files are committed:
 
-- `library.json` — title, artist, category, license, attribution, and hashes
+- `library.json` — ready tracks with license and hashes, plus metadata-only candidates
 - `credits.md` — generated attribution-ready credits
 - this README
 
@@ -33,6 +33,21 @@ Pixabay, filter, and use each track's download button. Downloading through a bot
 or scraper violates the site terms.
 
 ## Add a downloaded track
+
+You can first catalog a track by title, artist, genre, and mood, without an MP3:
+
+```powershell
+node content-studio/scripts/music-library.mjs candidate `
+  --title "Beat Your Competition" --artist "Vibe Tracks" `
+  --category "Dance & Electronic" --mood "funky, energetic" `
+  --preview-url "https://www.youtube.com/watch?v=ijjNFvZ-u90"
+```
+
+A candidate is a discovery note. Its duration, license, attribution, file, and hash
+stay pending. It appears in catalog searches but cannot be selected or mixed.
+When you choose it for a video, confirm the exact track and license in YouTube
+Studio, download its MP3 manually, and attach it with `add` using the same title
+and artist. The candidate becomes a ready track after the file is registered.
 
 ```powershell
 node content-studio/scripts/music-library.mjs add "C:\Users\you\Downloads\Track.mp3" `
@@ -65,10 +80,11 @@ and re-add it with explicit metadata.
 |---|---|
 | `init` | Create local category folders and refresh credits |
 | `open` | Open YouTube Audio Library or Pixabay Music |
+| `candidate` | Catalog title, artist, category, and mood without an MP3 |
 | `add <file>` | Copy/move one download and register it |
 | `scan` | Register files already under `local/` |
 | `list` | Show the catalog grouped by category |
-| `verify` | Check files exist and hashes match |
+| `verify` | Check ready files and hashes; report pending candidates separately |
 | `credits` | Regenerate `credits.md` |
 
 Use `--root <dir>` to point at a different music library root. Add `--move` to

@@ -25,13 +25,26 @@ The local catalog lives at `<bundle>/assets/music`. Its `local/` folder is gitig
 $env:CONTENT_STUDIO_MUSIC = "C:\workspace\skills\content-studio\assets\music"
 ```
 
-Initialize and import manually downloaded files:
+Initialize and record a track for discovery without an MP3:
+
+```powershell
+node <bundle>/scripts/music-library.mjs init
+node <bundle>/scripts/music-library.mjs candidate `
+  --title "Beat Your Competition" --artist "Vibe Tracks" `
+  --category "Dance & Electronic" --mood "funky, energetic" `
+  --preview-url "https://www.youtube.com/watch?v=ijjNFvZ-u90"
+```
+
+Candidate entries have no local audio, duration, hash, or confirmed license. They may appear in lists and review pages, but **cannot be selected or mixed**. Confirm the exact track and license in Studio when a video needs it, manually download the MP3, then attach it with `add` using the same title and artist; `add` promotes the candidate rather than duplicating it. If Studio says Creative Commons, include its exact `--attribution` text.
+
+Import manually downloaded files:
 
 ```powershell
 node <bundle>/scripts/music-library.mjs init
 node <bundle>/scripts/music-library.mjs open
 node <bundle>/scripts/music-library.mjs add "C:\Users\you\Downloads\track.mp3" `
-  --category cinematic --title "Track" --artist "Artist" --license youtube-audio-library
+  --title "Track" --artist "Artist" --category cinematic `
+  --license youtube-audio-library
 node <bundle>/scripts/music-library.mjs scan
 node <bundle>/scripts/music-library.mjs list
 ```
@@ -46,7 +59,7 @@ python <this-skill>/scripts/music.py review `
   --category cinematic --mood calm --max-duration 240 --count 5
 ```
 
-This writes `.content-studio/analysis/music-review.html` in the draft with local audio players. Show that page to the user and ask them to approve one track by exact title. Do not write a selection before approval.
+This writes `.content-studio/analysis/music-review.html` with audio players for local tracks and reference links for candidates. Show that page to the user and ask them to approve one track by exact title. For a candidate, obtain its manual Studio download and license details before writing the selection. Do not write a selection before approval.
 
 Useful filters:
 

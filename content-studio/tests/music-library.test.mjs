@@ -86,3 +86,42 @@ test("scans manually placed category folders and verifies hashes", () => {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("catalogs metadata candidates and promotes only after Studio license is supplied", () => {
+  const root = mkdtempSync(join(tmpdir(), "cs-music-"));
+  try {
+    assert.equal(run(root, ["init"]).status, 0);
+    const candidate = run(root, ["candidate", "--title", "Beat Your Competition",
+      "--artist", "Vibe Tracks", "--category", "Dance & Electronic",
+      "--mood", "funky, energetic", "--preview-url", "https://www.youtube.com/watch?v=example"]);
+    assert.equal(candidate.status, 0, candidate.stderr);
+    let manifest = readManifest(root);
+    assert.equal(manifest.tracks[0].status, "candidate");
+    assert.equal(manifest.tracks[0].file, null);
+    assert.equal(manifest.tracks[0].license, null);
+    assert.equal(run(root, ["verify"]).status, 0);
+    assert.match(readFileSync(join(root, "credits.md"), "utf8"), /license pending/);
+    assert.doesNotMatch(readFileSync(join(root, "credits.md"), "utf8"), /No attribution required/);
+    assert.notEqual(run(root, ["candidate", "--title", "Beat Your Competition",
+      "--artist", "Vibe Tracks", "--category", "pop"]).status, 0);
+
+    const source = join(root, "studio.mp3");
+    writeFileSync(source, "manually downloaded audio bytes");
+    const noLicense = run(root, ["add", source, "--title", "Beat Your Competition",
+      "--artist", "Vibe Tracks"]);
+    assert.notEqual(noLicense.status, 0);
+    assert.match(noLicense.stderr, /requires --license/);
+    const promoted = run(root, ["add", source, "--title", "Beat Your Competition",
+      "--artist", "Vibe Tracks", "--license", "youtube-audio-library"]);
+    assert.equal(promoted.status, 0, promoted.stderr);
+    manifest = readManifest(root);
+    assert.equal(manifest.tracks.length, 1);
+    assert.equal(manifest.tracks[0].title, "Beat Your Competition");
+    assert.equal(manifest.tracks[0].category, "dance-electronic");
+    assert.equal(manifest.tracks[0].mood, "funky, energetic");
+    assert.ok(manifest.tracks[0].sha256);
+    assert.equal(run(root, ["verify"]).status, 0);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

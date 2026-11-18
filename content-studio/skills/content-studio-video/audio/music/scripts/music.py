@@ -55,10 +55,14 @@ def source_label(track: dict) -> str:
 
 
 def license_label(track: dict) -> str:
+    if track.get("status") == "candidate":
+        return "License pending Studio check"
     return LICENSE_LABELS.get(str(track.get("license", "")), str(track.get("license", "unknown")))
 
 
 def attribution_line(track: dict) -> str:
+    if track.get("status") == "candidate":
+        return "Attribution pending Studio check."
     if not track.get("attribution_required"):
         return "No attribution required."
     text = str(track.get("attribution_text", "")).strip()
@@ -78,10 +82,14 @@ def load_catalog(root: Path) -> tuple[dict, list[dict]]:
     tracks = []
     for raw in manifest.get("tracks", []):
         track = dict(raw)
-        file = root / "local" / Path(str(track.get("file", "")))
-        track["absolute_path"] = str(file.resolve())
-        track["available"] = file.is_file()
-        track["duration_seconds"] = float(track.get("duration_seconds") or 0)
+        track.setdefault("status", "ready")
+        file_name = track.get("file")
+        file = root / "local" / Path(str(file_name)) if file_name else None
+        track["absolute_path"] = str(file.resolve()) if file else ""
+        track["available"] = bool(file and file.is_file() and track.get("sha256"))
+        # Preserve unknown candidate duration instead of implying a zero-second track.
+        track["duration_seconds"] = (None if track.get("status") == "candidate"
+                                     else float(track.get("duration_seconds") or 0))
         tracks.append(track)
     return manifest, tracks
 
@@ -92,7 +100,7 @@ def filter_tracks(tracks: list[dict], *, category: str | None = None,
                   available_only: bool = True) -> list[dict]:
     selected = []
     for track in tracks:
-        if available_only and not track.get("available"):
+        if available_only and not (track.get("available") or track.get("status") == "candidate"):
             continue
         if category and category_key(category) != category_key(str(track.get("category", ""))):
             continue
@@ -105,6 +113,8 @@ def filter_tracks(tracks: list[dict], *, category: str | None = None,
             if needle not in haystack:
                 continue
         duration = float(track.get("duration_seconds") or 0)
+        if not duration and (min_duration is not None or max_duration is not None):
+            continue
         if min_duration is not None and duration < min_duration:
             continue
         if max_duration is not None and duration > max_duration:
@@ -119,20 +129,20 @@ def resolve_track(tracks: list[dict], selector: str) -> dict:
     if not needle:
         raise SystemExit("--track cannot be empty")
     exact = [track for track in tracks
-             if needle in {str(track.get("file", "")).lower(),
-                           Path(str(track.get("file", ""))).name.lower(),
+             if needle in {str(track.get("file") or "").lower(),
+                           Path(str(track.get("file") or "")).name.lower(),
                            str(track.get("title", "")).lower()}]
     if len(exact) == 1:
         return exact[0]
     matches = [track for track in tracks
                if needle in str(track.get("title", "")).lower()
-               or needle in str(track.get("file", "")).lower()
+               or needle in str(track.get("file") or "").lower()
                or needle in str(track.get("artist", "")).lower()]
     if len(matches) == 1:
         return matches[0]
     if not matches:
         raise SystemExit(f"no catalog track matches {selector!r}; run list to see titles")
-    names = "\n".join(f"  {track.get('title')} — {track.get('artist')} ({track.get('file')})"
+    names = "\n".join(f"  {track.get('title')} — {track.get('artist')} ({track.get('file') or 'candidate'})"
                       for track in matches[:12])
     raise SystemExit(f"{selector!r} matches {len(matches)} tracks; use the exact title or file:\n{names}")
 
@@ -141,18 +151,26 @@ def print_tracks(tracks: list[dict]) -> None:
     if not tracks:
         print("no matching tracks")
         return
-    print(f"{'CATEGORY':<18} {'TITLE':<32} {'ARTIST':<22} {'TIME':>6}  LICENSE")
+    print(f"{'CATEGORY':<18} {'TITLE':<32} {'ARTIST':<22} {'TIME':>6}  STATUS / LICENSE")
     for track in tracks:
+        status = "candidate · " if track.get("status") == "candidate" else ""
         print(f"{str(track.get('category', '')):<18} {str(track.get('title', ''))[:32]:<32} "
               f"{str(track.get('artist', ''))[:22]:<22} {format_duration(track.get('duration_seconds')):>6}  "
-              f"{license_label(track)}")
+              f"{status}{license_label(track)}")
 
 
 def write_review(draft: Path, tracks: list[dict], catalog: Path, output: Path) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
     rows = []
     for index, track in enumerate(tracks, 1):
-        uri = Path(track["absolute_path"]).as_uri()
+        if track.get("status") == "candidate":
+            preview_url = str(track.get("preview_url") or "")
+            preview = (f"<a href='{html.escape(preview_url, quote=True)}'>Reference preview</a>"
+                       if preview_url.startswith("https://") else "No local preview")
+            preview += "<br><small>Download in YouTube Studio before selection.</small>"
+        else:
+            uri = Path(track["absolute_path"]).as_uri()
+            preview = f"<audio controls preload='none' src='{html.escape(uri, quote=True)}'></audio>"
         rows.append(
             "<tr>"
             f"<td>{index}</td>"
@@ -163,7 +181,7 @@ def write_review(draft: Path, tracks: list[dict], catalog: Path, output: Path) -
             f"<td>{format_duration(track.get('duration_seconds'))}</td>"
             f"<td>{html.escape(license_label(track))}<br>"
             f"<small>{html.escape(attribution_line(track))}</small></td>"
-            f"<td><audio controls preload='none' src='{html.escape(uri)}'></audio></td>"
+            f"<td>{preview}</td>"
             "</tr>"
         )
     page = (
@@ -173,8 +191,8 @@ def write_review(draft: Path, tracks: list[dict], catalog: Path, output: Path) -
         "vertical-align:top;text-align:left}small{color:#555}audio{width:260px}</style>"
         "<h1>Music review</h1>"
         f"<p>Catalog: <code>{html.escape(str(catalog))}</code></p>"
-        "<p>Listen to each candidate. Reply with the exact title you approve; the selection is not "
-        "written until the user chooses. Audio stays in the local catalog and is not copied into the draft.</p>"
+        "<p>Listen to available tracks. Metadata-only candidates need a manual Studio download "
+        "and license check before selection. Audio stays in the local catalog.</p>"
         "<table><tr><th>#</th><th>Track</th><th>Category</th><th>Time</th>"
         "<th>License</th><th>Preview</th></tr>" + "".join(rows) + "</table>"
     )
@@ -184,6 +202,8 @@ def write_review(draft: Path, tracks: list[dict], catalog: Path, output: Path) -
 
 def write_selection(draft: Path, track: dict, catalog: Path, channel: str,
                     draft_name: str) -> tuple[Path, Path]:
+    if track.get("status") == "candidate" or not track.get("available"):
+        raise SystemExit("music candidate needs a verified local Studio download before selection")
     selection = draft / "music-selection.json"
     credits = draft / "music-credits.txt"
     selected_at = datetime.now().astimezone().isoformat(timespec="seconds")
@@ -303,7 +323,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_filters(listing)
     listing.add_argument("--json", action="store_true")
     listing.add_argument("--include-missing", action="store_true",
-                         help="include catalog entries whose audio file is missing")
+                         help="include downloaded entries whose audio file is missing")
 
     review = sub.add_parser("review", parents=[shared],
                             help="build an audio review page for a draft")
@@ -385,12 +405,15 @@ def run(argv: list[str] | None = None) -> int:
         print(f"draft: {slug}/{args.draft}")
         print_tracks(selected)
         print(f"review: {output}")
-        print("Listen, then record the approved track with select --track \"<exact title>\".")
+        print("Select an approved local track; attach Studio downloads for candidates first.")
         return 0
 
     if args.command == "select":
         slug, draft = draft_for(args)
         track = resolve_track(tracks, args.track)
+        if track.get("status") == "candidate":
+            raise SystemExit(f"{track.get('title')} is a candidate: download it in YouTube Studio "
+                             "and attach it with music-library.mjs add before selection")
         if not track.get("available"):
             raise SystemExit(f"audio file is missing: {track.get('absolute_path')}")
         selection, credits = write_selection(draft, track, catalog, slug, args.draft)
@@ -415,6 +438,8 @@ def run(argv: list[str] | None = None) -> int:
                 track["absolute_path"] = str(
                     (catalog_root / "local" / Path(str(track.get("file", "")))).resolve())
             selection_note = selection.name
+        if track.get("status") == "candidate":
+            raise SystemExit("candidate music cannot be mixed; attach the Studio download first")
         track_path = Path(str(track.get("absolute_path", "")))
         if not track_path.is_file():
             raise SystemExit(f"selected audio file is missing: {track_path}")

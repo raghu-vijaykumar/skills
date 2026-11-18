@@ -139,6 +139,11 @@ function safeFileName(name) {
   return basename(name).replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").trim() || "track";
 }
 
+function sameIdentity(track, title, artist) {
+  return String(track.title || "").trim().toLowerCase() === String(title || "").trim().toLowerCase()
+    && String(track.artist || "").trim().toLowerCase() === String(artist || "").trim().toLowerCase();
+}
+
 function sha256(path) {
   const digest = createHash("sha256");
   digest.update(readFileSync(path));
@@ -181,11 +186,23 @@ function addTrack(root, input, options) {
   if (!AUDIO_EXTENSIONS.has(extname(source).toLowerCase())) {
     throw new Error(`unsupported audio type: ${extname(source) || "no extension"}`);
   }
-  if (!options.category) throw new Error("--category is required");
+  const candidate = manifest.tracks.find((track) =>
+    track.status === "candidate" && sameIdentity(track, options.title, options.artist));
+  if (options.title && options.artist && manifest.tracks.some((track) =>
+    track.status !== "candidate" && sameIdentity(track, options.title, options.artist))) {
+    throw new Error(`already cataloged: ${options.title} — ${options.artist}`);
+  }
+  if (!options.category && !candidate) throw new Error("--category is required");
+  if (candidate && !options.license) {
+    throw new Error("attaching a candidate requires --license from its YouTube Studio license panel");
+  }
+  if (candidate && String(options.license).includes("cc-by") && !options.attribution) {
+    throw new Error("Creative Commons candidates require exact --attribution text from Studio");
+  }
 
-  const category = categoryFor(manifest, options.category);
+  const category = categoryFor(manifest, options.category || candidate.category);
   const digest = sha256(source);
-  const duplicate = manifest.tracks.find((track) => track.sha256 === digest);
+  const duplicate = manifest.tracks.find((track) => track.sha256 && track.sha256 === digest);
   if (duplicate) {
     throw new Error(`already registered as "${duplicate.title}" (${duplicate.file})`);
   }
@@ -205,22 +222,56 @@ function addTrack(root, input, options) {
   const attribution = String(options.attribution || "");
   const track = {
     file: relativeTrackPath(root, target),
-    title: String(options.title || basename(target, extname(target))),
-    artist: String(options.artist || "Unknown artist"),
+    title: String(options.title || candidate?.title || basename(target, extname(target))),
+    artist: String(options.artist || candidate?.artist || "Unknown artist"),
     category: category.slug,
-    mood: String(options.mood || ""),
+    mood: String(options.mood || candidate?.mood || ""),
     duration_seconds: durationSeconds(target),
     license,
     attribution_required: Boolean(attribution) || Boolean(options["attribution-required"])
       || license.includes("cc-by"),
     attribution_text: attribution,
-    source_url: String(options["source-url"] || ""),
+    source_url: String(options["source-url"] || candidate?.source_url || ""),
+    ...(candidate?.preview_url ? { preview_url: candidate.preview_url } : {}),
     downloaded: String(options.downloaded || new Date().toISOString().slice(0, 10)),
     sha256: digest,
   };
+  if (candidate) manifest.tracks.splice(manifest.tracks.indexOf(candidate), 1);
   manifest.tracks.push(track);
   saveManifest(root, manifest);
   return { track, path: target };
+}
+
+function addCandidate(root, options) {
+  const manifest = loadManifest(root);
+  if (!options.title || !options.artist || !options.category) {
+    throw new Error("candidate requires --title, --artist, and --category");
+  }
+  const category = categoryFor(manifest, options.category);
+  if (manifest.tracks.some((track) => sameIdentity(track, options.title, options.artist))) {
+    throw new Error(`already cataloged: ${options.title} — ${options.artist}`);
+  }
+  // Candidate metadata is discoverable, but its license and audio stay unverified
+  // until the creator downloads and attaches the exact file from Studio.
+  const track = {
+    status: "candidate",
+    file: null,
+    title: String(options.title).trim(),
+    artist: String(options.artist).trim(),
+    category: category.slug,
+    mood: String(options.mood || ""),
+    duration_seconds: null,
+    license: null,
+    attribution_required: null,
+    attribution_text: "",
+    source_url: String(options["source-url"] || "https://www.youtube.com/audiolibrary"),
+    preview_url: String(options["preview-url"] || ""),
+    downloaded: null,
+    sha256: null,
+  };
+  manifest.tracks.push(track);
+  saveManifest(root, manifest);
+  return track;
 }
 
 function scanTracks(root, options) {
@@ -276,6 +327,8 @@ function labelFor(manifest, slug) {
 
 function writeCredits(root, manifest) {
   const paths = musicPaths(root);
+  const ready = manifest.tracks.filter((track) => track.status !== "candidate");
+  const candidates = manifest.tracks.filter((track) => track.status === "candidate");
   const lines = [
     "# Music credits",
     "",
@@ -283,11 +336,11 @@ function writeCredits(root, manifest) {
     "and are not committed or redistributed.",
     "",
   ];
-  if (!manifest.tracks.length) {
-    lines.push("_No tracks registered yet._", "");
+  if (!ready.length) {
+    lines.push("_No downloaded tracks registered yet._", "");
   } else {
     for (const category of manifest.categories) {
-      const tracks = manifest.tracks.filter((track) => track.category === category.slug);
+      const tracks = ready.filter((track) => track.category === category.slug);
       if (!tracks.length) continue;
       lines.push(`## ${category.label}`, "");
       for (const track of tracks) {
@@ -297,7 +350,16 @@ function writeCredits(root, manifest) {
       lines.push("");
     }
   }
-  const attribution = manifest.tracks.filter((track) => track.attribution_required);
+  if (candidates.length) {
+    lines.push("## Candidates awaiting Studio download", "",
+      "These are discovery notes, not licensed local audio or approved selections.", "");
+    for (const track of candidates) {
+      lines.push(`- **${track.title}** — ${track.artist} · ${labelFor(manifest, track.category)}`
+        + `${track.mood ? ` · ${track.mood}` : ""} · license pending`);
+    }
+    lines.push("");
+  }
+  const attribution = ready.filter((track) => track.attribution_required);
   lines.push("## Attribution required", "");
   if (!attribution.length) {
     lines.push("_No attribution-required tracks registered._", "");
@@ -326,7 +388,7 @@ function init(root) {
   writeCredits(root, manifest);
   console.log(`initialized ${paths.root}`);
   console.log(`audio folder: ${paths.local} (gitignored)`);
-  console.log("next: open the YouTube Audio Library, download MP3s, then run \"add\" or \"scan\"");
+  console.log("next: catalog candidates or download MP3s manually, then run \"add\" or \"scan\"");
 }
 
 function openLibrary(source = "youtube") {
@@ -353,7 +415,21 @@ function verify(root) {
   const paths = musicPaths(root);
   const manifest = loadManifest(root);
   const problems = [];
+  let ready = 0;
+  let candidates = 0;
   for (const track of manifest.tracks) {
+    if (track.status === "candidate") {
+      candidates += 1;
+      if (!track.title || !track.artist || !track.category || track.file || track.sha256) {
+        problems.push(`invalid candidate: ${track.title || "untitled"}`);
+      }
+      continue;
+    }
+    ready += 1;
+    if (!track.file || !track.sha256) {
+      problems.push(`incomplete local track: ${track.title || "untitled"}`);
+      continue;
+    }
     const file = join(paths.local, ...track.file.split("/"));
     if (!existsSync(file)) {
       problems.push(`missing: ${track.file}`);
@@ -365,7 +441,7 @@ function verify(root) {
     for (const problem of problems) console.error(problem);
     return false;
   }
-  console.log(`${manifest.tracks.length} track(s) verified`);
+  console.log(`${ready} local track(s) verified; ${candidates} candidate(s) await Studio download`);
   return true;
 }
 
@@ -380,7 +456,9 @@ function list(root) {
     if (!tracks.length) continue;
     console.log(`\n${category.label}`);
     for (const track of tracks) {
-      console.log(`  ${track.title} — ${track.artist} (${formatDuration(track.duration_seconds)})`);
+      const state = track.status === "candidate" ? "candidate: download and verify license" :
+        formatDuration(track.duration_seconds);
+      console.log(`  ${track.title} — ${track.artist} (${state})${track.mood ? ` · ${track.mood}` : ""}`);
     }
   }
 }
@@ -389,6 +467,7 @@ function usage() {
   return `Usage:
   node content-studio/scripts/music-library.mjs init
   node content-studio/scripts/music-library.mjs open [--source youtube|pixabay]
+  node content-studio/scripts/music-library.mjs candidate --title <title> --artist <artist> --category <name> [options]
   node content-studio/scripts/music-library.mjs add <file> --category <name> [options]
   node content-studio/scripts/music-library.mjs scan
   node content-studio/scripts/music-library.mjs list
@@ -397,6 +476,13 @@ function usage() {
 
 Global option:
   --root <dir>   music library root (default: content-studio/assets/music)
+
+Candidate options:
+  --title <text>          exact Studio title
+  --artist <text>         exact artist
+  --category <name>      Audio Library genre
+  --mood <text>           mood or intended use
+  --preview-url <url>    listening reference; not a download source
 
 Add options:
   --title <text>          track title
@@ -410,9 +496,10 @@ Add options:
   --downloaded <date>     YYYY-MM-DD
   --move                  move instead of copy
 
-The script does not download from YouTube. Download MP3s manually from the
-Audio Library, then add them here. Audio is stored under local/ and is
-gitignored; only the manifest and credits are committed.`;
+The script does not download from YouTube. Candidates are metadata only and
+cannot be selected or mixed. Download MP3s manually from the Audio Library,
+then add with the confirmed license; matching title and artist promote the
+candidate. Audio is stored under local/ and is gitignored.`;
 }
 
 function main() {
@@ -429,6 +516,11 @@ function main() {
     case "open":
       openLibrary(args.options.source || args.positional[0] || "youtube");
       return 0;
+    case "candidate": {
+      const track = addCandidate(root, args.options);
+      console.log(`cataloged candidate: ${track.title} — ${track.artist}`);
+      return 0;
+    }
     case "add": {
       if (!args.positional[0]) throw new Error("add requires an audio file");
       const { track, path } = addTrack(root, args.positional[0], args.options);
