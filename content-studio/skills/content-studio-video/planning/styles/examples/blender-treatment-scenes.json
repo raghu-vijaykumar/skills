@@ -1,0 +1,10 @@
+{
+  "topic": "Blender capability review",
+  "format": "video",
+  "scenes": [
+    {"id": "clamp", "duration_seconds": 4, "visual_intent": "A realistic mechanical clamp closes"},
+    {"id": "courier", "duration_seconds": 4, "visual_intent": "A cel-shaded courier waves"},
+    {"id": "corridor", "duration_seconds": 4, "visual_intent": "An atmospheric corridor camera push"},
+    {"id": "creature", "duration_seconds": 4, "visual_intent": "A 3D creature runs", "blender_style": "realistic-style"}
+  ]
+}

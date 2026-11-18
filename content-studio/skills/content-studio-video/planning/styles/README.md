@@ -11,7 +11,7 @@ are real outputs from the example scene input; no video frames are claimed.
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `list` | Supported | Installed bundle or videogen project → style and theme list | No | [Style list output](previews/list.json) | A project may enable only part of the built-in catalog; listing does not change presets. |
-| `plan` | Supported | Topic/format/scenes JSON → style-plan.json with per-scene treatments | No | [Example plan](previews/example-style-plan.json) | Planning only; uninstalled renderers are warnings, not fabricated renders. |
+| `plan` | Supported | Topic/format/scenes JSON → style-plan.json with per-scene treatments | No | [Example plan](previews/example-style-plan.json) · [Blender route example](previews/blender-treatment-plan.json) | Planning only; a missing Blender builder is `needs_builder`, not a fabricated render. |
 | `storyboard` | Supported | style-plan.json → static storyboard.html | No | [Example storyboard](previews/example-storyboard.html) | Visualization of the plan, not video frames; review before generating assets. |
 
 ## Named styles and variants

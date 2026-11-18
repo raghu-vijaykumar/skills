@@ -8,6 +8,6 @@ Code-driven video uses [videogen](videogen/SKILL.md); original Blender shots use
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `blender-catalog` | Supported | Maintained 94-ID category map → classified catalog | No | [Catalog tests](blender/tests/test_catalog.py) | Category guidance only. |
-| `blender-plan` | Supported | Visual request and optional style → suggested subject and style | No | [Routing tests](blender/tests/test_catalog.py) | Requires creative review; no automatic scene builder choice. |
+| `blender-catalog` | Supported | Maintained 94-ID capability manifest → classified catalog | No | [Catalog tests](blender/tests/test_catalog.py) | Rendered status requires local proof; most entries are still guidance. |
+| `blender-plan` | Supported | Visual request and optional style → suggested subject, style, and narrowly matching gallery builder | No | [Routing tests](blender/tests/test_catalog.py) | Requires creative review; unsupported combinations have no builder. |
 | `blender-shot` | Supported | Trusted `make_scene` builder and JSON spec → editable `.blend`, MP4, hash report | Specialist only | [Three rendered examples](blender/review.md) | Blender 5.3 tested; project owns geometry and animation. |

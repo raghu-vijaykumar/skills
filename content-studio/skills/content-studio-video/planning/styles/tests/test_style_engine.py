@@ -1,6 +1,9 @@
 import importlib.util
+import os
+import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 path = Path(__file__).resolve().parents[1] / "scripts" / "style_engine.py"
 spec = importlib.util.spec_from_file_location("style_engine", path)
@@ -38,6 +41,40 @@ class StyleEngineTests(unittest.TestCase):
     def test_invalid_duration_rejected(self):
         with self.assertRaises(ValueError):
             engine.plan({"scenes": [{"id": "a", "duration_seconds": -1}]})
+
+    def test_blender_scene_selects_only_matching_rendered_demo(self):
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            result = engine.plan({"scenes": [{"id": "clamp", "duration_seconds": 4,
+                "visual_intent": "Animate a realistic mechanical clamp"}]})
+        scene = result["scenes"][0]
+        self.assertEqual(scene["style"], "cinematic-3d")
+        self.assertEqual(scene["blender"]["builder"], "examples/clamp.py")
+        self.assertEqual(scene["status"], "planned_not_rendered")
+
+    def test_blender_style_override_and_unsupported_combination(self):
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            result = engine.plan({"scenes": [{"id": "unsupported", "duration_seconds": 4,
+                "style": "anime-style", "visual_intent": "Realistic clamp"}]})
+        scene = result["scenes"][0]
+        self.assertEqual(scene["blender"]["style"], "anime-style")
+        self.assertIsNone(scene["blender"]["builder"])
+        self.assertEqual(scene["status"], "needs_builder")
+        self.assertTrue(result["warnings"])
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            forced = engine.plan({"scenes": [{"id": "courier", "duration_seconds": 4,
+                "visual_intent": "A courier waves", "blender_style": "cartoon-style"}]})
+        self.assertEqual(forced["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(forced["scenes"][0]["blender"]["builder"],
+                         "examples/character.py")
+
+    def test_blender_overrides_require_compatible_editorial_style(self):
+        with self.assertRaisesRegex(ValueError, "Blender overrides require"):
+            engine.plan({"scenes": [{"id": "bad", "duration_seconds": 4,
+                "style": "core-explainer", "blender_style": "cartoon-style"}]})
+
+    def test_explicit_blender_executable_path(self):
+        with patch.dict(os.environ, {"CONTENT_STUDIO_BLENDER_EXE": sys.executable}):
+            self.assertEqual(engine.renderer_executable("blender"), sys.executable)
 
 if __name__ == "__main__":
     unittest.main()

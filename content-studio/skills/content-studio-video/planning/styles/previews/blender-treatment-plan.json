@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "topic": "Blender capability review",
+  "format": "video",
+  "scenes": [
+    {
+      "id": "clamp",
+      "duration_seconds": 4,
+      "style": "cinematic-3d",
+      "label": "Cinematic 3D reconstruction",
+      "techniques": [
+        "cutaway",
+        "orbit-camera",
+        "dramatic-light"
+      ],
+      "renderer": "blender",
+      "renderer_detected": true,
+      "status": "planned_not_rendered",
+      "evidence": [],
+      "visual_intent": "A realistic mechanical clamp closes",
+      "blender": {
+        "subject": "hard-surface",
+        "style": "realistic-style",
+        "reason": "selected from subject and visual intent",
+        "status": "Rendered",
+        "render_method": "blender-shot",
+        "builder": "examples/clamp.py",
+        "spec": "examples/clamp.json",
+        "evidence": "previews/clamp.gif",
+        "review_required": true
+      }
+    },
+    {
+      "id": "courier",
+      "duration_seconds": 4,
+      "style": "cinematic-3d",
+      "label": "Cinematic 3D reconstruction",
+      "techniques": [
+        "cutaway",
+        "orbit-camera",
+        "dramatic-light"
+      ],
+      "renderer": "blender",
+      "renderer_detected": true,
+      "status": "planned_not_rendered",
+      "evidence": [],
+      "visual_intent": "A cel-shaded courier waves",
+      "blender": {
+        "subject": "character-artist",
+        "style": "cartoon-style",
+        "reason": "selected from subject and visual intent",
+        "status": "Rendered",
+        "render_method": "blender-shot",
+        "builder": "examples/character.py",
+        "spec": "examples/character.json",
+        "evidence": "previews/character.gif",
+        "review_required": true
+      }
+    },
+    {
+      "id": "corridor",
+      "duration_seconds": 4,
+      "style": "cinematic-3d",
+      "label": "Cinematic 3D reconstruction",
+      "techniques": [
+        "cutaway",
+        "orbit-camera",
+        "dramatic-light"
+      ],
+      "renderer": "blender",
+      "renderer_detected": true,
+      "status": "planned_not_rendered",
+      "evidence": [],
+      "visual_intent": "An atmospheric corridor camera push",
+      "blender": {
+        "subject": "environment-artist",
+        "style": "stylized-style",
+        "reason": "selected from subject and visual intent",
+        "status": "Rendered",
+        "render_method": "blender-shot",
+        "builder": "examples/corridor.py",
+        "spec": "examples/corridor.json",
+        "evidence": "previews/corridor.gif",
+        "review_required": true
+      }
+    },
+    {
+      "id": "creature",
+      "duration_seconds": 4,
+      "style": "cinematic-3d",
+      "label": "Cinematic 3D reconstruction",
+      "techniques": [
+        "cutaway",
+        "orbit-camera",
+        "dramatic-light"
+      ],
+      "renderer": "blender",
+      "renderer_detected": true,
+      "status": "needs_builder",
+      "evidence": [],
+      "visual_intent": "A 3D creature runs",
+      "blender": {
+        "subject": "creature-artist",
+        "style": "realistic-style",
+        "reason": "explicit style",
+        "status": "Catalogued",
+        "render_method": null,
+        "builder": null,
+        "spec": null,
+        "evidence": null,
+        "review_required": true
+      }
+    }
+  ],
+  "warnings": [
+    "No reviewed Blender builder matches scene creature and its style"
+  ],
+  "review_required": true
+}

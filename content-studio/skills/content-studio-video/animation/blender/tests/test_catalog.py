@@ -1,6 +1,8 @@
-"""Check the upstream pin and ensure guidance never masquerades as a renderer."""
+"""Keep the full roadmap honest about which examples have rendered evidence."""
 
+import copy
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -11,26 +13,82 @@ SPEC.loader.exec_module(catalog_module)
 
 
 class CatalogTests(unittest.TestCase):
-    def test_all_named_skills_have_one_category_and_immutable_source(self):
+    def test_all_named_skills_have_one_category_dependencies_and_immutable_source(self):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 3)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
-            self.assertEqual(entry["status"], "Catalogued")
+            self.assertEqual(entry["route"], "content-studio-video-animation")
+            self.assertTrue(all(name in {item["id"] for item in entries}
+                                for name in entry["dependencies"]))
 
-    def test_default_route_is_reviewable_and_does_not_claim_a_renderer(self):
+    def test_known_demo_route_is_reviewable_and_generic_object_stays_catalogued(self):
         result = catalog_module.route("Animate a realistic mechanical clamp")
         self.assertEqual((result["subject"], result["style"]),
                          ("hard-surface", "realistic-style"))
-        self.assertIsNone(result["render_method"])
+        self.assertEqual(result["render_method"], "blender-shot")
+        self.assertEqual(result["builder"], "examples/clamp.py")
         self.assertTrue(result["review_required"])
+        generic = catalog_module.route("Animate an industrial machine")
+        self.assertIsNone(generic["render_method"])
+        self.assertEqual(generic["status"], "Catalogued")
+        self.assertEqual(catalog_module.route("A cel-shaded courier waves")["builder"],
+                         "examples/character.py")
+        self.assertEqual(catalog_module.route("An atmospheric corridor push")["builder"],
+                         "examples/corridor.py")
 
-    def test_explicit_style_wins_and_unknown_style_fails(self):
+    def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
         self.assertEqual(result["style"], "stop-motion-craft-style")
+        self.assertIsNone(result["render_method"])
+        overridden = catalog_module.route("A realistic mechanical clamp", "anime-style")
+        self.assertEqual(overridden["style"], "anime-style")
+        self.assertIsNone(overridden["render_method"])
         with self.assertRaisesRegex(ValueError, "Unknown Blender style"):
             catalog_module.route("A character waves", "unbuilt-style")
+
+    def test_false_rendered_claim_and_broken_dependency_are_rejected(self):
+        original = catalog_module.MANIFEST
+        try:
+            candidate = copy.deepcopy(original)
+            candidate["entries"][0]["status"] = "Rendered"
+            catalog_module.MANIFEST = candidate
+            with self.assertRaisesRegex(ValueError, "lacks a supported method"):
+                catalog_module.catalog()
+            candidate["entries"][0]["status"] = "Catalogued"
+            candidate["entries"][0]["dependencies"] = ["missing-skill"]
+            with self.assertRaisesRegex(ValueError, "Invalid dependencies"):
+                catalog_module.catalog()
+            candidate["entries"][0]["dependencies"] = ["blender-modeler"]
+            candidate["entries"][1]["dependencies"] = ["blender-director"]
+            with self.assertRaisesRegex(ValueError, "Dependency cycle"):
+                catalog_module.catalog()
+        finally:
+            catalog_module.MANIFEST = original
+
+    def test_explicit_subject_uses_catalog_id(self):
+        result = catalog_module.route("A realistic clamp", subject="hard-surface")
+        self.assertEqual(result["subject"], "hard-surface")
+        with self.assertRaisesRegex(ValueError, "Unknown Blender subject"):
+            catalog_module.route("A clamp", subject="unlisted-subject")
+
+    def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
+        book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(catalog_module.scorebook(book)), 3)
+        unscored = copy.deepcopy(book)
+        unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
+        with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
+            catalog_module.scorebook(unscored)
+        worse_winner = copy.deepcopy(book)
+        competitor = copy.deepcopy(worse_winner["routes"]["hard-surface"]["candidates"][0])
+        competitor["id"] = "clamp-better"
+        competitor["scores"] = {name: 5 for name in catalog_module.SCORE_FIELDS}
+        competitor["score_total"] = 100
+        worse_winner["routes"]["hard-surface"]["candidates"].append(competitor)
+        with self.assertRaisesRegex(ValueError, "not the best passing result"):
+            catalog_module.scorebook(worse_winner)
 
     def test_readme_catalog_and_rendered_gallery_stay_in_sync(self):
         readme = (catalog_module.REPO / "README.md").read_text(encoding="utf-8")

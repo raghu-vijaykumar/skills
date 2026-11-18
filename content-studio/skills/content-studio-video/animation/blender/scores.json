@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "weights": {
+    "subject_fidelity": 25,
+    "motion_readability": 25,
+    "composition": 20,
+    "finish": 20,
+    "evidence_integrity": 10
+  },
+  "minimum_score": 70,
+  "routes": {
+    "hard-surface": {
+      "selected": "clamp-v1",
+      "candidates": [
+        {
+          "id": "clamp-v1",
+          "video_sha256": "00ad2a3dfaef8f72879e4cfb20ec5f5b128660037d709ab5dc16f387b18a5782",
+          "gif_sha256": "3499afc701f2b9e79014e5fc2006ab03eebd6a4c9e0fc960a093fc860edaa682",
+          "gif_path": "previews/clamp.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [
+            1280,
+            720
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio frame review",
+          "review_date": "2026-11-18",
+          "review_note": "The pressure pad travels clearly, but the simplified thread and contact remain illustrative."
+        }
+      ]
+    },
+    "character-artist": {
+      "selected": "character-v1",
+      "candidates": [
+        {
+          "id": "character-v1",
+          "video_sha256": "8fce5e61d3a240a82e0c7cf467db84c9be92300f03dbe446fc80c29349daf849",
+          "gif_sha256": "7cde92b15bd64936ba4b278b5225172432bb7cca281cfdd3a688bffb67367353",
+          "gif_path": "previews/character.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [
+            1280,
+            720
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio frame review",
+          "review_date": "2026-11-18",
+          "review_note": "The full courier remains framed and the wave reads in motion; facial detail is deliberately simple."
+        }
+      ]
+    },
+    "environment-artist": {
+      "selected": "corridor-v1",
+      "candidates": [
+        {
+          "id": "corridor-v1",
+          "video_sha256": "5df9cb20b74004481f1ad74cb332fa7da72111fa75f291bf244e6b13d9085260",
+          "gif_sha256": "923893f0c7944da867d42ab6d95ba1282ccb02323fb0f5af470dabc3d7a5c4a4",
+          "gif_path": "previews/corridor.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [
+            1280,
+            720
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 5,
+            "finish": 5,
+            "evidence_integrity": 5
+          },
+          "score_total": 85,
+          "reviewer": "Content Studio frame review",
+          "review_date": "2026-11-18",
+          "review_note": "The push, modular depth, and lighting read clearly; light flicker is subtle in the compact GIF."
+        }
+      ]
+    }
+  }
+}

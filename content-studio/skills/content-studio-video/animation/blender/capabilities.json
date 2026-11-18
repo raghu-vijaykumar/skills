@@ -1,0 +1,1210 @@
+{
+  "schema_version": 2,
+  "upstream_commit": "904f095d8f36a6e72adaebb08d07f884a074743d",
+  "entries": [
+    {
+      "id": "blender-director",
+      "category": "Orchestration",
+      "wave": 0,
+      "dependencies": [],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "blender-modeler",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "hard-surface",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/clamp.gif",
+      "review": "review.md",
+      "builder": "examples/clamp.py",
+      "spec": "examples/clamp.json",
+      "compatible_styles": [
+        "realistic-style"
+      ],
+      "intent_cues": [
+        "clamp"
+      ],
+      "score_record": "scores.json"
+    },
+    {
+      "id": "prop-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "vehicle-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "environment-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/corridor.gif",
+      "review": "review.md",
+      "builder": "examples/corridor.py",
+      "spec": "examples/corridor.json",
+      "compatible_styles": [
+        "stylized-style"
+      ],
+      "intent_cues": [
+        "corridor"
+      ],
+      "score_record": "scores.json"
+    },
+    {
+      "id": "vegetation-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "character-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/character.gif",
+      "review": "review.md",
+      "builder": "examples/character.py",
+      "spec": "examples/character.json",
+      "compatible_styles": [
+        "cartoon-style"
+      ],
+      "intent_cues": [
+        "courier"
+      ],
+      "score_record": "scores.json"
+    },
+    {
+      "id": "creature-artist",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "character-archetypes",
+      "category": "Modeling",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "sculpting",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "retopology",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "uv-workflow",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "materials",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "texture-workflow",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "hair-groom",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "cloth-sim",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "lookdev",
+      "category": "Production",
+      "wave": 2,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "geometry-nodes",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "procedural-modeling"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "lighting",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "materials"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "camera-cinematography",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "scene-assembly"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "rendering",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "lighting",
+        "camera-cinematography"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "compositing",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "rendering"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "animation",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "rigging",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "character-artist"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "vfx-fx",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "compositing"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "physics-sim",
+      "category": "Technical",
+      "wave": 3,
+      "dependencies": [
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "procedural-modeling",
+      "category": "Pipeline",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "scene-assembly",
+      "category": "Pipeline",
+      "wave": 2,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "set-dressing",
+      "category": "Pipeline",
+      "wave": 2,
+      "dependencies": [
+        "scene-assembly"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "asset-optimization",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "lod-pipeline",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "asset-optimization"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "collision-proxy",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "blender-modeler"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "export-pipeline",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "asset-optimization"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "unity-export",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "export-pipeline"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "unreal-export",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "export-pipeline"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "godot-export",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "export-pipeline"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "qa-review",
+      "category": "Pipeline",
+      "wave": 6,
+      "dependencies": [
+        "rendering"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "archviz",
+      "category": "Pipeline",
+      "wave": 2,
+      "dependencies": [
+        "environment-artist",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "horror-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "psx-horror-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "lowpoly-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "anime-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "voxel-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "isometric-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "stylized-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "realistic-style",
+      "category": "Core styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "cartoon-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "comic-book-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "manga-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "pixel-art-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "hand-painted-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "painterly-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "stop-motion-craft-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "chibi-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "noir-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "minimalist-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "vector-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "retro-8bit-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "retro-16bit-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "hd-2d-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "frutiger-aero-style",
+      "category": "Extended styles",
+      "wave": 4,
+      "dependencies": [
+        "materials",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "cosmic-eldritch-horror",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "body-horror-style",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "analog-found-footage-horror",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "liminal-space-style",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "folk-horror-style",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "mascot-puppet-horror",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "dream-weirdcore-style",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "indie-horror-aesthetics",
+      "category": "Horror packs",
+      "wave": 4,
+      "dependencies": [
+        "horror-style"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "fantasy-worlds",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "sci-fi-punk-worlds",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "historical-worlds",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "apocalypse-worlds",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "biome-worlds",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "cozy-wholesome-mood",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "dark-gritty-mood",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "dream-surreal-mood",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "neon-retrofuturism",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "brutalist-mood",
+      "category": "Worlds and moods",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "lighting"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-action-combat",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-shooter",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-rpg",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-survival",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-stealth",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-puzzle-platformer",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-metroidvania-roguelike",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-soulslike",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-strategy-sim",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-racing-sports",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-narrative-vn",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-card-party-idle",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "genre-open-world-sandbox",
+      "category": "Genre direction",
+      "wave": 5,
+      "dependencies": [
+        "scene-assembly",
+        "animation"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    },
+    {
+      "id": "visual-console-eras",
+      "category": "Eras",
+      "wave": 5,
+      "dependencies": [
+        "rendering",
+        "compositing"
+      ],
+      "route": "content-studio-video-animation",
+      "method": null,
+      "status": "Catalogued",
+      "evidence": null
+    }
+  ]
+}

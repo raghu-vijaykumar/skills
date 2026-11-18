@@ -10,6 +10,12 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 
 The [render review](review.md) records the exact encoded assets, hashes, sampled frames, and limits behind these GIFs.
 
+## Score and select output artifacts
+
+Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
+
+Select the highest-scoring candidate that passes technical review and scores at least 70/100. Commit only that candidate's optimized GIF in `previews/`; retain rejected candidates' scores and hashes. `catalog.py` rejects a `Rendered` claim if its selected GIF is missing, changed, unscored, or outranked. From the repository root, run `python content-studio/skills/content-studio-video/animation/blender/scripts/catalog.py scores` to inspect the current winners before updating the README.
+
 ## Rebuild the showcases
 
 From the repository root, replace `<name>` with `clamp`, `character`, or `corridor` and use a new output directory for each preview:
