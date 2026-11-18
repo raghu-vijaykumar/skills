@@ -9,7 +9,7 @@
 - [x] T003 [P2] Score all three existing full-render candidates, record their hashes and visual reasons, and gate rendered README rows on the best valid GIF in `animation/blender/`.
 - [x] T004 [P3] Define and validate the full shot specification: stable object and beat IDs, provenance, cues, render settings, and required review states in `animation/blender/`.
 - [x] T005 [P3] Implement input-hashed resumable frame batches, durable logs, completion marker, free-space precheck, and exact MP4 assembly in `animation/blender/scripts/`.
-- [ ] T006 [P5] Register a Blender MP4 in a synthetic videogen project's asset manifest, place it at a narration cue, and verify the exact composed output.
+- [x] T006 [P5] Register a Blender MP4 in a synthetic videogen project's asset manifest, place it at a narration cue, and verify the exact composed output.
 
 ## Wave 2: Asset craft
 

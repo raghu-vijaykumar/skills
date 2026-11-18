@@ -7,7 +7,7 @@ export type ExplainerScene = {
   id: string; type: 'hero' | 'device' | 'flow' | 'stack' | 'code' | 'data' | 'document' | 'presenter';
   startFrame: number; endFrame: number; title: string; kicker?: string; subtitle?: string;
   visual: {symbol?: string; nodes?: string[]; lines?: string[]; metric?: string; note?: string; labels?: string[];
-    theme?: 'light' | 'dark'; imageId?: string};
+    theme?: 'light' | 'dark'; imageId?: string; videoId?: string; videoStartFrame?: number};
   stateChanges: {frame: number; label: string}[];
   camera: {frame: number; scale: number; x?: number; y?: number}[];
   presenter?: {pose?: 'speaking' | 'pointing' | 'thinking' | 'none'; label?: string};

@@ -34,6 +34,21 @@ ffmpeg -hide_banner -loglevel error -y -i "tmp/<name>.mp4" -vf "fps=8,scale=480:
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 
+## Reviewed videogen handoff
+
+The `blender-handoff` method packages a reported Blender MP4 with a narration WAV into a synthetic or approved videogen project. It verifies the MP4 hash, exact frame count, dimensions, and narration duration before copying either asset. The generated `asset-manifest.json` pins both hashes and rights notes; `scene-plan.json` records `visual.videoId`, its exact `videoStartFrame`, and the narration cue ID. The existing videogen validator rejects changed media, an unlisted shot, or an invalid cue. The generated `entry.tsx` and `video.tsx` are editable Remotion source, so a real project can adopt the reviewed shot at its approved cue.
+
+From the repository root, this reproduces the tested handoff using the ignored Blender gallery MP4 and a rights-cleared narration WAV:
+
+```powershell
+$skill = 'content-studio/skills/content-studio-video/animation/blender'
+python "$skill/scripts/handoff.py" --report tmp/gallery-clamp-v1.json --video tmp/gallery-clamp-v1.mp4 --narration '<reviewed-narration.wav>' --out tmp/clamp-handoff --title 'Clamp closing force' --cue-id cue-clamp --cue-start-frame 0 --video-license 'Original Content Studio procedural scene' --narration-license 'Owned or licensed narration'
+node --input-type=module -e "import {validateScenePlan} from './content-studio/skills/content-studio-video/animation/videogen/scripts/scene-plan.mjs'; validateScenePlan('./tmp/clamp-handoff')"
+npx remotion render tmp/clamp-handoff/entry.tsx BlenderHandoff tmp/clamp-handoff/handoff.mp4
+```
+
+On this Windows host, Remotion needed a writable `TEMP`/`TMP` outside the Codex sandbox path and permission to connect to its local Chrome DevTools port. The [exact handoff review](handoff-review.md) records the two scored candidates, encoded audio and picture checks, and selected GIF. This is a code-driven video handoff; edited-video timeline integration remains pending. Real drafts still require the workflow precheck and approved production plan before editing.
+
 For a long shot, add `--resumable --batch-frames 48` to the full-shot command. It records hashed PNGs and a durable log beside the output, checks free space before each batch, and writes `complete.json` only after probing the encoded MP4. Repeat the same command and output path after an interruption; changed inputs or cached frames fail closed. `--stop-after 1` is available for a bounded pause and resume test. The [resumable render review](resume-review.md) records a real stop, resume, and uninterrupted comparison.
 
 For a Content Studio video, copy the approved MP4 into the project asset folder, record its project-relative path and SHA-256 in `asset-manifest.json` with `origin: "procedural"`, and place it in the storyboard or Remotion scene at the intended narration cue. Use the [videogen asset contract](../videogen/references/idea-to-explainer.md) and review the hero alone, in the narrated composition, and in the exact final render. Real drafts must complete the [workflow precheck](../../../content-studio-workflow/SKILL.md) and obtain approval of the current production plan before editing. The edited-video delivery timeline does not yet consume Blender shot operations directly.

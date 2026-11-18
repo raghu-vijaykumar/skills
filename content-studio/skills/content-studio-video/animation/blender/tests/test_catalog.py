@@ -76,7 +76,10 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 3)
+        self.assertEqual(len(catalog_module.scorebook(book)), 4)
+        handoff = book["routes"]["video-handoff"]
+        self.assertEqual(len(handoff["candidates"]), 2)
+        self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -95,7 +98,7 @@ class CatalogTests(unittest.TestCase):
         generated = readme.split("<!-- blender-catalog:start -->", 1)[1].split(
             "<!-- blender-catalog:end -->", 1)[0].strip()
         self.assertEqual(generated, catalog_module.markdown_table(catalog_module.catalog()))
-        for name in ("clamp", "character", "corridor"):
+        for name in ("clamp", "character", "corridor", "handoff"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

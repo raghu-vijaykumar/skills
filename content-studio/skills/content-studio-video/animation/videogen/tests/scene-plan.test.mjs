@@ -109,3 +109,44 @@ test('scene plan requires imported media provenance and source IDs', () => {
     fs.rmSync(cwd,{recursive:true,force:true});
   }
 });
+
+test('Blender video cue requires a registered unchanged MP4 and narration cue', () => {
+  const cwd = fs.mkdtempSync(path.join(scratch, 'blender-handoff-'));
+  try {
+    fs.mkdirSync(path.join(cwd, 'assets'));
+    const video = path.join(cwd, 'assets', 'shot.mp4');
+    fs.writeFileSync(video, 'reviewed-video');
+    const narration = path.join(cwd, 'assets', 'narration.wav');
+    fs.writeFileSync(narration, 'reviewed-narration');
+    const sha256 = crypto.createHash('sha256').update(fs.readFileSync(video)).digest('hex');
+    const narrationHash = crypto.createHash('sha256').update(fs.readFileSync(narration)).digest('hex');
+    const manifest = {schemaVersion: 1, assets: [
+      {id: 'shot', path: 'assets/shot.mp4', sha256, origin: 'procedural', license: 'Original Blender shot'},
+      {id: 'narration', path: 'assets/narration.wav', sha256: narrationHash,
+        origin: 'recorded', license: 'Owned narration'},
+    ]};
+    const scene = {id: 'hero', type: 'hero', startFrame: 0, endFrame: 90, title: 'Mechanism',
+      visual: {videoId: 'shot', videoStartFrame: 30}, stateChanges: [{frame: 0, label: 'Before cue'}],
+      camera: [{frame: 0, scale: 1}], assetIds: ['shot', 'narration'], narrationCueIds: ['cue-shot'],
+      sourceIds: [], audioCueIds: ['narration']};
+    const plan = {schemaVersion: 1, width: 640, height: 360, fps: 30, durationFrames: 90, scenes: [scene]};
+    fs.writeFileSync(path.join(cwd, 'asset-manifest.json'), JSON.stringify(manifest));
+    const write = (value) => fs.writeFileSync(path.join(cwd, 'scene-plan.json'), JSON.stringify(value));
+    write(plan);
+    assert.ok(validateScenePlan(cwd));
+    write({...plan, scenes: [{...scene, visual: {...scene.visual, videoStartFrame: 90}}]});
+    assert.throws(() => validateScenePlan(cwd), /Invalid hero video cue/);
+    write({...plan, scenes: [{...scene, assetIds: []}]});
+    assert.throws(() => validateScenePlan(cwd), /assigned video asset/);
+    write({...plan, scenes: [{...scene, narrationCueIds: []}]});
+    assert.throws(() => validateScenePlan(cwd), /needs a narration cue/);
+    write({...plan, scenes: [{...scene, audioCueIds: []}]});
+    assert.throws(() => validateScenePlan(cwd), /needs a registered narration audio asset/);
+    write(plan);
+    fs.writeFileSync(video, 'changed-video');
+    assert.throws(() => validateScenePlan(cwd), /Asset hash mismatch/);
+  } finally {
+    if (!cwd.startsWith(scratch + path.sep)) throw new Error('Unsafe test cleanup');
+    fs.rmSync(cwd, {recursive: true, force: true});
+  }
+});

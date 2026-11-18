@@ -92,6 +92,50 @@
           "review_note": "The push, modular depth, and lighting read clearly; light flicker is subtle in the compact GIF."
         }
       ]
+    },
+    "video-handoff": {
+      "selected": "clamp-handoff-full-resolution",
+      "candidates": [
+        {
+          "id": "clamp-handoff-small-label",
+          "video_sha256": "1676b1faefeafd00da9f4b0f8bdc3f07e57d22b7004a432a5230f5a4bc2bf4bb",
+          "gif_sha256": "8fd8100988cff16192c8bf1b8f9a002a25bae7b5b321332c4ee7866b6342e2e4",
+          "technical_pass": true,
+          "video_frames": 120,
+          "video_resolution": [640, 360],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio frame review",
+          "review_date": "2026-11-18",
+          "review_note": "Narration and motion align, but the small frame and overlaid label reduce detail. The candidate GIF remains in ignored tmp evidence."
+        },
+        {
+          "id": "clamp-handoff-full-resolution",
+          "video_sha256": "ae9554ec2fea319b0c881aa03069389d1e45767f2bfab11723f7d86aead20d76",
+          "gif_sha256": "ee8a36dde1edf6d4626ac0ded6c815174aedd08dee928ad5b99c0a6db3047228",
+          "gif_path": "previews/handoff.gif",
+          "technical_pass": true,
+          "video_frames": 120,
+          "video_resolution": [1280, 720],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio frame review",
+          "review_date": "2026-11-18",
+          "review_note": "The full-resolution shot stays legible at the narration cue; the clamp contact remains illustrative. The exact composition includes an audio track."
+        }
+      ]
     }
   }
 }

@@ -96,6 +96,19 @@ export function validateScenePlan(folder, expected = {}) {
       throw new Error(`Hero image ${scene.visual.imageId} is not assigned to ${scene.id}`);
     if (scene.visual.imageId && !/\.(png|jpe?g|webp|svg)$/i.test(assets.get(scene.visual.imageId)?.path ?? ''))
       throw new Error(`Hero image ${scene.visual.imageId} must be an image asset`);
+    // A reviewed Blender shot stays a declared, hashed video asset at its cue.
+    if (scene.visual.videoId) {
+      if (!scene.assetIds.includes(scene.visual.videoId) ||
+          !/\.(mp4|webm)$/i.test(assets.get(scene.visual.videoId)?.path ?? ''))
+        throw new Error(`Hero video ${scene.visual.videoId} must be an assigned video asset`);
+      if (!Number.isInteger(scene.visual.videoStartFrame) ||
+          scene.visual.videoStartFrame < scene.startFrame || scene.visual.videoStartFrame >= scene.endFrame)
+        throw new Error(`Invalid hero video cue in ${scene.id}`);
+      if (!scene.narrationCueIds.length) throw new Error(`Hero video ${scene.id} needs a narration cue`);
+      if (!scene.audioCueIds.some((id) => scene.assetIds.includes(id) &&
+          /\.(mp3|wav|m4a)$/i.test(assets.get(id)?.path ?? '')))
+        throw new Error(`Hero video ${scene.id} needs a registered narration audio asset`);
+    }
     if (scene.sourceIds.length && !fs.existsSync(path.join(folder, 'research.md')))
       throw new Error(`Missing research.md for sourced scene ${scene.id}`);
     for (const id of scene.sourceIds) {

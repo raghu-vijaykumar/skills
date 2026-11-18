@@ -16,6 +16,8 @@ export type ExplainerScene = {
         labels?: string[];
         theme?: 'light' | 'dark';
         imageId?: string;
+        videoId?: string;
+        videoStartFrame?: number;
     };
     stateChanges: {
         frame: number;
