@@ -729,9 +729,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/pixel-chest.gif",
+      "review": "pixel-review.md",
+      "builder": "examples/pixel_chest.py",
+      "spec": "examples/pixel_chest.json",
+      "compatible_subjects": ["prop-artist"],
+      "intent_cues": ["chest"],
+      "score_record": "scores.json"
     },
     {
       "id": "hand-painted-style",

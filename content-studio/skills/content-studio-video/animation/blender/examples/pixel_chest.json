@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "pixel-treasure-chest",
+  "width": 320,
+  "height": 240,
+  "fps": 12,
+  "frames": 48,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "Standard",
+  "codec": "H264",
+  "camera_object": "Pixel locked camera",
+  "objects": [
+    {"id": "chest", "name": "SM_Pixel_Chest_Body"},
+    {"id": "chest-front", "name": "SM_Pixel_Chest_Front"},
+    {"id": "lid", "name": "SM_Pixel_Chest_Lid"},
+    {"id": "lid-control", "name": "Pixel lid hinge"},
+    {"id": "treasure", "name": "SM_Pixel_Treasure"},
+    {"id": "spark", "name": "SM_Pixel_Spark_0"},
+    {"id": "camera", "name": "Pixel locked camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "A closed treasure chest uses crisp 16 by 16 printed faces", "object_ids": ["chest", "chest-front", "lid"]},
+    {"id": "action", "frame": 24, "label": "The chest opens and a gold square emerges", "object_ids": ["lid-control", "treasure", "spark"]},
+    {"id": "result", "frame": 48, "label": "The chest holds open with rising square sparks", "object_ids": ["lid", "treasure", "spark"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "pixel-chest", "origin": "procedural", "license": "Original Content Studio 16 by 16 palette textures, chest, and animation"}
+  ]
+}

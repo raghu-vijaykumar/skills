@@ -162,7 +162,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
-        (r"\b(prop|object|product|furniture|lamp|chair|bottle)\b", "prop-artist"),
+        (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest)\b", "prop-artist"),
     ]
     subjects = {entry["id"] for entry in entries if entry["category"] == "Modeling"}
     if subject is not None and subject not in subjects:
@@ -193,6 +193,8 @@ def route(prompt, style=None, subject=None):
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
         default_style = ("comic-book-style" if subject == "vehicle-artist" and
                          re.search(r"\brocket\b", text) else
+                         "pixel-art-style" if subject == "prop-artist" and
+                         re.search(r"\bchest\b", text) else
                          "manga-style" if subject == "character-artist" and
                          re.search(r"\beye\b", text) and
                          re.search(r"\bgaze\b", text) else
