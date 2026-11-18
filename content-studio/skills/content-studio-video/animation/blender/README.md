@@ -27,6 +27,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Noir rain detective | [Source](examples/noir_detective.py) | [Inputs](examples/noir_detective.json) | [GIF](previews/noir-detective.gif) |
 | Minimalist kinetic pendulum | [Source](examples/minimal_pendulum.py) | [Inputs](examples/minimal_pendulum.json) | [GIF](previews/minimal-pendulum.gif) |
 | Vector sprout and bloom | [Source](examples/vector_sprout.py) | [Inputs](examples/vector_sprout.json) | [GIF](previews/vector-sprout.gif) |
+| Retro 8-bit arcade ship | [Source](examples/retro_8bit_ship.py) | [Inputs](examples/retro_8bit_ship.json) | [GIF](previews/retro8-ship.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -38,6 +39,7 @@ The [chibi courier review](chibi-review.md) records the full-body ratio, two sco
 The [noir detective review](noir-review.md) records the hard light, wet ground, walk audit, and two scored outputs.
 The [minimalist pendulum review](minimal-review.md) records the reduced three-color form, negative space, and two scored outputs.
 The [vector sprout review](vector-review.md) records three scored outputs, flat-fill geometry, and staged growth.
+The [retro 8-bit ship review](retro8-review.md) records two full scored outputs, four rejected GIF encoding probes, a four-color winner, and grid-aligned impact motion.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
@@ -49,6 +51,7 @@ The same rebuild commands also accept `chibi_courier`.
 They also accept `noir_detective`.
 They also accept `minimal_pendulum`.
 They also accept `vector_sprout`.
+They also accept `retro_8bit_ship`.
 
 From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, `comic_rocket`, `manga_gaze`, `pixel_chest`, `painted_teacup`, `watercolor_river`, or `paper_butterfly` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 
@@ -88,6 +91,7 @@ Use `scripts/audit_chibi.py` with the courier `.blend` for its 59.5% head-height
 Use `scripts/audit_noir.py` with the detective `.blend` for its fedora silhouette, two lights, six blind slats, 18 rain streaks, wet asphalt, haze, and walk. The selected variant adds three animated puddle ripples.
 Use `scripts/audit_minimal.py` with the pendulum `.blend` for its three-color palette, negative-space framing, parented bob, and diminishing swing. The selected variant adds one pivot pin and one hairline arc.
 Use `scripts/audit_vector.py` with the sprout `.blend` for its five flat fills, planar paths, fixed camera, stem and leaf growth, staggered bloom, and subpixel petal masking.
+Use `scripts/audit_retro8.py` with the arcade ship `.blend` for its four emission colors, square-pixel meshes, fixed low raster, held location keys, and impact reveal. For its GIF, quantize from the full MP4 to the four render-sampled palette colors with no dithering.
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 

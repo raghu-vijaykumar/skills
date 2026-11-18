@@ -781,6 +781,106 @@
         }
       ]
     },
+    "retro-8bit-style": {
+      "selected": "retro8-ship-v2",
+      "candidates": [
+        {
+          "id": "retro8-v1-auto4-gif",
+          "video_sha256": "0e3d031f76b59e8f26704865c315ecdac58d8570f5e0fedcd5f7ef42b0fe28b1",
+          "gif_sha256": "2751fe63a7d5310702b4a7027bb1266da48ef66b0b2606af8e98a1ca9610e7e7",
+          "technical_pass": false,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 2, "motion_readability": 3, "composition": 3,
+                     "finish": 1, "evidence_integrity": 5},
+          "score_total": 51,
+          "reviewer": "Content Studio exact GIF palette review",
+          "review_date": "2026-11-18",
+          "review_note": "Automatic four-slot GIF palette merged green and orange into pale shapes; this encode does not represent the authored four-color output."
+        },
+        {
+          "id": "retro8-v2-auto4-gif",
+          "video_sha256": "ef8151eb3840bf532f543d994ca022dee2739c7186a2d86dc8bdb3536b589955",
+          "gif_sha256": "d30cf62ec95cd18139c007189f1c5b4f51535bed414019af6557cbf42d21f8ae",
+          "technical_pass": false,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 2, "motion_readability": 4, "composition": 4,
+                     "finish": 1, "evidence_integrity": 5},
+          "score_total": 60,
+          "reviewer": "Content Studio exact GIF palette review",
+          "review_date": "2026-11-18",
+          "review_note": "The wider split reads, but automatic four-slot quantization again loses the green and orange material distinction."
+        },
+        {
+          "id": "retro8-v2-auto8-gif",
+          "video_sha256": "ef8151eb3840bf532f543d994ca022dee2739c7186a2d86dc8bdb3536b589955",
+          "gif_sha256": "e15455e06b2082cef8dbc7e0e80d89b86c6bbadb7438d1466810b24f3f456938",
+          "technical_pass": false,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 3, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio exact GIF palette review",
+          "review_date": "2026-11-18",
+          "review_note": "Automatic eight-slot quantization keeps orange but merges the ship green with pale cream."
+        },
+        {
+          "id": "retro8-v2-auto16-gif",
+          "video_sha256": "ef8151eb3840bf532f543d994ca022dee2739c7186a2d86dc8bdb3536b589955",
+          "gif_sha256": "33491bedb9ff66b5b9ed15aa3f6305a75896f86fe905a0f4489ccee7d11422a6",
+          "technical_pass": false,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio exact GIF palette review",
+          "review_date": "2026-11-18",
+          "review_note": "All four materials read, but the GIF contains encoded edge and background colors beyond the four-color treatment."
+        },
+        {
+          "id": "retro8-ship-v1",
+          "video_sha256": "0e3d031f76b59e8f26704865c315ecdac58d8570f5e0fedcd5f7ef42b0fe28b1",
+          "gif_sha256": "81a60444c9984bd4bacdb2878a20d5de27b17251e2d09b524821bd16d5f7b255",
+          "technical_pass": true,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 3,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and 8-bit sprite review",
+          "review_date": "2026-11-18",
+          "review_note": "Four-color square sprites, held ship motion, and a single shot read, but the four impact fragments separate too little. The 48-frame MP4, 24-frame GIF, and saved-scene audit passed."
+        },
+        {
+          "id": "retro8-ship-v2",
+          "video_sha256": "ef8151eb3840bf532f543d994ca022dee2739c7186a2d86dc8bdb3536b589955",
+          "gif_sha256": "549173b3aa5ee96657008cf2fe1ec19430780ae5144c7211ebdfa5362a8773e3",
+          "gif_path": "previews/retro8-ship.gif",
+          "technical_pass": true,
+          "video_frames": 48,
+          "video_resolution": [320, 240],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and 8-bit sprite review",
+          "review_date": "2026-11-18",
+          "review_note": "The projectile and four fragments separate on held pixel-grid poses without clipping. The selected GIF preserves exactly four colors. The 48-frame MP4, 24-frame GIF, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

@@ -881,9 +881,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/retro8-ship.gif",
+      "review": "retro8-review.md",
+      "builder": "examples/retro_8bit_ship.py",
+      "spec": "examples/retro_8bit_ship.json",
+      "compatible_subjects": ["vehicle-artist"],
+      "intent_cues": ["spaceship"],
+      "score_record": "scores.json"
     },
     {
       "id": "retro-16bit-style",

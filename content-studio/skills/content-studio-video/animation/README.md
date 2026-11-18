@@ -17,3 +17,4 @@ The [`chibi-style` courier](blender/chibi-review.md) is another scored `blender-
 The [`noir-style` detective](blender/noir-review.md) adds scored hard-light, silhouette, and wet-street evidence.
 The [`minimalist-style` pendulum](blender/minimal-review.md) adds a scored three-color, negative-space, and swing audit.
 The [`vector-style` sprout](blender/vector-review.md) adds a scored flat-fill, staged-growth, and polygon-path audit.
+The [`retro-8bit-style` ship](blender/retro8-review.md) adds a scored four-color sprite, held-motion, and impact audit.

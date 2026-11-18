@@ -188,6 +188,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(noir|neo.noir|hardboiled)\b", "noir-style"),
             (r"\b(minimalist|minimal|negative.space)\b", "minimalist-style"),
             (r"\b(vector|flat.design|svg.like)\b", "vector-style"),
+            (r"\b(8.bit|8bit|nes|four.color)\b", "retro-8bit-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -211,6 +212,9 @@ def route(prompt, style=None, subject=None):
                          re.search(r"\bpendulum\b", text) else
                          "vector-style" if subject == "vegetation-artist" and
                          re.search(r"\b(sprout|flower)\b", text) else
+                         "retro-8bit-style" if subject == "vehicle-artist" and
+                         re.search(r"\bspaceship\b", text) and
+                         re.search(r"\basteroid\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

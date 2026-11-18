@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "retro-8bit-ship",
+  "width": 320,
+  "height": 240,
+  "fps": 12,
+  "frames": 48,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "Standard",
+  "codec": "H264",
+  "camera_object": "8bit locked camera",
+  "variant": 2,
+  "objects": [
+    {"id": "ship", "name": "SM_8bit_Ship"},
+    {"id": "ship-control", "name": "8bit ship control"},
+    {"id": "projectile", "name": "SM_8bit_Projectile"},
+    {"id": "asteroid", "name": "SM_8bit_Asteroid"},
+    {"id": "fragment", "name": "SM_8bit_Fragment_0"},
+    {"id": "camera", "name": "8bit locked camera"}
+  ],
+  "beats": [
+    {"id": "approach", "frame": 1, "label": "Four-color sprite ship approaches a blocky asteroid", "object_ids": ["ship", "asteroid"]},
+    {"id": "fire", "frame": 26, "label": "A single stepped projectile crosses the starfield", "object_ids": ["ship-control", "projectile"]},
+    {"id": "impact", "frame": 48, "label": "The asteroid breaks into four grid-aligned sprite fragments", "object_ids": ["fragment", "ship"]}
+  ],
+  "review_states": ["approach", "fire", "impact"],
+  "assets": [
+    {"id": "retro-ship", "origin": "procedural", "license": "Original Content Studio four-color sprite geometry and animation"}
+  ]
+}
