@@ -151,7 +151,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
         (r"\b(room|corridor|environment|landscape|building)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
-        (r"\b(prop|object|product|furniture)\b", "prop-artist"),
+        (r"\b(prop|object|product|furniture|lamp|chair|bottle)\b", "prop-artist"),
     ]
     subjects = {entry["id"] for entry in entries if entry["category"] == "Modeling"}
     if subject is not None and subject not in subjects:
@@ -174,7 +174,8 @@ def route(prompt, style=None, subject=None):
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         chosen = next((name for pattern, name in style_rules if re.search(pattern, text)),
-                      "stylized-style" if subject == "character-artist" else "realistic-style")
+                      "stylized-style" if subject in {"character-artist", "prop-artist"}
+                      or (subject == "blender-modeler" and "lamp" in text) else "realistic-style")
         reason = "selected from subject and visual intent"
     # A rendered demo is reusable only for its declared subject, intent, and treatment.
     entry = next((item for item in entries if item["id"] == subject), None)

@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "id": "desk-lamp-benchmark",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "frames": 96,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Hero camera",
+  "objects": [
+    {"id": "blockout", "name": "SM_Lamp_Blockout"},
+    {"id": "base", "name": "SM_Lamp_Base"},
+    {"id": "lower-arm", "name": "SM_Lamp_Lower_Arm"},
+    {"id": "elbow", "name": "SM_Lamp_Elbow"},
+    {"id": "upper-arm", "name": "SM_Lamp_Upper_Arm"},
+    {"id": "shade", "name": "SM_Lamp_Shade"},
+    {"id": "diffuser", "name": "SM_Lamp_Diffuser"},
+    {"id": "notebook", "name": "SM_Notebook"},
+    {"id": "task-light", "name": "Lamp task light"},
+    {"id": "head-pivot", "name": "Lamp head pivot"},
+    {"id": "camera", "name": "Hero camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Adjustable lamp starts upright and unlit", "object_ids": ["base", "upper-arm", "shade"]},
+    {"id": "action", "frame": 48, "label": "Lamp head lowers while its diffuser turns on", "object_ids": ["upper-arm", "shade", "diffuser"]},
+    {"id": "result", "frame": 96, "label": "Finished desktop lamp holds its aimed pose", "object_ids": ["base", "shade", "diffuser"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "lamp-geometry", "origin": "procedural", "license": "Original Content Studio procedural mesh and materials"}
+  ]
+}

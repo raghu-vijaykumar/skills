@@ -18,9 +18,15 @@
       "wave": 2,
       "dependencies": [],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/lamp.gif",
+      "review": "lamp-review.md",
+      "builder": "examples/lamp.py",
+      "spec": "examples/lamp.json",
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "hard-surface",
@@ -52,9 +58,15 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/lamp.gif",
+      "review": "lamp-review.md",
+      "builder": "examples/lamp.py",
+      "spec": "examples/lamp.json",
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "vehicle-artist",

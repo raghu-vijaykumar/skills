@@ -9,6 +9,56 @@
   },
   "minimum_score": 70,
   "routes": {
+    "blender-modeler": {
+      "selected": "lamp-v2",
+      "candidates": [
+        {
+          "id": "lamp-v2",
+          "video_sha256": "d26318525066927df172965c54e7170839b4e0d36b1a2b3211a3e415ef3a8bd3",
+          "gif_sha256": "e68eddaada33c03e1f42f7707bcf6a258ac2e3b8d9d39908214a5aa637c1c8d9",
+          "gif_path": "previews/lamp.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [1280, 720],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio frame and structural review",
+          "review_date": "2026-11-18",
+          "review_note": "Named, measured, manifold mesh parts retain a separate hidden blockout and live bevels; the keyed head motion reads. This proves one original modeling benchmark, not general modeling automation."
+        }
+      ]
+    },
+    "prop-artist": {
+      "selected": "lamp-v2",
+      "candidates": [
+        {
+          "id": "lamp-v2",
+          "video_sha256": "d26318525066927df172965c54e7170839b4e0d36b1a2b3211a3e415ef3a8bd3",
+          "gif_sha256": "e68eddaada33c03e1f42f7707bcf6a258ac2e3b8d9d39908214a5aa637c1c8d9",
+          "gif_path": "previews/lamp.gif",
+          "technical_pass": true,
+          "video_frames": 96,
+          "video_resolution": [1280, 720],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio frame and structural review",
+          "review_date": "2026-11-18",
+          "review_note": "The 0.36 m desktop base, separate shade and arms, adjustable pivot, and visible light pool make a readable grounded prop; its notebook is a simple context shape."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [
