@@ -44,6 +44,7 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "sprint", "race", "racing", "stadium", "cars",
     "novel", "narrative", "letter", "deck", "card", "idle",
     "sandbox", "exploration", "traversable", "biome", "ps1", "ps5",
+    "material", "lookdev", "lighting", "swatch", "ceramic",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.
@@ -110,18 +111,22 @@ def plan(data, selected="auto"):
                              if item["category"] == blender_catalog().GENRE_CATEGORY}
         blender_era_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
                            if item["category"] == blender_catalog().ERA_CATEGORY}
+        blender_capability_ids = {item["id"] for item in blender_catalog().MANIFEST["entries"]
+                                  if item["category"] in blender_catalog().CRAFT_CATEGORIES}
         implicit_blender_style = requested if requested in blender_style_ids else None
         implicit_blender_world = requested if requested in blender_world_ids else None
         implicit_blender_genre = requested if requested in blender_genre_ids else None
         implicit_blender_era = requested if requested in blender_era_ids else None
+        implicit_blender_capability = requested if requested in blender_capability_ids else None
         if requested == "auto":
             style = ("cinematic-3d" if scene.get("blender_style") or scene.get("blender_subject")
                      or scene.get("blender_world") or scene.get("blender_genre")
-                     or scene.get("blender_era")
+                     or scene.get("blender_era") or scene.get("blender_capability")
                      else recommend(text + " " + data.get("topic", "")))
         else:
             style = ("cinematic-3d" if (implicit_blender_style or implicit_blender_world
-                                      or implicit_blender_genre or implicit_blender_era)
+                                      or implicit_blender_genre or implicit_blender_era
+                                      or implicit_blender_capability)
                      else resolve(requested))
         definition = STYLES[style]
         renderer = definition["renderer"]
@@ -146,13 +151,19 @@ def plan(data, selected="auto"):
             explicit_blender_era = scene.get("blender_era", implicit_blender_era)
             if implicit_blender_era and explicit_blender_era != implicit_blender_era:
                 raise ValueError(f"Conflicting Blender eras for scene {scene['id']}")
+            explicit_blender_capability = scene.get("blender_capability",
+                                                    implicit_blender_capability)
+            if (implicit_blender_capability and
+                    explicit_blender_capability != implicit_blender_capability):
+                raise ValueError(f"Conflicting Blender capabilities for scene {scene['id']}")
             # This is a proposal for review; only proven examples return a builder.
             selection = blender_catalog().route(text + " " + data.get("topic", ""),
                                                 explicit_blender_style,
                                                 scene.get("blender_subject"),
                                                 explicit_blender_world,
                                                 explicit_blender_genre,
-                                                explicit_blender_era)
+                                                explicit_blender_era,
+                                                explicit_blender_capability)
             planned["blender"] = selection
             if not selection["render_method"]:
                 planned["status"] = "needs_builder"
@@ -160,7 +171,7 @@ def plan(data, selected="auto"):
                     f"No reviewed Blender builder matches scene {scene['id']} and its style")
         elif (scene.get("blender_style") or scene.get("blender_subject") or
               scene.get("blender_world") or scene.get("blender_genre") or
-              scene.get("blender_era")):
+              scene.get("blender_era") or scene.get("blender_capability")):
             raise ValueError(f"Blender overrides require a cinematic-3d scene: {scene['id']}")
         output["scenes"].append(planned)
         if not available:

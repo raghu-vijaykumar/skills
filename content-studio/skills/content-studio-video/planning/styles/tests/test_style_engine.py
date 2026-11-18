@@ -421,6 +421,15 @@ class StyleEngineTests(unittest.TestCase):
                          "visual-console-eras")
         self.assertEqual(era["scenes"][0]["blender"]["builder"],
                          "examples/console_era_flight.py")
+        for prompt, skill in (("A polished brushed ceramic material study", "materials"),
+                              ("A material lookdev swatch lab", "lookdev"),
+                              ("A three point light sweep over material swatches", "lighting")):
+            with patch.object(engine, "renderer_executable", return_value=sys.executable):
+                craft = engine.plan({"scenes": [{"id": "lab", "duration_seconds": 3,
+                    "visual_intent": prompt}]})
+            self.assertEqual(craft["scenes"][0]["blender"]["capability"], skill)
+            self.assertEqual(craft["scenes"][0]["blender"]["builder"],
+                             "examples/material_light_lab.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

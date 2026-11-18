@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "material-light-lookdev-lab",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Lookdev overview camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_Lookdev_Stage"},
+    {"id": "polished", "name": "SM_Lookdev_Swatch_0"},
+    {"id": "brushed", "name": "SM_Lookdev_Swatch_1"},
+    {"id": "ceramic", "name": "SM_Lookdev_Swatch_2"},
+    {"id": "key", "name": "LGT_Key_Main"},
+    {"id": "fill", "name": "LGT_Fill_Soft"},
+    {"id": "rim", "name": "LGT_Rim_Back"},
+    {"id": "camera", "name": "Lookdev overview camera"}
+  ],
+  "beats": [
+    {"id": "clay", "frame": 1, "label": "Three equal shapes isolate material differences against the same stage", "object_ids": ["polished", "brushed", "ceramic"]},
+    {"id": "sweep", "frame": 37, "label": "Warm key crosses distinct PBR surfaces while fill and rim stay stable", "object_ids": ["key", "fill", "rim"]},
+    {"id": "hold", "frame": 72, "label": "A final highlight reveals polished, brushed, and ceramic response", "object_ids": ["polished", "brushed", "ceramic", "camera"]}
+  ],
+  "review_states": ["clay", "sweep", "hold"],
+  "assets": [
+    {"id": "lookdev-swatch-kit", "origin": "procedural", "license": "Original Content Studio material swatches and studio stage"}
+  ]
+}

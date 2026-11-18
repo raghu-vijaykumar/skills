@@ -204,9 +204,17 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/material-light-lab.gif",
+      "review": "material-light-review.md",
+      "builder": "examples/material_light_lab.py",
+      "spec": "examples/material_light_lab.json",
+      "compatible_subjects": ["blender-modeler", "prop-artist"],
+      "compatible_styles": ["realistic-style"],
+      "intent_cues": ["polished brushed ceramic material study"],
+      "score_record": "scores.json",
+      "score_route": "material-light-lab"
     },
     {
       "id": "texture-workflow",
@@ -253,9 +261,17 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/material-light-lab.gif",
+      "review": "material-light-review.md",
+      "builder": "examples/material_light_lab.py",
+      "spec": "examples/material_light_lab.json",
+      "compatible_subjects": ["blender-modeler", "prop-artist"],
+      "compatible_styles": ["realistic-style"],
+      "intent_cues": ["material lookdev swatch lab"],
+      "score_record": "scores.json",
+      "score_route": "material-light-lab"
     },
     {
       "id": "geometry-nodes",
@@ -277,9 +293,17 @@
         "materials"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/material-light-lab.gif",
+      "review": "material-light-review.md",
+      "builder": "examples/material_light_lab.py",
+      "spec": "examples/material_light_lab.json",
+      "compatible_subjects": ["blender-modeler", "prop-artist"],
+      "compatible_styles": ["realistic-style"],
+      "intent_cues": ["three point light sweep"],
+      "score_record": "scores.json",
+      "score_route": "material-light-lab"
     },
     {
       "id": "camera-cinematography",

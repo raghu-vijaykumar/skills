@@ -14,6 +14,7 @@ STYLE_CATEGORIES = {"Core styles", "Extended styles", "Horror packs"}
 WORLD_CATEGORY = "Worlds and moods"
 GENRE_CATEGORY = "Genre direction"
 ERA_CATEGORY = "Eras"
+CRAFT_CATEGORIES = {"Production", "Technical", "Pipeline"}
 VISUAL_CATEGORIES = STYLE_CATEGORIES | {WORLD_CATEGORY, "Genre direction", "Eras"}
 UPSTREAM = ("https://github.com/arjun988/blender-skills/blob/"
             f"{MANIFEST['upstream_commit']}/.claude/skills")
@@ -119,7 +120,8 @@ def catalog():
                 if not relative or not (BLENDER / relative).is_file():
                     raise ValueError(f"Executable entry lacks {field}: {name}")
         if entry["status"] in {"Rendered", "Integrated"}:
-            winner = winners.get(name)
+            # One audited shot can prove several craft routes without duplicating its score.
+            winner = winners.get(entry.get("score_route", name))
             if (entry.get("score_record") != "scores.json" or not winner or
                     winner["gif_path"] != entry["evidence"]):
                 raise ValueError(f"Rendered route lacks a scored winning GIF: {name}")
@@ -162,7 +164,8 @@ def catalog():
     return entries
 
 
-def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
+def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
+          capability=None):
     """Give an inspectable default; a catalogue route is never a render claim."""
     text = prompt.lower()
     entries = catalog()
@@ -267,6 +270,14 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
     selected_era = era or ("visual-console-eras" if
                            re.search(r"\b(ps1.ps5.spaceship.comparison|console.era.ship.comparison)\b", text)
                            else None)
+    craft = [item for item in entries if item["category"] in CRAFT_CATEGORIES]
+    craft_ids = {item["id"] for item in craft}
+    if capability is not None and capability not in craft_ids:
+        raise ValueError(f"Unknown Blender capability: {capability}")
+    selected_capability = capability or next(
+        (item["id"] for item in craft
+         if any(re.search(rf"\b{re.escape(cue)}\b", text)
+                for cue in item.get("intent_cues", []))), None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
         if style not in styles:
@@ -308,7 +319,9 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
-        default_style = ("stylized-style" if subject == "vehicle-artist" and
+        default_style = ("realistic-style" if
+                         selected_capability in {"materials", "lookdev", "lighting"}
+                         else "stylized-style" if subject == "vehicle-artist" and
                          selected_era == "visual-console-eras" else
                          "comic-book-style" if subject == "vehicle-artist" and
                          re.search(r"\brocket\b", text) else
@@ -416,10 +429,18 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
     world_entry = next((item for item in entries if item["id"] == selected_world), None)
     genre_entry = next((item for item in entries if item["id"] == selected_genre), None)
     era_entry = next((item for item in entries if item["id"] == selected_era), None)
+    capability_entry = next((item for item in entries
+                             if item["id"] == selected_capability), None)
     cue_matches = lambda item: any(re.search(rf"\b{re.escape(cue)}\b", text)
                                    for cue in item.get("intent_cues", []))
     # A matching world can select its own scene without pretending to be a style.
-    if selected_genre:
+    if selected_capability:
+        entry = capability_entry
+        matched = (entry["status"] in {"Rendered", "Integrated"}
+                   and subject in entry.get("compatible_subjects", [])
+                   and chosen in entry.get("compatible_styles", [])
+                   and (capability is not None or cue_matches(entry)))
+    elif selected_genre:
         entry = genre_entry
         matched = (genre_entry["status"] in {"Rendered", "Integrated"}
                    and subject in genre_entry.get("compatible_subjects", [])
@@ -446,6 +467,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
                    and chosen in entry.get("compatible_styles", []) and cue_matches(entry))
     return {"subject": subject, "style": chosen, "world": selected_world,
             "genre": selected_genre, "era": selected_era,
+            "capability": selected_capability,
             "reason": reason,
             "status": entry["status"] if matched else "Catalogued",
             "render_method": entry["method"] if matched else None,
@@ -493,6 +515,7 @@ def main():
     plan.add_argument("--world")
     plan.add_argument("--genre")
     plan.add_argument("--era")
+    plan.add_argument("--capability")
     sub.add_parser("readme-table")
     sub.add_parser("sync-readme")
     sub.add_parser("scores")
@@ -502,7 +525,8 @@ def main():
         print(json.dumps(entries, indent=2))
     elif args.action == "plan":
         print(json.dumps(route(args.prompt, args.style, args.subject,
-                               args.world, args.genre, args.era), indent=2))
+                               args.world, args.genre, args.era,
+                               args.capability), indent=2))
     elif args.action == "readme-table":
         print(markdown_table(entries))
     elif args.action == "scores":

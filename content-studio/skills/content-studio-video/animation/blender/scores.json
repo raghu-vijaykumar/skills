@@ -2434,6 +2434,50 @@
         }
       ]
     },
+    "material-light-lab": {
+      "selected": "material-light-v2",
+      "candidates": [
+        {
+          "id": "material-light-v1",
+          "video_sha256": "b8b2a15da080607a249d241d64801e510540e1eac26798f9a8e632102b07a248",
+          "gif_sha256": "18124d1cc1b016cd5d4cd0d96eb130af31e400098d8466e1ec76c3a3e216caf7",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and material-light review",
+          "review_date": "2026-11-19",
+          "review_note": "A controlled neutral clay pass shows equal forms under a fixed three-point rig. It does not reveal material differences or a light sweep. Full MP4, GIF, isolated swatches, and saved-scene audit passed."
+        },
+        {
+          "id": "material-light-v2",
+          "video_sha256": "181fab9584e963ab90759939d60875654d06fa17e49e586df82a166c4db0f00f",
+          "gif_sha256": "4972156ade59548c83e9a0e932750a1684b6b4db0f0d0f457ff7d15d7199cab2",
+          "gif_path": "previews/material-light-lab.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio encoded-frame and material-light review",
+          "review_date": "2026-11-19",
+          "review_note": "Polished gold, brushed metal, and glazed ceramic respond differently as a warm beauty key sweeps across three equal forms. Fill and rim remain fixed. The key sweep is subtle at GIF size and the polished metal uses a restrained illustrative fill. Full MP4, GIF, isolated swatches, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

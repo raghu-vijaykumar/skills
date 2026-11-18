@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 60)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 63)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -360,6 +360,18 @@ class CatalogTests(unittest.TestCase):
                                                 style="anime-style")["builder"])
         with self.assertRaisesRegex(ValueError, "Unknown Blender era"):
             catalog_module.route("A spaceship", era="unknown-era")
+        for prompt, skill in (("A polished brushed ceramic material study", "materials"),
+                              ("A material lookdev swatch lab", "lookdev"),
+                              ("A three point light sweep", "lighting")):
+            result = catalog_module.route(prompt)
+            self.assertEqual((result["subject"], result["style"],
+                              result["capability"]),
+                             ("blender-modeler", "realistic-style", skill))
+            self.assertEqual(result["builder"], "examples/material_light_lab.py")
+            self.assertIsNone(catalog_module.route(prompt,
+                                                    style="anime-style")["builder"])
+        with self.assertRaisesRegex(ValueError, "Unknown Blender capability"):
+            catalog_module.route("A swatch", capability="unknown-craft")
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -398,7 +410,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 61)
+        self.assertEqual(len(catalog_module.scorebook(book)), 62)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -495,6 +507,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(era["selected"], "console-era-flight-v2")
         self.assertEqual([candidate["score_total"] for candidate in era["candidates"]],
                          [62, 77])
+        material = book["routes"]["material-light-lab"]
+        self.assertEqual(material["selected"], "material-light-v2")
+        self.assertEqual([candidate["score_total"] for candidate in material["candidates"]],
+                         [58, 77])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

@@ -15,6 +15,7 @@
 
 - [ ] T007 [P4] Build original benchmark assets and reusable modeling, topology, UV, material, texture, groom, cloth, and lookdev routes with structural checks and scored moving proof.
   - [x] T007a Render and structurally audit the measured desk lamp for `blender-modeler` and `prop-artist`; score and publish its best GIF.
+  - [x] T007c Render a clay-to-beauty material lab with two scored outputs, three isolated PBR swatches, and an audited three-point light sweep for materials, lookdev, and lighting.
   - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
 - [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
 

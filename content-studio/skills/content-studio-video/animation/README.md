@@ -53,3 +53,4 @@ The [`genre-narrative-vn` station](blender/narrative-review.md) adds a scored qu
 The [`genre-card-party-idle` table](blender/card-table-review.md) adds a scored three-icon card hand, selected-card lift, and growing idle reward stack.
 The [`genre-open-world-sandbox` crossing](blender/open-world-review.md) adds a scored two-biome traversal with a bridge, tower landmark, and sparse discovery cues.
 The [`visual-console-eras` comparison](blender/console-era-review.md) adds scored PS1-like and modern-console ship motion with distinct geometry, filtering, and material constraints.
+The [material and lighting lab](blender/material-light-review.md) adds a clay-to-beauty review loop with three PBR masters and a moving three-point key.
