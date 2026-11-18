@@ -5,7 +5,7 @@ description: List built-in and project-enabled Content Studio styles, then plan 
 
 # Content Studio Styles
 
-Use this skill to inspect the editorial style registry and to plan a visual storytelling treatment. It combines the style catalog with the style engine; it extends `content-studio-motion-graphics` (vlog cue presets) and does not replace it.
+Use this skill to inspect the editorial style registry and to plan a visual storytelling treatment. It combines the style catalog with the style engine; it extends `content-studio-video-motion-graphics` (vlog cue presets) and does not replace it.
 
 ## List built-in styles
 

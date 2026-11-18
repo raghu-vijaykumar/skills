@@ -12,6 +12,6 @@ The runner creates internal stages and saves progress under `<workspace>/.conten
 
 **Scope today:** the executable voiceover stage extracts sparse frames, timestamped contact sheets, and an evidence manifest, and can validate and render an agent-authored script against that evidence. Vision interpretation and script authoring remain agent tasks; approved audio synthesis and timeline mixing are not yet wired. A review checkpoint is not a substitute for a generated script. Voice cloning remains unconfigured until consented samples and a reviewed backend are supplied. Editing preferences are captured but not yet executed by the simplified runner. No publishing occurs automatically.
 
-The `voiceover` block accepts `frame_interval_seconds`, `grid_columns`, `grid_rows`, `frame_width`, `contact_sheets`, and an optional workspace-relative `context_file`. The runner passes these to `content-studio-understand` so the planning view and the evidence match.
+The `voiceover` block accepts `frame_interval_seconds`, `grid_columns`, `grid_rows`, `frame_width`, `contact_sheets`, and an optional workspace-relative `context_file`. The runner passes these to `content-studio-video-understand` so the planning view and the evidence match.
 
 For a human approval gate, inspect the actual artifact, then create `<workspace>/.content-studio/workflow/approvals/<step-id>.json` containing `{"approved":true,"fingerprint":"<printed fingerprint>"}`. The agent must never create human approval records.

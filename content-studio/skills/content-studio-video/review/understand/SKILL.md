@@ -64,4 +64,4 @@ Voiceover must fit the **approved timeline**; use scene times in the rendered ma
 
 After synthesis, measure each actual cue WAV at **1.0×** against its visual end. If it runs long, shorten the text and regenerate that cue; do not speed up, overlap another scene, or let the assembler shift the next cue. Recheck the resulting picture and audio together in the encoded mix.
 
-`content-studio-voice` only enrolls a consented voice profile; it does not write scripts or synthesize speech. Script authoring stays here. After the script is approved, return to `content-studio-voice` for a reviewed backend and listening approval.
+`content-studio-video-voice-cloning` enrolls a consented voice profile and synthesizes speech; it does not write scripts. Script authoring stays here. After the script is approved, use the voice-cloning skill for a reviewed backend and listening approval.

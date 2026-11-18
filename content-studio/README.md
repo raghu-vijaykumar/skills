@@ -2,7 +2,7 @@
 
 [Content Studio Social](skills/content-studio-social/SKILL.md) organizes YouTube, LinkedIn and Instagram publishing and analytics. Its platform leaves are independently callable and route to the existing implementations. Personal LinkedIn opinions use [LinkedIn Author](skills/content-studio-social/linkedin/author/SKILL.md); its file-backed draft can resume in another chat, and the `content-studio linkedin` CLI enforces angle, draft, final package and publication gates for text, image, animated GIF, document carousel or video. Project presets and per-post production methods keep visual choices flexible.
 
-The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. The `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` names are retired; other top-level `content-studio-*` names are compatibility routes.
+The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. Only canonical skill entrypoints are exposed; backend scripts remain available where existing commands use them.
 
 ## Stage routes
 

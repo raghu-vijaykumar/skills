@@ -1,7 +1,7 @@
 # Music library
 
 Local catalog for YouTube Audio Library and Pixabay Music tracks used in vlogs.
-Choose and review tracks with the `content-studio-music` skill.
+Choose and review tracks with the `content-studio-video-music` skill.
 
 ## Important: the audio is not committed
 

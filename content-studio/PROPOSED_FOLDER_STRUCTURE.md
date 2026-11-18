@@ -1,6 +1,6 @@
 # Content Studio skill structure and workflow
 
-This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. [Social](skills/content-studio-social/SKILL.md) groups platform authoring, publishing and analytics; [video](skills/content-studio-video/SKILL.md) retains production methods. The three retired names `content-studio-videogen`, `content-studio-videopreprocess`, and `content-studio-videoedit` have no top-level entrypoints; other old `content-studio-*` names remain thin compatibility entrypoints. `methods.json` distinguishes working scripts from unsupported requests.
+This is the editable map for the migrated bundle. Every directory below with `SKILL.md` is independently discoverable. [Social](skills/content-studio-social/SKILL.md) groups platform authoring, publishing and analytics; [video](skills/content-studio-video/SKILL.md) retains production methods. Only canonical skills are exposed; backend directories may retain older names where scripts still use those paths. `methods.json` distinguishes working scripts from unsupported requests.
 
 ```text
 content-studio/skills/
@@ -74,7 +74,7 @@ content-studio/skills/
       archive/                      independent public-upload backup
 ```
 
-The Social publishing leaves use the existing YouTube/Instagram video publisher and LinkedIn CLI. The YouTube analytics leaf uses the existing owned-channel collector. LinkedIn and Instagram have no live analytics collector in this release; their leaves analyze supplied authorized data and label unavailable fields. The old `content-studio-linkedin` name routes to Social LinkedIn Author.
+The Social publishing leaves use the existing YouTube/Instagram video publisher and LinkedIn CLI. The YouTube analytics leaf uses the existing owned-channel collector. LinkedIn and Instagram have no live analytics collector in this release; their leaves analyze supplied authorized data and label unavailable fields.
 
 ## Default camera-footage path
 
@@ -101,7 +101,7 @@ The merged [`styles`](skills/content-studio-video/planning/styles/SKILL.md) skil
 
 ## Audio and voice cloning
 
-There is one `audio/` domain. Camera-audio cleanup runs, when justified, before the user's manual edit; mastering checks the final mix. Voice cloning owns consent, private reference samples, IndicF5 synthesis, and listening review. Narration owns script timing and mixing approved speech onto a supplied render. Samples, weights, generated audio, and consent evidence stay outside Git. Picture denoise belongs to `edit/restoration/`, not audio. The old `content-studio-audio` name is a compatibility route; `content-studio-audio-tune` is retired.
+There is one `audio/` domain. Camera-audio cleanup runs, when justified, before the user's manual edit; mastering checks the final mix. Voice cloning owns consent, private reference samples, IndicF5 synthesis, and listening review. Narration owns script timing and mixing approved speech onto a supplied render. Samples, weights, generated audio, and consent evidence stay outside Git. Picture denoise belongs to `edit/restoration/`, not audio.
 
 ## Editing memory across chats
 
@@ -109,4 +109,4 @@ There is one `audio/` domain. Camera-audio cleanup runs, when justified, before 
 
 ## Migration status
 
-The nested skills, recursive installer, compatibility entrypoints, method scripts, precheck routes, and narration mix are implemented here. The large clip-edit engine and shared Remotion style runtime remain shared backends behind separate operation entrypoints; extracting their internals further is optional cleanup. Unsupported methods are declared in `methods.json`, rather than exposed as working scripts. Test and release status is recorded in the feature spec and Git history.
+The nested canonical skills, recursive installer, method scripts, precheck routes, and narration mix are implemented here. The large clip-edit engine and shared Remotion style runtime remain shared backends behind separate operation entrypoints; extracting their internals further is optional cleanup. Unsupported methods are declared in `methods.json`, rather than exposed as working scripts. Test and release status is recorded in the feature spec and Git history.

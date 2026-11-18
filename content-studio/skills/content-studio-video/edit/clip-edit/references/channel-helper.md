@@ -414,7 +414,7 @@ exposes the same flags when it builds its timeline.
 
 ## Music selection
 
-Use [content-studio-music](../../../audio/music/SKILL.md) to shortlist and
+Use [content-studio-video-music](../../../audio/music/SKILL.md) to shortlist and
 approve background music from YouTube Audio Library or Pixabay Music. Tracks are
 cataloged locally under [assets/music](../../../../../assets/music/README.md); the MP3s
 stay in the gitignored `local/` folder because neither license allows
@@ -438,7 +438,7 @@ downloads from the source sites. The approved selection is written to
 
 ## From dataset to the next video
 
-`insights.json` is the input for [content-studio-ideagen](../../../planning/ideagen/SKILL.md): research
+`insights.json` is the input for [content-studio-video-ideagen](../../../planning/ideagen/SKILL.md): research
 sweep, scored idea selection, packaging before production, and a measurement loop that feeds
 the next run.
 

@@ -30,4 +30,4 @@ Read the approved video timeline, narration, user-provided context and candidate
 Preset rules live in `presets/`. The initial implementation supports catalogue management and keyword search; automated semantic detection, timeline insertion and previews are future integrations.
 
 ## Editing memory integration
-Before suggesting memes, retrieve applicable explicit preferences using `content-studio-memory`; respect scoped `meme_intensity` and human-provided exclusions. After a human approves or rejects a meme proposal, record that outcome using the memory skill with `--feature meme` and the real scene context. This is a documented agent handoff, not yet an automatic code hook.
+Before suggesting memes, retrieve applicable explicit preferences using `content-studio-video-memory`; respect scoped `meme_intensity` and human-provided exclusions. After a human approves or rejects a meme proposal, record that outcome using the memory skill with `--feature meme` and the real scene context. This is a documented agent handoff, not yet an automatic code hook.

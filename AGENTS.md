@@ -17,6 +17,14 @@ before treating it as complete.
 2. Read `README.md` for the end-to-end draft lifecycle and current draft layout.
 3. Inspect existing tests before adding parallel systems.
 
+## Skill entrypoints
+
+Expose only canonical, independently callable skills. Put each workflow in its
+owning nested skill and update callers to that name; do not add compatibility or
+alias `SKILL.md` entrypoints for old names. When retiring an entrypoint, have
+the installer unlink only managed links to it. Preserve colocated working
+scripts and references, and leave user-owned skill folders untouched.
+
 ## Mandatory precheck before Content Studio editing
 
 Before any production edit, including a direct specialist skill call, use the

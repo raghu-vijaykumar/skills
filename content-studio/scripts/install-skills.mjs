@@ -10,7 +10,14 @@ const sourceBundle = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const packageRoot = path.resolve(sourceBundle, '..');
 const npmCli = process.env.npm_execpath ?? path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmRun = (args) => process.platform === 'win32' ? run(process.execPath, [npmCli, ...args]) : run('npm', args);
-const retired = ['content-studio-videogen', 'content-studio-videopreprocess', 'content-studio-videoedit'];
+const retired = [
+  'content-studio-videogen', 'content-studio-videopreprocess', 'content-studio-videoedit',
+  'content-studio-archive', 'content-studio-audio', 'content-studio-autocut',
+  'content-studio-benchmark', 'content-studio-ideagen', 'content-studio-linkedin',
+  'content-studio-memes', 'content-studio-memory', 'content-studio-motion-graphics',
+  'content-studio-music', 'content-studio-publish', 'content-studio-styles',
+  'content-studio-understand', 'content-studio-voice',
+];
 
 export function retireManagedSkillLinks({parent, bases, io = fs}) {
   const removed = [];
@@ -92,7 +99,7 @@ export function installSkills({global = false, target = null, dependencies = tru
     if (lines[0] !== '---' || lines[1] !== `name: ${name}`)
       throw new Error(`Skill name/frontmatter mismatch: ${name}`);
   }
-  // Retired migration aliases also disappear from explicit --target installs.
+  // Retire only managed skill links; colocated legacy script directories stay in the release.
   const retiredBases = global ? [skills, path.join(os.homedir(), '.codex', 'skills'),
     path.join(os.homedir(), '.config', 'opencode', 'skills')] : [skills];
   const removed = retireManagedSkillLinks({parent, bases: retiredBases});

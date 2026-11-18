@@ -26,16 +26,23 @@ test('nested skills are discovered by their unique frontmatter names', (t) => {
   assert.throws(() => discoverSkills(root), /Duplicate skill name/);
 });
 
-test('Social exposes each platform operation while preserving the LinkedIn entrypoint', () => {
-  // The compatibility name must remain visible alongside independently callable Social leaves.
+test('Social exposes canonical platform operations without compatibility entrypoints', () => {
+  // Discovery should surface working skills while hiding routing-only aliases.
   const root = path.resolve('content-studio/skills');
   const names = new Set(discoverSkills(root).map(({name}) => name));
-  for (const name of ['content-studio-social', 'content-studio-linkedin',
+  for (const name of ['content-studio-social',
     'content-studio-social-youtube-publish', 'content-studio-social-youtube-analytics',
     'content-studio-social-linkedin-author', 'content-studio-social-linkedin-publish',
     'content-studio-social-linkedin-analytics', 'content-studio-social-instagram-publish',
     'content-studio-social-instagram-analytics']) {
     assert.ok(names.has(name), `${name} must be independently callable`);
+  }
+  for (const name of ['content-studio-archive', 'content-studio-audio', 'content-studio-autocut',
+    'content-studio-benchmark', 'content-studio-ideagen', 'content-studio-linkedin',
+    'content-studio-memes', 'content-studio-memory', 'content-studio-motion-graphics',
+    'content-studio-music', 'content-studio-publish', 'content-studio-styles',
+    'content-studio-understand', 'content-studio-voice']) {
+    assert.equal(names.has(name), false, `${name} is a retired compatibility entrypoint`);
   }
 });
 
@@ -97,7 +104,7 @@ test('reinstall retires managed migration links and preserves user-owned folders
   }
   const skills = path.join(root, 'skills');
   const nested = path.join(result.release, 'content-studio', 'skills', 'content-studio-video');
-  const managed = ['content-studio-videogen', 'content-studio-videopreprocess'];
+  const managed = ['content-studio-videogen', 'content-studio-videopreprocess', 'content-studio-linkedin'];
   for (const name of managed) {
     fs.symlinkSync(nested, path.join(skills, name), process.platform === 'win32' ? 'junction' : 'dir');
   }
@@ -114,15 +121,18 @@ test('reinstall retires managed migration links and preserves user-owned folders
   assert.equal(updated.removed.includes(unmanaged), false);
 });
 
-test('retirement cleanup unlinks all three managed aliases and leaves external or owned entries', () => {
+test('retirement cleanup unlinks all managed aliases and leaves external or owned entries', () => {
   const parent = path.join('C:', 'agents');
   const base = path.join(parent, 'skills');
   const managedRoot = path.join(parent, 'content-studio', 'v0.6.1');
-  const entries = new Map([
-    ['content-studio-videogen', {link: true, target: path.join(managedRoot, 'videogen')}],
-    ['content-studio-videopreprocess', {link: true, target: path.join(managedRoot, 'preprocess')}],
-    ['content-studio-videoedit', {link: true, target: path.join(managedRoot, 'clip-edit')}],
-  ].map(([name, value]) => [path.join(base, name), value]));
+  const retired = ['content-studio-videogen', 'content-studio-videopreprocess', 'content-studio-videoedit',
+    'content-studio-archive', 'content-studio-audio', 'content-studio-autocut',
+    'content-studio-benchmark', 'content-studio-ideagen', 'content-studio-linkedin',
+    'content-studio-memes', 'content-studio-memory', 'content-studio-motion-graphics',
+    'content-studio-music', 'content-studio-publish', 'content-studio-styles',
+    'content-studio-understand', 'content-studio-voice'];
+  const entries = new Map(retired.map((name) => [path.join(base, name),
+    {link: true, target: path.join(managedRoot, name)}]));
   const removed = [];
   const io = {
     existsSync: (candidate) => entries.has(candidate),
@@ -131,7 +141,7 @@ test('retirement cleanup unlinks all three managed aliases and leaves external o
     unlinkSync: (candidate) => { removed.push(candidate); entries.delete(candidate); },
   };
   assert.deepEqual(retireManagedSkillLinks({parent, bases: [base], io}), removed);
-  assert.equal(removed.length, 3);
+  assert.equal(removed.length, retired.length);
 
   entries.set(path.join(base, 'content-studio-videoedit'), {link: false});
   entries.set(path.join(base, 'content-studio-videogen'), {link: true, target: path.join(parent, 'other', 'videogen')});
