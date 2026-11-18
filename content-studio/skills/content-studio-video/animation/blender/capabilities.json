@@ -1261,9 +1261,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/retrowave-highway.gif",
+      "review": "retrowave-review.md",
+      "builder": "examples/retrowave_highway.py",
+      "spec": "examples/retrowave_highway.json",
+      "compatible_subjects": ["environment-artist", "vehicle-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["retrowave", "synthwave", "outrun", "striped sunset"],
+      "score_record": "scores.json"
     },
     {
       "id": "brutalist-mood",

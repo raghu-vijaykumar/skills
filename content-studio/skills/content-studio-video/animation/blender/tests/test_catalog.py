@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 44)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 45)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -254,6 +254,14 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(dream["builder"], "examples/dream_tide.py")
         self.assertIsNone(catalog_module.route("A surreal floating doorway",
                                                 style="anime-style")["builder"])
+        retrowave = catalog_module.route("A synthwave grid highway with a chrome car")
+        self.assertEqual((retrowave["subject"], retrowave["style"], retrowave["world"]),
+                         ("vehicle-artist", "stylized-style", "neon-retrofuturism"))
+        self.assertEqual(retrowave["builder"], "examples/retrowave_highway.py")
+        self.assertEqual(catalog_module.route("An outrun grid highway")["subject"],
+                         "environment-artist")
+        self.assertIsNone(catalog_module.route("A synthwave grid highway with a car",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -292,7 +300,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 45)
+        self.assertEqual(len(catalog_module.scorebook(book)), 46)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -325,6 +333,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(dream["selected"], "dream-tide-v2")
         self.assertEqual([candidate["score_total"] for candidate in dream["candidates"]],
                          [63, 78])
+        retrowave = book["routes"]["neon-retrofuturism"]
+        self.assertEqual(retrowave["selected"], "retrowave-highway-v2")
+        self.assertEqual([candidate["score_total"] for candidate in retrowave["candidates"]],
+                         [67, 82])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "retrowave-grid-highway",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Retro highway follow camera",
+  "variant": 2,
+  "objects": [
+    {"id": "grid", "name": "SM_Retro_Grid_Ground"},
+    {"id": "sun", "name": "SM_Retro_Striped_Sunset"},
+    {"id": "gate", "name": "SM_Retro_Neon_Gate"},
+    {"id": "car", "name": "SM_Retro_Chrome_Coupe_Rig"},
+    {"id": "body", "name": "SM_Retro_Chrome_Coupe_Body"},
+    {"id": "camera", "name": "Retro highway follow camera"}
+  ],
+  "beats": [
+    {"id": "future-memory", "frame": 1, "label": "A striped sunset sets behind a perspective cyan grid and chrome coupe", "object_ids": ["grid", "sun", "car"]},
+    {"id": "outrun", "frame": 36, "label": "The coupe drives beneath a magenta gateway", "object_ids": ["car", "gate"]},
+    {"id": "horizon", "frame": 72, "label": "The car continues toward dusk as the camera follows", "object_ids": ["car", "sun", "camera"]}
+  ],
+  "review_states": ["future-memory", "outrun", "horizon"],
+  "assets": [
+    {"id": "retrowave-highway", "origin": "procedural", "license": "Original Content Studio grid, striped sunset, gateway, mountains, and chrome car"}
+  ]
+}

@@ -1711,6 +1711,50 @@
         }
       ]
     },
+    "neon-retrofuturism": {
+      "selected": "retrowave-highway-v2",
+      "candidates": [
+        {
+          "id": "retrowave-highway-v1",
+          "video_sha256": "01d0260cdb84af2bdfd15a7a5303dc1ff825f5ec7ac49e5ee7da2656c722e5b4",
+          "gif_sha256": "e45ceafe988a6fb8e3ccffdca24caff80aa583748683326116ff29c083e289d4",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 5,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 67,
+          "reviewer": "Content Studio encoded-frame and retrowave mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The striped sun, 3D cyan grid, chrome, and magenta dusk form a clear outrun frame, but the coupe barely travels. Full MP4, GIF, isolated coupe, and saved-scene audit passed."
+        },
+        {
+          "id": "retrowave-highway-v2",
+          "video_sha256": "ac80b0704ac4b2a922061a63cc8dcc9ec0bbd86a1e99400322f702eb4b4c15f9",
+          "gif_sha256": "512b44a73c5fa7be1d2a5de8829e35dc6bd4196f0673086794010a2ec07db437",
+          "gif_path": "previews/retrowave-highway.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 5,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and retrowave mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The chrome coupe crosses the cyan perspective grid toward the striped peach sun, past the magenta gate; the wheels spin and camera follows. The stylized coupe and flat mountain silhouettes limit finish to 3/5. Full MP4, GIF, isolated coupe, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

@@ -70,7 +70,8 @@
   - [x] T013f Render one cozy reading-nook lane with two scored full outputs, an isolated rocking chair, warm-light and motion audit, and a distinct best GIF.
   - [x] T013g Render one dark freight-depot lane with two scored full outputs, an isolated gantry load, low-key wear audit, and a distinct best GIF.
   - [x] T013h Render one dreamlike threshold with two scored full outputs, an isolated door reveal, unsupported steps and scale-play audit, and a distinct best GIF.
-  - [ ] T013i Complete the other two worlds and moods, thirteen genre directions, and console-era route.
+  - [x] T013i Render one retrowave highway with two scored full outputs, an isolated chrome coupe, grid and sun audit, and a distinct best GIF.
+  - [ ] T013j Complete the remaining brutalist mood, thirteen genre directions, and console-era route.
 
 ## Wave 6: Delivery and QA
 

@@ -299,6 +299,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/dream_tide.py")
         self.assertEqual(dream["scenes"][0]["blender"]["world"],
                          "dream-surreal-mood")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            retrowave = engine.plan({"scenes": [{"id": "highway", "duration_seconds": 3,
+                "visual_intent": "A synthwave grid highway with a chrome car"}]})
+        self.assertEqual(retrowave["scenes"][0]["blender"]["builder"],
+                         "examples/retrowave_highway.py")
+        self.assertEqual(retrowave["scenes"][0]["blender"]["world"],
+                         "neon-retrofuturism")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
