@@ -131,6 +131,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A treasure chest opens and emits sparks"}]})
         self.assertEqual(pixel["scenes"][0]["blender"]["builder"],
                          "examples/pixel_chest.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            painted = engine.plan({"scenes": [{"id": "painted-teacup", "duration_seconds": 3,
+                "visual_intent": "A wildflower teacup turns and steams"}]})
+        self.assertEqual(painted["scenes"][0]["blender"]["builder"],
+                         "examples/painted_teacup.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

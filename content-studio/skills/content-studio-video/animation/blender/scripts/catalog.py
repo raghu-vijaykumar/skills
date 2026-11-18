@@ -162,7 +162,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
-        (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest)\b", "prop-artist"),
+        (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup)\b", "prop-artist"),
     ]
     subjects = {entry["id"] for entry in entries if entry["category"] == "Modeling"}
     if subject is not None and subject not in subjects:
@@ -181,6 +181,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
             (r"\bmanga\b", "manga-style"),
+            (r"\b(hand.painted|painted texture|brushwork)\b", "hand-painted-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -195,6 +196,8 @@ def route(prompt, style=None, subject=None):
                          re.search(r"\brocket\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
                          re.search(r"\bchest\b", text) else
+                         "hand-painted-style" if subject == "prop-artist" and
+                         re.search(r"\bteacup\b", text) else
                          "manga-style" if subject == "character-artist" and
                          re.search(r"\beye\b", text) and
                          re.search(r"\bgaze\b", text) else

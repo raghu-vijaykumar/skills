@@ -38,7 +38,8 @@
   - [x] T011b Render the comic rocket panel with a scored GIF and a print, ink, and impact audit.
   - [x] T011c Render the manga eye panel with a scored GIF and a grayscale, screentone, and gaze audit.
   - [x] T011d Render the pixel treasure chest with three scored outputs and a texel, palette, and motion audit.
-  - [ ] T011e Complete the remaining eleven extended treatments with distinct scored GIFs.
+  - [x] T011e Render the hand-painted wildflower teacup with two scored candidates and a painted UV, matte material, and steam audit.
+  - [ ] T011f Complete the remaining ten extended treatments with distinct scored GIFs.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 
 ## Wave 5: Settings and genre direction

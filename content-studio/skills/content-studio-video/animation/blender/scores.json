@@ -435,6 +435,50 @@
         }
       ]
     },
+    "hand-painted-style": {
+      "selected": "painted-teacup-v2",
+      "candidates": [
+        {
+          "id": "painted-teacup-v1",
+          "video_sha256": "ef39309bb5643e79683cda9430d86bb0861d8c52a2c0b29bcf58032cdd8b8aaa",
+          "gif_sha256": "3e98de9ac85fae446ce7f9d64c38e54ff3ddfbd3ab76dd6b7c869b107ef9c447",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and painted-material review",
+          "review_date": "2026-11-18",
+          "review_note": "The matte wildflower cup turns and grows rim-anchored steam. The pale unpainted background separates the hero but leaves the composition less cohesive. The full encode and saved blend passed the structural audit."
+        },
+        {
+          "id": "painted-teacup-v2",
+          "video_sha256": "69a0e6f4b385a9b0383a461e154e21a2ef54e38f2ef4d70826b7d71782da540d",
+          "gif_sha256": "43719137640190c2cd2681fd7fc4e856c14aea6e6425f6080ee11dfead2c209a",
+          "gif_path": "previews/painted-teacup.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and painted-material review",
+          "review_date": "2026-11-18",
+          "review_note": "The revised packed flower albedo has broad bristle variation, and a subtle packed background wash ties the turning ceramic to its scene. Steam remains legible at README size, and the saved blend passes the material and motion audit."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

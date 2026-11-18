@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "hand-painted-wildflower-teacup",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Painted teacup camera",
+  "objects": [
+    {"id": "cup", "name": "SM_Painted_Cup"},
+    {"id": "cup-control", "name": "Painted cup turn control"},
+    {"id": "handle", "name": "SM_Painted_Handle"},
+    {"id": "saucer", "name": "SM_Painted_Saucer"},
+    {"id": "steam", "name": "SM_Painted_Steam_0"},
+    {"id": "camera", "name": "Painted teacup camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "The matte ceramic cup presents painted wildflowers on a packed albedo", "object_ids": ["cup", "handle", "saucer"]},
+    {"id": "action", "frame": 36, "label": "The cup turns to reveal more painted flowers as steam rises", "object_ids": ["cup-control", "cup", "steam"]},
+    {"id": "result", "frame": 72, "label": "The flower motif settles in a new view beneath three steam curls", "object_ids": ["cup", "steam"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "wildflower-paint", "origin": "procedural", "license": "Original Content Studio brush-like painted albedo, cup mesh, and steam"}
+  ]
+}

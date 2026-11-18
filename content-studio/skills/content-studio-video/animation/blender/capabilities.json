@@ -748,9 +748,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/painted-teacup.gif",
+      "review": "painted-review.md",
+      "builder": "examples/painted_teacup.py",
+      "spec": "examples/painted_teacup.json",
+      "compatible_subjects": ["prop-artist"],
+      "intent_cues": ["teacup"],
+      "score_record": "scores.json"
     },
     {
       "id": "painterly-style",
