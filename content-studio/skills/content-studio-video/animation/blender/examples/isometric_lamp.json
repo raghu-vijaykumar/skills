@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "isometric-desk-lamp",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "tile_size_m": 0.8,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "CAM_Iso_Lamp",
+  "objects": [
+    {"id": "tile", "name": "SM_Iso_Tile"},
+    {"id": "lamp-base", "name": "SM_Iso_Lamp_Base"},
+    {"id": "shade", "name": "SM_Iso_Lamp_Shade"},
+    {"id": "notebook", "name": "SM_Iso_Notebook"},
+    {"id": "pivot", "name": "Iso lamp pivot"},
+    {"id": "camera", "name": "CAM_Iso_Lamp"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Locked orthographic tile view with raised unlit lamp", "object_ids": ["tile", "lamp-base", "shade"]},
+    {"id": "action", "frame": 38, "label": "Upper arm swings down and the task light turns on", "object_ids": ["shade", "notebook"]},
+    {"id": "result", "frame": 72, "label": "Lit lamp holds within its one-tile footprint", "object_ids": ["tile", "shade", "notebook"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "isometric-geometry", "origin": "procedural", "license": "Original Content Studio one-tile diorama and lamp"}
+  ]
+}

@@ -109,6 +109,31 @@
         }
       ]
     },
+    "isometric-style": {
+      "selected": "isometric-lamp-v1",
+      "candidates": [
+        {
+          "id": "isometric-lamp-v1",
+          "video_sha256": "50c18c9afc8baebfef8402781b4ff59ddd0517ae85c744fdf66306a6d0535950",
+          "gif_sha256": "8b477e9307b89383aea2ef1ca6aabc9b7e7af38fd449dd2e0fb297b0645c4f87",
+          "gif_path": "previews/isometric-lamp.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 5,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 87,
+          "reviewer": "Content Studio exact-frame and true-iso audit",
+          "review_date": "2026-11-18",
+          "review_note": "The fixed true-iso camera shows the full one-tile diorama with readable top and side planes; the lamp swings down and illuminates the notebook. The notebook markings remain simple."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

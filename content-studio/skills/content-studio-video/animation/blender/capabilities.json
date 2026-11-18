@@ -597,9 +597,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/isometric-lamp.gif",
+      "review": "isometric-review.md",
+      "builder": "examples/isometric_lamp.py",
+      "spec": "examples/isometric_lamp.json",
+      "compatible_subjects": ["prop-artist", "blender-modeler"],
+      "intent_cues": ["lamp"],
+      "score_record": "scores.json"
     },
     {
       "id": "stylized-style",
