@@ -718,6 +718,69 @@
         }
       ]
     },
+    "vector-style": {
+      "selected": "vector-sprout-v3",
+      "candidates": [
+        {
+          "id": "vector-sprout-v1",
+          "video_sha256": "1a9ebe863a4ae7e2e5e5452f0706fa6d077621129f578dccac5569f5e91fe628",
+          "gif_sha256": "d8a7c509ec750f784e095d41b93ed680ec98fa897a45ada1d6544afa89ecbf2b",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio exact-frame and vector-path review",
+          "review_date": "2026-11-18",
+          "review_note": "The seed grows into a flat five-petal flower with crisp fills, but all petals appear together and remain vertically aligned. The full encode, GIF decode, and planar-path audit passed."
+        },
+        {
+          "id": "vector-sprout-v2",
+          "video_sha256": "c399d429de43c8f49e690442a38ec18844ba5f5900d578a7fcceb920d8bf79d5",
+          "gif_sha256": "034a9e1fe070cd1d04dba683b23e60e8893a0c19a3c6dba4a3b1a42091404884",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and vector-path review",
+          "review_date": "2026-11-18",
+          "review_note": "Radial petals open in a designed sequence, but a subpixel petal appears as an isolated dot during the bloom. Full render and saved-scene audit passed."
+        },
+        {
+          "id": "vector-sprout-v3",
+          "video_sha256": "22b7aac9aff3d55443a4e4d5709ac2bb3e872f71528c8901060b1fc5b1ad8330",
+          "gif_sha256": "94e705a349be93e05c3b0122e37bd0022ac31737ecef2f6eb5f2fcc299cec963",
+          "gif_path": "previews/vector-sprout.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and vector-path review",
+          "review_date": "2026-11-18",
+          "review_note": "Subpixel petals stay hidden until they read as shapes. Five emission-only fills, a fixed front camera, crisp contours, a sun icon, and staggered flower growth retain SVG-like clarity in the GIF. Full render and structural audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

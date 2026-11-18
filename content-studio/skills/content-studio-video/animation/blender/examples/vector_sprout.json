@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "vector-flat-sprout",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Vector front camera",
+  "objects": [
+    {"id": "panel", "name": "SM_Vector_Icon_Panel"},
+    {"id": "stem", "name": "SM_Vector_Sprout_Stem"},
+    {"id": "left-leaf", "name": "SM_Vector_Left_Leaf"},
+    {"id": "right-leaf", "name": "SM_Vector_Right_Leaf"},
+    {"id": "flower", "name": "SM_Vector_Flower_Center"},
+    {"id": "sun", "name": "SM_Vector_Sun"},
+    {"id": "camera", "name": "Vector front camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "A flat seed rests under a graphic sun", "object_ids": ["panel", "sun", "stem"]},
+    {"id": "action", "frame": 36, "label": "The icon sprout extends and two leaves unfold", "object_ids": ["stem", "left-leaf", "right-leaf"]},
+    {"id": "result", "frame": 72, "label": "A five-petal graphic flower blooms in the panel", "object_ids": ["flower", "left-leaf", "right-leaf", "sun"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "vector-sprout", "origin": "procedural", "license": "Original Content Studio flat polygon artwork and growth animation"}
+  ]
+}

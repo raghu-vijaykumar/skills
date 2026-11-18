@@ -159,7 +159,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye)\b", "character-artist"),
-        (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
+        (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
         (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup)\b", "prop-artist"),
@@ -187,6 +187,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(chibi|super.deformed)\b", "chibi-style"),
             (r"\b(noir|neo.noir|hardboiled)\b", "noir-style"),
             (r"\b(minimalist|minimal|negative.space)\b", "minimalist-style"),
+            (r"\b(vector|flat.design|svg.like)\b", "vector-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -208,6 +209,8 @@ def route(prompt, style=None, subject=None):
                          re.search(r"\b(detective|fedora)\b", text) else
                          "minimalist-style" if subject == "blender-modeler" and
                          re.search(r"\bpendulum\b", text) else
+                         "vector-style" if subject == "vegetation-artist" and
+                         re.search(r"\b(sprout|flower)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

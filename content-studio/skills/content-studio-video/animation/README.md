@@ -16,3 +16,4 @@ Code-driven video uses [videogen](videogen/SKILL.md); original Blender shots use
 The [`chibi-style` courier](blender/chibi-review.md) is another scored `blender-shot` treatment with a distinct full-body proportion and motion audit.
 The [`noir-style` detective](blender/noir-review.md) adds scored hard-light, silhouette, and wet-street evidence.
 The [`minimalist-style` pendulum](blender/minimal-review.md) adds a scored three-color, negative-space, and swing audit.
+The [`vector-style` sprout](blender/vector-review.md) adds a scored flat-fill, staged-growth, and polygon-path audit.

@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 23)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 24)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -136,6 +136,11 @@ class CatalogTests(unittest.TestCase):
                          ("blender-modeler", "minimalist-style"))
         self.assertEqual(minimal["builder"], "examples/minimal_pendulum.py")
         self.assertIsNone(catalog_module.route("A minimalist car drives")["builder"])
+        vector = catalog_module.route("A sprout grows into a flower")
+        self.assertEqual(vector["subject"], "vegetation-artist")
+        self.assertEqual(vector["style"], "vector-style")
+        self.assertEqual(vector["builder"], "examples/vector_sprout.py")
+        self.assertIsNone(catalog_module.route("A vector forest grows")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -174,7 +179,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 24)
+        self.assertEqual(len(catalog_module.scorebook(book)), 25)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -213,6 +218,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(minimal["selected"], "minimal-pendulum-v2")
         self.assertEqual([candidate["score_total"] for candidate in minimal["candidates"]],
                          [74, 82])
+        vector = book["routes"]["vector-style"]
+        self.assertEqual(vector["selected"], "vector-sprout-v3")
+        self.assertEqual([candidate["score_total"] for candidate in vector["candidates"]],
+                         [74, 78, 82])
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -236,10 +245,13 @@ class CatalogTests(unittest.TestCase):
                      "horror-corridor", "psx-horror", "anime-heroine", "stylized-windmill",
                      "cartoon-bounce", "comic-rocket", "manga-gaze", "pixel-chest",
                      "painted-teacup", "watercolor-river", "paper-butterfly",
-                     "chibi-courier", "noir-detective", "minimal-pendulum"):
+                     "chibi-courier", "noir-detective", "minimal-pendulum",
+                     "vector-sprout"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)
+        self.assertIn("![Best scored vector sprout animation](content-studio/skills/"
+                      "content-studio-video/animation/blender/previews/vector-sprout.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

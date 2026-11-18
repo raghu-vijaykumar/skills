@@ -862,9 +862,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/vector-sprout.gif",
+      "review": "vector-review.md",
+      "builder": "examples/vector_sprout.py",
+      "spec": "examples/vector_sprout.json",
+      "compatible_subjects": ["vegetation-artist"],
+      "intent_cues": ["sprout", "flower"],
+      "score_record": "scores.json"
     },
     {
       "id": "retro-8bit-style",
