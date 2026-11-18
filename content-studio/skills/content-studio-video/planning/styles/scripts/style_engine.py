@@ -26,7 +26,8 @@ ALIASES = {"3blue1brown": "math-visual", "kurzgesagt": "vector-science", "firesh
 STYLES["cinematic-3d"]["keywords"].extend([
     "viking", "longship", "fjord", "apocalypse", "apocalyptic", "wasteland",
     "scavenger", "outpost", "roadside", "fuel", "station", "underwater",
-    "kelp", "reef", "seabed", "fish", "bubbles",
+    "kelp", "reef", "seabed", "fish", "bubbles", "cozy", "hygge",
+    "wholesome", "reading", "nook", "rocking",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

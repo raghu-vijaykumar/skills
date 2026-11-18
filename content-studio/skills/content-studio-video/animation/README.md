@@ -34,3 +34,4 @@ The [`sci-fi-punk-worlds` alley](blender/cyberpunk-review.md) adds a scored cybe
 The [`historical-worlds` longship](blender/viking-review.md) adds a scored Viking period lane with a wool sail, shields, and camera-follow crossing.
 The [`apocalypse-worlds` outpost](blender/wasteland-review.md) adds a scored roadside collapse lane with improvised repairs, a salvaged hauler, and a dust sweep.
 The [`biome-worlds` kelp forest](blender/kelp-review.md) adds a scored underwater lane with swaying plants, fish, bubbles, and a camera glide.
+The [`cozy-wholesome-mood` nook](blender/cozy-review.md) adds a scored reading-room lane with rounded furniture, gentle chair rocking, and a warming practical lamp.

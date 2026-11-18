@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "cozy-reading-nook",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Cozy nook friendly-eye camera",
+  "variant": 2,
+  "objects": [
+    {"id": "room", "name": "SM_Nook_Cream_Wall"},
+    {"id": "rug", "name": "SM_Nook_Round_Rug"},
+    {"id": "chair", "name": "SM_Nook_Rocking_Chair_Rig"},
+    {"id": "cushion", "name": "SM_Nook_Sage_Chair_Seat"},
+    {"id": "lamp", "name": "SM_Nook_Warm_Reading_Light"},
+    {"id": "camera", "name": "Cozy nook friendly-eye camera"}
+  ],
+  "beats": [
+    {"id": "comfort", "frame": 1, "label": "A rounded chair sits among safe books, rug, plant, and warm window", "object_ids": ["room", "rug", "chair"]},
+    {"id": "reading", "frame": 48, "label": "The lamp warms as the chair rocks gently", "object_ids": ["chair", "lamp"]},
+    {"id": "rest", "frame": 72, "label": "The friendly-eye camera glides into the quiet reading nook", "object_ids": ["chair", "camera"]}
+  ],
+  "review_states": ["comfort", "reading", "rest"],
+  "assets": [
+    {"id": "cozy-nook", "origin": "procedural", "license": "Original Content Studio chair, lamp, furniture, books, rug, and plant"}
+  ]
+}

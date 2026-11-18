@@ -1579,6 +1579,50 @@
         }
       ]
     },
+    "cozy-wholesome-mood": {
+      "selected": "cozy-nook-v2",
+      "candidates": [
+        {
+          "id": "cozy-nook-v1",
+          "video_sha256": "560284715f7dd53b9f75fa30e474356b4e9b7e5d146242e7b75fdeb279f57023",
+          "gif_sha256": "fc27b7637485b246e3db1d40a7c669d58ffc6288140918011b4c1d6916d2a6b5",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 2,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and cozy room review",
+          "review_date": "2026-11-19",
+          "review_note": "The soft chair, plant, books, rug, and warm window establish a safe reading nook, but the chair and camera barely move. Full MP4, GIF, isolated chair, and saved-scene audit passed."
+        },
+        {
+          "id": "cozy-nook-v2",
+          "video_sha256": "cc56f102c3e878135b9022cc985edde7a6608302c6ee73250912522132c65c1b",
+          "gif_sha256": "c21f782ecf46ffb49d078586e4dd9ad7d66dee9c1d434b4b7f13eba0ac51dfe4",
+          "gif_path": "previews/cozy-nook.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and cozy room review",
+          "review_date": "2026-11-19",
+          "review_note": "The isolated and in-room chair shows a gentle visible rock while the lamp warms and camera moves closer. Rounded stylized geometry and simple room dressing limit finish to 3/5. Full MP4, GIF, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

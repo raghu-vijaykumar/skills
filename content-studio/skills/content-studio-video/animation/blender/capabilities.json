@@ -1201,9 +1201,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cozy-nook.gif",
+      "review": "cozy-review.md",
+      "builder": "examples/cozy_nook.py",
+      "spec": "examples/cozy_nook.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["cozy", "reading nook", "rocking chair", "hygge"],
+      "score_record": "scores.json"
     },
     {
       "id": "dark-gritty-mood",

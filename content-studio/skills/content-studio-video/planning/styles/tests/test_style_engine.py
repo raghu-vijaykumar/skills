@@ -278,6 +278,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/kelp_forest.py")
         self.assertEqual(kelp["scenes"][0]["blender"]["world"],
                          "biome-worlds")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            cozy = engine.plan({"scenes": [{"id": "nook", "duration_seconds": 3,
+                "visual_intent": "A cozy reading nook with a rocking chair and warm lamp"}]})
+        self.assertEqual(cozy["scenes"][0]["blender"]["builder"],
+                         "examples/cozy_nook.py")
+        self.assertEqual(cozy["scenes"][0]["blender"]["world"],
+                         "cozy-wholesome-mood")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

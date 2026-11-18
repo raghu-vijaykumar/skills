@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 41)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 42)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -236,6 +236,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(kelp["builder"], "examples/kelp_forest.py")
         self.assertIsNone(catalog_module.route("An underwater kelp forest",
                                                 style="voxel-style")["builder"])
+        cozy = catalog_module.route("A cozy reading nook with a rocking chair")
+        self.assertEqual((cozy["subject"], cozy["style"], cozy["world"]),
+                         ("environment-artist", "stylized-style", "cozy-wholesome-mood"))
+        self.assertEqual(cozy["builder"], "examples/cozy_nook.py")
+        self.assertIsNone(catalog_module.route("A cozy reading nook",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -274,7 +280,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 42)
+        self.assertEqual(len(catalog_module.scorebook(book)), 43)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -294,6 +300,10 @@ class CatalogTests(unittest.TestCase):
         kelp = book["routes"]["biome-worlds"]
         self.assertEqual(kelp["selected"], "kelp-forest-v2")
         self.assertEqual([candidate["score_total"] for candidate in kelp["candidates"]],
+                         [68, 78])
+        cozy = book["routes"]["cozy-wholesome-mood"]
+        self.assertEqual(cozy["selected"], "cozy-nook-v2")
+        self.assertEqual([candidate["score_total"] for candidate in cozy["candidates"]],
                          [68, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)

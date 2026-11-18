@@ -67,7 +67,8 @@
   - [x] T013c Render one Viking historical lane with two scored full outputs, an isolated longship, period-cue audit, and a distinct best GIF.
   - [x] T013d Render one post-apoc roadside lane with two scored full outputs, an isolated salvage cart, collapse and dust audit, and a distinct best GIF.
   - [x] T013e Render one underwater kelp biome with two scored full outputs, an isolated seven-fish school, vegetation and motion audit, and a distinct best GIF.
-  - [ ] T013f Complete the other five worlds and moods, thirteen genre directions, and console-era route.
+  - [x] T013f Render one cozy reading-nook lane with two scored full outputs, an isolated rocking chair, warm-light and motion audit, and a distinct best GIF.
+  - [ ] T013g Complete the other four worlds and moods, thirteen genre directions, and console-era route.
 
 ## Wave 6: Delivery and QA
 
