@@ -479,6 +479,69 @@
         }
       ]
     },
+    "painterly-style": {
+      "selected": "watercolor-river-v3",
+      "candidates": [
+        {
+          "id": "watercolor-river-v1",
+          "video_sha256": "d277510fe4d539d2932714af7e2b531d38c381104110e116a508815349a8caf1",
+          "gif_sha256": "30640e89fc29d0b71c7c71ba339951200368ef039385aa18e7bb43ed82645adf",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio exact-frame and watercolor-scene review",
+          "review_date": "2026-11-18",
+          "review_note": "Packed paper and pigment, a drifting sailboat, and swaying reeds read, but six-by-three rows of bright geometric ripples distract from the watercolor composition. Full encode and saved-scene audit passed."
+        },
+        {
+          "id": "watercolor-river-v2",
+          "video_sha256": "fa217a04e2d5e1eca28fd76616c4b051209a0551bc5b889fa900f81e35809574",
+          "gif_sha256": "a29ea86d46342acf3eec24cae811fb9e59ba8374c38f934d4724e1f6e251b82d",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and watercolor-scene review",
+          "review_date": "2026-11-18",
+          "review_note": "Scattered, lower-contrast pigment strokes and a washed sail improve the frame, though the moving boat remains small at README size. Full encode and saved-scene audit passed."
+        },
+        {
+          "id": "watercolor-river-v3",
+          "video_sha256": "9a0b2c57be34a7348145d661807b35ae7e86d0920757f03c3d8e1c6dbad37c3a",
+          "gif_sha256": "6fcb82057466e8513dec96210e08582590f6db4d29b3c0a78be63dc3488c2469",
+          "gif_path": "previews/watercolor-river.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and watercolor-scene review",
+          "review_date": "2026-11-18",
+          "review_note": "A 1.18x boat and twelve restrained foreground strokes preserve the complete drifting action in the compact GIF. Packed sky, river, sun, paper grain and sail washes establish a scene-wide painterly treatment; simple geometry remains illustrative."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

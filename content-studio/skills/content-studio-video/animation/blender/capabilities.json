@@ -767,9 +767,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/watercolor-river.gif",
+      "review": "watercolor-review.md",
+      "builder": "examples/watercolor_river.py",
+      "spec": "examples/watercolor_river.json",
+      "compatible_subjects": ["vehicle-artist", "environment-artist"],
+      "intent_cues": ["river"],
+      "score_record": "scores.json"
     },
     {
       "id": "stop-motion-craft-style",

@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "painterly-watercolor-river",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Watercolor fixed camera",
+  "objects": [
+    {"id": "canvas", "name": "SM_Watercolor_Canvas"},
+    {"id": "boat", "name": "SM_Watercolor_Boat"},
+    {"id": "boat-control", "name": "Watercolor boat control"},
+    {"id": "sail", "name": "SM_Watercolor_Sail"},
+    {"id": "reed", "name": "SM_Watercolor_Reed_0"},
+    {"id": "camera", "name": "Watercolor fixed camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "A small sailboat sits left of the sunlit watercolor river", "object_ids": ["canvas", "boat", "sail"]},
+    {"id": "action", "frame": 36, "label": "The boat drifts across layered pigment washes as reeds sway", "object_ids": ["boat-control", "boat", "reed"]},
+    {"id": "result", "frame": 72, "label": "The boat reaches the right-hand water beneath a painted sky", "object_ids": ["canvas", "boat", "sail", "reed"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "river-watercolor", "origin": "procedural", "license": "Original Content Studio packed watercolor canvas, sail wash, boat, and reeds"}
+  ]
+}

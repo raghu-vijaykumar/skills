@@ -136,6 +136,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A wildflower teacup turns and steams"}]})
         self.assertEqual(painted["scenes"][0]["blender"]["builder"],
                          "examples/painted_teacup.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            river = engine.plan({"scenes": [{"id": "watercolor-river", "duration_seconds": 3,
+                "visual_intent": "A sailboat drifts across a river"}]})
+        self.assertEqual(river["scenes"][0]["blender"]["builder"],
+                         "examples/watercolor_river.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
