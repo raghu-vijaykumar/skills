@@ -156,6 +156,11 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A fedora detective walks through rainy light"}]})
         self.assertEqual(noir["scenes"][0]["blender"]["builder"],
                          "examples/noir_detective.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            minimal = engine.plan({"scenes": [{"id": "minimal-swing", "duration_seconds": 3,
+                "visual_intent": "A pendulum sculpture swings through empty space"}]})
+        self.assertEqual(minimal["scenes"][0]["blender"]["builder"],
+                         "examples/minimal_pendulum.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

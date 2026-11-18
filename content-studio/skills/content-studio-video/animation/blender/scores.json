@@ -674,6 +674,50 @@
         }
       ]
     },
+    "minimalist-style": {
+      "selected": "minimal-pendulum-v2",
+      "candidates": [
+        {
+          "id": "minimal-pendulum-v1",
+          "video_sha256": "4d0c75a517414b0283698dc399027b7c9fb9ed347fcefa681c7d0cc510e7dd1f",
+          "gif_sha256": "e055b5c25abf3ad0e4ebcbd31faaea381654b6de64fa3979e3ccf49f5d822be0",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio exact-frame and minimalist-form review",
+          "review_date": "2026-11-18",
+          "review_note": "The single red bob makes a legible diminishing swing in a three-color open composition. The bare rod joint and floor band leave the mechanism and stage less resolved. The full encode and saved-scene audit passed."
+        },
+        {
+          "id": "minimal-pendulum-v2",
+          "video_sha256": "0c1c284a42696ae8bd8d45e2007d37994b9f58857bda9385c0f08f759876b924",
+          "gif_sha256": "9df1202dfaaae3ab467f4c23d4db99b459a2033c92232dc034f3348312cd20a0",
+          "gif_path": "previews/minimal-pendulum.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 82,
+          "reviewer": "Content Studio exact-frame and minimalist-form review",
+          "review_date": "2026-11-18",
+          "review_note": "The visible pivot pin and single hairline arc clarify the red bob's damped travel while preserving a three-color palette and deliberate empty right half. The full render, GIF decode, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

@@ -843,9 +843,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/minimal-pendulum.gif",
+      "review": "minimal-review.md",
+      "builder": "examples/minimal_pendulum.py",
+      "spec": "examples/minimal_pendulum.json",
+      "compatible_subjects": ["blender-modeler"],
+      "intent_cues": ["pendulum"],
+      "score_record": "scores.json"
     },
     {
       "id": "vector-style",

@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "minimalist-kinetic-pendulum",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Minimal pendulum camera",
+  "objects": [
+    {"id": "base", "name": "SM_Minimal_Base"},
+    {"id": "support", "name": "SM_Minimal_Support"},
+    {"id": "pivot", "name": "Minimal pendulum pivot"},
+    {"id": "rod", "name": "SM_Minimal_Rod"},
+    {"id": "bob", "name": "SM_Minimal_Red_Bob"},
+    {"id": "camera", "name": "Minimal pendulum camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "One red sphere hangs from a spare charcoal pendulum", "object_ids": ["base", "support", "rod", "bob"]},
+    {"id": "action", "frame": 20, "label": "The sphere crosses the intentional empty stage", "object_ids": ["pivot", "rod", "bob"]},
+    {"id": "result", "frame": 72, "label": "The swing settles into a smaller arc", "object_ids": ["pivot", "bob"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "minimal-pendulum", "origin": "procedural", "license": "Original Content Studio reduced pendulum geometry and animation"}
+  ]
+}

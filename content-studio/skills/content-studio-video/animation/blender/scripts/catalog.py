@@ -186,6 +186,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(stop.motion|claymation|paper.craft|papercraft|handmade)\b", "stop-motion-craft-style"),
             (r"\b(chibi|super.deformed)\b", "chibi-style"),
             (r"\b(noir|neo.noir|hardboiled)\b", "noir-style"),
+            (r"\b(minimalist|minimal|negative.space)\b", "minimalist-style"),
             (r"\banime\b", "anime-style"),
             (r"\b(cel.shaded|cartoon|toon)\b", "cartoon-style"),
             (r"\b(atmospheric|stylized)\b", "stylized-style"),
@@ -205,6 +206,8 @@ def route(prompt, style=None, subject=None):
                          re.search(r"\b(postal|mail|letter|envelope|courier)\b", text) else
                          "noir-style" if subject == "character-artist" and
                          re.search(r"\b(detective|fedora)\b", text) else
+                         "minimalist-style" if subject == "blender-modeler" and
+                         re.search(r"\bpendulum\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
