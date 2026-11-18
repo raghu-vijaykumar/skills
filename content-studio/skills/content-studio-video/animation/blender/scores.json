@@ -209,6 +209,50 @@
         }
       ]
     },
+    "anime-style": {
+      "selected": "anime-heroine-v2",
+      "candidates": [
+        {
+          "id": "anime-heroine-v1",
+          "video_sha256": "71824d09cd164260922334efb3d02aaae8ec22ed924524a8cdb5e7470a931a8e",
+          "gif_sha256": "f0567a797acbb57e40d550f84448327ec25903b6dddfbebd9c9dc7442b9d6da5",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 3,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio exact-frame and anime-scene audit",
+          "review_date": "2026-11-18",
+          "review_note": "Cel bands, enlarged eyes, blink and arm lift read, but the held arm leaves a visible shoulder gap. Its candidate GIF remains in ignored tmp evidence."
+        },
+        {
+          "id": "anime-heroine-v2",
+          "video_sha256": "37ec66e02e3a3de0e15c24033dae59df10c4f5fc9e704d7b8dfe0fe60f21768c",
+          "gif_sha256": "9a9041db8ad2f6cd5d4d60e6a11cba5bc922cb3a5e32e67c136bf1016148580b",
+          "gif_path": "previews/anime-heroine.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio exact-frame and anime-scene audit",
+          "review_date": "2026-11-18",
+          "review_note": "A filled shoulder keeps the raised arm attached through the blink and held pose. Hard cel bands, clear outlines, oversized eyes and hair masses read, while the simplified bust remains short of a polished anime character."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

@@ -577,9 +577,15 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/anime-heroine.gif",
+      "review": "anime-review.md",
+      "builder": "examples/anime_heroine.py",
+      "spec": "examples/anime_heroine.json",
+      "compatible_subjects": ["character-artist"],
+      "intent_cues": ["heroine"],
+      "score_record": "scores.json"
     },
     {
       "id": "voxel-style",

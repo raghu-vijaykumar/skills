@@ -31,7 +31,8 @@
   - [x] T010d Render the measured realistic clamp lamp treatment with a distinct scored GIF and a PBR-scale audit; retain its documented photoreal limits.
   - [x] T010e Render the narrow psychological horror corridor with a distinct scored GIF and a fog/light/spatial audit.
   - [x] T010f Render the PSX horror CRT hall with a distinct scored GIF and a low-resolution texture/geometry audit.
-  - [ ] T010g Complete the remaining two core style treatments with distinct scored GIFs.
+  - [x] T010g Render the anime heroine with a distinct scored GIF and a cel-band, outline, and pose-control audit.
+  - [ ] T010h Complete the remaining stylized core style with a distinct scored GIF.
 - [ ] T011 [P4] Author the fifteen extended styles with distinct scored GIFs and explicit recipe differences.
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
 

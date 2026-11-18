@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "id": "anime-heroine-pose",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Anime portrait camera",
+  "objects": [
+    {"id": "torso", "name": "SM_Anime_Torso"},
+    {"id": "head", "name": "SM_Anime_Head"},
+    {"id": "left-eye", "name": "SM_Anime_Left_Eye"},
+    {"id": "right-eye", "name": "SM_Anime_Right_Eye"},
+    {"id": "hair", "name": "SM_Anime_Hair_Cap"},
+    {"id": "arm", "name": "SM_Anime_Raised_Arm"},
+    {"id": "scarf", "name": "SM_Anime_Scarf_Tail"},
+    {"id": "head-control", "name": "Anime head control"},
+    {"id": "arm-control", "name": "Anime arm control"},
+    {"id": "camera", "name": "Anime portrait camera"}
+  ],
+  "beats": [
+    {"id": "initial", "frame": 1, "label": "Large-eyed cel character looks toward the viewer", "object_ids": ["head", "left-eye", "right-eye", "hair"]},
+    {"id": "action", "frame": 36, "label": "Character lifts an arm while blinking and scarf moves", "object_ids": ["arm", "scarf", "head-control"]},
+    {"id": "result", "frame": 72, "label": "Character holds the expressive raised-arm pose", "object_ids": ["head", "arm", "scarf"]}
+  ],
+  "review_states": ["initial", "action", "result"],
+  "assets": [
+    {"id": "anime-heroine", "origin": "procedural", "license": "Original Content Studio anime character geometry and graphic backdrop"}
+  ]
+}

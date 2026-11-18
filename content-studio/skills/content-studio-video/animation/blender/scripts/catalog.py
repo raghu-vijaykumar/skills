@@ -158,7 +158,7 @@ def route(prompt, style=None, subject=None):
     subject_rules = [
         (r"\b(vehicle|car|truck|aircraft|spaceship)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal)\b", "creature-artist"),
-        (r"\b(character|person|human|mascot|courier)\b", "character-artist"),
+        (r"\b(character|person|human|mascot|courier|heroine)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -188,9 +188,14 @@ def route(prompt, style=None, subject=None):
             (r"\b(voxel|minecraft|blocky)\b", "voxel-style"),
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
+        # The demonstrated heroine has an anime default when the prompt omits a treatment.
+        default_style = ("anime-style" if subject == "character-artist" and
+                         re.search(r"\bheroine\b", text) else
+                         "stylized-style" if subject in {"character-artist", "prop-artist"}
+                         or (subject == "blender-modeler" and "lamp" in text) else
+                         "realistic-style")
         chosen = next((name for pattern, name in style_rules if re.search(pattern, text)),
-                      "stylized-style" if subject in {"character-artist", "prop-artist"}
-                      or (subject == "blender-modeler" and "lamp" in text) else "realistic-style")
+                      default_style)
         reason = "selected from subject and visual intent"
     # A rendered demo is reusable only for its declared subject, intent, and treatment.
     entry = next((item for item in entries if item["id"] == subject), None)

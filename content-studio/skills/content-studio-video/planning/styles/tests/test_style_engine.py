@@ -96,6 +96,16 @@ class StyleEngineTests(unittest.TestCase):
                 "visual_intent": "A PSX horror hall reveals a CRT"}]})
         self.assertEqual(psx["scenes"][0]["blender"]["builder"],
                          "examples/psx_horror.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            anime = engine.plan({"scenes": [{"id": "anime-heroine", "duration_seconds": 3,
+                "visual_intent": "An anime heroine blinks and raises an arm"}]})
+        self.assertEqual(anime["scenes"][0]["blender"]["builder"],
+                         "examples/anime_heroine.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            unnamed = engine.plan({"scenes": [{"id": "heroine", "duration_seconds": 3,
+                "visual_intent": "A heroine blinks and raises an arm"}]})
+        self.assertEqual(unnamed["scenes"][0]["blender"]["builder"],
+                         "examples/anime_heroine.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

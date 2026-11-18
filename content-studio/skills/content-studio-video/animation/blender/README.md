@@ -14,10 +14,11 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Realistic product visualization | [Source](examples/realistic_lamp.py) | [Inputs](examples/realistic_lamp.json) | [GIF](previews/realistic-lamp.gif) |
 | Psychological horror corridor | [Source](examples/horror_corridor.py) | [Inputs](examples/horror_corridor.json) | [GIF](previews/horror-corridor.gif) |
 | PSX horror CRT hall | [Source](examples/psx_horror.py) | [Inputs](examples/psx_horror.json) | [GIF](previews/psx-horror.gif) |
+| Anime heroine pose | [Source](examples/anime_heroine.py) | [Inputs](examples/anime_heroine.json) | [GIF](previews/anime-heroine.gif) |
 
 The [render review](review.md) records the exact encoded assets, hashes, sampled frames, and limits behind these GIFs.
 
-New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The [low-poly variant](lowpoly-review.md) has a distinct recipe and polygon-budget audit. The [voxel variant](voxel-review.md) adds an occupancy-grid and stepped-motion audit. The [isometric variant](isometric-review.md) locks camera axes and tile footprint. The [realistic variant](realistic-review.md) checks real-world scale and PBR values while documenting its illustrative limits. The [horror variant](horror-review.md) checks narrow spatial proportions, one practical light, fog, and a sparse reveal. The [PSX horror variant](psx-horror-review.md) checks native low resolution, a tiny nearest atlas, and flat geometry. The original three gallery specs remain readable under the version 1 contract.
+New routes use the [version 2 shot contract](shot-contract.md) for object and beat IDs, rights, and exact render settings. The [desk lamp benchmark](lamp-review.md) adds a Blender structural audit for modeling and prop craft. The [low-poly variant](lowpoly-review.md) has a distinct recipe and polygon-budget audit. The [voxel variant](voxel-review.md) adds an occupancy-grid and stepped-motion audit. The [isometric variant](isometric-review.md) locks camera axes and tile footprint. The [realistic variant](realistic-review.md) checks real-world scale and PBR values while documenting its illustrative limits. The [horror variant](horror-review.md) checks narrow spatial proportions, one practical light, fog, and a sparse reveal. The [PSX horror variant](psx-horror-review.md) checks native low resolution, a tiny nearest atlas, and flat geometry. The [anime variant](anime-review.md) checks hard cel bands, contours, proportions, and independent pose controls. The original three gallery specs remain readable under the version 1 contract.
 
 ## Score and select output artifacts
 
@@ -27,7 +28,7 @@ Select the highest-scoring candidate that passes technical review and scores at 
 
 ## Rebuild the showcases
 
-From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, or `psx_horror` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
+From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, or `anime_heroine` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 
 ```powershell
 $skill = 'content-studio/skills/content-studio-video/animation/blender'
@@ -52,6 +53,7 @@ Use `scripts/audit_isometric.py` with the isometric `.blend` for its camera and 
 Use `scripts/audit_realistic.py` with the realistic `.blend` for its scale, fixture, and material check.
 Use `scripts/audit_horror.py` with the horror `.blend` for its spatial, fog, and light-timing check.
 Use `scripts/audit_psx.py` with the PSX `.blend` for its raster, atlas, geometry, fog, and CRT cue check. Replace the generic GIF command with `ffmpeg -hide_banner -loglevel error -y -i tmp/psx_horror.mp4 -vf "fps=8,scale=480:360:flags=neighbor,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse=dither=none" -loop 0 "$skill/previews/psx-horror.gif"` to retain blocky pixels.
+Use `scripts/audit_anime.py` with the anime `.blend` for its cel bands, outline, eye proportions, blink, and separate pose controls.
 
 The generated report records the exact Blender version, input and output hashes, resolution, and encoded frame count. Inspect action timing and detail in the full MP4. The GIFs in the root README are compressed review copies of those renders; they do not replace the full motion and structural checks.
 
