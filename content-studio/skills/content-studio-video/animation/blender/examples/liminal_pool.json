@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "liminal-empty-poolrooms",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Liminal pool inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "floor", "name": "SM_Pool_Hall_Floor"},
+    {"id": "water", "name": "SM_Pool_Water"},
+    {"id": "first-bay", "name": "SM_Pool_Bay_0_Lintel"},
+    {"id": "last-bay", "name": "SM_Pool_Bay_4_Lintel"},
+    {"id": "opening", "name": "SM_Pool_Far_Opening"},
+    {"id": "fluorescent", "name": "SM_Pool_Fluorescent_2"},
+    {"id": "camera", "name": "Liminal pool inspection camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "An empty tiled pool stretches through repeated pale bays", "object_ids": ["water", "first-bay"]},
+    {"id": "wrongness", "frame": 36, "label": "A fluorescent bay flickers as the camera advances without seeing anyone", "object_ids": ["fluorescent", "camera"]},
+    {"id": "continuation", "frame": 72, "label": "The repeating hall still ends in another dark opening", "object_ids": ["last-bay", "opening"]}
+  ],
+  "review_states": ["establish", "wrongness", "continuation"],
+  "assets": [
+    {"id": "poolrooms", "origin": "procedural", "license": "Original Content Studio modular poolrooms and water animation"}
+  ]
+}

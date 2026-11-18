@@ -1155,6 +1155,40 @@
         }
       ]
     },
+    "liminal-space-style": {
+      "selected": "liminal-pool-v2",
+      "candidates": [
+        {
+          "id": "liminal-pool-v1",
+          "video_sha256": "cce7d38654963e6deec2df19e1785e8cff006f608aa2d788e3646d0cc3297fa4",
+          "gif_sha256": "57e240a4130c942576898230841b0a2426e22a1ab03633897c414d9502eda3ab",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and poolroom repetition review",
+          "review_date": "2026-11-18",
+          "review_note": "Five repeating bays, an empty tiled pool, and the far opening establish liminal space, but the short camera travel makes the animation almost static. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "liminal-pool-v2",
+          "video_sha256": "fdc26d1ad38f0f3aefed2886cd84f1a3139ce9f49fc762de5fdda7057e195b42",
+          "gif_sha256": "5b6294fa4d0872be02295cb74f58cde5c792c23d66a7ba1f2bab874f4903ba59",
+          "gif_path": "previews/liminal-pool.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and poolroom repetition review",
+          "review_date": "2026-11-18",
+          "review_note": "The longer empty-hall push passes repeated bays, a fluorescent strip fails briefly, and water glints drift while the far opening still does not resolve. Exact MP4, GIF, isolated bay, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

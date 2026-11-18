@@ -34,6 +34,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Cosmic void aperture | [Source](examples/cosmic_aperture.py) | [Inputs](examples/cosmic_aperture.json) | [GIF](previews/cosmic-aperture.gif) |
 | Mutating six-digit hand | [Source](examples/mutating_hand.py) | [Inputs](examples/mutating_hand.json) | [GIF](previews/mutating-hand.gif) |
 | Analog training tape | [Source](examples/analog_training.py) | [Inputs](examples/analog_training.json) | [GIF](previews/analog-training.gif) |
+| Empty liminal poolrooms | [Source](examples/liminal_pool.py) | [Inputs](examples/liminal_pool.json) | [GIF](previews/liminal-pool.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -52,6 +53,7 @@ The [Frutiger Aero review](aero-review.md) records two scored outputs, an isolat
 The [cosmic aperture review](cosmic-review.md) records three scored outputs, an isolated aperture preview, the scale mismatch, and its moving impossible geometry.
 The [mutating hand review](hand-review.md) records three scored renders, four scored GIF artifacts, an isolated hand preview, and the corrected sixth-digit anatomy.
 The [analog tape review](analog-review.md) records three scored outputs, the isolated safety monitor, scanline and tracking audit, and timed signal-loss reveal.
+The [liminal pool review](liminal-review.md) records two scored outputs, an isolated modular bay, an empty repetition audit, and the slow camera push.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 
@@ -70,6 +72,7 @@ They also accept `aero_dashboard`.
 They also accept `cosmic_aperture`.
 They also accept `mutating_hand`.
 They also accept `analog_training`.
+They also accept `liminal_pool`.
 
 From the repository root, replace `<name>` with `clamp`, `character`, `corridor`, `lamp`, `lowpoly_lamp`, `voxel_lamp`, `isometric_lamp`, `realistic_lamp`, `horror_corridor`, `psx_horror`, `anime_heroine`, `stylized_windmill`, `cartoon_bounce`, `comic_rocket`, `manga_gaze`, `pixel_chest`, `painted_teacup`, `watercolor_river`, or `paper_butterfly` and use a new output directory for each preview. The commands read each spec's own review frames and resolution:
 

@@ -1010,9 +1010,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/liminal-pool.gif",
+      "review": "liminal-review.md",
+      "builder": "examples/liminal_pool.py",
+      "spec": "examples/liminal_pool.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["pool", "poolrooms"],
+      "score_record": "scores.json"
     },
     {
       "id": "folk-horror-style",

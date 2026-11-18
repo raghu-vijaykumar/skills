@@ -160,7 +160,7 @@ def route(prompt, style=None, subject=None):
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
         (r"\b(character|person|human|mascot|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b", "character-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
-        (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void)\b", "environment-artist"),
+        (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
         (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup|dashboard|widget)\b", "prop-artist"),
     ]
@@ -180,6 +180,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(cosmic.horror|eldritch|lovecraftian|void.horror)\b", "cosmic-eldritch-horror"),
             (r"\b(body.horror|mutation|mutating|flesh.fusion)\b", "body-horror-style"),
             (r"\b(analog.horror|found.footage|vhs|security.tape|training.tape)\b", "analog-found-footage-horror"),
+            (r"\b(liminal|backrooms|poolrooms|empty.mall|empty.school)\b", "liminal-space-style"),
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
@@ -239,6 +240,9 @@ def route(prompt, style=None, subject=None):
                          "analog-found-footage-horror" if subject == "environment-artist" and
                          re.search(r"\btraining\b", text) and
                          re.search(r"\b(camera|recording|tape|footage)\b", text) else
+                         "liminal-space-style" if subject == "environment-artist" and
+                         re.search(r"\bpool\b", text) and
+                         re.search(r"\b(empty|endless|repeating|repeats|vacant)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
