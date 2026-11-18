@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "console-era-flight-comparison",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Era comparison camera",
+  "variant": 2,
+  "objects": [
+    {"id": "stage", "name": "SM_Era_Comparison_Stage"},
+    {"id": "retro", "name": "SM_Era_PS1_Ship_Rig"},
+    {"id": "modern", "name": "SM_Era_PS5_Ship_Rig"},
+    {"id": "retro-label", "name": "PS1 era label"},
+    {"id": "modern-label", "name": "PS5 era label"},
+    {"id": "camera", "name": "Era comparison camera"}
+  ],
+  "beats": [
+    {"id": "compare", "frame": 1, "label": "PS1-like and PS5-like ships share one silhouette and two era-specific display panels", "object_ids": ["retro", "modern", "retro-label", "modern-label"]},
+    {"id": "lift", "frame": 55, "label": "Both ships rise and bank through the same comparison pose", "object_ids": ["retro", "modern"]},
+    {"id": "hold", "frame": 72, "label": "Low polygon nearest texels and smooth PBR hull remain legible side by side", "object_ids": ["retro", "modern", "camera"]}
+  ],
+  "review_states": ["compare", "lift", "hold"],
+  "assets": [
+    {"id": "era-ship-kit", "origin": "procedural", "license": "Original Content Studio retro and modern comparison ships"}
+  ]
+}

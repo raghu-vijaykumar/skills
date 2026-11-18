@@ -1561,9 +1561,16 @@
         "compositing"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/console-era-flight.gif",
+      "review": "console-era-review.md",
+      "builder": "examples/console_era_flight.py",
+      "spec": "examples/console_era_flight.json",
+      "compatible_subjects": ["vehicle-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["ps1 ps5 spaceship comparison", "console era ship comparison"],
+      "score_record": "scores.json"
     }
   ]
 }

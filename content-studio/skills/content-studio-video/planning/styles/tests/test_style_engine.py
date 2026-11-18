@@ -414,6 +414,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-open-world-sandbox")
         self.assertEqual(crossing["scenes"][0]["blender"]["builder"],
                          "examples/open_world_crossing.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            era = engine.plan({"scenes": [{"id": "era", "duration_seconds": 3,
+                "visual_intent": "A PS1 PS5 spaceship comparison"}]})
+        self.assertEqual(era["scenes"][0]["blender"]["era"],
+                         "visual-console-eras")
+        self.assertEqual(era["scenes"][0]["blender"]["builder"],
+                         "examples/console_era_flight.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

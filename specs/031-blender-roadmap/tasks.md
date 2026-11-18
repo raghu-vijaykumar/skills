@@ -85,7 +85,7 @@
   - [x] T013u Render one narrative station plate with three scored full outputs, isolated set and letter previews, a single-cue and camera audit, and a distinct best GIF.
   - [x] T013v Render one card/idle choice lane with two scored full outputs, isolated card and reward previews, a structural and selected-card audit, and a distinct best GIF.
   - [x] T013w Render one open-world crossing with two scored full outputs, isolated explorer and tower previews, a biome and landmark audit, and a distinct best GIF.
-  - [ ] T013x Complete the console-era route.
+  - [x] T013x Render a PS1/PS5 console-era comparison with two scored full outputs, isolated ship previews, a topology/filter/PBR audit, and a distinct best GIF. Other eras remain outside this demonstrated lane.
 
 ## Wave 6: Delivery and QA
 

@@ -13,6 +13,7 @@ MANIFEST = json.loads((BLENDER / "capabilities.json").read_text(encoding="utf-8"
 STYLE_CATEGORIES = {"Core styles", "Extended styles", "Horror packs"}
 WORLD_CATEGORY = "Worlds and moods"
 GENRE_CATEGORY = "Genre direction"
+ERA_CATEGORY = "Eras"
 VISUAL_CATEGORIES = STYLE_CATEGORIES | {WORLD_CATEGORY, "Genre direction", "Eras"}
 UPSTREAM = ("https://github.com/arjun988/blender-skills/blob/"
             f"{MANIFEST['upstream_commit']}/.claude/skills")
@@ -161,7 +162,7 @@ def catalog():
     return entries
 
 
-def route(prompt, style=None, subject=None, world=None, genre=None):
+def route(prompt, style=None, subject=None, world=None, genre=None, era=None):
     """Give an inspectable default; a catalogue route is never a render claim."""
     text = prompt.lower()
     entries = catalog()
@@ -259,6 +260,13 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                                else "genre-open-world-sandbox" if
                                re.search(r"\b(open.world.biome.crossing|sandbox.exploration.bridge|traversable.biome.border|open.world.river.bridge)\b", text)
                                else None)
+    eras = {entry["id"] for entry in entries if entry["category"] == ERA_CATEGORY}
+    if era is not None and era not in eras:
+        raise ValueError(f"Unknown Blender era: {era}")
+    # Only the demonstrated endpoint comparison may infer this broad era route.
+    selected_era = era or ("visual-console-eras" if
+                           re.search(r"\b(ps1.ps5.spaceship.comparison|console.era.ship.comparison)\b", text)
+                           else None)
     styles = {e["id"] for e in entries if e["category"] in STYLE_CATEGORIES}
     if style is not None:
         if style not in styles:
@@ -300,7 +308,9 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
             (r"\b(low.poly|lowpoly)\b", "lowpoly-style"),
         ]
         # Demonstrated subjects can choose a reviewed treatment when no style is named.
-        default_style = ("comic-book-style" if subject == "vehicle-artist" and
+        default_style = ("stylized-style" if subject == "vehicle-artist" and
+                         selected_era == "visual-console-eras" else
+                         "comic-book-style" if subject == "vehicle-artist" and
                          re.search(r"\brocket\b", text) else
                          "stop-motion-craft-style" if subject == "creature-artist" and
                          re.search(r"\bbutterfly\b", text) else
@@ -396,12 +406,16 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                          "realistic-style")
         chosen = next((name for pattern, name in style_rules if re.search(pattern, text)),
                       default_style)
+        if selected_era and chosen == "psx-horror-style" and not re.search(r"\bhorror\b", text):
+            # PS1 in a comparison names an era, not a horror treatment.
+            chosen = default_style
         reason = "selected from subject and visual intent"
     # A rendered demo is reusable only for its declared subject, intent, and treatment.
     entry = next((item for item in entries if item["id"] == subject), None)
     style_entry = next((item for item in entries if item["id"] == chosen), None)
     world_entry = next((item for item in entries if item["id"] == selected_world), None)
     genre_entry = next((item for item in entries if item["id"] == selected_genre), None)
+    era_entry = next((item for item in entries if item["id"] == selected_era), None)
     cue_matches = lambda item: any(re.search(rf"\b{re.escape(cue)}\b", text)
                                    for cue in item.get("intent_cues", []))
     # A matching world can select its own scene without pretending to be a style.
@@ -411,6 +425,12 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
                    and subject in genre_entry.get("compatible_subjects", [])
                    and chosen in genre_entry.get("compatible_styles", [])
                    and (genre is not None or cue_matches(genre_entry)))
+    elif selected_era:
+        entry = era_entry
+        matched = (era_entry["status"] in {"Rendered", "Integrated"}
+                   and subject in era_entry.get("compatible_subjects", [])
+                   and chosen in era_entry.get("compatible_styles", [])
+                   and (era is not None or cue_matches(era_entry)))
     elif (world_entry and world_entry["status"] in {"Rendered", "Integrated"}
             and subject in world_entry.get("compatible_subjects", [])
             and chosen in world_entry.get("compatible_styles", [])
@@ -425,7 +445,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None):
         matched = (entry and entry["status"] in {"Rendered", "Integrated"}
                    and chosen in entry.get("compatible_styles", []) and cue_matches(entry))
     return {"subject": subject, "style": chosen, "world": selected_world,
-            "genre": selected_genre,
+            "genre": selected_genre, "era": selected_era,
             "reason": reason,
             "status": entry["status"] if matched else "Catalogued",
             "render_method": entry["method"] if matched else None,
@@ -472,6 +492,7 @@ def main():
     plan.add_argument("--subject")
     plan.add_argument("--world")
     plan.add_argument("--genre")
+    plan.add_argument("--era")
     sub.add_parser("readme-table")
     sub.add_parser("sync-readme")
     sub.add_parser("scores")
@@ -481,7 +502,7 @@ def main():
         print(json.dumps(entries, indent=2))
     elif args.action == "plan":
         print(json.dumps(route(args.prompt, args.style, args.subject,
-                               args.world, args.genre), indent=2))
+                               args.world, args.genre, args.era), indent=2))
     elif args.action == "readme-table":
         print(markdown_table(entries))
     elif args.action == "scores":

@@ -52,3 +52,4 @@ The [`genre-racing-sports` sprint](blender/circuit-review.md) adds scored team-c
 The [`genre-narrative-vn` station](blender/narrative-review.md) adds a scored quiet background plate, emotional camera push, and one letter interaction cue.
 The [`genre-card-party-idle` table](blender/card-table-review.md) adds a scored three-icon card hand, selected-card lift, and growing idle reward stack.
 The [`genre-open-world-sandbox` crossing](blender/open-world-review.md) adds a scored two-biome traversal with a bridge, tower landmark, and sparse discovery cues.
+The [`visual-console-eras` comparison](blender/console-era-review.md) adds scored PS1-like and modern-console ship motion with distinct geometry, filtering, and material constraints.

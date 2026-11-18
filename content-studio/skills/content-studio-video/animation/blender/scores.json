@@ -2390,6 +2390,50 @@
         }
       ]
     },
+    "visual-console-eras": {
+      "selected": "console-era-flight-v2",
+      "candidates": [
+        {
+          "id": "console-era-flight-v1",
+          "video_sha256": "06791d93b8f654729458982ab8a8b4c5b6b92cdc0a747f618e154d14f6cd5912",
+          "gif_sha256": "d4d8f8aee183ee03a91b1c2da142cbb360a1b3e4e42dc726430f167b382e9972",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 62,
+          "reviewer": "Content Studio encoded-frame and console-era review",
+          "review_date": "2026-11-19",
+          "review_note": "Static PS1-like and PS5-like ships compare visibly different topology, filtering, display treatment, and PBR finish, but do not show either model in motion. Only the two endpoints are demonstrated. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "console-era-flight-v2",
+          "video_sha256": "ecf762a4999c85697ff11eb26d541db992d9282695f6ec2875e5d7583ff525a7",
+          "gif_sha256": "552edc819f5175a42afbe2093805d0b45bfa418283584acfb5c64f8c3fa29cd1",
+          "gif_path": "previews/console-era-flight.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio encoded-frame and console-era review",
+          "review_date": "2026-11-19",
+          "review_note": "Both ships rise and bank through the same pose. The left ship visibly uses chunky PS1-like geometry, nearest-filtered 16px texture, and scanline stage; the right ship has smooth metallic PBR surfaces. This is an authored PS1/PS5 visual comparison, not a historical performance emulation or coverage of PS2-PS4 and other media eras. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [
