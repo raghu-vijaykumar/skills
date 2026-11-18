@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "id": "dream-tide-doorway",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Dream tide witness camera",
+  "variant": 2,
+  "objects": [
+    {"id": "sea", "name": "SM_Dream_Mirror_Sea"},
+    {"id": "doorway", "name": "SM_Dream_Unsupported_Doorway"},
+    {"id": "door", "name": "SM_Dream_Opening_Door_Rig"},
+    {"id": "lunar", "name": "SM_Dream_Revealed_Lunar_Ring"},
+    {"id": "key", "name": "SM_Dream_Giant_Key_Ring"},
+    {"id": "stairs", "name": "SM_Dream_Floating_Step_0"},
+    {"id": "boat", "name": "SM_Dream_Tiny_Boat_Rig"},
+    {"id": "camera", "name": "Dream tide witness camera"}
+  ],
+  "beats": [
+    {"id": "impossible", "frame": 1, "label": "An unsupported rose doorway and enormous key stand over a lavender mirror sea", "object_ids": ["sea", "doorway", "key"]},
+    {"id": "unfold", "frame": 36, "label": "Floating stairs rise as a tiny boat drifts toward the threshold", "object_ids": ["stairs", "boat"]},
+    {"id": "reveal", "frame": 72, "label": "The door opens onto a glowing lunar mark while the camera approaches", "object_ids": ["door", "lunar", "camera"]}
+  ],
+  "review_states": ["impossible", "unfold", "reveal"],
+  "assets": [
+    {"id": "dream-tide", "origin": "procedural", "license": "Original Content Studio door, key, stairs, paper boat, and mirror sea"}
+  ]
+}

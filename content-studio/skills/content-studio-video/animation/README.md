@@ -36,3 +36,4 @@ The [`apocalypse-worlds` outpost](blender/wasteland-review.md) adds a scored roa
 The [`biome-worlds` kelp forest](blender/kelp-review.md) adds a scored underwater lane with swaying plants, fish, bubbles, and a camera glide.
 The [`cozy-wholesome-mood` nook](blender/cozy-review.md) adds a scored reading-room lane with rounded furniture, gentle chair rocking, and a warming practical lamp.
 The [`dark-gritty-mood` depot](blender/gritty-review.md) adds a scored industrial lane with oxidized structure, patched metal, low-key light, and a crossing crane load.
+The [`dream-surreal-mood` tide](blender/dream-tide-review.md) adds a scored pastel threshold lane with unsupported stairs, an oversized key, a tiny boat, and an opening door.

@@ -28,7 +28,8 @@ STYLES["cinematic-3d"]["keywords"].extend([
     "scavenger", "outpost", "roadside", "fuel", "station", "underwater",
     "kelp", "reef", "seabed", "fish", "bubbles", "cozy", "hygge",
     "wholesome", "reading", "nook", "rocking", "gritty", "rusty",
-    "freight", "depot", "gantry",
+    "freight", "depot", "gantry", "dreamlike", "surreal",
+    "doorway", "levitating", "tide",
 ])
 EXECUTABLES = {"manim": "manim", "remotion": "node", "blender": "blender"}
 # Node presence is only a prerequisite; Remotion package/project availability is not validated.

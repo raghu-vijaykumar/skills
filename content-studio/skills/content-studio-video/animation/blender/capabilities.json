@@ -1241,9 +1241,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/dream-tide.gif",
+      "review": "dream-tide-review.md",
+      "builder": "examples/dream_tide.py",
+      "spec": "examples/dream_tide.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["dreamlike", "surreal", "floating doorway", "mirror sea"],
+      "score_record": "scores.json"
     },
     {
       "id": "neon-retrofuturism",

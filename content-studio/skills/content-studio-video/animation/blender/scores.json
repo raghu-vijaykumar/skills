@@ -1667,6 +1667,50 @@
         }
       ]
     },
+    "dream-surreal-mood": {
+      "selected": "dream-tide-v2",
+      "candidates": [
+        {
+          "id": "dream-tide-v1",
+          "video_sha256": "dd2e3416c8bebe071df87c8d339d79e6d3df014d9b63a3117442a29fa899ca71",
+          "gif_sha256": "de0549dcc353e64c95997b0ce40d1bb73a63f3f3b6895cd632a66727367efd26",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and surreal mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The giant key and unsupported stairs establish scale play and bent logic, but the door and boat hardly move. Full MP4, GIF, isolated doorway, and saved-scene audit passed."
+        },
+        {
+          "id": "dream-tide-v2",
+          "video_sha256": "73542144b56da38f048be17d392d267e0a9611426a6115b2ac44241b92f4fa61",
+          "gif_sha256": "05cd7e65159dd28d1dd175604eab3d4f7bf343374ebc8df7316412d7ed3131b7",
+          "gif_path": "previews/dream-tide.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and surreal mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The stair rise, tiny boat drift, opening door, lunar mark, and camera move make the surreal action legible. The mirror sea has no fluid simulation and prop geometry is simple, limiting finish to 3/5. Full MP4, GIF, isolated doorway, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

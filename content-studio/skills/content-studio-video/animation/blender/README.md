@@ -46,6 +46,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Underwater kelp biome | [Source](examples/kelp_forest.py) | [Inputs](examples/kelp_forest.json) | [GIF](previews/kelp-forest.gif) |
 | Cozy reading nook | [Source](examples/cozy_nook.py) | [Inputs](examples/cozy_nook.json) | [GIF](previews/cozy-nook.gif) |
 | Dark freight depot | [Source](examples/gritty_depot.py) | [Inputs](examples/gritty_depot.json) | [GIF](previews/gritty-depot.gif) |
+| Dreamlike mirror tide | [Source](examples/dream_tide.py) | [Inputs](examples/dream_tide.json) | [GIF](previews/dream-tide.gif) |
 
 The [opening render review](review.md) records exact encoded assets, hashes, sampled frames, and limits for the first three GIFs. Each later treatment has its own linked review below.
 
@@ -76,6 +77,7 @@ The [wasteland fuel-stop review](wasteland-review.md) records two scored outputs
 The [underwater kelp review](kelp-review.md) records two scored outputs, an isolated seven-fish school, vegetation density, bubbles, and a camera glide.
 The [cozy reading nook review](cozy-review.md) records two scored outputs, an isolated rocking chair, warm light change, safe clutter, and a camera glide.
 The [dark freight depot review](gritty-review.md) records two scored outputs, an isolated gantry load, oxidation and repair cues, and a load travel audit.
+The [dream tide review](dream-tide-review.md) records two scored outputs, an isolated opening door, giant key, levitating stairs, and a symbolic reveal audit.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

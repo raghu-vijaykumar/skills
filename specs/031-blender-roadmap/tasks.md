@@ -69,7 +69,8 @@
   - [x] T013e Render one underwater kelp biome with two scored full outputs, an isolated seven-fish school, vegetation and motion audit, and a distinct best GIF.
   - [x] T013f Render one cozy reading-nook lane with two scored full outputs, an isolated rocking chair, warm-light and motion audit, and a distinct best GIF.
   - [x] T013g Render one dark freight-depot lane with two scored full outputs, an isolated gantry load, low-key wear audit, and a distinct best GIF.
-  - [ ] T013h Complete the other three worlds and moods, thirteen genre directions, and console-era route.
+  - [x] T013h Render one dreamlike threshold with two scored full outputs, an isolated door reveal, unsupported steps and scale-play audit, and a distinct best GIF.
+  - [ ] T013i Complete the other two worlds and moods, thirteen genre directions, and console-era route.
 
 ## Wave 6: Delivery and QA
 
