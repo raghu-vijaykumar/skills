@@ -2,6 +2,7 @@
   "schema_version": 1,
   "methods": [
     {"id": "timeline-delivery", "script": "scripts/timeline.py", "status": "supported", "review": "Exact human-approved revision required"},
+    {"id": "hdr-audio-only", "script": "scripts/timeline.py", "status": "supported", "review": "Audio-only supplied edit; verify copied video packets and HDR/Dolby Vision metadata on exact output"},
     {"id": "crop", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect framing on affected frames"},
     {"id": "lens-correction", "script": "scripts/timeline.py", "status": "supported", "review": "Use calibrated parameters and inspect geometry"},
     {"id": "denoise-light", "script": "scripts/timeline.py", "status": "supported", "review": "Inspect temporal side effects"},

@@ -11,7 +11,8 @@ a production approval.
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `timeline-delivery` | Supported | Approved timeline + hashed sources/voice/fonts/sidecars + human approval → one final MP4 + render record | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Approval must match the exact revision and input bytes; SDR only. |
+| `timeline-delivery` | Supported | Approved timeline + hashed sources/voice/fonts/sidecars + human approval → one final MP4 + render record | Yes | [Timeline preview](previews/timeline-preview.gif) and [validation](previews/validate.txt) | Approval must match the exact revision and input bytes; picture processing is SDR only. |
+| `hdr-audio-only` | Supported | Supplied full HDR/Dolby Vision edit + approved audio cues → copied video packets and one mixed audio stream | Yes | [Focused delivery test](tests/test_delivery.py) | No picture changes; final packet and metadata verification must pass. |
 | `text-behind-subject` | Supported | One shot + hashed local foreground matte + rising title cue → composited output | Yes | [Synthetic rendered preview](../edit/motion-graphics/previews/text-behind-subject.gif) | Cue stays inside one shot and outside joins; review moving matte and title. |
 | `crop` | Supported | Timeline picture clip + crop geometry → cropped picture in final render | Yes | [Before / after](previews/methods/crop.gif) and [method notes](previews/methods.md) | Editable per clip; preview affected ranges. |
 | `lens-correction` | Supported | Timeline clip + lens parameters → lens-corrected picture | Yes | [Before / after](previews/methods/lens-correction.gif) and [method notes](previews/methods.md) | Explicit parameters; no automatic camera profile. |

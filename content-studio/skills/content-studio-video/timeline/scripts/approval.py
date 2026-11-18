@@ -17,6 +17,7 @@ def capability_sha256() -> str:
         root / "scripts" / "model.py",
         root / "scripts" / "compiler.py",
         root / "scripts" / "timeline.py",
+        root / "scripts" / "verify.py",
         # Custom transitions are shared with the specialist renderer. Any
         # recipe or catalog change must invalidate prior render approval.
         root.parent / "shared" / "xfade_effects.py",

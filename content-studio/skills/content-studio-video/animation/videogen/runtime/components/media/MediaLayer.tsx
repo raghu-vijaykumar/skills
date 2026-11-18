@@ -1,5 +1,5 @@
 import React from 'react';
-import {Audio, Img, Sequence, Video} from 'remotion';
+import {Audio, Img, Sequence, Video, staticFile} from 'remotion';
 import type {MediaClip} from '../../animation/media.ts';
 
 // Mounts declared MediaClips (sfx/image/gif/video) as Remotion <Sequence>s so
@@ -13,7 +13,8 @@ export function MediaLayer({clips, fps}: {clips: readonly MediaClip[]; fps: numb
         if (clip.kind === 'sfx') {
           return (
             <Sequence key={clip.id} from={from} durationInFrames={frames}>
-              <Audio src={clip.src} volume={clip.volume ?? 0.5} />
+              <Audio src={clip.src.startsWith('/sfx/') ? staticFile(clip.src.slice(1)) : clip.src}
+                volume={clip.volume ?? 0.5} />
             </Sequence>
           );
         }

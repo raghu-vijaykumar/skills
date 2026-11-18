@@ -7,7 +7,7 @@ import subprocess
 from fractions import Fraction
 from pathlib import Path
 
-from compiler import media_info
+from compiler import media_info, verify_picture_copy
 from model import AUDIO_METHODS, load, sha256_file, validate
 
 
@@ -62,6 +62,9 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
         raise ValueError("Delivered output is missing or differs from the timeline")
     if sha256_file(output) != record["output_sha256"]:
         raise ValueError("Delivered output bytes changed")
+    picture_copy = None
+    if resolved["video_policy"] == "copy_source":
+        picture_copy = verify_picture_copy(resolved["clips"][0]["path"], output)
     info = media_info(output)
     video, audio = info["video"], info["audio"]
     if not video or not audio:
@@ -146,6 +149,7 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
         "resolution": [resolved["width"], resolved["height"]],
         "fps": fps,
         "audio_sample_rate": 48000,
+        "picture_copy": picture_copy,
         "mastering": mastering,
         "evidence": evidence,
         "human_review_required": True,

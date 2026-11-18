@@ -332,6 +332,73 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
             model.validate(self.timeline)
         self.assertFalse(self.output.exists())
 
+    def test_hlg_audio_only_export_copies_picture_packets(self):
+        # The supplied HDR picture must bypass every video filter and encoder.
+        encoder = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"],
+                                 capture_output=True, text=True)
+        if "libx265" not in encoder.stdout:
+            self.skipTest("libx265 required for the HLG fixture")
+        source = self.root / "hlg-source.mp4"
+        result = subprocess.run([
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=10:duration=2",
+            "-f", "lavfi", "-i", "sine=frequency=440:duration=2",
+            "-c:v", "libx265", "-pix_fmt", "yuv420p10le",
+            "-x265-params", "colorprim=bt2020:transfer=arib-std-b67:colormatrix=bt2020nc:log-level=error",
+            "-color_primaries", "bt2020", "-color_trc", "arib-std-b67",
+            "-colorspace", "bt2020nc", "-c:a", "aac", "-shortest", str(source),
+        ], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr[-800:])
+        self.assertEqual(compiler.media_info(source)["video"].get("color_transfer"),
+                         "arib-std-b67")
+        self.timeline["picture"] = [{"id": "p1", "source": source.name,
+                                      "sha256": model.sha256_file(source),
+                                      "source_in": 0, "source_out": 2}]
+        self.timeline["transitions"] = []
+        self.timeline["operations"] = []
+        self.timeline["audio"] = [{"id": "effect", "kind": "sfx",
+                                   "source": self.voice.name,
+                                   "sha256": model.sha256_file(self.voice),
+                                   "start": .6, "gain": .25,
+                                   "review_status": "approved"}]
+        self.timeline.update({"video_policy": "copy_source",
+                              "color_policy": "preserve", "width": 160,
+                              "height": 90, "fps": 10})
+        resolved = model.validate(self.timeline)
+        record = compiler.render(self.timeline, resolved)
+        self.assertEqual(record["video_encoder_invocations"], 0)
+        identity = compiler.verify_picture_copy(source, self.output)
+        self.assertTrue(identity["video_packet_sha256"])
+        self.assertEqual(compiler.media_info(self.output)["video"]["color_transfer"],
+                         "arib-std-b67")
+        # Listen by measurement: the 880 Hz fixture cue should appear at its
+        # approved time while the 440 Hz source remains the natural bed.
+        def cue_tone(at):
+            raw = subprocess.run([
+                "ffmpeg", "-v", "error", "-ss", str(at), "-t", "0.2",
+                "-i", str(self.output), "-vn", "-ac", "1", "-ar", "8000",
+                "-f", "f32le", "-"], capture_output=True, check=True).stdout
+            samples = [value[0] for value in struct.iter_unpack("<f", raw)]
+            real = sum(value * math.cos(2 * math.pi * 880 * n / 8000)
+                       for n, value in enumerate(samples))
+            imag = sum(value * math.sin(2 * math.pi * 880 * n / 8000)
+                       for n, value in enumerate(samples))
+            return math.hypot(real, imag) / len(samples)
+        self.assertGreater(cue_tone(.7), cue_tone(.2) * 4)
+        blocked = self.root / "blocked-hlg.mp4"
+        self.timeline["output"] = str(blocked)
+        with patch.object(compiler, "verify_picture_copy",
+                          side_effect=ValueError("packet verification failed")):
+            with self.assertRaisesRegex(ValueError, "packet verification failed"):
+                compiler.render(self.timeline, model.validate(self.timeline))
+        self.assertFalse(blocked.exists())
+        self.timeline["operations"] = [{"id": "picture", "method": "crop",
+                                        "start": 0, "end": 1, "x": 0,
+                                        "y": 0, "w": 1, "h": 1,
+                                        "review_status": "approved"}]
+        with self.assertRaisesRegex(ValueError, "audio-only"):
+            model.validate(self.timeline)
+
     def test_approved_render_creates_one_master_and_record(self):
         approval_path = self._approved()
         real_run = subprocess.run

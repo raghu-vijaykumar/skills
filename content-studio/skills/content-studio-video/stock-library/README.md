@@ -25,7 +25,7 @@ All three accept `top-right`, `top-left`, `bottom-right`, `bottom-left`, or `cen
 
 ## Git catalogue and local sound-effect references
 
-Run from the source repository root. This skill's `assets/` folder owns the catalogue. The source repository tracks the catalogue and owned CTA clips; `assets/media/sfx/` is ignored by Git while the sourced Reel WAVs have unknown redistribution rights:
+Run from the source repository root. This skill's `assets/` folder owns the catalogue. The source repository tracks the catalogue, owned CTA clips, and the pinned [Earshot bank](../audio/sfx/SKILL.md) in `assets/media/sfx/earshot/`; other SFX files remain Git-ignored unless their redistribution rights are confirmed:
 
 ```powershell
 $stock = 'content-studio/skills/content-studio-video/stock-library/assets'
@@ -72,5 +72,5 @@ The separate [memes catalogue](../memes/README.md) handles user-supplied reactio
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `cta-variants` | Supported | Named design, size, rate, duration, placement → silent transparent ProRes clip | No | [Animated variants](#like--share--subscribe-cta) and [exact-asset review notes](previews/cta-variants.md) | Full asset production follows the approved Content Studio precheck; the generic delivery timeline cannot yet compose this alpha clip. |
-| `authored-assets` | Supported | Reviewed visual assets or SFX reference and provenance → Git catalogue and local-only SFX WAVs | No | [Importer tests](tests/test_stock_library.py) | Unknown-rights or unreviewed SFX are reference-only; contextual meme insertion remains in the memes skill. |
+| `authored-assets` | Supported | Reviewed visual assets or SFX reference and provenance → Git catalogue and tracked Earshot WAVs or local-only references | No | [Importer tests](tests/test_stock_library.py) | Unknown-rights or unreviewed SFX are reference-only; contextual meme insertion remains in the memes skill. |
 | `shot-sfx-select` | Supported | Reviewed sound profiles + edited-shot tags → ranked JSON cue proposals | Proposal only | [Selection tests](tests/test_stock_library.py) | Exact tag and duration matching; unknown-rights effects are reference-only, no automatic timeline insertion. |

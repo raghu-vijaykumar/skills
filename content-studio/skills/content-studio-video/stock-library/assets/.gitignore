@@ -1,5 +1,12 @@
-# Reel excerpts have unknown redistribution rights. Keep the working WAVs local.
-/media/sfx/
+# Keep sourced references local. The pinned, auditable Earshot bank is a
+# deliberately shipped Content Studio asset, so only that subtree is tracked.
+/media/sfx/*
+!/media/sfx/earshot/
+# Newly fitted or forged candidates stay local until their individual rights
+# and listening review permit an explicit force-add to the shipped library.
+/media/sfx/earshot/created/
+/recipes/earshot/
+/recipes/local/
 
 # Production precheck and review outputs are machine-local evidence.
 /.content-studio/

@@ -9,6 +9,8 @@ import math
 from pathlib import Path
 
 SCHEMA = "content-studio.delivery-timeline.v1"
+# Delivery modes are capabilities even though they are not timed operations.
+DELIVERY_METHODS = {"timeline-delivery", "hdr-audio-only"}
 PICTURE_METHODS = {
     "crop", "lens-correction",
     "denoise-light", "denoise-medium", "deflicker",
@@ -47,6 +49,20 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: source.read(1 << 20), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _approved_sfx_asset(asset_id: str, digest: str) -> None:
+    """Bind a final bank cue to the current audited listening decision."""
+    path = Path(__file__).resolve().parents[2] / "stock-library" / "assets" / "catalogue.json"
+    items = json.loads(path.read_text(encoding="utf-8"))["assets"]
+    item = next((row for row in items if row.get("id") == asset_id), None)
+    if (not item or item.get("sha256") != digest or
+            item.get("rights") not in {"owned", "licensed", "permission"} or
+            item.get("reuse_status") != "reusable" or
+            item.get("effect_review") != "passed" or
+            item.get("sfx_profile", {}).get("identification_review") != "passed" or
+            item.get("origin", {}).get("audit", {}).get("status") != "passed"):
+        raise ValueError(f"SFX asset {asset_id} lacks current catalogue listening approval")
 
 
 def write_new(path: Path, value: dict) -> None:
@@ -113,7 +129,7 @@ def make_initial(plan: Path, source: Path, output: Path, *, fps: int,
         "output": str(output),
         "fps": fps, "width": width, "height": height,
         "color_policy": "sdr",
-        "audio_policy": "mix", "video_preset": "medium",
+        "audio_policy": "mix", "video_policy": "encode", "video_preset": "medium",
         "picture": [{"id": "p0001", "source": source.name,
                      "sha256": sha256_file(source), "source_in": 0}],
         "transitions": [], "operations": [], "audio": [],
@@ -159,8 +175,12 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     if (not isinstance(width, int) or not isinstance(height, int)
             or width < 2 or height < 2 or width % 2 or height % 2):
         raise ValueError("Output dimensions must be positive even integers")
-    if timeline.get("color_policy") != "sdr":
-        raise ValueError("Only reviewed SDR output is currently supported")
+    video_policy = timeline.get("video_policy", "encode")
+    if video_policy not in {"encode", "copy_source"}:
+        raise ValueError("Unsupported video_policy")
+    if (video_policy == "encode" and timeline.get("color_policy") != "sdr") or (
+            video_policy == "copy_source" and timeline.get("color_policy") != "preserve"):
+        raise ValueError("SDR encoding or exact source-picture preservation is required")
     audio_policy = timeline.get("audio_policy", "mix")
     if audio_policy not in {"mix", "copy_source"}:
         raise ValueError("Unsupported audio_policy")
@@ -339,6 +359,10 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             raise ValueError(f"Audio asset changed: {cue_id}")
         if require_review and cue.get("review_status") != "approved":
             raise ValueError(f"Audio cue {cue_id} lacks human review")
+        if require_review and cue.get("sound_review_required"):
+            raise ValueError(f"SFX cue {cue_id} lacks sound listening review")
+        if require_review and cue.get("kind") == "sfx" and cue.get("asset_id"):
+            _approved_sfx_asset(cue["asset_id"], cue["sha256"])
         at = _number(cue.get("start"), f"{cue_id}.start")
         if at >= duration:
             raise ValueError(f"Audio cue {cue_id} starts outside the timeline")
@@ -358,6 +382,12 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                 value = _number(cue.get(fade, 0), f"{cue_id}.{fade}")
                 if value > min(length / 2, 10):
                     raise ValueError(f"{cue_id}.{fade} exceeds the music span")
+    if video_policy == "copy_source":
+        # An audio-only HDR/Dolby Vision route must never reconstruct picture frames.
+        if (len(resolved) != 1 or resolved[0]["source_in"] != 0 or
+                by_after or operations or audio_policy != "mix" or
+                float(resolved[0].get("audio_gain", 1)) != 1):
+            raise ValueError("copy_source video needs one uncut picture and audio-only changes")
     if audio_policy == "copy_source":
         # Stream copy is valid only when the picture edit cannot shift source audio.
         if (len(resolved) != 1 or resolved[0]["source_in"] != 0
@@ -378,13 +408,15 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     return {"clips": resolved, "transitions": by_after, "operations": operations,
             "audio": audio, "duration": duration, "fps": fps, "width": width,
             "height": height, "root": root, "output": output,
-            "audio_policy": audio_policy, "video_preset": video_preset}
+            "audio_policy": audio_policy, "video_policy": video_policy,
+            "video_preset": video_preset}
 
 
 def revise(timeline: dict, changes: dict, *, new_output: str) -> dict:
     """A revision is a copy; the old bytes remain eligible for audit."""
     allowed = {"picture", "transitions", "operations", "audio", "fps",
-               "width", "height", "color_policy", "audio_policy", "video_preset"}
+               "width", "height", "color_policy", "audio_policy", "video_policy",
+               "video_preset"}
     if not isinstance(changes, dict) or not changes or set(changes) - allowed:
         raise ValueError("Revision changes contain unsupported fields")
     updated = copy.deepcopy(timeline)

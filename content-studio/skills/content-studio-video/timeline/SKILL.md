@@ -92,8 +92,7 @@ timeline, source, voice, font, sidecar, plan, or renderer capability invalidates
 the prior timeline approval. Do not silently fall back to the specialist
 full-master scripts when an operation is unavailable in this route.
 
-The current route is SDR only. AI upscale, HDR/Dolby Vision, and methods marked
-`unsupported` in `methods.json` require further adapters and evidence.
+Picture-processing delivery remains SDR only. For an already edited HDR/Dolby Vision source with **audio-only** changes, `init --preserve-picture` creates a timeline that copies its coded video packets while mixing approved audio. It rejects cuts, joins, picture operations, or source-audio gain changes. The final render and `verify` compare every video packet payload plus HDR/Dolby Vision stream metadata against the source and stop if preservation cannot be established. A bounded preview may use a different packet range; inspect the exact final output before package approval. AI upscale and HDR/Dolby Vision picture operations remain unsupported.
 
 The approval fingerprint binds the timeline, approved plan, source assets, and
 renderer capability. Preflight checklist evidence may continue to be recorded

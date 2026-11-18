@@ -41,6 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("--fps", type=int, default=30)
     init.add_argument("--width", type=int, default=1920)
     init.add_argument("--height", type=int, default=1080)
+    init.add_argument("--preserve-picture", action="store_true",
+                      help="Copy a supplied HDR/Dolby Vision picture while mixing audio")
     hash_asset = commands.add_parser("hash", help="Hash an input asset for a timeline")
     hash_asset.add_argument("--file", type=Path, required=True)
     for name in ("validate", "fingerprint", "preview", "render"):
@@ -78,6 +80,14 @@ def main(argv: list[str] | None = None) -> int:
             info = media_info(args.source)
             if not info["video"] or info["duration"] <= 0:
                 raise ValueError("Input must contain a video stream")
+            if args.preserve_picture:
+                from fractions import Fraction
+                video = info["video"]
+                timeline["video_policy"] = "copy_source"
+                timeline["color_policy"] = "preserve"
+                timeline["width"] = int(video["width"])
+                timeline["height"] = int(video["height"])
+                timeline["fps"] = float(Fraction(video["avg_frame_rate"]))
             timeline["picture"][0]["source_out"] = round(info["duration"], 6)
             resolved = validate(timeline)
             compile_graph(timeline, resolved)

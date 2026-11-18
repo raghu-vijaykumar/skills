@@ -152,8 +152,93 @@ def _audio_graph(label: str, operations: list[dict], duration: float,
     return "afinal"
 
 
+def _compile_copy_video(resolved: dict) -> tuple[list[str], str]:
+    """Mix audio while the supplied picture packets bypass every video filter."""
+    clip = resolved["clips"][0]
+    source = media_info(clip["path"])
+    video = source["video"]
+    if not video or not source["audio"] or abs(source["duration"] - resolved["duration"]) > .08:
+        raise ValueError("Picture-copy mix needs a full-length video with source audio")
+    from fractions import Fraction
+    rate = float(Fraction(video.get("avg_frame_rate") or "0/1"))
+    if (int(video["width"]) != resolved["width"] or
+            int(video["height"]) != resolved["height"] or
+            abs(rate - resolved["fps"]) > .05):
+        raise ValueError("Picture-copy settings must match source size and frame rate")
+    inputs = ["-i", str(clip["path"])]
+    length = _fmt(resolved["duration"])
+    graph = [f"[0:a:0]aresample=48000,aformat=channel_layouts=stereo,"
+             f"atrim=duration={length}[abase]"]
+    labels = ["abase"]
+    for index, cue in enumerate(resolved["audio"], start=1):
+        source_path = asset_path(resolved["root"], cue["source"])
+        if not media_info(source_path)["audio"]:
+            raise ValueError(f"No audio stream in {cue['id']}")
+        if cue.get("loop"):
+            inputs.extend(["-stream_loop", "-1", "-t", _fmt(float(cue["duration"]))])
+        inputs.extend(["-i", str(source_path)])
+        delay = int(round(float(cue["start"]) * 1000))
+        chain = [f"[{index}:a:0]aresample=48000,aformat=channel_layouts=stereo",
+                 f"volume={float(cue.get('gain', 1)):g}"]
+        if cue.get("loop"):
+            span = float(cue["duration"])
+            chain.append(f"atrim=duration={_fmt(span)}")
+            if cue.get("fade_in"):
+                chain.append(f"afade=t=in:st=0:d={_fmt(float(cue['fade_in']))}")
+            if cue.get("fade_out"):
+                chain.append(f"afade=t=out:st={_fmt(span - float(cue['fade_out']))}:"
+                             f"d={_fmt(float(cue['fade_out']))}")
+        chain.extend([f"adelay={delay}|{delay}", "apad",
+                      f"atrim=duration={length}[acue{index}]"])
+        graph.append(",".join(chain))
+        labels.append(f"acue{index}")
+    graph.append("".join(f"[{label}]" for label in labels) +
+                 f"amix=inputs={len(labels)}:duration=first:normalize=0,"
+                 "alimiter=limit=0.95,aresample=48000,"
+                 "aformat=sample_rates=48000:channel_layouts=stereo[afinal]")
+    return inputs, ";".join(graph)
+
+
+def verify_picture_copy(source: Path, output: Path) -> dict:
+    """Fail closed if remuxing changed coded packets or HDR metadata."""
+    original, delivered = media_info(source)["video"], media_info(output)["video"]
+    if not original or not delivered:
+        raise ValueError("Picture-copy verification needs two video streams")
+    keys = ("codec_name", "profile", "width", "height", "pix_fmt", "color_range",
+            "color_space", "color_transfer", "color_primaries")
+    differences = [key for key in keys if original.get(key) != delivered.get(key)]
+    if differences:
+        raise ValueError("Picture-copy metadata changed: " + ", ".join(differences))
+    # Compare the actual Dolby Vision configuration fields, not just its presence.
+    def dovi_metadata(stream: dict) -> list[dict]:
+        return [{key: value for key, value in side.items() if key not in {"side_data_type"}}
+                for side in stream.get("side_data_list", [])
+                if "dovi" in json.dumps(side).lower() or
+                "dolby vision" in json.dumps(side).lower()]
+    source_dv = dovi_metadata(original)
+    output_dv = dovi_metadata(delivered)
+    if source_dv != output_dv:
+        raise ValueError("Dolby Vision stream metadata changed")
+    command = ["ffprobe", "-v", "error", "-select_streams", "v:0",
+               "-show_packets", "-show_entries", "packet=data_hash",
+               "-show_data_hash", "sha256", "-of", "csv=p=0"]
+    hashes = []
+    for path in (source, output):
+        result = subprocess.run([*command, str(path)], capture_output=True, text=True)
+        if result.returncode or "SHA256:" not in result.stdout:
+            raise ValueError("Cannot establish video packet identity")
+        hashes.append(result.stdout.strip())
+    if hashes[0] != hashes[1]:
+        raise ValueError("Remux changed or dropped video packet payloads")
+    import hashlib
+    return {"video_packet_sha256": hashlib.sha256(hashes[0].encode()).hexdigest(),
+            "dolby_vision": bool(source_dv)}
+
+
 def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
     """Return input arguments and one graph; every branch stays unencoded."""
+    if resolved["video_policy"] == "copy_source":
+        return _compile_copy_video(resolved)
     clips = resolved["clips"]
     width, height, fps = resolved["width"], resolved["height"], resolved["fps"]
     duration = resolved["duration"]
@@ -455,13 +540,17 @@ def _export(timeline: dict, resolved: dict, output: Path,
         graph_path.write_text(graph, encoding="utf-8")
         temporary = Path(scratch) / "delivery.mp4"
         copy_audio = resolved["audio_policy"] == "copy_source"
+        copy_video = resolved["video_policy"] == "copy_source"
         command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
                    "-n", *inputs, "-/filter_complex", str(graph_path),
-                   "-map", "[vfinal]", "-map", "0:a:0" if copy_audio else "[afinal]",
-                   *seek_args, "-t", _fmt(expected),
-                   "-r", _fmt(resolved["fps"]),
-                   "-c:v", "libx264", "-preset", resolved["video_preset"],
-                   "-crf", "18", "-pix_fmt", "yuv420p",
+                   "-map", "0:v:0" if copy_video else "[vfinal]",
+                   "-map", "0:a:0" if copy_audio else "[afinal]",
+                   *seek_args,
+                   *([] if copy_video and preview_range is None else ["-t", _fmt(expected)]),
+                   *(["-c:v", "copy", "-map_metadata", "0"] if copy_video else
+                     ["-r", _fmt(resolved["fps"]), "-c:v", "libx264",
+                      "-preset", resolved["video_preset"], "-crf", "18",
+                      "-pix_fmt", "yuv420p"]),
                    *(["-c:a", "copy"] if copy_audio else
                      ["-c:a", "aac", "-ar", "48000", "-b:a", "192k"]),
                    "-movflags", "+faststart", str(temporary)]
@@ -473,6 +562,8 @@ def _export(timeline: dict, resolved: dict, output: Path,
         if (not delivered["video"] or not delivered["audio"]
                 or abs(delivered["duration"] - expected) > .15):
             raise RuntimeError("Rendered duration or streams failed validation")
+        if copy_video and preview_range is None:
+            verify_picture_copy(resolved["clips"][0]["path"], temporary)
         os.replace(temporary, output)
     return {"output": str(output), "output_sha256": sha256_file(output),
             "duration": delivered["duration"]}
@@ -483,7 +574,7 @@ def render(timeline: dict, resolved: dict) -> dict:
     record.update({
         "operations": [item["id"] for item in resolved["operations"]],
         "audio_cues": [item["id"] for item in resolved["audio"]],
-        "video_encoder_invocations": 1,
+        "video_encoder_invocations": 0 if resolved["video_policy"] == "copy_source" else 1,
         "audio_encoder_invocations": 0 if resolved["audio_policy"] == "copy_source" else 1,
         "review_status": "pending_exact_output_review",
     })

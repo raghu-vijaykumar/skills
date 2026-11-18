@@ -112,7 +112,7 @@ def write_catalogue(root: Path, assets: list[dict]) -> None:
     catalog = root / "catalogue.json"
     readme = root / "README.md"
     lines = ["# Content Studio stock assets", "",
-             "Git catalogue of owned media and local-only reference effects. SFX WAVs under `media/sfx/` are ignored by Git while redistribution rights are unknown.", "",
+             "Git catalogue of owned media and local-only reference effects. Reviewed Earshot WAVs under `media/sfx/earshot/` ship with Content Studio; sourced references remain local.", "",
              "| ID | Name | Type | Size / length | Rights | Creator | Review | Sound / shot tags | Tags | Source | File |",
              "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for item in sorted(assets, key=lambda row: row["name"].casefold()):
@@ -210,6 +210,9 @@ def review_sfx(root: Path, ident: str, rights: str, effect_review: str, note: st
         raise ValueError("SFX catalogue ID not found")
     if rights not in RIGHTS or effect_review not in EFFECT_REVIEWS or not note.strip():
         raise ValueError("Valid rights, effects-only review, and review note are required")
+    if (item.get("origin", {}).get("audit", {}).get("status") == "failed" and
+            effect_review == "passed"):
+        raise ValueError("Failed SFX audit blocks approval")
     # A later verified decision updates metadata in place; SHA-256 dedupe keeps one media copy.
     item.update({"rights": rights, "effect_review": effect_review,
                  "review_note": note.strip(),
@@ -271,6 +274,7 @@ def suggest_sfx(assets: list[dict], manifest: dict, mode: str = "delivery") -> d
             for item in assets:
                 profile = item.get("sfx_profile", {})
                 if (item.get("kind") != "sfx" or item.get("effect_review") != "passed" or
+                        item.get("origin", {}).get("audit", {}).get("status", "passed") != "passed" or
                         profile.get("identification_review") != "passed"):
                     continue
                 cleared = (item.get("rights") in {"owned", "licensed", "permission"} and

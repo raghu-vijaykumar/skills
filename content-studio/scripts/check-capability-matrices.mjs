@@ -16,8 +16,8 @@ const expectedUnsupported = new Set([
 ]);
 // Keep the declared-method total in sync when a reviewed capability is added.
 // Reference critique adds a leaf with mapped evidence for independently timed cuts.
-const expectedMethodCount = 137;
-const expectedMatrixCount = 47;
+const expectedMethodCount = 146;
+const expectedMatrixCount = 48;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))
   .filter(({folder}) => folder === videoRoot || folder.startsWith(videoRoot + path.sep));

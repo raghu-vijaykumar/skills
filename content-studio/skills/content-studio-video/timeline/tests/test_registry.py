@@ -15,7 +15,7 @@ class CapabilityRegistryTests(unittest.TestCase):
                      if entry["status"] == "supported"}
         implemented = (model.PICTURE_METHODS | model.GRAPHIC_METHODS
                        | model.AUDIO_METHODS | set(model.JOIN_TRANSITIONS)
-                       | model.POINT_TRANSITIONS | {"timeline-delivery"})
+                       | model.POINT_TRANSITIONS | model.DELIVERY_METHODS)
         self.assertEqual(supported, implemented)
         self.assertEqual(
             next(entry for entry in registry["methods"]

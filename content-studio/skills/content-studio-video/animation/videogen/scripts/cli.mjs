@@ -13,6 +13,7 @@ import {publishInstagram} from './publish-instagram.mjs';
 import {verifyPackage} from '../../../../../scripts/package.mjs';
 import {scaffoldDraft} from './scaffold.mjs';
 import {validateScenePlan} from './scene-plan.mjs';
+import {validateSfxCues} from './validate-sfx-cues.mjs';
 import {alignNarration} from './align-narration.mjs';
 import {generateScore} from './procedural-score.mjs';
 
@@ -249,6 +250,10 @@ async function main() {
     const item = metadata(config, id);
     // Reject unsupported or unproven authored scenes before a costly bundle or render.
     validateScenePlan(item.dir);
+    // Bounded SFX previews may contain pending cues. Full delivery needs a
+    // human approval bound to these exact cue bytes and copied audio assets.
+    validateSfxCues(item.dir, config.publicDir,
+      {delivery: command === 'render' && hasFlag('delivery')});
     const narrated = fs.existsSync(path.join(item.dir, 'content', 'narration.yaml'));
     if (narrated) run(process.execPath, [path.join(toolkit, 'scripts', 'verify-narration.mjs'), item.dir], 'Narration cache');
     checks(config, id, 'video', 'prepare');

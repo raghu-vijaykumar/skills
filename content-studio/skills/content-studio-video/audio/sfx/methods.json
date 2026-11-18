@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "earshot-bank-import", "script": "scripts/sfx.py", "status": "supported", "review": "Confirm pinned revision, 252 playable WAVs, audit state, license, and gallery"},
+    {"id": "sfx-forge", "script": "scripts/sfx.py", "status": "supported", "review": "Listen to complete candidate and inspect recipe, audit, and provenance before catalogue approval"},
+    {"id": "sfx-fit", "script": "scripts/sfx.py", "status": "supported", "review": "Confirm source rights, derivative license, sound quality, and full candidate"},
+    {"id": "sfx-events", "script": "scripts/events.py", "status": "supported", "review": "Inspect timecoded frames and original audio before accepting event meaning"},
+    {"id": "sfx-propose", "script": "scripts/events.py", "status": "supported", "review": "Review exact cue timing, sound, levels, and original audio in bounded preview"}
+  ]
+}
