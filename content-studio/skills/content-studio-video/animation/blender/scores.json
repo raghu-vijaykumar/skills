@@ -1623,6 +1623,50 @@
         }
       ]
     },
+    "dark-gritty-mood": {
+      "selected": "gritty-depot-v2",
+      "candidates": [
+        {
+          "id": "gritty-depot-v1",
+          "video_sha256": "fadd5d927f4b7b797f68f7f3ddd3a7cc8098eaeee3115d833472b74f3a0b8ecf",
+          "gif_sha256": "8a6baf286db050ccb7f2b3bc28cc9c37ac225d27c571a4eabbd56814845b9133",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and industrial mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The oxidized gantry, repaired shutter, low-key light, and isolated load establish a dark depot, but the load barely moves. Full MP4, GIF, isolated load, and saved-scene audit passed."
+        },
+        {
+          "id": "gritty-depot-v2",
+          "video_sha256": "13335530ab54e141323248fcc02020033f7922532b29feebacec87a22afa53cd",
+          "gif_sha256": "e562961c9ca552e565eabbb1cb0762385f5cecad2df8fb1503571003e8062dc6",
+          "gif_path": "previews/gritty-depot.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and industrial mood review",
+          "review_date": "2026-11-19",
+          "review_note": "The cage and hook traverse a visibly worn freight bay with restrained swing and a camera push. The simple cage and regular truss geometry limit finish to 3/5. Full MP4, GIF, isolated load, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

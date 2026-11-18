@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "gritty-freight-depot",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Gritty depot inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "depot", "name": "SM_Depot_Stained_Back_Wall"},
+    {"id": "shutter", "name": "SM_Depot_Patched_Shutter"},
+    {"id": "gantry", "name": "SM_Depot_Gantry_Beam"},
+    {"id": "load", "name": "SM_Depot_Suspended_Load_Rig"},
+    {"id": "hook", "name": "SM_Depot_Crane_Hook"},
+    {"id": "cage", "name": "SM_Depot_Cargo_Cage_Base"},
+    {"id": "camera", "name": "Gritty depot inspection camera"}
+  ],
+  "beats": [
+    {"id": "wear", "frame": 1, "label": "Oxidized gantry, repaired shutter, and lonely work lamp establish industrial wear", "object_ids": ["depot", "shutter", "gantry"]},
+    {"id": "haul", "frame": 38, "label": "The still-suspended cage and hook traverse the gantry", "object_ids": ["load", "hook", "cage"]},
+    {"id": "settle", "frame": 72, "label": "The patched load reaches the far side of the melancholy freight bay", "object_ids": ["load", "camera"]}
+  ],
+  "review_states": ["wear", "haul", "settle"],
+  "assets": [
+    {"id": "freight-depot", "origin": "procedural", "license": "Original Content Studio depot, gantry, cage, chain, and lamps"}
+  ]
+}

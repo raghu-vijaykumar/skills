@@ -35,3 +35,4 @@ The [`historical-worlds` longship](blender/viking-review.md) adds a scored Vikin
 The [`apocalypse-worlds` outpost](blender/wasteland-review.md) adds a scored roadside collapse lane with improvised repairs, a salvaged hauler, and a dust sweep.
 The [`biome-worlds` kelp forest](blender/kelp-review.md) adds a scored underwater lane with swaying plants, fish, bubbles, and a camera glide.
 The [`cozy-wholesome-mood` nook](blender/cozy-review.md) adds a scored reading-room lane with rounded furniture, gentle chair rocking, and a warming practical lamp.
+The [`dark-gritty-mood` depot](blender/gritty-review.md) adds a scored industrial lane with oxidized structure, patched metal, low-key light, and a crossing crane load.

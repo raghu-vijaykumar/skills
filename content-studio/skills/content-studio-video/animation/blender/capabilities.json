@@ -1221,9 +1221,16 @@
         "lighting"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/gritty-depot.gif",
+      "review": "gritty-review.md",
+      "builder": "examples/gritty_depot.py",
+      "spec": "examples/gritty_depot.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["dark gritty", "freight depot", "industrial depot", "rusty depot"],
+      "score_record": "scores.json"
     },
     {
       "id": "dream-surreal-mood",

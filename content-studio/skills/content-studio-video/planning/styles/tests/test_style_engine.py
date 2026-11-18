@@ -285,6 +285,13 @@ class StyleEngineTests(unittest.TestCase):
                          "examples/cozy_nook.py")
         self.assertEqual(cozy["scenes"][0]["blender"]["world"],
                          "cozy-wholesome-mood")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            gritty = engine.plan({"scenes": [{"id": "depot", "duration_seconds": 3,
+                "visual_intent": "A dark gritty freight depot with a moving crane"}]})
+        self.assertEqual(gritty["scenes"][0]["blender"]["builder"],
+                         "examples/gritty_depot.py")
+        self.assertEqual(gritty["scenes"][0]["blender"]["world"],
+                         "dark-gritty-mood")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):
