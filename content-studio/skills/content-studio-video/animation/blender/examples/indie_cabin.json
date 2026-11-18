@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "indie-forest-cabin",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Forest cabin first-person camera",
+  "variant": 2,
+  "objects": [
+    {"id": "forest", "name": "SM_Cabin_Forest_Floor"},
+    {"id": "cabin", "name": "SM_Cabin_Timber_Shell"},
+    {"id": "window", "name": "SM_Cabin_Window_Glow"},
+    {"id": "light", "name": "SM_Cabin_Window_Light"},
+    {"id": "trail", "name": "SM_Cabin_Red_Trail_Marker_0"},
+    {"id": "flashlight", "name": "SM_Cabin_Flashlight_Cone"},
+    {"id": "camera", "name": "Forest cabin first-person camera"}
+  ],
+  "beats": [
+    {"id": "approach", "frame": 1, "label": "A handheld beam follows red markers toward an isolated lit cabin", "object_ids": ["trail", "flashlight", "cabin"]},
+    {"id": "failure", "frame": 45, "label": "The cabin window abruptly goes dark as the camera nears", "object_ids": ["window", "light", "camera"]},
+    {"id": "inspection", "frame": 72, "label": "The cabin remains shut and the flashlight has to carry the path", "object_ids": ["forest", "flashlight", "camera"]}
+  ],
+  "review_states": ["approach", "failure", "inspection"],
+  "assets": [
+    {"id": "cabin-forest", "origin": "procedural", "license": "Original Content Studio cabin, firs, path, trail markers, and flashlight"}
+  ]
+}

@@ -1291,6 +1291,40 @@
         }
       ]
     },
+    "indie-horror-aesthetics": {
+      "selected": "indie-cabin-v2",
+      "candidates": [
+        {
+          "id": "indie-cabin-v1",
+          "video_sha256": "84683fdcfbed184b306104f9c15a8e5f0a4fbfc5f9b432624ecf2c6d875f320c",
+          "gif_sha256": "7139f52b5f6720c3739d644f2f81f8c39d8f4d4694428fce483cdd7fc837141f",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 2, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and forest-cabin lane review",
+          "review_date": "2026-11-18",
+          "review_note": "A readable cabin, red route markers, fir silhouettes, practical window, and first-person path establish the chosen indie forest lane, but the window stays lit and the camera only drifts. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "indie-cabin-v2",
+          "video_sha256": "ef2404f76f5669fdd02a4f885f77fc269101a82db7c73e5e386be74d29b75bc4",
+          "gif_sha256": "332b798a4fd1e11e943a2c944eaa5de40bd7906b7e0f6baa04b34b2ab6dadaef",
+          "gif_path": "previews/indie-cabin.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and forest-cabin lane review",
+          "review_date": "2026-11-18",
+          "review_note": "The first-person camera follows red markers toward the cabin, then the warm window cuts out and cool fill retains its silhouette. The simple fir and siding geometry limit finish to 3/5. Full MP4, GIF, isolated cabin, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

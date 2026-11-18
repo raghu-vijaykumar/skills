@@ -233,6 +233,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(dream["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(dream["scenes"][0]["blender"]["builder"],
                          "examples/dream_playground.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            indie = engine.plan({"scenes": [{"id": "cabin", "duration_seconds": 3,
+                "visual_intent": "A first-person flashlight follows red markers to a forest cabin as its window goes dark"}]})
+        self.assertEqual(indie["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(indie["scenes"][0]["blender"]["builder"],
+                         "examples/indie_cabin.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

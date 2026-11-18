@@ -1082,9 +1082,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/indie-cabin.gif",
+      "review": "indie-review.md",
+      "builder": "examples/indie_cabin.py",
+      "spec": "examples/indie_cabin.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["cabin", "trail", "flashlight", "window"],
+      "score_record": "scores.json"
     },
     {
       "id": "fantasy-worlds",

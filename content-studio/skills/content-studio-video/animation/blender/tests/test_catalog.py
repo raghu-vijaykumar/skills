@@ -18,7 +18,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 35)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 36)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -196,6 +196,13 @@ class CatalogTests(unittest.TestCase):
                          ("environment-artist", "dream-weirdcore-style"))
         self.assertEqual(dream["builder"], "examples/dream_playground.py")
         self.assertIsNone(catalog_module.route("A dreamcore car drives")["builder"])
+        indie = catalog_module.route("A first-person flashlight follows red markers to a forest cabin as its window goes dark")
+        self.assertEqual((indie["subject"], indie["style"]),
+                         ("environment-artist", "indie-horror-aesthetics"))
+        self.assertEqual(indie["builder"], "examples/indie_cabin.py")
+        self.assertIsNone(catalog_module.route("An indie horror car drives")["builder"])
+        self.assertEqual(catalog_module.route("A person walks through a room")["subject"],
+                         "character-artist")
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -234,7 +241,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 36)
+        self.assertEqual(len(catalog_module.scorebook(book)), 37)
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")
@@ -323,6 +330,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(dream["selected"], "dream-playground-v2")
         self.assertEqual([candidate["score_total"] for candidate in dream["candidates"]],
                          [68, 78])
+        indie = book["routes"]["indie-horror-aesthetics"]
+        self.assertEqual(indie["selected"], "indie-cabin-v2")
+        self.assertEqual([candidate["score_total"] for candidate in indie["candidates"]],
+                         [68, 78])
         unscored = copy.deepcopy(book)
         unscored["routes"]["hard-surface"]["candidates"][0]["scores"].pop("finish")
         with self.assertRaisesRegex(ValueError, "five 0–5 scores"):
@@ -350,7 +361,7 @@ class CatalogTests(unittest.TestCase):
                      "vector-sprout", "retro8-ship", "retro16-fox", "hd2d-bridge",
                      "aero-dashboard", "cosmic-aperture", "mutating-hand",
                      "analog-training", "liminal-pool", "folk-ritual", "puppet-stage",
-                     "dream-playground"):
+                     "dream-playground", "indie-cabin"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)
@@ -378,6 +389,8 @@ class CatalogTests(unittest.TestCase):
                       "content-studio-video/animation/blender/previews/puppet-stage.gif)", readme)
         self.assertIn("![Best scored dream weirdcore playground animation](content-studio/skills/"
                       "content-studio-video/animation/blender/previews/dream-playground.gif)", readme)
+        self.assertIn("![Best scored indie forest cabin horror animation](content-studio/skills/"
+                      "content-studio-video/animation/blender/previews/indie-cabin.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

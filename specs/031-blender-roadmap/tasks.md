@@ -49,7 +49,7 @@
   - [x] T011m Render the retro 16-bit fox with two scored candidates and a packed-dither, palette, fox-walk, and waterfall audit.
   - [x] T011n Render the HD-2D lantern bridge with three scored candidates and a pixel-actor, painted-stage, lighting, and DOF audit.
   - [x] T011o Render the Frutiger Aero dashboard with two scored candidates and a glossy-aqua, leaf, bubble-trail, and UI audit.
-- [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
+- [x] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
   - [x] T012a Render the cosmic aperture with three scored candidates and a tiny-witness, broken-geometry, moving-iris, and void audit.
   - [x] T012b Render the body-horror hand with three full renders, four scored GIF outputs, and a corrected sixth-digit anatomy audit.
   - [x] T012c Render the analog training tape with three scored candidates and a scanline, signal-loss, security-camera, and doorway audit.
@@ -57,7 +57,7 @@
   - [x] T012e Render the sunlit folk rite with two scored candidates and a wicker, repeated-symbol, village, and ribbon-motion audit.
   - [x] T012f Render the puppet show with two scored candidates and a felt, plastic gaze, staged brand, and sick-light audit.
   - [x] T012g Render the dream playground with two scored candidates and an oversized toy, disconnected nursery, and impossible-door audit.
-  - [ ] T012h Complete the remaining indie horror pack with its own scored GIF.
+  - [x] T012h Render the forest cabin indie lane with two scored candidates and a first-person trail, fir, flashlight, and window-blackout audit.
 
 ## Wave 5: Settings and genre direction
 

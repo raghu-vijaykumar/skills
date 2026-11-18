@@ -158,7 +158,9 @@ def route(prompt, style=None, subject=None):
     subject_rules = [
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat)\b", "vehicle-artist"),
         (r"\b(creature|monster|dragon|animal|butterfly|fox)\b", "creature-artist"),
-        (r"\b(character|person|human|mascot|puppet|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b", "character-artist"),
+        # A first-person camera cue does not make its environment a character shot.
+        (r"\b(character|human|mascot|puppet|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b|(?<!first[- ])\bperson\b", "character-artist"),
+        (r"\b(cabin|trail|woodland)\b", "environment-artist"),
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
@@ -184,6 +186,7 @@ def route(prompt, style=None, subject=None):
             (r"\b(folk.horror|rural.ritual|pastoral.dread|wicker.effigy)\b", "folk-horror-style"),
             (r"\b(mascot.horror|puppet.horror|felt.horror|costume.horror)\b", "mascot-puppet-horror"),
             (r"\b(dreamcore|weirdcore|traumacore|dream.horror|surreal.childhood)\b", "dream-weirdcore-style"),
+            (r"\b(indie.horror|cabin.horror|forest.horror|corporate.horror|silent.hill|fear.to.fathom|puppet.combo)\b", "indie-horror-aesthetics"),
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
@@ -255,6 +258,9 @@ def route(prompt, style=None, subject=None):
                          "dream-weirdcore-style" if subject == "environment-artist" and
                          re.search(r"\b(playground|nursery|playroom)\b", text) and
                          re.search(r"\b(block|alphabet|toy|chair|door)\b", text) else
+                         "indie-horror-aesthetics" if subject == "environment-artist" and
+                         re.search(r"\b(cabin)\b", text) and
+                         re.search(r"\b(forest|trail|flashlight|window)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and
