@@ -466,6 +466,12 @@ class StyleEngineTests(unittest.TestCase):
                     "visual_intent": prompt}]})
             self.assertEqual(asset["scenes"][0]["blender"]["subject"], subject)
             self.assertEqual(asset["scenes"][0]["blender"]["builder"], builder)
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            qa = engine.plan({"scenes": [{"id": "qa", "duration_seconds": 3,
+                "visual_intent": "A material swatch QA review"}]})
+        self.assertEqual(qa["scenes"][0]["blender"]["capability"], "qa-review")
+        self.assertEqual(qa["scenes"][0]["blender"]["builder"],
+                         "examples/material_light_lab.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

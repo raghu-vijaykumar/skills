@@ -330,7 +330,7 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
                          "stylized-style" if subject == "vegetation-artist" and
                          re.search(r"\bkelp.frond.vegetation\b", text) else
                          "realistic-style" if
-                         selected_capability in {"materials", "lookdev", "lighting"}
+                         selected_capability in {"materials", "lookdev", "lighting", "qa-review"}
                          else "stylized-style" if
                          selected_capability in {"camera-cinematography", "rendering", "animation", "geometry-nodes", "procedural-modeling", "scene-assembly"}
                          else "stylized-style" if subject == "vehicle-artist" and

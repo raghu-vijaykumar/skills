@@ -598,9 +598,17 @@
         "rendering"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/material-light-lab.gif",
+      "review": "qa-review.md",
+      "builder": "examples/material_light_lab.py",
+      "spec": "examples/material_light_lab.json",
+      "compatible_subjects": ["blender-modeler"],
+      "compatible_styles": ["realistic-style"],
+      "intent_cues": ["material swatch qa review"],
+      "score_record": "scores.json",
+      "score_route": "material-light-lab"
     },
     {
       "id": "archviz",

@@ -9,4 +9,6 @@ Use [videogen](videogen/SKILL.md) for Remotion projects and the [headless Blende
 
 For an approved Blender shot in a code-driven video, use the [hashed videogen handoff](blender/README.md#reviewed-videogen-handoff). Its generated scene records the MP4, rights note, narration cue, and exact start frame. Review the composed output and score every full gallery candidate before selecting a README GIF.
 
+For a reviewable Blender asset, run the [screenshot-backed QA pass](blender/qa-review.md) on the saved scene and scored output. Inspect its captures before entering a visual verdict; a technical pass alone leaves the verdict at `REVIEW`.
+
 For 2D, 2.5D, 3D and hybrid work with authored heroes, use the [per-part and per-action review loop](../review/critique/references/object-scoring.md#production-checkpoints) at narrated proof and exact master. Carry the inventory from the storyboard into both reports. Fix gaps with bounded rerenders and rescore the same actions.

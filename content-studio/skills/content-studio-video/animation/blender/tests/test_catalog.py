@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 73)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 74)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -414,6 +414,11 @@ class CatalogTests(unittest.TestCase):
                          ("character-archetypes", "noir-style",
                           "examples/noir_detective.py"))
         self.assertIsNone(catalog_module.route("A detective archetype in an alley",
+                                                style="anime-style")["builder"])
+        qa = catalog_module.route("A material swatch QA review")
+        self.assertEqual((qa["capability"], qa["style"], qa["builder"]),
+                         ("qa-review", "realistic-style", "examples/material_light_lab.py"))
+        self.assertIsNone(catalog_module.route("A material swatch QA review",
                                                 style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
