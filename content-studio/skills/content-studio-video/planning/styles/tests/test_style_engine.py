@@ -393,6 +393,13 @@ class StyleEngineTests(unittest.TestCase):
                          "genre-racing-sports")
         self.assertEqual(circuit["scenes"][0]["blender"]["builder"],
                          "examples/circuit_sprint.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            narrative = engine.plan({"scenes": [{"id": "choice", "duration_seconds": 3,
+                "visual_intent": "A visual novel station letter choice"}]})
+        self.assertEqual(narrative["scenes"][0]["blender"]["genre"],
+                         "genre-narrative-vn")
+        self.assertEqual(narrative["scenes"][0]["blender"]["builder"],
+                         "examples/station_letter.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 56)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 57)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -333,6 +333,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(circuit["builder"], "examples/circuit_sprint.py")
         self.assertIsNone(catalog_module.route("A circuit sprint",
                                                 style="anime-style")["builder"])
+        narrative = catalog_module.route("A visual novel station letter choice")
+        self.assertEqual((narrative["subject"], narrative["style"], narrative["genre"]),
+                         ("environment-artist", "stylized-style", "genre-narrative-vn"))
+        self.assertEqual(narrative["builder"], "examples/station_letter.py")
+        self.assertIsNone(catalog_module.route("A visual novel station letter",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -371,7 +377,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 57)
+        self.assertEqual(len(catalog_module.scorebook(book)), 58)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -452,6 +458,10 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(circuit["selected"], "circuit-sprint-v2")
         self.assertEqual([candidate["score_total"] for candidate in circuit["candidates"]],
                          [58, 73])
+        narrative = book["routes"]["genre-narrative-vn"]
+        self.assertEqual(narrative["selected"], "station-letter-v3")
+        self.assertEqual([candidate["score_total"] for candidate in narrative["candidates"]],
+                         [58, 68, 73])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
         self.assertEqual(handoff["selected"], "clamp-handoff-full-resolution")

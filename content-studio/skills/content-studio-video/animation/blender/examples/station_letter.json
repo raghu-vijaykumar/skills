@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "narrative-station-letter",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Station letter emotional camera",
+  "variant": 3,
+  "objects": [
+    {"id": "platform", "name": "SM_Narrative_Platform"},
+    {"id": "window", "name": "SM_Narrative_Rain_Window"},
+    {"id": "witness", "name": "SM_Narrative_Lone_Witness"},
+    {"id": "bench", "name": "SM_Narrative_Bench"},
+    {"id": "letter", "name": "SM_Narrative_Sealed_Letter"},
+    {"id": "cue", "name": "SM_Narrative_Letter_Cue"},
+    {"id": "camera", "name": "Station letter emotional camera"}
+  ],
+  "beats": [
+    {"id": "alone", "frame": 1, "label": "A lone witness waits at a rain-lit station beside an untouched letter", "object_ids": ["platform", "window", "witness", "bench", "letter"]},
+    {"id": "notice", "frame": 42, "label": "A single letter cue emerges as the camera closes in on the choice", "object_ids": ["letter", "cue", "camera"]},
+    {"id": "decision", "frame": 72, "label": "The letter rises from the bench while the rain continues", "object_ids": ["letter", "cue", "window", "camera"]}
+  ],
+  "review_states": ["alone", "notice", "decision"],
+  "assets": [
+    {"id": "station-plate", "origin": "procedural", "license": "Original Content Studio station, witness, bench, envelope, and rain"}
+  ]
+}

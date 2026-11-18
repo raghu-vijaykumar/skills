@@ -82,7 +82,8 @@
   - [x] T013r Render one Soulslike ruined causeway with two scored full outputs, isolated gate and bonfire previews, ruin and threat audit, and a distinct best GIF.
   - [x] T013s Render one strategy/sim settlement with two scored full outputs, isolated building and unit previews, a tile and resource audit, and a distinct best GIF.
   - [x] T013t Render one racing circuit with two scored full outputs, isolated car and venue previews, a track and finish-order audit, and a distinct best GIF.
-  - [ ] T013u Complete the three remaining genre directions and console-era route.
+  - [x] T013u Render one narrative station plate with three scored full outputs, isolated set and letter previews, a single-cue and camera audit, and a distinct best GIF.
+  - [ ] T013v Complete the two remaining genre directions and console-era route.
 
 ## Wave 6: Delivery and QA
 

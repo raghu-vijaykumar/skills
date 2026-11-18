@@ -1501,9 +1501,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/station-letter.gif",
+      "review": "narrative-review.md",
+      "builder": "examples/station_letter.py",
+      "spec": "examples/station_letter.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["visual novel station letter", "rain station letter", "walking sim station", "narrative letter cue"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-card-party-idle",

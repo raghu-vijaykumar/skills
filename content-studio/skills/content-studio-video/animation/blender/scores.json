@@ -2239,6 +2239,69 @@
         }
       ]
     },
+    "genre-narrative-vn": {
+      "selected": "station-letter-v3",
+      "candidates": [
+        {
+          "id": "station-letter-v1",
+          "video_sha256": "5a1eff1fa4235e5b9054b7c912acb1a5ef853c079edec78fffd8b9d6dcb9cf4d",
+          "gif_sha256": "1c968e15bead367d2a17d3c9e6d9bb74467a0dc288225563d99997634bc9e977",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 58,
+          "reviewer": "Content Studio encoded-frame and station-letter review",
+          "review_date": "2026-11-19",
+          "review_note": "A rain-window background plate, lonely figure, suitcase, bench, and sealed letter suggest a narrative decision, with quiet negative space on the right. The static shot has no decision or camera movement. The figure is a simplified silhouette. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "station-letter-v2",
+          "video_sha256": "387ed4aba07188f3e311d08e2cc5ef1ac0cecdb7f0aa1532289bb396cf549c63",
+          "gif_sha256": "049e0556a5d099ec93df933bfed4ec260c8f4087348b72ae3314b9bfad0d9c53",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and station-letter review",
+          "review_date": "2026-11-19",
+          "review_note": "The camera closes on one cyan letter cue; the sealed letter rises and rain descends in the window. The quiet right wall remains plate-ready. The person is a simple cylindrical silhouette, leaving this below the 70-point gallery threshold. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        },
+        {
+          "id": "station-letter-v3",
+          "video_sha256": "a106f0c9ebdb445340b2e7923c3a45d7d71cc148a917b07548cc36a96541cd4d",
+          "gif_sha256": "39575f0f1391d4b2265a38738a380fbcbb4ca0c494cfc004f005b2e6022e78a6",
+          "gif_path": "previews/station-letter.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and station-letter review",
+          "review_date": "2026-11-19",
+          "review_note": "The witness now reads as a seated human silhouette with head, hair, arms and legs beside one cyan letter cue. The letter and seal rise together, rain descends, and the camera pushes closer while the right wall remains plate-ready. This is authored motion, not interactive dialogue or branching. Full MP4, GIF, isolated heroes, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

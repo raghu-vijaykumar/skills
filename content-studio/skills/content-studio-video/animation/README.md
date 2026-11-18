@@ -49,3 +49,4 @@ The [`genre-metroidvania-roguelike` run](blender/modular-run-review.md) adds sco
 The [`genre-soulslike` causeway](blender/soulslike-review.md) adds a scored ruined route with a bonfire landmark, opening pale gate, and revealed enemy silhouette.
 The [`genre-strategy-sim` settlement](blender/strategy-review.md) adds a scored tile grid with distinct resource sites, dispatched workers, and a growing watchtower.
 The [`genre-racing-sports` sprint](blender/circuit-review.md) adds scored team-color cars, clear track boundaries, a modular grandstand, and a verified finish order.
+The [`genre-narrative-vn` station](blender/narrative-review.md) adds a scored quiet background plate, emotional camera push, and one letter interaction cue.
