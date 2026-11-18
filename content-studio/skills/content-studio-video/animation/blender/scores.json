@@ -1975,6 +1975,50 @@
         }
       ]
     },
+    "genre-stealth": {
+      "selected": "stealth-infiltration-v2",
+      "candidates": [
+        {
+          "id": "stealth-infiltration-v1",
+          "video_sha256": "302bf61662b30bb5207b6ecc9a6a64b7757e84e1f85bc29825854d263d0c8026",
+          "gif_sha256": "eb1c3c3d36fa40faa69a94ffd2afcf9e4fe1af14a27175d4178585c1477d6763",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 63,
+          "reviewer": "Content Studio encoded-frame and stealth-lane review",
+          "review_date": "2026-11-19",
+          "review_note": "Quiet blue cover lane, exposed metal plates, patrolling guard position, ladder, and upper terminal read, but the infiltrator scarcely moves. Full MP4, GIF, isolated actor and route, and saved-scene audit passed."
+        },
+        {
+          "id": "stealth-infiltration-v2",
+          "video_sha256": "e0d40f0415c0b3348c0da346347e5ebecede0a54f3c8fd11c1c7dd7b002ff128",
+          "gif_sha256": "7b8ddfb636ceb98ba185a3e0cc8aae2abed6747280f2ca7cff43e00dfc740392",
+          "gif_path": "previews/stealth-infiltration.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and stealth-lane review",
+          "review_date": "2026-11-19",
+          "review_note": "The infiltrator travels through the quiet cover lane, reaches the ladder, climbs to the upper objective, and activates its screen while the guard and search pool patrol. Stylized shadow and metal cues are visual only; simple actor geometry caps finish. Full MP4, GIF, isolated actor and route, and saved-scene audit passed."
+        }
+      ]
+    },
     "video-handoff": {
       "selected": "clamp-handoff-full-resolution",
       "candidates": [

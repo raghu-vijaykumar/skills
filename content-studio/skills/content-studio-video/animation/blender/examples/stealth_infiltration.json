@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "id": "stealth-infiltration-shadow-lane",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Stealth shadow-and-catwalk camera",
+  "variant": 2,
+  "objects": [
+    {"id": "floor", "name": "SM_Stealth_Floor"},
+    {"id": "shadow", "name": "SM_Stealth_Quiet_Shadow_Lane"},
+    {"id": "noise", "name": "SM_Stealth_Noisy_Plate_0"},
+    {"id": "cover", "name": "SM_Stealth_Concealment_Crate_0"},
+    {"id": "catwalk", "name": "SM_Stealth_Upper_Catwalk"},
+    {"id": "ladder", "name": "SM_Stealth_Ladder_Left_Rail"},
+    {"id": "objective", "name": "SM_Stealth_Objective_Terminal"},
+    {"id": "screen", "name": "SM_Stealth_Terminal_Screen"},
+    {"id": "infiltrator", "name": "SM_Stealth_Infiltrator_Rig"},
+    {"id": "guard", "name": "SM_Stealth_Patrol_Guard_Rig"},
+    {"id": "searchlight", "name": "SM_Stealth_Guard_Light_Pool"},
+    {"id": "camera", "name": "Stealth shadow-and-catwalk camera"}
+  ],
+  "beats": [
+    {"id": "shadow", "frame": 1, "label": "Infiltrator hides behind crates in a quiet blue shadow lane beside noisy steel plates", "object_ids": ["shadow", "noise", "cover", "infiltrator"]},
+    {"id": "patrol", "frame": 50, "label": "The guard and search pool patrol the exposed route while the infiltrator reaches the ladder", "object_ids": ["guard", "searchlight", "ladder", "infiltrator"]},
+    {"id": "infiltrate", "frame": 72, "label": "The infiltrator climbs onto the upper catwalk and activates the secured objective", "object_ids": ["catwalk", "infiltrator", "objective", "screen"]}
+  ],
+  "review_states": ["shadow", "patrol", "infiltrate"],
+  "assets": [
+    {"id": "stealth-warehouse", "origin": "procedural", "license": "Original Content Studio stealth floor, concealment props, guard, catwalk, and terminal"}
+  ]
+}

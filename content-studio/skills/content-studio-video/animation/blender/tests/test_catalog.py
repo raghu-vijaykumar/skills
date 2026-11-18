@@ -4,6 +4,7 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import re
 import unittest
 from unittest.mock import patch
 
@@ -18,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 50)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 51)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -295,6 +296,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(survival["builder"], "examples/survival_shelter.py")
         self.assertIsNone(catalog_module.route("A survival shelter with a crafting bench",
                                                 style="anime-style")["builder"])
+        stealth = catalog_module.route("A stealth infiltration route with a shadow patrol")
+        self.assertEqual((stealth["subject"], stealth["style"], stealth["genre"]),
+                         ("environment-artist", "stylized-style", "genre-stealth"))
+        self.assertEqual(stealth["builder"], "examples/stealth_infiltration.py")
+        self.assertIsNone(catalog_module.route("A stealth infiltration route",
+                                                style="anime-style")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -333,7 +340,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 51)
+        self.assertEqual(len(catalog_module.scorebook(book)), 52)
         fantasy = book["routes"]["fantasy-worlds"]
         self.assertEqual(fantasy["selected"], "fantasy-gate-v2")
         self.assertEqual([candidate["score_total"] for candidate in fantasy["candidates"]],
@@ -389,6 +396,10 @@ class CatalogTests(unittest.TestCase):
         survival = book["routes"]["genre-survival"]
         self.assertEqual(survival["selected"], "survival-shelter-v2")
         self.assertEqual([candidate["score_total"] for candidate in survival["candidates"]],
+                         [63, 78])
+        stealth = book["routes"]["genre-stealth"]
+        self.assertEqual(stealth["selected"], "stealth-infiltration-v2")
+        self.assertEqual([candidate["score_total"] for candidate in stealth["candidates"]],
                          [63, 78])
         handoff = book["routes"]["video-handoff"]
         self.assertEqual(len(handoff["candidates"]), 2)
@@ -500,6 +511,12 @@ class CatalogTests(unittest.TestCase):
         generated = readme.split("<!-- blender-catalog:start -->", 1)[1].split(
             "<!-- blender-catalog:end -->", 1)[0].strip()
         self.assertEqual(generated, catalog_module.markdown_table(catalog_module.catalog()))
+        gallery = readme.split("<!-- blender-catalog:start -->", 1)[0]
+        # Every selected rendered artifact must play inline in the showcase table.
+        for evidence in {entry["evidence"] for entry in catalog_module.catalog()
+                         if entry["status"] == "Rendered"}:
+            path = "content-studio/skills/content-studio-video/animation/blender/" + evidence
+            self.assertRegex(gallery, r"!\[[^]]+\]\(" + re.escape(path) + r"\)")
         for name in ("clamp", "character", "corridor", "lamp", "handoff",
                      "lowpoly-lamp", "voxel-lamp", "isometric-lamp", "realistic-lamp",
                      "horror-corridor", "psx-horror", "anime-heroine", "stylized-windmill",

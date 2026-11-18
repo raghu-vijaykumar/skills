@@ -1381,9 +1381,16 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/stealth-infiltration.gif",
+      "review": "stealth-review.md",
+      "builder": "examples/stealth_infiltration.py",
+      "spec": "examples/stealth_infiltration.json",
+      "compatible_subjects": ["environment-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["stealth lane", "stealth infiltration", "infiltration route", "shadow patrol"],
+      "score_record": "scores.json"
     },
     {
       "id": "genre-puzzle-platformer",
