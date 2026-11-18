@@ -179,6 +179,7 @@ def route(prompt, style=None, subject=None):
         style_rules = [
             (r"\b(cosmic.horror|eldritch|lovecraftian|void.horror)\b", "cosmic-eldritch-horror"),
             (r"\b(body.horror|mutation|mutating|flesh.fusion)\b", "body-horror-style"),
+            (r"\b(analog.horror|found.footage|vhs|security.tape|training.tape)\b", "analog-found-footage-horror"),
             (r"\b(psx|ps1|playstation 1|retro horror)\b", "psx-horror-style"),
             (r"\b(horror|creepy|haunted|scary)\b", "horror-style"),
             (r"\b(comic.book|comic|graphic.novel)\b", "comic-book-style"),
@@ -235,6 +236,9 @@ def route(prompt, style=None, subject=None):
                          "body-horror-style" if subject == "character-artist" and
                          re.search(r"\bhand\b", text) and
                          re.search(r"\b(extra|sixth|fused|metal|unfolds)\b", text) else
+                         "analog-found-footage-horror" if subject == "environment-artist" and
+                         re.search(r"\btraining\b", text) and
+                         re.search(r"\b(camera|recording|tape|footage)\b", text) else
                          "painterly-style" if subject in {"vehicle-artist", "environment-artist"}
                          and re.search(r"\briver\b", text) else
                          "pixel-art-style" if subject == "prop-artist" and

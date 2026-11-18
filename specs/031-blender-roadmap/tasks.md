@@ -52,7 +52,8 @@
 - [ ] T012 [P4] Author the eight horror packs with distinct scored GIFs and explicit recipe differences.
   - [x] T012a Render the cosmic aperture with three scored candidates and a tiny-witness, broken-geometry, moving-iris, and void audit.
   - [x] T012b Render the body-horror hand with three full renders, four scored GIF outputs, and a corrected sixth-digit anatomy audit.
-  - [ ] T012c Complete the remaining six horror packs with distinct scored GIFs.
+  - [x] T012c Render the analog training tape with three scored candidates and a scanline, signal-loss, security-camera, and doorway audit.
+  - [ ] T012d Complete the remaining five horror packs with distinct scored GIFs.
 
 ## Wave 5: Settings and genre direction
 

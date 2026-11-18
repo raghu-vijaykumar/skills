@@ -1107,6 +1107,54 @@
         }
       ]
     },
+    "analog-found-footage-horror": {
+      "selected": "analog-training-v3",
+      "candidates": [
+        {
+          "id": "analog-training-v1",
+          "video_sha256": "11f7f1c6a97c17a789cba4b4ee5c72badb85f76ed62bffbeb900f4f82ff307d9",
+          "gif_sha256": "7ecf7bd4b40580e461b572f5a6e68123c7e68bf2dddf828578c1f4f25eaf993e",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 3, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and analog-tape review",
+          "review_date": "2026-11-18",
+          "review_note": "The empty room, training monitor, scanlines, timestamp, fluorescent flicker, and rolling line read, but the doorway remains empty and the camera stays locked. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "analog-training-v2",
+          "video_sha256": "585ae6d1243b10421a190f820c8c03dcd6438a69a97b8d185207e91ffe7e3247",
+          "gif_sha256": "a85dcd5820deadd1546a251cb451a031285139a77a3082fe0e53be6ee9e0dca6",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 3, "evidence_integrity": 5},
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and analog-tape review",
+          "review_date": "2026-11-18",
+          "review_note": "A partial figure appears after the empty opening, chroma-offset UI and slight camera jitter strengthen recorded-footage language, but the training screen stays unchanged. Full MP4, GIF decode, and saved-scene audit passed."
+        },
+        {
+          "id": "analog-training-v3",
+          "video_sha256": "4e03d726148d38ca0b5be25dc9ced57df64a648ba24b7152702e3e381e73611f",
+          "gif_sha256": "2a38dc240f19c1bf3bdb0c4d48fecc145e5f115709e80a99d09a9afbcb2fa732",
+          "gif_path": "previews/analog-training.gif",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {"subject_fidelity": 4, "motion_readability": 4, "composition": 4,
+                     "finish": 4, "evidence_integrity": 5},
+          "score_total": 82,
+          "reviewer": "Content Studio encoded-frame and analog-tape review",
+          "review_date": "2026-11-18",
+          "review_note": "The safety message loses signal as a silhouette appears, the tracking line jumps, and scanlines, chroma UI, and fluorescent stutter remain readable. Exact MP4, GIF, isolated monitor, and saved-scene audit passed."
+        }
+      ]
+    },
     "hard-surface": {
       "selected": "clamp-v1",
       "candidates": [

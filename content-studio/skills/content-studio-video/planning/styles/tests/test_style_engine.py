@@ -203,6 +203,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(hand["scenes"][0]["style"], "cinematic-3d")
         self.assertEqual(hand["scenes"][0]["blender"]["builder"],
                          "examples/mutating_hand.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            analog = engine.plan({"scenes": [{"id": "training", "duration_seconds": 3,
+                "visual_intent": "A training room security camera records an empty chair"}]})
+        self.assertEqual(analog["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(analog["scenes"][0]["blender"]["builder"],
+                         "examples/analog_training.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

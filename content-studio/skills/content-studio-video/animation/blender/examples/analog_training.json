@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "analog-horror-training-tape",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "Standard",
+  "codec": "H264",
+  "camera_object": "Tape locked security camera",
+  "variant": 3,
+  "objects": [
+    {"id": "room", "name": "SM_Tape_Room_Floor"},
+    {"id": "chair", "name": "SM_Tape_Empty_Chair"},
+    {"id": "screen", "name": "SM_Tape_Monitor_Screen"},
+    {"id": "figure", "name": "SM_Tape_Implied_Figure"},
+    {"id": "camera-label", "name": "SM_Tape_Camera_Label"},
+    {"id": "tracking", "name": "SM_Tape_Rolling_Tracking_Bar"},
+    {"id": "camera", "name": "Tape locked security camera"}
+  ],
+  "beats": [
+    {"id": "establish", "frame": 1, "label": "An empty chair and training monitor sit under a security camera timestamp", "object_ids": ["chair", "camera-label"]},
+    {"id": "damage", "frame": 36, "label": "The fluorescent light stutters as a tracking line crosses the room", "object_ids": ["screen", "tracking"]},
+    {"id": "implication", "frame": 72, "label": "A partial figure waits in the doorway while the tape keeps recording", "object_ids": ["figure", "camera"]}
+  ],
+  "review_states": ["establish", "damage", "implication"],
+  "assets": [
+    {"id": "training-room", "origin": "procedural", "license": "Original Content Studio training room, tape UI, and animated recording"}
+  ]
+}

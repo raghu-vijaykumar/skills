@@ -992,9 +992,15 @@
         "horror-style"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/analog-training.gif",
+      "review": "analog-review.md",
+      "builder": "examples/analog_training.py",
+      "spec": "examples/analog_training.json",
+      "compatible_subjects": ["environment-artist"],
+      "intent_cues": ["training"],
+      "score_record": "scores.json"
     },
     {
       "id": "liminal-space-style",
