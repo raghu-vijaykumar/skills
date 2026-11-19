@@ -1,11 +1,13 @@
 ---
 name: content-studio-video-narration
-description: Place approved recorded or generated narration on a supplied edited-video timeline.
+description: Prepare a complete narration track for listening approval, then place it on an approved vlog picture edit.
 ---
 
 # content-studio-video-narration
 
-Before production edits, complete the mandatory `content-studio-workflow` precheck with the selected method, exact script, output, estimate, fallback, and review criterion. Start from the user's hashed manual render and approved, evidence-linked script. Use the voice-cloning skill only if cloning was requested and consented. Assemble recorded or synthesized audio against the edit, listen to the timing and mix, then use `scripts/mix_into_video.py` for a separate voiced master. If the edit changes, retime and review before another mix.
+Before production edits, complete the mandatory `content-studio-workflow` precheck with the selected method, exact command, output, estimate, fallback, and review criterion. Start from a hashed, human-approved picture edit, either a manual render or an approved long cut. Draft and validate evidence-linked cues internally against that picture. Use the voice-cloning skill only if cloning was requested and consented. Assemble the complete recorded or synthesized narration track, listen through it at normal speed, and give the editor the playable audio for explicit listening approval. Share written cues if requested; written script review is not required. Apply timecoded feedback and repeat the audio review before placing narration on the video. If the picture edit or voice changes, retime and renew the affected approval.
+
+Place the approved narration on the locked picture timeline. Review the voiced video for cue boundaries, dialogue and ambience, speech clarity, and mix before adding requested motion graphics or ASS overlays. Use the native timeline where it supports every selected operation; `scripts/mix_into_video.py` is a separate voiced-master route when the approved plan calls for it. Verify the encoded audio on the final video.
 
 Use the [narration review loop](../../review/critique/references/narration-scoring.md) to score and fix script and voice windows, then recheck them in the encoded mix.
 

@@ -19,5 +19,16 @@ Use [Long Cut](../skills/content-studio-video/edit/long-cut/SKILL.md) when you w
    - **Other basic removals** — No. [Exact issue and source range; add a supported reviewed method to the plan]
 
 3. **Human review · Cut decisions** — Show source-linked frames and bounded join previews with sound. For each candidate, record `cut` or `keep`, the reviewer and reason, and exact source-frame cut bounds. Do not remove footage from detector scores alone. Resume by building the ordered retained spans.
-4. **Assemble and preview** — Build one native delivery timeline from all retained spans, keeping camera audio aligned. Validate the output canvas and preview representative within-clip cuts, clip joins, and audio boundaries. **Human review · Exact timeline** — Approve the revision and fingerprint before final rendering.
-5. **Render and review** — Render one long MP4, verify the exact delivered picture and sound, and review every flagged join. Return the video and review evidence. Publishing requires a separate explicit request.
+4. **Render the long-cut picture** — Build a native timeline from all retained spans, keeping camera audio aligned. Preview representative within-clip cuts, clip joins, and audio boundaries. Approve the exact timeline fingerprint, render a playable long-cut picture video, and verify its joins. **Human review · Video** — Watch and approve this video before narration starts.
+5. **Prepare the full narration audio** — Use the approved picture to draft and validate narration internally. Record or synthesize the whole track, inspect every cue against its scene, and listen through the complete audio at normal speed. **Human review · Narration audio** — Let me listen to the full track and request timecoded changes; a written script is optional. Regenerate affected takes and repeat listening review until I approve the audio.
+
+   - **Narration voice and language** — [recorded voice | generated voice | consented clone], [language and tone]
+   - **Dialogue and ambience** — [keep | duck under narration | mute reviewed ranges]
+   - **Music** — No. [Track or mood]
+
+6. **Add narration, then graphics** — Put the approved narration on the locked picture and review the voiced video for timing and mix. After that, add requested motion graphics or ASS overlays using the same picture clock. Preview the narrated composite and approve the exact final timeline.
+
+   - **Motion graphics** — No. [Scene cues, labels, and style]
+   - **ASS overlays or requested captions** — No. [Words, cue times, font, and safe area]
+
+7. **Final render and review** — Render and verify the exact final video with approved narration and overlays. Review picture, spoken audio, and every affected join. Return the long-cut video, narration audio, final video, and review evidence. Publishing requires a separate explicit request.

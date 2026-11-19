@@ -6,7 +6,7 @@ description: Use consented voice profiles for local English Chatterbox Turbo or 
 
 Before changing production material, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
-This skill uses a consented profile's declared backend: Chatterbox Turbo for the bundled English-only `en-raghu` and `en-rakshitha` profiles, or IndicF5 for existing Indian-language profiles. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. Bundled profile references enter Git only after the requester records the speaker's cloning consent and authorizes the repository addition. Backend setup and quality gates are in [Chatterbox Turbo](references/chatterbox-turbo.md) and [IndicF5](references/indicf5.md).
+This skill uses a consented profile's declared backend: Chatterbox Turbo for the bundled English-only `en-raghu` and `en-rakshitha` profiles, or IndicF5 for existing Indian-language profiles. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration and internal factual, scene, and timing validation before synthesis. Assemble the complete candidate audio and obtain the editor's listening approval before placing it on a video; the editor need not review written text. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. Bundled profile references enter Git only after the requester records the speaker's cloning consent and authorizes the repository addition. Backend setup and quality gates are in [Chatterbox Turbo](references/chatterbox-turbo.md) and [IndicF5](references/indicf5.md).
 
 ## Enroll (after the user supplies samples)
 
@@ -24,7 +24,7 @@ Requires FFmpeg and FFprobe. Each sample must have at least 3 seconds of audio a
 
 ## Synthesize with IndicF5
 
-Write the approved narration as a JSON script with ordered sections:
+Write the internally validated narration candidate as a JSON script with ordered sections:
 
 ```json
 {

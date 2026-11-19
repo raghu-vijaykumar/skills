@@ -47,8 +47,8 @@
   in the cue `direction` or `notes` so the later voice mix preserves it.
 - Make a final read-through across scene boundaries for repeated ideas,
   invented first-person reactions, source accuracy, natural language, and
-  conversational timing. Report replaced cues and remaining review flags to
-  the creator before synthesis.
+  conversational timing. Record replaced cues and remaining review flags in
+  the internal evidence; resolve factual flags before synthesis.
 
 ## Spoken rhythm pass
 
@@ -175,6 +175,9 @@ The report status is:
 The command exits non-zero on `fail`. Use `--allow-errors` only when you
 deliberately want review files for a draft that still has errors.
 
-Present `voiceover.md` and the report to the creator. Do not synthesize or
-record until the exact text and timing are approved. If the master changes,
-regenerate the evidence and retime the script.
+Keep `voiceover.md` and the report as internal evidence, and share them when
+the creator asks. After factual, picture, and timing validation under the
+approved plan, synthesize or record a candidate and assemble the complete
+narration track. Present playable audio for the creator's listening approval
+before adding it to the video. If the approved picture changes, regenerate
+the evidence, retime the affected cues, and repeat listening review.

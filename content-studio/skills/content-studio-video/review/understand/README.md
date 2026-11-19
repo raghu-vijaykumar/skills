@@ -11,7 +11,7 @@ extraction from a synthetic clip.
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `inspect` | Supported | Approved edit or review candidate → sampled frames + contact sheets + evidence.json | No | [Contact sheet](previews/contact-sheet.jpg) | Sparse frames only; timestamps approximate; never infer landmarks, identities, or events from filenames. |
-| `voiceover` | Supported | voiceover.json + evidence.json → voiceover.md + teleprompter + CSV + report with advisory rhythm notes | No | [Draft example](previews/example-voiceover.md) | Fails on overlap, out-of-range times, unknown frames, or pace; rhythm does not change status; human approval before synthesis. |
+| `voiceover` | Supported | voiceover.json + evidence.json → voiceover.md + teleprompter + CSV + report with advisory rhythm notes | No | [Draft example](previews/example-voiceover.md) | Fails on overlap, out-of-range times, unknown frames, or pace; rhythm does not change status; validate text internally, then obtain human approval of the complete audio before video placement. |
 | `cue-scene-review` | Supported | Exact picture + script → cue boundary/middle frames, contact sheets, pending scene-review.json | No | [Synthetic scene-review test](tests/test_scene_review.py); generated frames stay per draft | Frame extraction and hash checks are automatic; a vision reviewer must set the visual bounds and scene match for every cue. |
 
 ## Evidence note

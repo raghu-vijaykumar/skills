@@ -7,6 +7,8 @@ description: Route code-driven video authoring, rendering, validation, and appro
 
 The [Blender director guide](blender/director.md) turns a brief into a reviewable shot proposal inside this existing animation route.
 
+For narrated animation, validate and produce the complete narration audio first. Give the editor the playable track for listening approval before authoring visual scenes. Build the storyboard and cue clock from that approved voice, then animate, preview, score, fix, and rescore hero elements and their narrated shots. Review the full rendered video, apply requested edits, and review the revised exact master. A changed voice requires renewed listening approval and visual retiming.
+
 Run `python blender/scripts/audit_roadmap.py --output <report.json>` before updating the [Blender README showcase](blender/README.md); it validates every score record and decodes all selected GIFs.
 
 Use [videogen](videogen/SKILL.md) for Remotion projects and the [headless Blender route](references/blender-art.md) for original 3D props, characters, environments, and visual treatments. Use [engineering 3D](engineering-3d/SKILL.md) for authored cutaway assemblies and the [Blender preview tool](engineering-3d/references/headless-preview.md) for representative object states and frame cost before scaling up. The Blender catalog is planning guidance; its 94 upstream skill names do not imply 94 renderers. Choose a visual representation for each teaching beat, preview hero elements alone, then verify in the narrated render. All production edits require the workflow precheck and rendered review.

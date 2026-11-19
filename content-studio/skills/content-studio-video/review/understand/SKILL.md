@@ -1,6 +1,6 @@
 ---
 name: content-studio-video-understand
-description: Analyze sparse frames from an approved vlog edit, combine verified visual evidence with human context, and draft timestamped voiceover for review.
+description: Analyze sparse frames from an approved vlog edit, combine verified visual evidence with human context, and prepare timestamped narration for listening review.
 ---
 # Content Studio Understand
 
@@ -34,7 +34,7 @@ Use `context.json` for human-supplied names, itinerary, language, tone, pronunci
 
 Before drafting the script prompt, list any needed specifics that neither the footage nor creator context establishes as literal `unknown` values, for example `specifics.ticket_status: unknown`. Do not infer a booking or admission outcome from arrival footage. If a proposed line depends on an unknown, omit that claim or mark the draft cue `needs_review: true` with the missing field in `notes`; resolve or remove it before voice generation.
 
-## 2. Draft and review every cue against picture
+## 2. Draft and validate every cue against picture
 
 Write `voiceover.json` with `{id,start,end,text,evidence_frame_ids,needs_review,direction,notes}` segments. Keep the text in the requested language mix; read [voiceover guidance](references/voiceover.md) before writing.
 
@@ -51,7 +51,7 @@ python content-studio/skills/content-studio-video/review/understand/scripts/scen
 
 Open **every** cue sheet, inspect individual frames around ambiguous transitions, and set `visual_start`, `visual_end`, `visual_description`, and `scene_match` in `scene-review.json`. These bounds come from the picture, not an evenly spaced narration grid. A line may start up to 0.5 seconds before its visual beat, but its spoken end must stay inside the reviewed visual end. Mark mismatches `rewrite` or `pending`, then rewrite/shorten the cue or move it to the correct scene. Regenerate the review after any script timing/text change; exact script and picture hashes prevent stale approval. The tool extracts evidence automatically but cannot infer whether Kannada-English wording describes the scene. A vision-capable reviewer must make that judgment for each cue.
 
-Before presenting a draft, audit each location across adjacent cues. Replace repeated descriptions of the same movement, displays, or shopping with a distinct creator moment or a useful, verified fact about the place, craft, history, transport, or visit. Source facts outside the footage and creator context from a reliable primary source; record the URL in the cue's `notes`. A place fact must not imply the travelers saw, bought, or did something unsupported by the edit. When no relevant fact improves a long shot, shorten the narration and leave room for its original sound. Include the changed cues and any open fact checks in the review notes.
+Before rendering listening proof, audit each location across adjacent cues. Replace repeated descriptions of the same movement, displays, or shopping with a distinct creator moment or a useful, verified fact about the place, craft, history, transport, or visit. Source facts outside the footage and creator context from a reliable primary source; record the URL in the cue's `notes`. A place fact must not imply the travelers saw, bought, or did something unsupported by the edit. When no relevant fact improves a long shot, shorten the narration and leave room for its original sound. Record changed cues and any open fact checks in the internal review notes; resolve factual flags before synthesis.
 
 ```bash
 python content-studio/skills/content-studio-video/review/understand/scripts/voiceover.py \
@@ -62,10 +62,10 @@ python content-studio/skills/content-studio-video/review/understand/scripts/voic
   --title "Dubai Day 3"
 ```
 
-Writes `voiceover.md`, `voiceover-teleprompter.txt`, `voiceover.csv`, and `voiceover-report.json`. The report includes advisory rhythm suggestions for runs of long lines, repeated openings, and cues with little speaking room. They do not change the validation status or rewrite text. The validator fails on overlapping segments, out-of-range times, unknown evidence frames, speech over the pace limit, missing scene reviews, or cue windows outside reviewed picture bounds. Fix the errors, then present the markdown, cue sheets, and timing report for human review.
+Writes `voiceover.md`, `voiceover-teleprompter.txt`, `voiceover.csv`, and `voiceover-report.json`. The report includes advisory rhythm suggestions for runs of long lines, repeated openings, and cues with little speaking room. They do not change the validation status or rewrite text. The validator fails on overlapping segments, out-of-range times, unknown evidence frames, speech over the pace limit, missing scene reviews, or cue windows outside reviewed picture bounds. Fix the errors and use the text and reports as internal production evidence; share them if the editor asks.
 
-Voiceover must fit the **approved timeline**; use scene times in the rendered master, not raw source timestamps. Leave room for original dialogue where requested. Obtain explicit human approval of the final narration text and timing before synthesizing or recording audio. A changed final master invalidates the approval and requires regeneration or retiming.
+Voiceover must fit the **approved picture**; use scene times in its rendered video, not raw source timestamps. Leave room for original dialogue where requested. Under the approved production plan, synthesize or record candidate takes after internal factual, scene, and timing validation. Assemble the full playable narration track, listen to it, and obtain explicit human **audio** approval before placing it on the video. The editor need not read the script. A changed picture or narration take invalidates the listening approval and requires rechecking the affected cues.
 
 After synthesis, measure each actual cue WAV at **1.0×** against its visual end. If it runs long, shorten the text and regenerate that cue; do not speed up, overlap another scene, or let the assembler shift the next cue. Recheck the resulting picture and audio together in the encoded mix.
 
-`content-studio-video-voice-cloning` enrolls a consented voice profile and synthesizes speech; it does not write scripts. Script authoring stays here. After the script is approved, use the voice-cloning skill for a reviewed backend and listening approval.
+`content-studio-video-voice-cloning` enrolls a consented voice profile and synthesizes speech; it does not write scripts. Script authoring stays here. Use the voice-cloning skill for candidate audio after internal validation, then obtain listening approval of the complete track before the production mix.
