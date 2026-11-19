@@ -16,8 +16,10 @@ import numpy as np
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL / "scripts"))
+sys.path.insert(0, str(SKILL / "previews"))
 sys.path.insert(0, str(SKILL.parents[1] / "timeline" / "scripts"))
 import clipping  # noqa: E402
+import build_real_demo  # noqa: E402
 import approval  # noqa: E402
 import compiler  # noqa: E402
 import model  # noqa: E402
@@ -134,6 +136,34 @@ class ClippingTests(unittest.TestCase):
         guide.write_bytes(b"changed guide")
         with self.assertRaisesRegex(ValueError, "guide changed"):
             clipping.validate_selection(self.crop_selection)
+
+    def test_separate_hero_boxes_expose_a_subject_lost_by_portrait_crop(self):
+        self.boxes.write_text(json.dumps({"subjects": [
+            {"source": self.source.name, "start": 1, "end": 3,
+             "box": {"x": .64, "y": .2, "w": .18, "h": .6},
+             "confidence": .99, "label": "red hero"},
+            {"source": self.source.name, "start": 1, "end": 3,
+             "box": {"x": .06, "y": .2, "w": .18, "h": .6},
+             "confidence": .8, "label": "green hero"},
+        ]}), encoding="utf-8")
+        record = self._inspect_and_crop()
+        interval = record["crop_intervals"][0]
+        framing = json.loads((self.crop_selection.parent /
+                              interval["framing_file"]).read_text(encoding="utf-8"))
+        samples = framing["subject_samples"]
+        self.assertEqual({item.get("label") for item in samples},
+                         {"red hero", "green hero"})
+        self.assertEqual(framing["hero_coverage_status"], "REVIEW")
+        self.assertEqual(framing["minimum_hero_coverage"], 0)
+        self.assertTrue(any(item["label"] == "green hero" and item["status"] == "REVIEW"
+                            for item in samples))
+
+    def test_readme_gif_builder_requires_an_approved_full_render_record(self):
+        self._review_selection()
+        with self.assertRaisesRegex(ValueError, "full-render record is missing"):
+            build_real_demo.build(self.source, self.source, self.crop_selection,
+                                  self.root / "readme-gifs")
+        self.assertFalse((self.root / "readme-gifs").exists())
 
     def test_full_source_discovery_leaves_range_for_editor(self):
         record = clipping.inspect_source(self.source, self.selection,

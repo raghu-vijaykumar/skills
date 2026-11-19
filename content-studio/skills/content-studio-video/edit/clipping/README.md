@@ -22,6 +22,8 @@ The command writes `selection-v001-source-review/evidence.json`, timestamped fra
 
 Create normalized 0–1 hero boxes in the [reframe subject schema](../reframe/previews/example-subjects.json). The `source` value is the original filename, and each box has absolute `start`/`end` seconds. Prefer a box around the primary person, product, or mechanism and include its meaningful moving parts. If no reviewed box is available, explicitly choose `saliency` or `center` and judge that result on its merits.
 
+For multiple heroes in one shot, add one box around the group with the highest confidence so the stable crop follows its center. Add a separately labelled, time-bounded box for each person or object as coverage evidence. The framing report checks every active box, including one that the crop proposal did not center on. A group box cannot prove individual visibility when subjects overlap or move between samples; inspect the whole preview. If their separation exceeds the portrait window, mark the proposal `REVIEW` and choose a shorter range, a reviewed crop interval, or another composition.
+
 ```powershell
 python content-studio/skills/content-studio-video/edit/clipping/scripts/clipping.py propose-crop --selection <draft>/.content-studio/clipping/selection-v001.json --out-selection <draft>/.content-studio/clipping/selection-v002.json --output <draft>/.content-studio/clipping/crop-v001 --method subjects --subjects <hero-boxes.json> --size 1080x1920
 ```
