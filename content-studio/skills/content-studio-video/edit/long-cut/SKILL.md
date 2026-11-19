@@ -5,6 +5,8 @@ description: Assemble ordered camera originals into one long reviewable video af
 
 # Long cut
 
+Use the [copy-and-edit Long Cut form](../../../../prompts/long-cut.md) to capture the editor's source, cut, and output choices.
+
 Use this skill when the editor explicitly wants one continuous video from camera originals in capture order. Keep every usable source span in sequence. Remove only reviewed blur, fast-pan, and camera-tilt intervals. This is an editorial assembly, without AutoCut's transcript selection, story outline, target duration, or automatic shortening. Preserve original media and keep camera audio synchronized with the picture cuts.
 
 ## Plan and diagnose

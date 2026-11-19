@@ -3,16 +3,16 @@
 Fill the brackets and change **No** to **Yes** for the options you want.
 
 - **Footage** — [raw folder or manual export path]
-- **Stage** — [source prep | continue from manual edit | final review]
+- **Stage** — [source prep | long cut from raw folder | continue from manual edit | final review]
 - **Channel or draft** — [optional]
 - **Keep or avoid** — [shots, dialogue, HDR/Dolby Vision, other notes]
 
 ## Workflow in order
 
 1. **Precheck** — Inspect footage and compatibility. Show the selected operations, exact commands, estimates, outputs, and fallbacks. **Human review** — Approve the current plan before edits.
-2. **Raw folder handoff** — Preserve originals. Order clips, check duplicates, and deliver `.content-studio/_timeline.csv` plus `.content-studio/analysis/source-review/`. Run selected diagnostics in parallel where supported. **Human review** — Review findings, including blur evidence, and stop for my manual edit. Resume with my export and a new plan.
+2. **Raw folder route** — Preserve originals. Order clips, check duplicates, and deliver `.content-studio/_timeline.csv` plus `.content-studio/analysis/source-review/`. Run selected diagnostics in parallel where supported. For **source prep**, review findings and stop for my manual edit. For **long cut**, use the [Long Cut form](long-cut.md) and [subskill](../skills/content-studio-video/edit/long-cut/SKILL.md): review blur, fast-pan, and tilt candidates and exact cut bounds, then assemble all retained footage in capture order. Long cut needs its own approved `edited-render` plan and timeline review before the one final render.
 
-3. **Cut and lock picture** — With my manual export, settle cuts, intro, and transition overlaps first. **Human review** — Approve exact cut ranges, intro choice, and joins with sound.
+3. **Cut and lock picture** — For a manual export, settle cuts, intro, and transition overlaps first; the options below apply to that route. For long cut, use the reviewed ordered-source spans and options in the linked form. **Human review** — Approve exact cut ranges and joins with sound.
 
    - **Trims or joins** — No. [Ranges or clip order]
    - **Blur fix · cut blurry spans** — No. [Ranges to keep or inspect]
