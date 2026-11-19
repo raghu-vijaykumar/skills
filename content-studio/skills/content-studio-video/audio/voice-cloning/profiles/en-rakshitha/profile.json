@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "name": "en-rakshitha",
+  "language": "en",
+  "samples": [
+    {
+      "file": "reference-take2.wav",
+      "sha256": "bf0a148fc49df91a64bc57ef6f90f4e86c7d1f34b07ec5b916253fce3a1452ff",
+      "duration_seconds": 6.75,
+      "source_name": "Recording (3).m4a",
+      "source_range_seconds": [
+        9.8,
+        16.55
+      ]
+    }
+  ],
+  "total_duration_seconds": 6.75,
+  "references": {
+    "take2": {
+      "file": "reference-take2.wav",
+      "sha256": "bf0a148fc49df91a64bc57ef6f90f4e86c7d1f34b07ec5b916253fce3a1452ff",
+      "duration_seconds": 6.75
+    }
+  },
+  "source_sha256": "920af38794ed1cd771d1843659c98aae82739e11aaa1333ac50c9a9908449778",
+  "consent": {
+    "affirmed": true,
+    "note": "Raghu confirmed Rakshitha explicitly consented to cloning her voice from Recording (3).m4a for English audio under en-rakshitha.",
+    "recorded_at": "2026-11-19T14:23:36.44572+05:30"
+  },
+  "backend": {
+    "name": "ChatterboxTurbo",
+    "model_id": "ResembleAI/chatterbox-turbo",
+    "revision": "749d1c1a46eb10492095d68fbcf55691ccf137cd",
+    "configured": true,
+    "defaults": {
+      "seed_base": 2025
+    }
+  },
+  "synthesis_ready": true,
+  "review": {
+    "status": "take2 selected by user after listening",
+    "selected_at": "2026-11-19T09:02:46.6403198Z",
+    "variants": [
+      "take2"
+    ],
+    "preview_sha256": "318b0dc7e90d3f26623a18af36a280c65171101d3481855305f49426920d9da7"
+  },
+  "repository": {
+    "path": "content-studio/skills/content-studio-video/audio/voice-cloning/profiles/en-rakshitha",
+    "stored_at": "2026-11-19",
+    "note": "Raghu requested adding only the selected take 2 reference to Git. The full source and generated previews remain local."
+  }
+}

@@ -6,7 +6,7 @@ description: Use consented voice profiles for local English Chatterbox Turbo or 
 
 Before changing production material, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
-This skill uses a consented profile's declared backend: Chatterbox Turbo for the bundled English-only `en-raghu` profile, or IndicF5 for existing Indian-language profiles. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. The repo also tracks consented bundled profile references at their owners' explicit request. Backend setup and quality gates are in [Chatterbox Turbo](references/chatterbox-turbo.md) and [IndicF5](references/indicf5.md).
+This skill uses a consented profile's declared backend: Chatterbox Turbo for the bundled English-only `en-raghu` and `en-rakshitha` profiles, or IndicF5 for existing Indian-language profiles. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. Bundled profile references enter Git only after the requester records the speaker's cloning consent and authorizes the repository addition. Backend setup and quality gates are in [Chatterbox Turbo](references/chatterbox-turbo.md) and [IndicF5](references/indicf5.md).
 
 ## Enroll (after the user supplies samples)
 
@@ -54,11 +54,10 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
   that is round-trip transcribed and heard. A matching text hash or words/sec
   report proves timing and provenance, not intelligible speech.
 
-## Synthesize English with en-raghu
+## Synthesize English with a bundled profile
 
-The owner reviewed and retained both English reference takes. Choose one per
-render; the CLI rejects an omitted choice so it cannot silently choose a voice
-style. The same approved script and timeline format applies:
+`en-raghu` retains take 2 and take 3; select one for each render. `en-rakshitha`
+uses the selected take 2. The same approved script and timeline format applies:
 
 ```powershell
 python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "<draft>" status --profile en-raghu
@@ -74,6 +73,8 @@ environment and official checkpoint outside Git; see
 script in Latin text. `--dry-run` validates the selection and reports reuse
 without loading model weights. Chatterbox output is stored in the same
 resumable segment manifest and uses the same review and assembly gates below.
+For Rakshitha's selected English voice, substitute `--profile en-rakshitha`
+and keep `--reference-variant take2`.
 
 ## Assemble
 

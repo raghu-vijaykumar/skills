@@ -1,8 +1,9 @@
 # Chatterbox Turbo English narration backend
 
-`en-raghu` uses the local [Chatterbox Turbo](https://github.com/resemble-ai/chatterbox)
-English checkpoint. The two consented reference WAVs are bundled in
-[`profiles/en-raghu`](../profiles/en-raghu/README.md). The model's
+`en-raghu` and `en-rakshitha` use the local [Chatterbox Turbo](https://github.com/resemble-ai/chatterbox)
+English checkpoint. Their consented reference WAVs are bundled in
+[`profiles/en-raghu`](../profiles/en-raghu/README.md) and
+[`profiles/en-rakshitha`](../profiles/en-rakshitha/README.md). The model's
 [MIT-licensed weights](https://huggingface.co/ResembleAI/chatterbox-turbo)
 and the Python environment remain outside Git.
 
@@ -41,11 +42,13 @@ $voicePy = 'content-studio/skills/content-studio-video/audio/voice-cloning/scrip
 & (Join-Path $voiceEnv 'Scripts\python.exe') $voicePy --workspace '<draft>' synthesize --profile en-raghu --script '<approved-script.json>' --model-dir '<local-model-folder>' --reference-variant take2 --device cpu
 ```
 
-Choose `take3` for the other approved reference. The profile's hash check
-rejects missing, replaced, or out-of-folder reference audio before the model
-loads. The segment manifest binds the reference variant and hash to every
-output so a different take cannot reuse stale audio. The existing `assemble`
-step requires exact scene review, real duration checks, and 1.0x timing.
+Choose `take3` for Raghu's other approved reference. For Rakshitha's selected
+English voice, use `--profile en-rakshitha --reference-variant take2`. The
+profile's hash check rejects missing, replaced, or out-of-folder reference
+audio before the model loads. The segment manifest binds the reference variant
+and hash to every output so a different take cannot reuse stale audio. The
+existing `assemble` step requires exact scene review, real duration checks,
+and 1.0x timing.
 
 The owner liked both short test previews. That approves retaining both
 references, not every future generated line. Round-trip transcribe each

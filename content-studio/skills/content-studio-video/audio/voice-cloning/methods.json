@@ -11,7 +11,7 @@
       "id": "english-voice-synthesize",
       "script": "scripts/voice.py",
       "status": "supported",
-      "review": "Select take2 or take3 and round-trip transcribe and listen to each generated English segment before production use"
+      "review": "Select a consented reference variant and round-trip transcribe and listen to each generated English segment before production use"
     },
     {
       "id": "compare-indic-mio-emotion",
