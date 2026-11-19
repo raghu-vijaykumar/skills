@@ -111,6 +111,12 @@ def catalog():
         if entry["status"] == "Catalogued" and (method or entry.get("evidence")
                                                 or entry.get("builder")):
             raise ValueError(f"Catalogued guidance cannot claim a renderer: {name}")
+        if entry["category"] == "Orchestration" and entry["status"] == "Catalogued":
+            # The director produces a reviewable proposal, never gallery media.
+            proof = entry.get("planning_proof")
+            if (entry.get("planning_method") != "blender-plan" or not proof or
+                    not (BLENDER / proof).is_file()):
+                raise ValueError("Blender director needs a planning method and guide")
         if entry["status"] in {"Prototype", "Rendered", "Integrated"}:
             if method != "blender-shot":
                 raise ValueError(f"Executable entry lacks a supported method: {name}")
@@ -502,12 +508,17 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
 
 
 def markdown_table(entries):
-    lines = ["| Category | Skill | Content Studio route | Status | Render evidence |",
+    lines = ["| Category | Skill | Content Studio route | Status | Evidence |",
              "| --- | --- | --- | --- | --- |"]
     for entry in entries:
-        route = entry["method"] or f"Planned wave {entry['wave']}"
+        route = (entry["method"] or
+                 (f"{entry['planning_method']} (planning)" if entry.get("planning_method")
+                  else f"Planned wave {entry['wave']}"))
         evidence = (f"[GIF](content-studio/skills/content-studio-video/animation/blender/"
-                    f"{entry['evidence']})" if entry.get("evidence") else "Pending")
+                    f"{entry['evidence']})" if entry.get("evidence") else
+                    (f"[Guide](content-studio/skills/content-studio-video/animation/blender/"
+                     f"{entry['planning_proof']})" if entry.get("planning_proof") else
+                     "Pending"))
         lines.append(f"| {entry['category']} | [`{entry['id']}`]({entry['source']}) | "
                      f"{route} | {entry['status']} | {evidence} |")
     return "\n".join(lines)

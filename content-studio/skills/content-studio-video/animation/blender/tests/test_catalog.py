@@ -21,6 +21,9 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
         self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 90)
         self.assertEqual(sum(entry["status"] == "Prototype" for entry in entries), 3)
+        director = next(entry for entry in entries if entry["id"] == "blender-director")
+        self.assertEqual(director["planning_method"], "blender-plan")
+        self.assertTrue((catalog_module.BLENDER / director["planning_proof"]).is_file())
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")

@@ -5,6 +5,10 @@ description: Route code-driven video authoring, rendering, validation, and appro
 
 # content-studio-video-animation
 
+The [Blender director guide](blender/director.md) turns a brief into a reviewable shot proposal inside this existing animation route.
+
+Run `python blender/scripts/audit_roadmap.py --output <report.json>` before updating the README showcase; it validates every score record and decodes all selected GIFs.
+
 Use [videogen](videogen/SKILL.md) for Remotion projects and the [headless Blender route](references/blender-art.md) for original 3D props, characters, environments, and visual treatments. Use [engineering 3D](engineering-3d/SKILL.md) for authored cutaway assemblies and the [Blender preview tool](engineering-3d/references/headless-preview.md) for representative object states and frame cost before scaling up. The Blender catalog is planning guidance; its 94 upstream skill names do not imply 94 renderers. Choose a visual representation for each teaching beat, preview hero elements alone, then verify in the narrated render. All production edits require the workflow precheck and rendered review.
 
 For an approved Blender shot in a code-driven video, use the [hashed videogen handoff](blender/README.md#reviewed-videogen-handoff). Its generated scene records the MP4, rights note, narration cue, and exact start frame. Review the composed output and score every full gallery candidate before selecting a README GIF.

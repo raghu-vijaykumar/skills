@@ -1,6 +1,6 @@
 # Feature Specification: Complete headless Blender capability roadmap
 
-**Branch**: `main` | **Created**: 2026-11-18 | **Status**: In progress
+**Branch**: `main` | **Created**: 2026-11-18 | **Status**: Complete for the bounded routes in the 94-row audit; engine editor imports pending
 
 ## User scenarios and testing
 

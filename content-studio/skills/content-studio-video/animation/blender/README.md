@@ -1,5 +1,7 @@
 # Headless Blender gallery
 
+The [director guide](director.md) uses the existing catalog planner to propose a shot when the brief omits a style.
+
 The [video animation skill](../SKILL.md) indexes 94 upstream subject and style names for planning. `Catalogued` in the root README does not imply a tested renderer. The rendered gallery examples are original, explicitly authored Blender scenes. A project can replace their builders while retaining the same preview and full-shot contract.
 
 | Showcase | Builder | Specification | Rendered GIF |

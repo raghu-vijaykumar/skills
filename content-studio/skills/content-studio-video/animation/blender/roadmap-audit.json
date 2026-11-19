@@ -1,0 +1,1949 @@
+{
+  "schema_version": 1,
+  "upstream_commit": "904f095d8f36a6e72adaebb08d07f884a074743d",
+  "catalog_rows": 94,
+  "statuses": {
+    "Catalogued": 1,
+    "Prototype": 3,
+    "Rendered": 90,
+    "Integrated": 0
+  },
+  "scored_routes": 69,
+  "scored_candidate_records": 137,
+  "distinct_selected_gifs_decoded": 67,
+  "distinct_style_gifs": 31,
+  "distinct_visual_route_gifs": 55,
+  "engine_editor_imports": "pending",
+  "rows": [
+    {
+      "id": "blender-director",
+      "category": "Orchestration",
+      "status": "Catalogued",
+      "method": null,
+      "planning_method": "blender-plan",
+      "review": null,
+      "evidence": null,
+      "planning_proof": "director.md"
+    },
+    {
+      "id": "blender-modeler",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "lamp-review.md",
+      "evidence": "previews/lamp.gif",
+      "score_route": "blender-modeler",
+      "selected_candidate": "lamp-v2",
+      "selected_score": 82,
+      "candidate_count": 1,
+      "gif_sha256": "e68eddaada33c03e1f42f7707bcf6a258ac2e3b8d9d39908214a5aa637c1c8d9",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "hard-surface",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "review.md",
+      "evidence": "previews/clamp.gif",
+      "score_route": "hard-surface",
+      "selected_candidate": "clamp-v1",
+      "selected_score": 77,
+      "candidate_count": 1,
+      "gif_sha256": "3499afc701f2b9e79014e5fc2006ab03eebd6a4c9e0fc960a093fc860edaa682",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "prop-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "lamp-review.md",
+      "evidence": "previews/lamp.gif",
+      "score_route": "prop-artist",
+      "selected_candidate": "lamp-v2",
+      "selected_score": 82,
+      "candidate_count": 1,
+      "gif_sha256": "e68eddaada33c03e1f42f7707bcf6a258ac2e3b8d9d39908214a5aa637c1c8d9",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "vehicle-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "modeling-reuse-review.md",
+      "evidence": "previews/circuit-sprint.gif",
+      "score_route": "genre-racing-sports",
+      "selected_candidate": "circuit-sprint-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "07cf143a655e6d9db0516b68304a50d0d6236c52b2450e4df5747ff4e1b969da",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "environment-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "review.md",
+      "evidence": "previews/corridor.gif",
+      "score_route": "environment-artist",
+      "selected_candidate": "corridor-v1",
+      "selected_score": 85,
+      "candidate_count": 1,
+      "gif_sha256": "923893f0c7944da867d42ab6d95ba1282ccb02323fb0f5af470dabc3d7a5c4a4",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "vegetation-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "modeling-reuse-review.md",
+      "evidence": "previews/kelp-forest.gif",
+      "score_route": "biome-worlds",
+      "selected_candidate": "kelp-forest-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "9bb3cd22b144fbb1d76c41d8a9664073a73064d876bdb3749daeb0bd9adce45e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "character-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "review.md",
+      "evidence": "previews/character.gif",
+      "score_route": "character-artist",
+      "selected_candidate": "character-v1",
+      "selected_score": 82,
+      "candidate_count": 1,
+      "gif_sha256": "7cde92b15bd64936ba4b278b5225172432bb7cca281cfdd3a688bffb67367353",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "creature-artist",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "beetle-rig-review.md",
+      "evidence": "previews/beetle-rig.gif",
+      "score_route": "beetle-rig",
+      "selected_candidate": "beetle-rig-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "ff856bb7dee09f466773b94f054432e2e75450310240f02567e8fc62c664757f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "character-archetypes",
+      "category": "Modeling",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "archetype-review.md",
+      "evidence": "previews/noir-detective.gif",
+      "score_route": "noir-style",
+      "selected_candidate": "noir-detective-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "eb59ede8fef3891b0b332e0289308b03dbe404241313557a44859e33a835debd",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "sculpting",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "guardian-craft-review.md",
+      "evidence": "previews/guardian-craft.gif",
+      "score_route": "guardian-craft",
+      "selected_candidate": "guardian-craft-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "89fc348bdda5b080b312ae924a55b14fcfb424c0deddc0eeec88ca5c13d0ae4f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "retopology",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "guardian-craft-review.md",
+      "evidence": "previews/guardian-craft.gif",
+      "score_route": "guardian-craft",
+      "selected_candidate": "guardian-craft-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "89fc348bdda5b080b312ae924a55b14fcfb424c0deddc0eeec88ca5c13d0ae4f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "uv-workflow",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "materials",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "material-light-review.md",
+      "evidence": "previews/material-light-lab.gif",
+      "score_route": "material-light-lab",
+      "selected_candidate": "material-light-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "4972156ade59548c83e9a0e932750a1684b6b4db0f0d0f457ff7d15d7199cab2",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "texture-workflow",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "hair-groom",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "guardian-craft-review.md",
+      "evidence": "previews/guardian-craft.gif",
+      "score_route": "guardian-craft",
+      "selected_candidate": "guardian-craft-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "89fc348bdda5b080b312ae924a55b14fcfb424c0deddc0eeec88ca5c13d0ae4f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "cloth-sim",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "banner-impact-review.md",
+      "evidence": "previews/banner-impact.gif",
+      "score_route": "banner-impact",
+      "selected_candidate": "banner-impact-v2",
+      "selected_score": 74,
+      "candidate_count": 2,
+      "gif_sha256": "a5d535f80e334eb39f8a254f3fe2ecbc06329b40fec3945f12981ea79bc4d092",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "lookdev",
+      "category": "Production",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "material-light-review.md",
+      "evidence": "previews/material-light-lab.gif",
+      "score_route": "material-light-lab",
+      "selected_candidate": "material-light-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "4972156ade59548c83e9a0e932750a1684b6b4db0f0d0f457ff7d15d7199cab2",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "geometry-nodes",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "geometry-node-review.md",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "score_route": "geometry-node-walkway",
+      "selected_candidate": "geometry-node-walkway-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "45a485bea41a92abad820079afdc038898df61f7ad8e8425f82666eae608dbee",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "lighting",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "material-light-review.md",
+      "evidence": "previews/material-light-lab.gif",
+      "score_route": "material-light-lab",
+      "selected_candidate": "material-light-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "4972156ade59548c83e9a0e932750a1684b6b4db0f0d0f457ff7d15d7199cab2",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "camera-cinematography",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "narrative-technical-review.md",
+      "evidence": "previews/station-letter.gif",
+      "score_route": "genre-narrative-vn",
+      "selected_candidate": "station-letter-v3",
+      "selected_score": 73,
+      "candidate_count": 3,
+      "gif_sha256": "39575f0f1391d4b2265a38738a380fbcbb4ca0c494cfc004f005b2e6022e78a6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "rendering",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "narrative-technical-review.md",
+      "evidence": "previews/station-letter.gif",
+      "score_route": "genre-narrative-vn",
+      "selected_candidate": "station-letter-v3",
+      "selected_score": 73,
+      "candidate_count": 3,
+      "gif_sha256": "39575f0f1391d4b2265a38738a380fbcbb4ca0c494cfc004f005b2e6022e78a6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "compositing",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "cyberpunk-composite-review.md",
+      "evidence": "previews/cyberpunk-composite.gif",
+      "score_route": "cyberpunk-composite",
+      "selected_candidate": "cyberpunk-composite-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "1db02e0b7f1b5cc4a777181d80b4283865a56c61f4c6c55a31d6be55cdf148a2",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "animation",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "narrative-technical-review.md",
+      "evidence": "previews/station-letter.gif",
+      "score_route": "genre-narrative-vn",
+      "selected_candidate": "station-letter-v3",
+      "selected_score": 73,
+      "candidate_count": 3,
+      "gif_sha256": "39575f0f1391d4b2265a38738a380fbcbb4ca0c494cfc004f005b2e6022e78a6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "rigging",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "beetle-rig-review.md",
+      "evidence": "previews/beetle-rig.gif",
+      "score_route": "beetle-rig",
+      "selected_candidate": "beetle-rig-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "ff856bb7dee09f466773b94f054432e2e75450310240f02567e8fc62c664757f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "vfx-fx",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "banner-impact-review.md",
+      "evidence": "previews/banner-impact.gif",
+      "score_route": "banner-impact",
+      "selected_candidate": "banner-impact-v2",
+      "selected_score": 74,
+      "candidate_count": 2,
+      "gif_sha256": "a5d535f80e334eb39f8a254f3fe2ecbc06329b40fec3945f12981ea79bc4d092",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "physics-sim",
+      "category": "Technical",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "banner-impact-review.md",
+      "evidence": "previews/banner-impact.gif",
+      "score_route": "banner-impact",
+      "selected_candidate": "banner-impact-v2",
+      "selected_score": 74,
+      "candidate_count": 2,
+      "gif_sha256": "a5d535f80e334eb39f8a254f3fe2ecbc06329b40fec3945f12981ea79bc4d092",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "procedural-modeling",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "geometry-node-review.md",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "score_route": "geometry-node-walkway",
+      "selected_candidate": "geometry-node-walkway-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "45a485bea41a92abad820079afdc038898df61f7ad8e8425f82666eae608dbee",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "scene-assembly",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "geometry-node-review.md",
+      "evidence": "previews/geometry-node-walkway.gif",
+      "score_route": "geometry-node-walkway",
+      "selected_candidate": "geometry-node-walkway-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "45a485bea41a92abad820079afdc038898df61f7ad8e8425f82666eae608dbee",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "set-dressing",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "set-dressing-review.md",
+      "evidence": "previews/cozy-nook.gif",
+      "score_route": "cozy-wholesome-mood",
+      "selected_candidate": "cozy-nook-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "c21f782ecf46ffb49d078586e4dd9ad7d66dee9c1d434b4b7f13eba0ac51dfe4",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "asset-optimization",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "lod-pipeline",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "collision-proxy",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "export-pipeline",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "game-asset-review.md",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "score_route": "game-asset-pipeline",
+      "selected_candidate": "game-asset-pipeline-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "unity-export",
+      "category": "Pipeline",
+      "status": "Prototype",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": null,
+      "evidence": null,
+      "editor_import": "pending"
+    },
+    {
+      "id": "unreal-export",
+      "category": "Pipeline",
+      "status": "Prototype",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": null,
+      "evidence": null,
+      "editor_import": "pending"
+    },
+    {
+      "id": "godot-export",
+      "category": "Pipeline",
+      "status": "Prototype",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": null,
+      "evidence": null,
+      "editor_import": "pending"
+    },
+    {
+      "id": "qa-review",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "qa-review.md",
+      "evidence": "previews/material-light-lab.gif",
+      "score_route": "material-light-lab",
+      "selected_candidate": "material-light-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "4972156ade59548c83e9a0e932750a1684b6b4db0f0d0f457ff7d15d7199cab2",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "archviz",
+      "category": "Pipeline",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "archviz-review.md",
+      "evidence": "previews/archviz-studio.gif",
+      "score_route": "archviz",
+      "selected_candidate": "archviz-studio-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "6bafaae7b60249a6f1b5b3bc10d2eed7989f4f5bfcc2afd5976c41346c61dd85",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "horror-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "horror-review.md",
+      "evidence": "previews/horror-corridor.gif",
+      "score_route": "horror-style",
+      "selected_candidate": "horror-corridor-v1",
+      "selected_score": 77,
+      "candidate_count": 1,
+      "gif_sha256": "2ab2408df3677333ac952302d016d9679208a6f64c872e9dffa7953548aec2c8",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "psx-horror-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "psx-horror-review.md",
+      "evidence": "previews/psx-horror.gif",
+      "score_route": "psx-horror-style",
+      "selected_candidate": "psx-horror-v1",
+      "selected_score": 78,
+      "candidate_count": 1,
+      "gif_sha256": "5c2bbdd5064c7062bffe64e697cfda4839ba421b65e28d4c4a257e8d06cf4d1f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          360
+        ]
+      }
+    },
+    {
+      "id": "lowpoly-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "lowpoly-review.md",
+      "evidence": "previews/lowpoly-lamp.gif",
+      "score_route": "lowpoly-style",
+      "selected_candidate": "lowpoly-lamp-v2",
+      "selected_score": 87,
+      "candidate_count": 1,
+      "gif_sha256": "74cb5ccd7894aa61eeb1ec20d7f734a964c96433f733b6f7c8f88553fcb88b80",
+      "gif_decode": {
+        "frames": 32,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "anime-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "anime-review.md",
+      "evidence": "previews/anime-heroine.gif",
+      "score_route": "anime-style",
+      "selected_candidate": "anime-heroine-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "9a9041db8ad2f6cd5d4d60e6a11cba5bc922cb3a5e32e67c136bf1016148580b",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "voxel-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "voxel-review.md",
+      "evidence": "previews/voxel-lamp.gif",
+      "score_route": "voxel-style",
+      "selected_candidate": "voxel-lamp-v1",
+      "selected_score": 87,
+      "candidate_count": 1,
+      "gif_sha256": "bff9bab3c1aafe29d1fea4a7a5ab41ae1e9b6b82045b3549c0622b04d55f5c66",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "isometric-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "isometric-review.md",
+      "evidence": "previews/isometric-lamp.gif",
+      "score_route": "isometric-style",
+      "selected_candidate": "isometric-lamp-v1",
+      "selected_score": 87,
+      "candidate_count": 1,
+      "gif_sha256": "8b477e9307b89383aea2ef1ca6aabc9b7e7af38fd449dd2e0fb297b0645c4f87",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "stylized-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "stylized-review.md",
+      "evidence": "previews/stylized-windmill.gif",
+      "score_route": "stylized-style",
+      "selected_candidate": "stylized-windmill-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "9b67db3fcef052ee8d7da8d1d05e25f9bb4324935aaf0d57b43b8e2ab3ff0ab6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "realistic-style",
+      "category": "Core styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "realistic-review.md",
+      "evidence": "previews/realistic-lamp.gif",
+      "score_route": "realistic-style",
+      "selected_candidate": "realistic-lamp-v1",
+      "selected_score": 78,
+      "candidate_count": 1,
+      "gif_sha256": "0c07435f1e7570595d8ffec174f3bc8b83f2565c0d42a157ff3b8c473ecee9ee",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "cartoon-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "cartoon-review.md",
+      "evidence": "previews/cartoon-bounce.gif",
+      "score_route": "cartoon-style",
+      "selected_candidate": "cartoon-bounce-v1",
+      "selected_score": 87,
+      "candidate_count": 1,
+      "gif_sha256": "9404ed02a1caed0e4b752841e9867465af869be1641af857c49175440bc92249",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "comic-book-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "comic-review.md",
+      "evidence": "previews/comic-rocket.gif",
+      "score_route": "comic-book-style",
+      "selected_candidate": "comic-rocket-v1",
+      "selected_score": 82,
+      "candidate_count": 1,
+      "gif_sha256": "e0d2913c87096117d2017f3fbff534861d9c725f525ba785a602618c5136e924",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "manga-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "manga-review.md",
+      "evidence": "previews/manga-gaze.gif",
+      "score_route": "manga-style",
+      "selected_candidate": "manga-gaze-v1",
+      "selected_score": 78,
+      "candidate_count": 1,
+      "gif_sha256": "7cfffa47a26aff9ef7dc856800fdba265b6b25872e18b7e6111972654f4533c8",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "pixel-art-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "pixel-review.md",
+      "evidence": "previews/pixel-chest.gif",
+      "score_route": "pixel-art-style",
+      "selected_candidate": "pixel-chest-v2-coarse",
+      "selected_score": 82,
+      "candidate_count": 3,
+      "gif_sha256": "af4364960afceb5c84c39c996e4c71f95fdf461055e7ee7f41856533058598de",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          360
+        ]
+      }
+    },
+    {
+      "id": "hand-painted-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "painted-review.md",
+      "evidence": "previews/painted-teacup.gif",
+      "score_route": "hand-painted-style",
+      "selected_candidate": "painted-teacup-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "43719137640190c2cd2681fd7fc4e856c14aea6e6425f6080ee11dfead2c209a",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "painterly-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "watercolor-review.md",
+      "evidence": "previews/watercolor-river.gif",
+      "score_route": "painterly-style",
+      "selected_candidate": "watercolor-river-v3",
+      "selected_score": 82,
+      "candidate_count": 3,
+      "gif_sha256": "6fcb82057466e8513dec96210e08582590f6db4d29b3c0a78be63dc3488c2469",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "stop-motion-craft-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "paper-review.md",
+      "evidence": "previews/paper-butterfly.gif",
+      "score_route": "stop-motion-craft-style",
+      "selected_candidate": "paper-butterfly-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "1399de1e12b6905336d2522324f2b8c60432b6c3d152a31a9217be11eb63a035",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "chibi-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "chibi-review.md",
+      "evidence": "previews/chibi-courier.gif",
+      "score_route": "chibi-style",
+      "selected_candidate": "chibi-courier-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "6fdccf74cfd27ec93d9f40bff1eb0f45967c5be66bf02d4938ceed7900b79a3a",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "noir-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "noir-review.md",
+      "evidence": "previews/noir-detective.gif",
+      "score_route": "noir-style",
+      "selected_candidate": "noir-detective-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "eb59ede8fef3891b0b332e0289308b03dbe404241313557a44859e33a835debd",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "minimalist-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "minimal-review.md",
+      "evidence": "previews/minimal-pendulum.gif",
+      "score_route": "minimalist-style",
+      "selected_candidate": "minimal-pendulum-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "9df1202dfaaae3ab467f4c23d4db99b459a2033c92232dc034f3348312cd20a0",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "vector-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "vector-review.md",
+      "evidence": "previews/vector-sprout.gif",
+      "score_route": "vector-style",
+      "selected_candidate": "vector-sprout-v3",
+      "selected_score": 82,
+      "candidate_count": 3,
+      "gif_sha256": "94e705a349be93e05c3b0122e37bd0022ac31737ecef2f6eb5f2fcc299cec963",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "retro-8bit-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "retro8-review.md",
+      "evidence": "previews/retro8-ship.gif",
+      "score_route": "retro-8bit-style",
+      "selected_candidate": "retro8-ship-v2",
+      "selected_score": 82,
+      "candidate_count": 6,
+      "gif_sha256": "549173b3aa5ee96657008cf2fe1ec19430780ae5144c7211ebdfa5362a8773e3",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          320,
+          240
+        ]
+      }
+    },
+    {
+      "id": "retro-16bit-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "retro16-review.md",
+      "evidence": "previews/retro16-fox.gif",
+      "score_route": "retro-16bit-style",
+      "selected_candidate": "retro16-fox-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "22f735a31bb8604c2fbff21f8a5b4d042b7382ef7ae1327b314cf03cc5592dc7",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          320,
+          240
+        ]
+      }
+    },
+    {
+      "id": "hd-2d-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "hd2d-review.md",
+      "evidence": "previews/hd2d-bridge.gif",
+      "score_route": "hd-2d-style",
+      "selected_candidate": "hd2d-bridge-v3",
+      "selected_score": 82,
+      "candidate_count": 3,
+      "gif_sha256": "734c92bb30bbdb10a651dde677b368aad2e7b3f399b4e871cd2fb9caf3ef56b0",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "frutiger-aero-style",
+      "category": "Extended styles",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "aero-review.md",
+      "evidence": "previews/aero-dashboard.gif",
+      "score_route": "frutiger-aero-style",
+      "selected_candidate": "aero-dashboard-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "36a423bc4fbf1c6612ee958629e5a469898dc71c370cf325557955146d663e41",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "cosmic-eldritch-horror",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "cosmic-review.md",
+      "evidence": "previews/cosmic-aperture.gif",
+      "score_route": "cosmic-eldritch-horror",
+      "selected_candidate": "cosmic-aperture-v3",
+      "selected_score": 78,
+      "candidate_count": 3,
+      "gif_sha256": "4c6b654268371f9299502e89b2116efa3e3dd4a5924aa4d4232798dbdc105509",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "body-horror-style",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "hand-review.md",
+      "evidence": "previews/mutating-hand.gif",
+      "score_route": "body-horror-style",
+      "selected_candidate": "mutating-hand-v3-diffusion",
+      "selected_score": 78,
+      "candidate_count": 4,
+      "gif_sha256": "49f69624e454dc3606f3fd4d3bbbbc18daddf06674b1ecec7a88222eb1fe550c",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "analog-found-footage-horror",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "analog-review.md",
+      "evidence": "previews/analog-training.gif",
+      "score_route": "analog-found-footage-horror",
+      "selected_candidate": "analog-training-v3",
+      "selected_score": 82,
+      "candidate_count": 3,
+      "gif_sha256": "2a38dc240f19c1bf3bdb0c4d48fecc145e5f115709e80a99d09a9afbcb2fa732",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "liminal-space-style",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "liminal-review.md",
+      "evidence": "previews/liminal-pool.gif",
+      "score_route": "liminal-space-style",
+      "selected_candidate": "liminal-pool-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "5b6294fa4d0872be02295cb74f58cde5c792c23d66a7ba1f2bab874f4903ba59",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "folk-horror-style",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "folk-review.md",
+      "evidence": "previews/folk-ritual.gif",
+      "score_route": "folk-horror-style",
+      "selected_candidate": "folk-ritual-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "ca254b1ea00f7de489feec6a21b34a1af2d7d3788f96901eb1e4fc1b68e1efd4",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "mascot-puppet-horror",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "puppet-review.md",
+      "evidence": "previews/puppet-stage.gif",
+      "score_route": "mascot-puppet-horror",
+      "selected_candidate": "puppet-stage-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "b1d13f4443b80e72e8b83efe3750c4155cd52149390b20034350b4ea77f411c7",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "dream-weirdcore-style",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "dream-review.md",
+      "evidence": "previews/dream-playground.gif",
+      "score_route": "dream-weirdcore-style",
+      "selected_candidate": "dream-playground-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "1136c267ab0094e7e028d918dcbf67045633a511e99e4e538bd9f26317b37a0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "indie-horror-aesthetics",
+      "category": "Horror packs",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "indie-review.md",
+      "evidence": "previews/indie-cabin.gif",
+      "score_route": "indie-horror-aesthetics",
+      "selected_candidate": "indie-cabin-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "332b798a4fd1e11e943a2c944eaa5de40bd7906b7e0f6baa04b34b2ab6dadaef",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "fantasy-worlds",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "fantasy-review.md",
+      "evidence": "previews/fantasy-gate.gif",
+      "score_route": "fantasy-worlds",
+      "selected_candidate": "fantasy-gate-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "18f859518f3ed6cebee51c246710d796a90f60e4d2017943c574d8ecbfaade1a",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "sci-fi-punk-worlds",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "cyberpunk-review.md",
+      "evidence": "previews/cyberpunk-alley.gif",
+      "score_route": "sci-fi-punk-worlds",
+      "selected_candidate": "cyberpunk-alley-v2",
+      "selected_score": 74,
+      "candidate_count": 2,
+      "gif_sha256": "b8a39bcaf7fb52b1ad58ce8be670e152f80722797f16f5816c50335a4d634d0e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "historical-worlds",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "viking-review.md",
+      "evidence": "previews/viking-longship.gif",
+      "score_route": "historical-worlds",
+      "selected_candidate": "viking-longship-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "21347c4bbf126b0eb8c20edb7fc5f67e74309e7b991cba5fd3bcaf76da7f538b",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "apocalypse-worlds",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "wasteland-review.md",
+      "evidence": "previews/wasteland-station.gif",
+      "score_route": "apocalypse-worlds",
+      "selected_candidate": "wasteland-station-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "d2aec2a63183e43b52f599ed42c7bca94e796c6d4063f406b7ba43bc678b2a7e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "biome-worlds",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "kelp-review.md",
+      "evidence": "previews/kelp-forest.gif",
+      "score_route": "biome-worlds",
+      "selected_candidate": "kelp-forest-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "9bb3cd22b144fbb1d76c41d8a9664073a73064d876bdb3749daeb0bd9adce45e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "cozy-wholesome-mood",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "cozy-review.md",
+      "evidence": "previews/cozy-nook.gif",
+      "score_route": "cozy-wholesome-mood",
+      "selected_candidate": "cozy-nook-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "c21f782ecf46ffb49d078586e4dd9ad7d66dee9c1d434b4b7f13eba0ac51dfe4",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "dark-gritty-mood",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "gritty-review.md",
+      "evidence": "previews/gritty-depot.gif",
+      "score_route": "dark-gritty-mood",
+      "selected_candidate": "gritty-depot-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "e562961c9ca552e565eabbb1cb0762385f5cecad2df8fb1503571003e8062dc6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "dream-surreal-mood",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "dream-tide-review.md",
+      "evidence": "previews/dream-tide.gif",
+      "score_route": "dream-surreal-mood",
+      "selected_candidate": "dream-tide-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "05cd7e65159dd28d1dd175604eab3d4f7bf343374ebc8df7316412d7ed3131b7",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "neon-retrofuturism",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "retrowave-review.md",
+      "evidence": "previews/retrowave-highway.gif",
+      "score_route": "neon-retrofuturism",
+      "selected_candidate": "retrowave-highway-v2",
+      "selected_score": 82,
+      "candidate_count": 2,
+      "gif_sha256": "512b44a73c5fa7be1d2a5de8829e35dc6bd4196f0673086794010a2ec07db437",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "brutalist-mood",
+      "category": "Worlds and moods",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "brutalist-review.md",
+      "evidence": "previews/brutalist-archive.gif",
+      "score_route": "brutalist-mood",
+      "selected_candidate": "brutalist-archive-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "07871ca0f210715b8c3e77ed1b949eb02b087eeeb09d1856844c3b13bf81af82",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-action-combat",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "action-review.md",
+      "evidence": "previews/action-arena.gif",
+      "score_route": "genre-action-combat",
+      "selected_candidate": "action-arena-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "e3597b021156b4a8b3f592696c18c729f016dcaa3e5afca8e2d8b7e1b0503cac",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-shooter",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "shooter-review.md",
+      "evidence": "previews/shooter-rooftop.gif",
+      "score_route": "genre-shooter",
+      "selected_candidate": "shooter-rooftop-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "a56ff2409a5d73d7e38a549c4dcdcf4eadaf4f878a847013e3d7007cb7329094",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-rpg",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "rpg-review.md",
+      "evidence": "previews/rpg-quest-hub.gif",
+      "score_route": "genre-rpg",
+      "selected_candidate": "rpg-quest-hub-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "ce195d874d780b389733741947ec6ccd3020f2013cf577fa2b25f8e505e74e8f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-survival",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "survival-review.md",
+      "evidence": "previews/survival-shelter.gif",
+      "score_route": "genre-survival",
+      "selected_candidate": "survival-shelter-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "8e4fbb7bf476beff25d3eb22a13df41ec0c75700f63eba1117f20a11a9cf7dae",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-stealth",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "stealth-review.md",
+      "evidence": "previews/stealth-infiltration.gif",
+      "score_route": "genre-stealth",
+      "selected_candidate": "stealth-infiltration-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "7b8ddfb636ceb98ba185a3e0cc8aae2abed6747280f2ca7cff43e00dfc740392",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-puzzle-platformer",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "puzzle-review.md",
+      "evidence": "previews/puzzle-platformer.gif",
+      "score_route": "genre-puzzle-platformer",
+      "selected_candidate": "puzzle-platformer-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "6da7b4468c67ac8df6e4c6362b26c78441fdfb952e97f72f2e3c6a6679be9c7e",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-metroidvania-roguelike",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "modular-run-review.md",
+      "evidence": "previews/modular-gate.gif",
+      "score_route": "genre-metroidvania-roguelike",
+      "selected_candidate": "modular-gate-v2",
+      "selected_score": 74,
+      "candidate_count": 2,
+      "gif_sha256": "c91f61a63c20736ed13ff4bbdfcf065d2d233a11752c2a78bd390632477026c1",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-soulslike",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "soulslike-review.md",
+      "evidence": "previews/soulslike-causeway.gif",
+      "score_route": "genre-soulslike",
+      "selected_candidate": "soulslike-causeway-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "9845525b46309062cf536ed7bcd3ff3886a9879833b306c48f542220ff294046",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-strategy-sim",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "strategy-review.md",
+      "evidence": "previews/strategy-settlement.gif",
+      "score_route": "genre-strategy-sim",
+      "selected_candidate": "strategy-settlement-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "dd211e2b855561d713770ae9f5dfd62515b70e3c2f082306a9d5d4a8948bb35f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-racing-sports",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "circuit-review.md",
+      "evidence": "previews/circuit-sprint.gif",
+      "score_route": "genre-racing-sports",
+      "selected_candidate": "circuit-sprint-v2",
+      "selected_score": 73,
+      "candidate_count": 2,
+      "gif_sha256": "07cf143a655e6d9db0516b68304a50d0d6236c52b2450e4df5747ff4e1b969da",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-narrative-vn",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "narrative-review.md",
+      "evidence": "previews/station-letter.gif",
+      "score_route": "genre-narrative-vn",
+      "selected_candidate": "station-letter-v3",
+      "selected_score": 73,
+      "candidate_count": 3,
+      "gif_sha256": "39575f0f1391d4b2265a38738a380fbcbb4ca0c494cfc004f005b2e6022e78a6",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-card-party-idle",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "card-table-review.md",
+      "evidence": "previews/card-table.gif",
+      "score_route": "genre-card-party-idle",
+      "selected_candidate": "card-table-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "7444b56b49a7e54a485aa7eda88ff32816cf193412ff71bef37ca86743ec294f",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "genre-open-world-sandbox",
+      "category": "Genre direction",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "open-world-review.md",
+      "evidence": "previews/open-world-crossing.gif",
+      "score_route": "genre-open-world-sandbox",
+      "selected_candidate": "open-world-crossing-v2",
+      "selected_score": 78,
+      "candidate_count": 2,
+      "gif_sha256": "69b73375d032230f8a6147c7359dce9aa7e9286bf71d6a5417e583e824a95397",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    },
+    {
+      "id": "visual-console-eras",
+      "category": "Eras",
+      "status": "Rendered",
+      "method": "blender-shot",
+      "planning_method": null,
+      "review": "console-era-review.md",
+      "evidence": "previews/console-era-flight.gif",
+      "score_route": "visual-console-eras",
+      "selected_candidate": "console-era-flight-v2",
+      "selected_score": 77,
+      "candidate_count": 2,
+      "gif_sha256": "552edc819f5175a42afbe2093805d0b45bfa418283584acfb5c64f8c3fa29cd1",
+      "gif_decode": {
+        "frames": 24,
+        "resolution": [
+          480,
+          270
+        ]
+      }
+    }
+  ]
+}

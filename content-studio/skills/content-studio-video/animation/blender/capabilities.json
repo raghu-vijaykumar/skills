@@ -10,7 +10,9 @@
       "route": "content-studio-video-animation",
       "method": null,
       "status": "Catalogued",
-      "evidence": null
+      "evidence": null,
+      "planning_method": "blender-plan",
+      "planning_proof": "director.md"
     },
     {
       "id": "blender-modeler",

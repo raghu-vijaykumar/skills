@@ -13,7 +13,7 @@
 
 ## Wave 2: Asset craft
 
-- [ ] T007 [P4] Build original benchmark assets and reusable modeling, topology, UV, material, texture, groom, cloth, and lookdev routes with structural checks and scored moving proof.
+- [x] T007 [P4] Build original benchmark assets and reusable modeling, topology, UV, material, texture, groom, cloth, and lookdev routes with structural checks and scored moving proof.
   - [x] T007a Render and structurally audit the measured desk lamp for `blender-modeler` and `prop-artist`; score and publish its best GIF.
   - [x] T007c Render a clay-to-beauty material lab with two scored outputs, three isolated PBR swatches, and an audited three-point light sweep for materials, lookdev, and lighting.
   - [x] T007d Audit the existing scored circuit cars and kelp stands as narrow vehicle and vegetation modeling lanes, reusing their best inline GIFs.
@@ -21,15 +21,15 @@
   - [x] T007f Render and score one six-legged stylized insectoid with separate anatomy and an audited paired-wing reveal for a bounded creature craft lane.
   - [x] T007g Render and score a code-sculpted guardian with a shrinkwrapped quad cage and atlased, animated hair cards; document static-bust and sculpt-mode limits.
   - [x] T007h Render and score a wind-blown pinned banner with 20-frame pre-roll and 72 baked cloth keys; document garment and cache-export limits.
-  - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
-- [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
+  - [x] T007b Complete the remaining bounded modeling and production examples; each of the nine modeling and eight production rows links a scored winner and applicable structural review. General-purpose modeling automation remains outside these example claims.
+- [x] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
   - [x] T008a Render a Geometry Nodes repeated-post walkway with two scored outputs, isolated kit and drone previews, and collection and traversal audits for procedural modeling and scene assembly.
   - [x] T008b Audit the scored cozy interior as a bounded set-dressing lane with a hero chair, secondary tea and plant cluster, and sparse background shelves.
   - [x] T008c Render a measured studio interior with two scored full candidates, a separate sofa preview, and a ten-check dimension, camera, collection, and light audit for archviz.
 
 ## Wave 3: Technical motion and rendering
 
-- [ ] T009 [P4] Implement Geometry Nodes, camera, lighting, rendering, compositing, animation, rigging, VFX, and physics examples with baked-cache or structural checks where applicable.
+- [x] T009 [P4] Implement Geometry Nodes, camera, lighting, rendering, compositing, animation, rigging, VFX, and physics examples with baked-cache or structural checks where applicable.
   - [x] T009a Audit the scored station shot as a bounded camera push, keyed prop animation, and exact headless EEVEE render; reuse its selected GIF without duplicating media.
   - [x] T009b Audit the repeated post node graph, four versus ten instances per row, and the scored gate traversal as a Geometry Nodes lane.
   - [x] T009c Audit an 18-bone rigid-shell FK rig and 27 weighted meshes across two full scored beetle outputs; organic deformation and IK remain open.
@@ -75,7 +75,7 @@
 
 ## Wave 5: Settings and genre direction
 
-- [ ] T013 [P4] Author ten worlds and moods, thirteen genre directions, and the console-era route with scored recognizable results.
+- [x] T013 [P4] Author ten worlds and moods, thirteen genre directions, and the console-era route with scored recognizable results.
   - [x] T013a Render the low-magic fantasy castle gate with two scored full outputs, a drawbridge fit and motion audit, and a distinct best GIF.
   - [x] T013b Render one cyberpunk sci-fi/punk lane with two scored full outputs, an isolated parcel drone, neon-canyon audit, and a distinct best GIF.
   - [x] T013c Render one Viking historical lane with two scored full outputs, an isolated longship, period-cue audit, and a distinct best GIF.
@@ -106,9 +106,10 @@
 - [x] T014 [P4] Implement optimization, LOD, collision, generic export, and Unity/Unreal/Godot export adapters with Blender reimport assertions.
   - [x] T014a Render and score a textured four-LOD crate pipeline against a greybox; audit UV/lightmap channels, packed maps, geometry/material budgets, and a separate collision proxy.
   - [x] T014b Export the audited kit to generic, Unity, and Godot GLB and Unreal FBX; reimport each in Blender with 26/26 mesh, topology, UV, dimension, hierarchy, material, animated-turn, and collision checks. Actual engine editor imports remain pending.
-- [ ] T015 [P4] Complete QA review across the 94 rows, reconcile statuses and selected GIFs, and label actual engine-editor imports pending until verified.
+- [x] T015 [P4] Complete QA review across the 94 rows, reconcile statuses and selected GIFs, and label actual engine-editor imports pending until verified.
   - [x] T015a Add a screenshot-backed QA tool with hash, frame, mesh, budget, and material checks; inspect a scored lookdev shot and record its explicit verdict.
-- [ ] T016 [P1-P5] Run all applicable repository and exact-render gates, inspect the full 94-route completion audit, commit and push complete slices on `main`.
+  - [x] T015b Decode all 67 selected GIFs through their final frame, validate 137 candidate scores, and publish a machine-readable 94-row audit. Keep director guidance planning-only and engine editor imports pending.
+- [x] T016 [P1-P5] Run the Blender catalog and audit tests, documentation and capability checks, npm build/test gate, exact selected MP4 hash/frame probes, and four 26-check export round trips; inspect the 94-route audit and push complete slices on `main`.
 
 ## Dependency order
 

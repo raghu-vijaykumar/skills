@@ -1,5 +1,7 @@
 # Headless Blender craft and style
 
+Use the [director guide](../blender/director.md) to turn an unstylized brief into a bounded shot proposal with dependencies, commands, and review frames.
+
 This Content Studio route adapts useful ideas from [Blender Skills at pinned commit 904f095](https://github.com/arjun988/blender-skills/tree/904f095d8f36a6e72adaebb08d07f884a074743d), licensed under [MIT](https://github.com/arjun988/blender-skills/blob/904f095d8f36a6e72adaebb08d07f884a074743d/LICENSE). The upstream skills are guidance, not executable scene builders. Content Studio's production precheck, evidence, rights, and human review gates control actual work.
 
 Choose a subject discipline first: prop/hard surface, character/creature, vegetation, vehicle, or environment. Block the silhouette and scale before details. Keep moving parts independent, name their pivots and parent relations, and match real references when physical accuracy matters. Record when internals or motion are illustrative.
