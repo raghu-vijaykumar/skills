@@ -12,7 +12,7 @@ new workspace profiles and model weights are not gallery assets.
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
 | `enroll-and-synthesize` | Supported | Consented samples + approved script + IndicF5 model → segment WAVs + manifest + assembled narration | Specialist only | [Actual inference sample and commands](previews/example-synthesis.md) | A Kannada/Latin mixed cue needs phonetic Kannada TTS text or a bounded reviewed override; the gallery sample failed transcription and is not approved narration. Assembly requires a frame-reviewed cue manifest and keeps voice at 1.0x; `--duration` still needs exact-picture verification later. |
-| `compare-indic-mio-emotion` | Supported preview | Consented Rakshitha profile + cached Indic-Mio LiteRT bundle → paired neutral/emotion WAVs + manifest | Specialist only | `scripts/indic_mio_compare.py` writes to `%LOCALAPPDATA%/ContentStudio/voice-tests/indic-mio-rakshitha/` by default | Script-only local sidecar; short utterances, fixed seed, no production mux. Check wording and speaker resemblance by listening before selecting this backend. |
+| `compare-indic-mio-emotion` | Supported | Consented Rakshitha profile + cached Indic-Mio LiteRT bundle → paired neutral/emotion WAVs + manifest | Specialist only | [Local comparison script](scripts/indic_mio_compare.py) writes to `%LOCALAPPDATA%/ContentStudio/voice-tests/indic-mio-rakshitha/` by default | Preview-only local sidecar; short utterances, fixed seed, no production mux. Check wording and speaker resemblance by listening before selecting this backend. |
 
 ## Evidence note
 
