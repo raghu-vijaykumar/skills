@@ -743,7 +743,8 @@ class CatalogTests(unittest.TestCase):
             catalog_module.scorebook(worse_winner)
 
     def test_readme_catalog_and_rendered_gallery_stay_in_sync(self):
-        readme = (catalog_module.REPO / "README.md").read_text(encoding="utf-8")
+        # The catalog and selected GIFs must stay together in the Blender guide.
+        readme = (catalog_module.BLENDER / "README.md").read_text(encoding="utf-8")
         generated = readme.split("<!-- blender-catalog:start -->", 1)[1].split(
             "<!-- blender-catalog:end -->", 1)[0].strip()
         self.assertEqual(generated, catalog_module.markdown_table(catalog_module.catalog()))
@@ -751,7 +752,7 @@ class CatalogTests(unittest.TestCase):
         # Every selected rendered artifact must play inline in the showcase table.
         for evidence in {entry["evidence"] for entry in catalog_module.catalog()
                          if entry["status"] == "Rendered"}:
-            path = "content-studio/skills/content-studio-video/animation/blender/" + evidence
+            path = evidence
             self.assertRegex(gallery, r"!\[[^]]+\]\(" + re.escape(path) + r"\)")
         for name in ("clamp", "character", "corridor", "lamp", "handoff",
                      "lowpoly-lamp", "voxel-lamp", "isometric-lamp", "realistic-lamp",
@@ -769,43 +770,25 @@ class CatalogTests(unittest.TestCase):
                      "banner-impact"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
-            self.assertIn(f"animation/blender/previews/{name}.gif", readme)
-        self.assertIn("![Best scored vector sprout animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/vector-sprout.gif)", readme)
-        self.assertIn("![Best scored retro 8-bit ship animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/retro8-ship.gif)", readme)
-        self.assertIn("![Best scored retro 16-bit fox animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/retro16-fox.gif)", readme)
-        self.assertIn("![Best scored HD-2D lantern bridge animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/hd2d-bridge.gif)", readme)
-        self.assertIn("![Best scored Frutiger Aero dashboard animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/aero-dashboard.gif)", readme)
-        self.assertIn("![Best scored cosmic eldritch aperture animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/cosmic-aperture.gif)", readme)
-        self.assertIn("![Best scored body horror mutating hand animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/mutating-hand.gif)", readme)
-        self.assertIn("![Best scored analog found footage training animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/analog-training.gif)", readme)
-        self.assertIn("![Best scored liminal poolrooms animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/liminal-pool.gif)", readme)
-        self.assertIn("![Best scored folk horror rite animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/folk-ritual.gif)", readme)
-        self.assertIn("![Best scored mascot puppet horror animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/puppet-stage.gif)", readme)
-        self.assertIn("![Best scored dream weirdcore playground animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/dream-playground.gif)", readme)
-        self.assertIn("![Best scored indie forest cabin horror animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/indie-cabin.gif)", readme)
-        self.assertIn("![Best scored fantasy drawbridge animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/fantasy-gate.gif)", readme)
-        self.assertIn("![Best scored cyberpunk alley animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/cyberpunk-alley.gif)", readme)
-        self.assertIn("![Best scored Viking longship animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/viking-longship.gif)", readme)
-        self.assertIn("![Best scored post-apocalyptic wasteland animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/wasteland-station.gif)", readme)
-        self.assertIn("![Best scored underwater kelp biome animation](content-studio/skills/"
-                      "content-studio-video/animation/blender/previews/kelp-forest.gif)", readme)
+            self.assertIn(f"previews/{name}.gif", gallery)
+        self.assertIn("![Best scored vector sprout animation](previews/vector-sprout.gif)", readme)
+        self.assertIn("![Best scored retro 8-bit ship animation](previews/retro8-ship.gif)", readme)
+        self.assertIn("![Best scored retro 16-bit fox animation](previews/retro16-fox.gif)", readme)
+        self.assertIn("![Best scored HD-2D lantern bridge animation](previews/hd2d-bridge.gif)", readme)
+        self.assertIn("![Best scored Frutiger Aero dashboard animation](previews/aero-dashboard.gif)", readme)
+        self.assertIn("![Best scored cosmic eldritch aperture animation](previews/cosmic-aperture.gif)", readme)
+        self.assertIn("![Best scored body horror mutating hand animation](previews/mutating-hand.gif)", readme)
+        self.assertIn("![Best scored analog found footage training animation](previews/analog-training.gif)", readme)
+        self.assertIn("![Best scored liminal poolrooms animation](previews/liminal-pool.gif)", readme)
+        self.assertIn("![Best scored folk horror rite animation](previews/folk-ritual.gif)", readme)
+        self.assertIn("![Best scored mascot puppet horror animation](previews/puppet-stage.gif)", readme)
+        self.assertIn("![Best scored dream weirdcore playground animation](previews/dream-playground.gif)", readme)
+        self.assertIn("![Best scored indie forest cabin horror animation](previews/indie-cabin.gif)", readme)
+        self.assertIn("![Best scored fantasy drawbridge animation](previews/fantasy-gate.gif)", readme)
+        self.assertIn("![Best scored cyberpunk alley animation](previews/cyberpunk-alley.gif)", readme)
+        self.assertIn("![Best scored Viking longship animation](previews/viking-longship.gif)", readme)
+        self.assertIn("![Best scored post-apocalyptic wasteland animation](previews/wasteland-station.gif)", readme)
+        self.assertIn("![Best scored underwater kelp biome animation](previews/kelp-forest.gif)", readme)
 
     def test_visual_style_gifs_must_be_distinct(self):
         original = catalog_module.MANIFEST

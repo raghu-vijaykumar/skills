@@ -514,10 +514,9 @@ def markdown_table(entries):
         route = (entry["method"] or
                  (f"{entry['planning_method']} (planning)" if entry.get("planning_method")
                   else f"Planned wave {entry['wave']}"))
-        evidence = (f"[GIF](content-studio/skills/content-studio-video/animation/blender/"
-                    f"{entry['evidence']})" if entry.get("evidence") else
-                    (f"[Guide](content-studio/skills/content-studio-video/animation/blender/"
-                     f"{entry['planning_proof']})" if entry.get("planning_proof") else
+        # The generated table lives beside its previews and planning evidence.
+        evidence = (f"[GIF]({entry['evidence']})" if entry.get("evidence") else
+                    (f"[Guide]({entry['planning_proof']})" if entry.get("planning_proof") else
                      "Pending"))
         lines.append(f"| {entry['category']} | [`{entry['id']}`]({entry['source']}) | "
                      f"{route} | {entry['status']} | {evidence} |")
@@ -525,8 +524,8 @@ def markdown_table(entries):
 
 
 def sync_readme(entries):
-    """Update only the generated catalog region of the main README."""
-    path = REPO / "README.md"
+    """Keep the generated catalog with the Blender gallery and its evidence."""
+    path = BLENDER / "README.md"
     body = path.read_text(encoding="utf-8")
     start = "<!-- blender-catalog:start -->"
     end = "<!-- blender-catalog:end -->"

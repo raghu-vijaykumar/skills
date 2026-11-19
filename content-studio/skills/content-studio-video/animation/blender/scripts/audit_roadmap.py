@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from catalog import BLENDER, REPO, VISUAL_CATEGORIES, catalog, markdown_table, scorebook
+from catalog import BLENDER, VISUAL_CATEGORIES, catalog, markdown_table, scorebook
 
 
 def decode_gif(path):
@@ -29,7 +29,8 @@ def audit():
     entries = catalog()
     winners = scorebook()
     book = json.loads((BLENDER / "scores.json").read_text(encoding="utf-8"))
-    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    # Audit the page that actually presents the scored gallery and catalog.
+    readme = (BLENDER / "README.md").read_text(encoding="utf-8")
     start, end = "<!-- blender-catalog:start -->", "<!-- blender-catalog:end -->"
     if readme.count(start) != 1 or readme.count(end) != 1:
         raise ValueError("README catalog markers are missing or duplicated")
@@ -51,7 +52,7 @@ def audit():
                         "candidate_count": len(book["routes"][score_route]["candidates"]),
                         "gif_sha256": winner["gif_sha256"]})
             gif = BLENDER / entry["evidence"]
-            relative = "content-studio/skills/content-studio-video/animation/blender/" + entry["evidence"]
+            relative = entry["evidence"]
             if f"]({relative})" not in readme.split(start, 1)[0]:
                 raise ValueError(f"Selected GIF is not inline above the catalog: {entry['id']}")
             if gif not in decoded:
