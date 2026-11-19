@@ -2609,6 +2609,56 @@
           "review_note": "The full-resolution shot stays legible at the narration cue; the clamp contact remains illustrative. The exact composition includes an audio track."
         }
       ]
+    },
+    "game-asset-pipeline": {
+      "selected": "game-asset-pipeline-v2",
+      "candidates": [
+        {
+          "id": "game-asset-pipeline-v1",
+          "video_sha256": "6c80437611b415d9a5e05a6d8f3b26a99c9e87d4c29b937cf3415927fd6f5de9",
+          "gif_sha256": "0ec4e675e8fb8baef2fd2a52706cf0ba0ea13e2eea373f4bf680a4f07ea98f96",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 3,
+            "finish": 2,
+            "evidence_integrity": 5
+          },
+          "score_total": 50,
+          "reviewer": "Content Studio encoded-frame and pipeline review",
+          "review_date": "2026-11-19",
+          "review_note": "A static greybox makes four geometry budgets legible, but it does not show texture, rotation, or collision motion. Both full outputs and saved scene passed technical checks."
+        },
+        {
+          "id": "game-asset-pipeline-v2",
+          "video_sha256": "a78bc65163f43b7a49b6d18b3e1df2e3add9871311996d6e1b2ccedc2eb77c4e",
+          "gif_sha256": "e1f2585677c99a2496227b8c8c3ee518c9f9086578a7834208296e332c0e7a0e",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and pipeline review",
+          "review_date": "2026-11-19",
+          "review_note": "The lit wood crates turn on a shared comparison stage, exposing LOD shape changes; a cyan outline descends to show the separate collision proxy. Textures are illustrative and the UV layout itself requires the structural audit.",
+          "gif_path": "previews/game-asset-pipeline.gif"
+        }
+      ]
     }
   }
 }

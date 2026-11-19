@@ -205,7 +205,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
         (r"\b(tree|plant|vegetation|forest|sprout|flower)\b", "vegetation-artist"),
         (r"\b(room|corridor|hallway|hall|environment|landscape|building|island|cottage|windmill|river|lake|aperture|portal|void|pool|poolrooms|mall|school|hotel|field|village|playground|nursery|playroom)\b", "environment-artist"),
         (r"\b(machine|mechanism|clamp|robot|industrial)\b", "hard-surface"),
-        (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup|dashboard|widget)\b", "prop-artist"),
+        # The scored crate pipeline is a prop benchmark, even without a style cue.
+        (r"\b(prop|object|product|furniture|lamp|chair|bottle|chest|teacup|dashboard|widget|crate)\b", "prop-artist"),
     ]
     subjects = {entry["id"] for entry in entries if entry["category"] == "Modeling"}
     if subject is not None and subject not in subjects:

@@ -212,13 +212,20 @@
       "id": "uv-workflow",
       "category": "Production",
       "wave": 2,
-      "dependencies": [
-        "blender-modeler"
-      ],
+      "dependencies": ["blender-modeler"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate uv atlas lightmap"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "materials",
@@ -244,13 +251,20 @@
       "id": "texture-workflow",
       "category": "Production",
       "wave": 2,
-      "dependencies": [
-        "blender-modeler"
-      ],
+      "dependencies": ["blender-modeler"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate packed orm atlas"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "hair-groom",
@@ -510,85 +524,125 @@
       "id": "asset-optimization",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "blender-modeler"
-      ],
+      "dependencies": ["blender-modeler"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate lod budget audit"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "lod-pipeline",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "asset-optimization"
-      ],
+      "dependencies": ["asset-optimization"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate four lod comparison"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "collision-proxy",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "blender-modeler"
-      ],
+      "dependencies": ["blender-modeler"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate collision proxy"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "export-pipeline",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "asset-optimization"
-      ],
+      "dependencies": ["asset-optimization"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/game-asset-pipeline.gif",
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate glb fbx roundtrip"],
+      "narrow_cue_required": true,
+      "review": "game-asset-review.md",
+      "score_record": "scores.json",
+      "score_route": "game-asset-pipeline"
     },
     {
       "id": "unity-export",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "export-pipeline"
-      ],
+      "dependencies": ["export-pipeline"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Prototype",
+      "evidence": null,
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate unity glb adapter"],
+      "narrow_cue_required": true
     },
     {
       "id": "unreal-export",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "export-pipeline"
-      ],
+      "dependencies": ["export-pipeline"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Prototype",
+      "evidence": null,
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate unreal fbx adapter"],
+      "narrow_cue_required": true
     },
     {
       "id": "godot-export",
       "category": "Pipeline",
       "wave": 6,
-      "dependencies": [
-        "export-pipeline"
-      ],
+      "dependencies": ["export-pipeline"],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Prototype",
+      "evidence": null,
+      "builder": "examples/game_asset_pipeline.py",
+      "spec": "examples/game_asset_pipeline.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["crate godot glb adapter"],
+      "narrow_cue_required": true
     },
     {
       "id": "qa-review",

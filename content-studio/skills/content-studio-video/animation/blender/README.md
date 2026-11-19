@@ -13,6 +13,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Isometric tile treatment | [Source](examples/isometric_lamp.py) | [Inputs](examples/isometric_lamp.json) | [GIF](previews/isometric-lamp.gif) |
 | Realistic product visualization | [Source](examples/realistic_lamp.py) | [Inputs](examples/realistic_lamp.json) | [GIF](previews/realistic-lamp.gif) |
 | Measured studio walkthrough | [Source](examples/archviz_studio.py) | [Inputs](examples/archviz_studio.json) | [GIF](previews/archviz-studio.gif) |
+| Game asset pipeline | [Source](examples/game_asset_pipeline.py) | [Inputs](examples/game_asset_pipeline.json) | [GIF](previews/game-asset-pipeline.gif) |
 | Psychological horror corridor | [Source](examples/horror_corridor.py) | [Inputs](examples/horror_corridor.json) | [GIF](previews/horror-corridor.gif) |
 | PSX horror CRT hall | [Source](examples/psx_horror.py) | [Inputs](examples/psx_horror.json) | [GIF](previews/psx-horror.gif) |
 | Anime heroine pose | [Source](examples/anime_heroine.py) | [Inputs](examples/anime_heroine.json) | [GIF](previews/anime-heroine.gif) |
@@ -121,6 +122,7 @@ The [vehicle and vegetation modeling review](modeling-reuse-review.md) reuses sc
 The [detective archetype review](archetype-review.md) reuses the selected noir GIF for one audited role silhouette and walk; other character families remain unproven.
 The [QA review](qa-review.md) records a screenshot-backed, budgeted verdict for the scored lookdev output and documents the reusable Blender QA script.
 The [archviz review](archviz-review.md) records two scored full interior walkthroughs, a measured window and level camera audit, and the selected GIF.
+The [game asset pipeline review](game-asset-review.md) scores two full crate shots and audits packed UVs, textures, LOD budgets, collision, and GLB/FBX Blender round trips. Unity, Unreal, and Godot editor imports remain pending.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.
 

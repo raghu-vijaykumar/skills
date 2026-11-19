@@ -61,3 +61,4 @@ The [vehicle and vegetation modeling evidence](blender/modeling-reuse-review.md)
 The [detective archetype evidence](blender/archetype-review.md) connects one scored noir shot to an audited character role.
 The [Blender QA evidence](blender/qa-review.md) records exact-output hash, mesh, budget, angle, and beauty checks with an explicit verdict.
 The [measured studio archviz evidence](blender/archviz-review.md) compares a greybox and furnished walkthrough with audited dimensions and camera motion.
+The [game asset pipeline evidence](blender/game-asset-review.md) scores two complete animations and checks UVs, textures, LODs, collision, and GLB/FBX round trips. Engine editor imports remain pending.

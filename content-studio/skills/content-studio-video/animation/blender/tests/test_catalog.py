@@ -19,7 +19,8 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 75)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 81)
+        self.assertEqual(sum(entry["status"] == "Prototype" for entry in entries), 3)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
             self.assertEqual(entry["route"], "content-studio-video-animation")
@@ -429,6 +430,19 @@ class CatalogTests(unittest.TestCase):
                                                 capability="archviz")["builder"])
         self.assertIsNone(catalog_module.route("A measured studio archviz walkthrough",
                                                 style="anime-style")["builder"])
+        for cue, capability in (("crate UV atlas lightmap", "uv-workflow"),
+                                ("crate packed ORM atlas", "texture-workflow"),
+                                ("crate LOD budget audit", "asset-optimization"),
+                                ("crate four LOD comparison", "lod-pipeline"),
+                                ("crate collision proxy", "collision-proxy"),
+                                ("crate GLB FBX roundtrip", "export-pipeline")):
+            result = catalog_module.route(f"A {cue}")
+            self.assertEqual((result["capability"], result["builder"]),
+                             (capability, "examples/game_asset_pipeline.py"))
+        self.assertIsNone(catalog_module.route("Optimize a generic car asset",
+                                                capability="asset-optimization")["builder"])
+        for target in ("Unity GLB", "Unreal FBX", "Godot GLB"):
+            self.assertIsNone(catalog_module.route(f"A crate {target} adapter")["builder"])
 
     def test_explicit_style_wins_and_unsupported_combination_has_no_builder(self):
         result = catalog_module.route("A character waves", "stop-motion-craft-style")
@@ -467,7 +481,9 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 64)
+        self.assertEqual(len(catalog_module.scorebook(book)), 65)
+        self.assertEqual([candidate["score_total"] for candidate in
+                          book["routes"]["game-asset-pipeline"]["candidates"]], [50, 73])
         archviz = book["routes"]["archviz"]
         self.assertEqual(archviz["selected"], "archviz-studio-v2")
         self.assertEqual([candidate["score_total"] for candidate in archviz["candidates"]],
@@ -703,7 +719,7 @@ class CatalogTests(unittest.TestCase):
                      "analog-training", "liminal-pool", "folk-ritual", "puppet-stage",
                      "dream-playground", "indie-cabin", "fantasy-gate",
                      "cyberpunk-alley", "viking-longship", "wasteland-station",
-                     "kelp-forest", "archviz-studio"):
+                     "kelp-forest", "archviz-studio", "game-asset-pipeline"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

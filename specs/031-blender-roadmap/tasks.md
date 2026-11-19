@@ -98,6 +98,8 @@
 ## Wave 6: Delivery and QA
 
 - [ ] T014 [P4] Implement optimization, LOD, collision, generic export, and Unity/Unreal/Godot export adapters with Blender reimport assertions.
+  - [x] T014a Render and score a textured four-LOD crate pipeline against a greybox; audit UV/lightmap channels, packed maps, geometry/material budgets, and a separate collision proxy.
+  - [x] T014b Export the audited kit to generic, Unity, and Godot GLB and Unreal FBX; reimport each in Blender with named-mesh, topology, UV, and dimension checks. Actual engine editor imports remain pending.
 - [ ] T015 [P4] Complete QA review across the 94 rows, reconcile statuses and selected GIFs, and label actual engine-editor imports pending until verified.
   - [x] T015a Add a screenshot-backed QA tool with hash, frame, mesh, budget, and material checks; inspect a scored lookdev shot and record its explicit verdict.
 - [ ] T016 [P1-P5] Run all applicable repository and exact-render gates, inspect the full 94-route completion audit, commit and push complete slices on `main`.
