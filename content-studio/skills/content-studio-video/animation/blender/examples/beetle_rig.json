@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "beetle-rig-benchmark",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Beetle three-quarter camera",
+  "variant": 2,
+  "objects": [
+    {"id": "body", "name": "SM_Beetle_Abdomen"},
+    {"id": "head", "name": "SM_Beetle_Head"},
+    {"id": "left-wing", "name": "SM_Beetle_L_Elytron"},
+    {"id": "right-wing", "name": "SM_Beetle_R_Elytron"},
+    {"id": "rig", "name": "ARM_Reed_Beetle"},
+    {"id": "stage", "name": "Beetle specimen pedestal"},
+    {"id": "camera", "name": "Beetle three-quarter camera"}
+  ],
+  "beats": [
+    {"id": "inspect", "frame": 1, "label": "A six-legged beetle shows distinct head, thorax, abdomen, eyes, antennae, and folded wing covers", "object_ids": ["body", "head", "left-wing", "right-wing", "rig"]},
+    {"id": "unfurl", "frame": 36, "label": "The paired wing covers lift while alternating legs flex from their named rig joints", "object_ids": ["left-wing", "right-wing", "rig"]},
+    {"id": "settle", "frame": 72, "label": "The beetle settles with folded wings and planted legs", "object_ids": ["body", "left-wing", "right-wing", "rig"]}
+  ],
+  "review_states": ["inspect", "unfurl", "settle"],
+  "assets": [
+    {"id": "reed-beetle", "origin": "procedural", "license": "Original Content Studio insectoid geometry, rigid-bone armature, and animation"}
+  ]
+}

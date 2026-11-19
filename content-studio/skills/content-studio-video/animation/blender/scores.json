@@ -2659,6 +2659,56 @@
           "gif_path": "previews/game-asset-pipeline.gif"
         }
       ]
+    },
+    "beetle-rig": {
+      "selected": "beetle-rig-v2",
+      "candidates": [
+        {
+          "id": "beetle-rig-v1",
+          "video_sha256": "116267826adc8e1cfeff82a33444ac0cde64a50e411243babc474f1b6f3240b7",
+          "gif_sha256": "bd4296fd7e15ac6a64b4eb36231cb6a9fecd2e5c4db87c06307d4e8c65388f18",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 1,
+            "composition": 4,
+            "finish": 2,
+            "evidence_integrity": 5
+          },
+          "score_total": 54,
+          "reviewer": "Content Studio encoded-frame and creature rig review",
+          "review_date": "2026-11-19",
+          "review_note": "The complete greyblock shows six jointed legs, paired eyes, antennae, and wing covers, but its neutral pose never changes and surface treatment is sparse. Exact encoded frames, GIF, and saved scene passed checks."
+        },
+        {
+          "id": "beetle-rig-v2",
+          "video_sha256": "94286adf2ce0ef9e391299e02077b80843ba5bcf3088673ffb49c61902f9a9c9",
+          "gif_sha256": "ff856bb7dee09f466773b94f054432e2e75450310240f02567e8fc62c664757f",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 78,
+          "reviewer": "Content Studio encoded-frame and creature rig review",
+          "review_date": "2026-11-19",
+          "review_note": "The amber-and-jade beetle raises both rigidly skinned elytra through an FK armature and changes alternating leg poses. Three-quarter framing keeps the silhouette readable; the toy-like organic surface and limited gait keep finish at 3. Exact output, GIF, and saved-scene audit passed.",
+          "gif_path": "previews/beetle-rig.gif"
+        }
+      ]
     }
   }
 }

@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 81)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 83)
         self.assertEqual(sum(entry["status"] == "Prototype" for entry in entries), 3)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
@@ -430,6 +430,14 @@ class CatalogTests(unittest.TestCase):
                                                 capability="archviz")["builder"])
         self.assertIsNone(catalog_module.route("A measured studio archviz walkthrough",
                                                 style="anime-style")["builder"])
+        beetle = catalog_module.route("A reed beetle raises wing covers")
+        self.assertEqual((beetle["subject"], beetle["style"], beetle["builder"]),
+                         ("creature-artist", "stylized-style", "examples/beetle_rig.py"))
+        rig = catalog_module.route("A reed beetle FK rig unfurls wing covers")
+        self.assertEqual((rig["subject"], rig["capability"], rig["builder"]),
+                         ("creature-artist", "rigging", "examples/beetle_rig.py"))
+        self.assertIsNone(catalog_module.route("An octopus needs a rig",
+                                                capability="rigging")["builder"])
         for cue, capability in (("crate UV atlas lightmap", "uv-workflow"),
                                 ("crate packed ORM atlas", "texture-workflow"),
                                 ("crate LOD budget audit", "asset-optimization"),
@@ -481,7 +489,9 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 65)
+        self.assertEqual(len(catalog_module.scorebook(book)), 66)
+        self.assertEqual([candidate["score_total"] for candidate in
+                          book["routes"]["beetle-rig"]["candidates"]], [54, 78])
         self.assertEqual([candidate["score_total"] for candidate in
                           book["routes"]["game-asset-pipeline"]["candidates"]], [50, 73])
         archviz = book["routes"]["archviz"]
@@ -719,7 +729,8 @@ class CatalogTests(unittest.TestCase):
                      "analog-training", "liminal-pool", "folk-ritual", "puppet-stage",
                      "dream-playground", "indie-cabin", "fantasy-gate",
                      "cyberpunk-alley", "viking-longship", "wasteland-station",
-                     "kelp-forest", "archviz-studio", "game-asset-pipeline"):
+                     "kelp-forest", "archviz-studio", "game-asset-pipeline",
+                     "beetle-rig"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

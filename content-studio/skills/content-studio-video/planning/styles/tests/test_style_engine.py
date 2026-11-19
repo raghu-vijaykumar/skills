@@ -484,6 +484,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(crate["scenes"][0]["blender"]["capability"], "lod-pipeline")
         self.assertEqual(crate["scenes"][0]["blender"]["builder"],
                          "examples/game_asset_pipeline.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            beetle = engine.plan({"scenes": [{"id": "beetle", "duration_seconds": 3,
+                "visual_intent": "A reed beetle FK rig unfurls wing covers"}]})
+        self.assertEqual(beetle["scenes"][0]["blender"]["capability"], "rigging")
+        self.assertEqual(beetle["scenes"][0]["blender"]["builder"],
+                         "examples/beetle_rig.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

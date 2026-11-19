@@ -160,9 +160,21 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/beetle-rig.gif",
+      "review": "beetle-rig-review.md",
+      "builder": "examples/beetle_rig.py",
+      "spec": "examples/beetle_rig.json",
+      "compatible_styles": [
+        "stylized-style"
+      ],
+      "intent_cues": [
+        "reed beetle"
+      ],
+      "score_record": "scores.json",
+      "score_route": "beetle-rig",
+      "prefer_subject_cue": true
     },
     {
       "id": "character-archetypes",
@@ -429,12 +441,27 @@
       "category": "Technical",
       "wave": 3,
       "dependencies": [
-        "character-artist"
+        "creature-artist"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/beetle-rig.gif",
+      "review": "beetle-rig-review.md",
+      "builder": "examples/beetle_rig.py",
+      "spec": "examples/beetle_rig.json",
+      "compatible_styles": [
+        "stylized-style"
+      ],
+      "intent_cues": [
+        "reed beetle fk rig"
+      ],
+      "score_record": "scores.json",
+      "score_route": "beetle-rig",
+      "compatible_subjects": [
+        "creature-artist"
+      ],
+      "narrow_cue_required": true
     },
     {
       "id": "vfx-fx",
