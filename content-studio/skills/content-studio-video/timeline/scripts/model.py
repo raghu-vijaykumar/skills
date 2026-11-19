@@ -433,6 +433,11 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             sidecar = asset_path(root, item.get("source"))
             if sidecar.suffix.lower() != ".ass" or sha256_file(sidecar) != item.get("sha256"):
                 raise ValueError(f"Motion-graphics sidecar changed or is invalid: {op_id}")
+            if "font_source" in item or "font_sha256" in item:
+                # Captions bind the exact font bytes as well as the ASS script.
+                font = asset_path(root, item.get("font_source"))
+                if sha256_file(font) != item.get("font_sha256"):
+                    raise ValueError(f"ASS font changed or is invalid: {op_id}")
     audio = timeline.get("audio", [])
     if not isinstance(audio, list):
         raise ValueError("audio must be a list")
@@ -488,6 +493,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     input_paths += [asset_path(root, c["source"]) for c in audio]
     input_paths += [asset_path(root, o["font_source"]) for o in operations if o["method"] == "title"]
     input_paths += [asset_path(root, o["source"]) for o in operations if o["method"] == "motion-graphics-ass"]
+    input_paths += [asset_path(root, o["font_source"]) for o in operations
+                    if o["method"] == "motion-graphics-ass" and o.get("font_source")]
     input_paths += [asset_path(root, o["matte_source"]) for o in operations
                     if o["method"] == "text-behind-subject"]
     input_paths += [asset_path(root, o["font_source"]) for o in operations

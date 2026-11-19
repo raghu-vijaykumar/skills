@@ -24,9 +24,9 @@
 
 ## Phase 4: User Story 3 - Requested captions
 
-- [ ] T011 [US3] Create canonical cue validation, font/safe-zone preview, and pending timeline handoff in `content-studio/skills/content-studio-video/edit/captions/scripts/captions.py`.
-- [ ] T012 [US3] Add `content-studio-video-captions` skill, registry, and router references under `content-studio/skills/content-studio-video/edit/captions/` and `edit/SKILL.md`.
-- [ ] T013 [US3] Verify exact cue timing, text, sidecar hash invalidation, and absent-by-default behavior in `content-studio/skills/content-studio-video/edit/captions/tests/test_captions.py`.
+- [x] T011 [US3] Create canonical cue validation, font/safe-zone preview, and pending timeline handoff in `content-studio/skills/content-studio-video/edit/captions/scripts/captions.py`.
+- [x] T012 [US3] Add `content-studio-video-captions` skill, registry, and router references under `content-studio/skills/content-studio-video/edit/captions/` and `edit/SKILL.md`.
+- [x] T013 [US3] Verify exact cue timing, text, sidecar hash invalidation, and absent-by-default behavior in `content-studio/skills/content-studio-video/edit/captions/tests/test_captions.py`.
 
 ## Phase 5: User Story 4 - Separate recorder sync
 

@@ -166,6 +166,8 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
         return [("filter", name) for name in
                 ("blackdetect", "freezedetect", "scale", "signalstats", "metadata",
                  "silencedetect", "loudnorm", "drawbox")] + [("encoder", "png")]
+    if method == "captions-ass":
+        return [("filter", "ass"), ("encoder", "libx264")]
     if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
                   "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
                   "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",

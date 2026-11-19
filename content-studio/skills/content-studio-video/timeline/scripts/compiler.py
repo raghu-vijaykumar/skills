@@ -402,7 +402,9 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                          f"enable='between(t,{_fmt(start)},{_fmt(end)})'[{target}]")
         elif method == "motion-graphics-ass":
             sidecar = asset_path(resolved["root"], item["source"])
-            graph.append(f"[{current_v}]ass={_text(item['source'])}[{target}]")
+            font_dir = (f":fontsdir={_text(str(Path(item['font_source']).parent))}"
+                        if item.get("font_source") else "")
+            graph.append(f"[{current_v}]ass={_text(item['source'])}{font_dir}[{target}]")
         elif method == "text-behind-subject":
             # The white matte restores original foreground pixels after the
             # rising title, so the title passes behind the person and terrain.

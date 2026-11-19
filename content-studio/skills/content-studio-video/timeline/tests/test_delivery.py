@@ -500,6 +500,39 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         self.assertGreater(inside, before + 25)
         self.assertAlmostEqual(after, before, delta=5)
 
+    def test_caption_sidecar_uses_bound_font_in_one_export(self):
+        black = self.root / "black.mp4"
+        made = subprocess.run([
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-f", "lavfi", "-i", "color=c=black:s=320x180:r=10:d=1.5",
+            "-f", "lavfi", "-i", "sine=frequency=440:duration=1.5",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+            "-shortest", str(black)], capture_output=True, text=True)
+        self.assertEqual(made.returncode, 0, made.stderr[-500:])
+        self.timeline["picture"] = [{"id": "black", "source": black.name,
+                                     "sha256": model.sha256_file(black),
+                                     "source_in": 0, "source_out": 1.5}]
+        self.timeline["transitions"] = []
+        self.timeline["audio"] = []
+        self.timeline["operations"] = [{
+            "id": "captions", "method": "motion-graphics-ass",
+            "source": self.sidecar.name, "sha256": model.sha256_file(self.sidecar),
+            "font_source": self.font.name, "font_sha256": model.sha256_file(self.font),
+            "start": 0, "end": 1.5, "review_status": "approved"}]
+        self.timeline["height"] = 180
+        self.timeline["fps"] = 10
+        compiler.render(self.timeline, model.validate(self.timeline))
+
+        def luma(at):
+            data = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", str(at),
+                "-i", str(self.output), "-frames:v", "1", "-vf", "format=gray",
+                "-f", "rawvideo", "-"], capture_output=True, check=True).stdout
+            return sum(data) / len(data)
+
+        self.assertGreater(luma(.4), luma(.1) + .2)
+        self.assertAlmostEqual(luma(.9), luma(.1), delta=1)
+
     def test_timed_audio_processing_stays_in_final_export(self):
         self.timeline["operations"].extend([
             {"id": "highpass", "method": "highpass", "hz": 80,

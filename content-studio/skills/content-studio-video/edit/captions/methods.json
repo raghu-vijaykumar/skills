@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "captions-ass", "script": "scripts/captions.py", "status": "supported", "review": "Requested only; review cue text, typography, safe area, exact timeline frames, and font hash"}
+  ]
+}

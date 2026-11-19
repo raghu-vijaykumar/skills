@@ -17,6 +17,8 @@ Hero-led long-form [clipping](../edit/clipping/SKILL.md) hands reviewed source i
 
 `object-blur` is a supported SDR concealment operation for one uncut finished edit. The [object blur skill](../edit/object-blur/SKILL.md) detects the named target on each frame and supplies a hashed lossless mask. The timeline requires a matching human full-frame coverage record before approval and composites blur in the final encode.
 
+Explicitly requested [captions](../edit/captions/SKILL.md) arrive as a `pending_review` `motion-graphics-ass` operation. Validate the sidecar and font hashes, inspect the cue/font/safe-zone preview, then approve a new timeline revision for the single final encode. No caption operation is added to ordinary vlog drafts.
+
 ## Draft and review a timeline
 
 The production plan at `.content-studio/preflight/plan.json` must already have

@@ -68,6 +68,24 @@ class TimelineModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "edited-render"):
             model.validate(self.timeline)
 
+    def test_ass_captions_bind_font_and_sidecar_bytes(self):
+        sidecar = self.root / "captions.ass"
+        sidecar.write_text("[Script Info]\n", encoding="utf-8")
+        font = self.root / "font.ttf"
+        font.write_bytes(b"font fixture")
+        self.timeline["operations"] = [{
+            "id": "captions", "method": "motion-graphics-ass",
+            "source": sidecar.name, "sha256": model.sha256_file(sidecar),
+            "font_source": font.name, "font_sha256": model.sha256_file(font),
+            "start": 0, "end": 4, "review_status": "approved"}]
+        model.validate(self.timeline)
+        approval.fingerprint(self.path, self.timeline)
+        font.write_bytes(b"different font")
+        with self.assertRaisesRegex(ValueError, "ASS font changed"):
+            model.validate(self.timeline)
+        with self.assertRaisesRegex(ValueError, "ASS font changed"):
+            approval.fingerprint(self.path, self.timeline)
+
     def test_revision_needs_new_timeline_approval(self):
         old_fingerprint = approval.fingerprint(self.path, self.timeline)
         changed = model.revise(self.timeline, {"operations": [{
