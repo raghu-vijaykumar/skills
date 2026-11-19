@@ -48,6 +48,8 @@ class CaptionSheetTests(unittest.TestCase):
         self.assertIn("Dialogue: 0,0:00:00.30,0:00:00.70", text)
         self.assertIn("Dialogue: 0,0:00:00.80,0:00:01.20", text)
         self.assertEqual(report["operation"]["review_status"], "pending_review")
+        self.assertEqual(report["status"], "REVIEW")
+        self.assertEqual(report["exact_master_review"], "pending")
         self.assertEqual(report["operation"]["font_sha256"], captions.sha256_file(self.font))
         self.assertEqual(report["operation"]["sha256"], captions.sha256_file(self.sidecar))
         self.assertEqual(json.loads(self.handoff.read_text())["operation"], report["operation"])

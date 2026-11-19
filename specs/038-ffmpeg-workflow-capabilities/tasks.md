@@ -6,7 +6,7 @@
 ## Phase 1: Shared setup
 
 - [x] T001 Confirm current owning skills, references, method registries, and tests for all eight stories in `content-studio/skills/content-studio-video/` and `content-studio/skills/content-studio-workflow/`.
-- [ ] T002 Record focused synthetic media commands and expected outcomes in `specs/038-ffmpeg-workflow-capabilities/quickstart.md`.
+- [x] T002 Record focused synthetic media commands and expected outcomes in `specs/038-ffmpeg-workflow-capabilities/quickstart.md`.
 
 ## Phase 2: User Story 1 - Diagnose media and machine
 
@@ -64,6 +64,6 @@
 
 ## Phase 10: Cross-skill completion
 
-- [ ] T033 Run `npm run check:docs` and relevant existing Python/Node suites; inspect exact rendered evidence where pixels or audio change.
-- [ ] T034 Review staged feature diffs, commit complete slices to `main`, push to `origin`, and verify the pushed head.
-- [ ] T035 Audit all eight user stories against `specs/038-ffmpeg-workflow-capabilities/spec.md` and record outcomes in a verification report in this feature directory.
+- [x] T033 Run `npm run check:docs` and relevant existing Python/Node suites; inspect exact rendered evidence where pixels or audio change.
+- [x] T034 Review staged feature diffs, commit complete slices to `main`, push to `origin`, and verify the pushed head.
+- [x] T035 Audit all eight user stories against `specs/038-ffmpeg-workflow-capabilities/spec.md` and record outcomes in a verification report in this feature directory.

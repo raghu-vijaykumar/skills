@@ -432,6 +432,12 @@ def validate_plan(plan: dict) -> None:
         if step.get("method_id"):
             if not isinstance(step["method_id"], str):
                 raise ValueError(f"Step {step['id']} method_id must be a string")
+            if plan.get("kind") == "linkedin" and step["method_id"] in {
+                    "text-copy", "content-card", "videogen"}:
+                # LinkedIn's established copy/card/Remotion routes have their
+                # own production validation. They are not FFmpeg filter IDs.
+                ids.add(step["id"])
+                continue
             # A named production method must match the selected profile; a route string alone is not capability proof.
             state = capabilities.get(step["method_id"], {}).get("status", "unknown")
             if state != "available":

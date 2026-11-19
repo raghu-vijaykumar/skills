@@ -8,16 +8,16 @@ published videos are untouched.
 
 **Status:** `Supported` means the skill manifest provides a runnable script. `Unsupported` means the manifest declares no script and this document makes no capability claim. **Delivery timeline:** `Yes` means the single-render delivery timeline consumes an equivalent operation; `Specialist only` means use this skill with a bounded preview and carry the approved result forward; `No` means unsupported or intentionally outside the one-render route. Examples are illustrative evidence, not delivery masters.
 
-> This leaf has no `methods.json` manifest; the rows document the operations its `SKILL.md` exposes. The checker treats them as documented workflow capabilities, not manifest methods.
+The manifest names the accurate cut and optional smart-cut comparison. The
+existing CLI also handles trims and joins; the examples below remain review
+evidence for those requests.
 
 ## Capability matrix
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `trim` | Supported | Clip + start/end → new trimmed clip | Specialist only | [Actual trim](previews/trim-preview.gif) | This bounded example keeps 0.4–2.2 seconds; preserve originals and review audio. |
-| `cut` | Supported | Clip + remove range → new cut clip | Specialist only | [Actual cut](previews/cut-preview.gif) | This bounded example removes the middle 1–2 seconds; never the raw-folder default. |
-| `join` | Supported | Ordered clips + approved source order → joined clip | Specialist only | [Actual three-shot join](previews/joined-preview.gif) | A → B → C source order; review boundaries, color, audio, and full export. |
-| `review-supplied-render` | Supported | Supplied manual render → hashed review evidence and metadata | Specialist only | [Three-point review](previews/review-contact.jpg) / [audio](previews/review-audio.mp3) / [report](previews/example-join.md#supplied-render-review) | Bounded review only; do not infer titles or actions beyond sampled evidence. |
+| `accurate-cut` | Supported | Approved clip + removal range → accurate edited video | Yes | [Actual cut](previews/cut-preview.gif) and [source review](previews/example-join.md#supplied-render-review) | Review every picture/audio boundary; the native timeline also supports approved cuts. |
+| `smart-cut-candidate` | Supported | Compatible SDR H.264 clip + frame-aligned removals → packet-copy comparison and report | No | [Long-GOP packet, frame and audio fixture](tests/test_smart_cut.py) and [method limits](references/smart-cut.md) | Comparison only; fail closed on VFR, HDR/DV, unknown transfer, effects, or uncertain boundaries. |
 
 ## Edit examples
 

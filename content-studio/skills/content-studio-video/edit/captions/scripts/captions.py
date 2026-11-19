@@ -134,8 +134,15 @@ def create(sheet_path: Path, root: Path, sidecar: Path, handoff: Path,
                  "sha256": sha256_file(sidecar), "font_source": sheet["font_source"],
                  "font_sha256": sheet["font_sha256"], "start": 0,
                  "end": sheet["duration_seconds"], "review_status": "pending_review"}
-    report = {"sheet_sha256": sha256_file(sheet_path), "operation": operation,
-              "cues": sheet["cues"], "human_review_required": True}
+    # Keep the requested change provisional until the cue preview and the
+    # delivered master both agree with the editor's exact wording and timing.
+    report = {"status": "REVIEW", "issue": "editor requested timed captions",
+              "baseline": "No caption operation on the current delivery timeline",
+              "candidate": "hashed ASS sidecar on a pending timeline revision",
+              "acceptance": "Exact words, cue times, font coverage and safe-zone fit in preview and master",
+              "sheet_sha256": sha256_file(sheet_path), "operation": operation,
+              "cues": sheet["cues"], "human_review_required": True,
+              "exact_master_review": "pending"}
     handoff.parent.mkdir(parents=True, exist_ok=True)
     handoff.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return report

@@ -12,6 +12,15 @@ Before any Content Studio editing or production, run the integrated precheck in 
 
 After approval, `preflight.py` generates the exact step checklist from the reviewed plan. Run `verify --phase start` before editing, update each step with evidence, and run `verify --phase complete` before package approval. A plan edit invalidates approval and requires another human review. The lifecycle checklist and publish authorization remain separate gates. Direct specialist editing calls also start here.
 
+For every proposed enhancement, keep one issue record through the checklist:
+identify the source-linked problem and baseline, set a measurable or human
+review criterion, compare a bounded candidate with leaving the source alone,
+and record `SKIP`, `FIX`, `REVIEW`, or `UNSUPPORTED` plus rejected alternatives.
+After a `FIX`, inspect the affected range in the exact delivered output and
+recheck side effects. A failed final check returns to a bounded candidate or
+`REVIEW`; never treat a preview or encode success as closure. Diagnostic
+findings such as intentional black or silence can close as reviewed `SKIP`.
+
 For authored hero animation, include the [object checkpoints](../content-studio-video/review/critique/references/object-scoring.md#production-checkpoints) in the proof and final steps. List the exact scorer commands, inventory and report paths, and a bounded rerender budget. Require the per-ID results and open retests in the step evidence.
 
 Present every user-facing video plan as concise numbered bullets in dependency order. Group independent work under **Parallel** and name any shared prerequisite. Mark each **Human review** with the artifact to inspect, the decision needed, and the step that resumes afterward. Link the editable plan with exact commands and keep each bullet focused on the work and its result. The [copy-and-edit prompts](../../prompts/) use the same format.
