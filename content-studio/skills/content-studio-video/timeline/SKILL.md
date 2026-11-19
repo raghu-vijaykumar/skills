@@ -57,6 +57,10 @@ seconds, measured from its `start`. Optional `fade_in` and `fade_out` seconds
 soften the bed edges. The renderer loops the hashed source at decode time and
 trims it before mixing, so the music stays on the one delivery timeline. Review
 the repeat seam and the music level against narration in bounded previews.
+
+One approved `loudnorm` operation may span the entire resolved picture duration. The renderer first measures the final source/voice/music mix without an intermediate media master. If the mix is outside -16 ±1 LUFS or exceeds -1.5 dBTP, the final encode uses the measured two-pass parameters once; an already acceptable mix records `SKIP`. `verify` remeasures the exact delivered audio and marks a missed correction `REVIEW`. Listen to voice clarity, music balance and pumping; loudness numbers alone do not approve the package. The separate [folder mastering command](../audio/mastering/SKILL.md) remains available for independent audio-only exports.
+
+A bounded timeline preview uses provisional dynamic loudnorm; the full output uses measured parameters from the entire resolved mix. For a supplied HDR/Dolby Vision edit with audio-only changes, the same audio analysis is available while the coded picture remains in the verified packet-copy path.
 Voice cues may have up to 0.12 seconds of source tail beyond the picture; the
 output graph trims that tail at the resolved picture duration. Longer voice
 overruns fail validation so incomplete narration is not silently dropped.

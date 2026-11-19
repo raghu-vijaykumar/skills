@@ -12,6 +12,8 @@ normalization, not a private recording or a subjective quality judgment.
 | --- | --- | --- | --- | --- | --- |
 | `master` | Supported | Video folder or draft ID → mastered WAV/MP4 + manifest + 10-second before/after WAVs | Specialist only | [Before](previews/before.mp3) / [after](previews/after.mp3) and [manifest excerpt](previews/manifest.json) | Targets -16 LUFS and -1.5 dBTP; cleanup remains REVIEW; never trims or joins; inputs never overwritten. |
 
+The delivery timeline has a separate whole-mix measured `loudnorm` adapter. It decodes the resolved source/voice/music mix for analysis without writing an audio master, then encodes the selected correction once with the final picture. Its exact-master verification records baseline, delivered LUFS/dBTP, and `SKIP`/`FIX`/`REVIEW` outcome. This does not change the standalone folder-mastering command.
+
 ## Evidence note
 
 All committed previews are generated from synthetic cards, tones, or text-to-speech, or are labelled command/output examples. No private footage, private voice, credentials, licensed music, or full masters are included.

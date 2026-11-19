@@ -43,10 +43,10 @@
 
 ## Phase 7: User Story 6 - Measured final-mix loudness
 
-- [ ] T021 [US6] Measure resolved mix and apply measured normalization in one final export in `content-studio/skills/content-studio-video/timeline/scripts/compiler.py`.
-- [ ] T022 [US6] Verify exact output against approved loudness and true peak in `content-studio/skills/content-studio-video/timeline/scripts/verify.py`.
-- [ ] T023 [US6] Test voice-plus-music, already-acceptable, and miss cases in `content-studio/skills/content-studio-video/timeline/tests/test_delivery.py`.
-- [ ] T024 [US6] Document the timeline/standalone distinction in `content-studio/skills/content-studio-video/audio/mastering/SKILL.md` and `timeline/SKILL.md`.
+- [x] T021 [US6] Measure resolved mix and apply measured normalization in one final export in `content-studio/skills/content-studio-video/timeline/scripts/compiler.py`.
+- [x] T022 [US6] Verify exact output against approved loudness and true peak in `content-studio/skills/content-studio-video/timeline/scripts/verify.py`.
+- [x] T023 [US6] Test voice-plus-music, already-acceptable, and miss cases in `content-studio/skills/content-studio-video/timeline/tests/test_delivery.py`.
+- [x] T024 [US6] Document the timeline/standalone distinction in `content-studio/skills/content-studio-video/audio/mastering/SKILL.md` and `timeline/SKILL.md`.
 
 ## Phase 8: User Story 7 - Guarded smart cut
 

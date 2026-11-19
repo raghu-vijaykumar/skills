@@ -21,6 +21,20 @@ import timeline as cli  # noqa: E402
 import verify as delivery_verify  # noqa: E402
 
 
+class MasteringDecisionTests(unittest.TestCase):
+    def test_skip_fix_and_missed_output_stay_distinct(self):
+        clean = {"integrated_lufs": -16.2, "true_peak_dbtp": -1.8}
+        self.assertEqual(delivery_verify._mastering_result(
+            {"decision": "SKIP", "measurement": {}}, clean)["status"], "SKIP")
+        self.assertEqual(delivery_verify._mastering_result(
+            {"decision": "FIX", "measurement": {}}, clean)["status"], "FIX")
+        missed = {"integrated_lufs": -19.5, "true_peak_dbtp": -.5}
+        self.assertEqual(delivery_verify._mastering_result(
+            {"decision": "FIX", "measurement": {}}, missed)["status"], "REVIEW")
+        self.assertEqual(delivery_verify._mastering_result(
+            {"decision": "SKIP", "measurement": {}}, missed)["status"], "REVIEW")
+
+
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
                      "FFmpeg and FFprobe required")
 class DeliveryTimelineTests(unittest.TestCase):
@@ -355,7 +369,9 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                                       "sha256": model.sha256_file(source),
                                       "source_in": 0, "source_out": 2}]
         self.timeline["transitions"] = []
-        self.timeline["operations"] = []
+        self.timeline["operations"] = [{"id": "master", "method": "loudnorm",
+                                        "start": 0, "end": 2,
+                                        "review_status": "approved"}]
         self.timeline["audio"] = [{"id": "effect", "kind": "sfx",
                                    "source": self.voice.name,
                                    "sha256": model.sha256_file(self.voice),
@@ -367,6 +383,7 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         resolved = model.validate(self.timeline)
         record = compiler.render(self.timeline, resolved)
         self.assertEqual(record["video_encoder_invocations"], 0)
+        self.assertIn(record["audio_analysis"]["decision"], {"SKIP", "FIX"})
         identity = compiler.verify_picture_copy(source, self.output)
         self.assertTrue(identity["video_packet_sha256"])
         self.assertEqual(compiler.media_info(self.output)["video"]["color_transfer"],
@@ -562,8 +579,9 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
 
         def tone_at(start):
             decoded = subprocess.run([
-                "ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", str(start),
-                "-t", "0.2", "-i", str(self.output), "-vn", "-ac", "1",
+                "ffmpeg", "-hide_banner", "-loglevel", "error",
+                "-i", str(self.output), "-ss", str(start), "-t", "0.2",
+                "-vn", "-ac", "1",
                 "-ar", "8000", "-f", "f32le", "-"],
                 capture_output=True)
             self.assertEqual(decoded.returncode, 0, decoded.stderr[-500:])
@@ -576,6 +594,14 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         self.assertGreater(tone_at(.9), tone_at(.2) * 8)
 
     def test_timed_audio_processing_stays_in_final_export(self):
+        for clip in self.timeline["picture"]:
+            clip["audio_gain"] = .05
+        self.timeline["audio"][0]["gain"] = .1
+        self.timeline["audio"].append({
+            "id": "music", "kind": "music", "source": self.voice.name,
+            "sha256": model.sha256_file(self.voice), "start": .1,
+            "duration": 2, "loop": True, "gain": .05,
+            "review_status": "approved"})
         self.timeline["operations"].extend([
             {"id": "highpass", "method": "highpass", "hz": 80,
              "start": 0.2, "end": 1.0, "review_status": "approved"},
@@ -599,11 +625,35 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                 "--approval", str(self._approved())]), 0)
         self.assertTrue(self.output.is_file())
         record = self.output.with_suffix(".mp4.render.json")
+        rendered = json.loads(record.read_text(encoding="utf-8"))
+        self.assertEqual(rendered["audio_analysis"]["decision"], "FIX")
+        self.assertEqual(rendered["audio_encoder_invocations"], 1)
         with contextlib.redirect_stdout(io.StringIO()) as result:
             self.assertEqual(cli.main(["verify", "--record", str(record)]), 0)
         mastering = json.loads(result.getvalue())["mastering"]
-        self.assertIn(mastering["status"], {"FIX", "REVIEW"})
+        self.assertEqual(mastering["status"], "FIX")
         self.assertIn("integrated_lufs", mastering)
+        self.assertAlmostEqual(mastering["integrated_lufs"], -16, delta=1)
+        self.assertLessEqual(mastering["true_peak_dbtp"], -1.5)
+
+    def test_already_acceptable_mix_skips_normalization_and_stays_acceptable(self):
+        self.timeline["picture"] = [{"id": "p1", "source": self.source.name,
+                                     "sha256": model.sha256_file(self.source),
+                                     "source_in": 0, "source_out": 2,
+                                     "audio_gain": 1.9}]
+        self.timeline["transitions"] = []
+        self.timeline["audio"] = []
+        self.timeline["operations"] = [{"id": "master", "method": "loudnorm",
+                                        "start": 0, "end": 2,
+                                        "review_status": "approved"}]
+        record = compiler.render(self.timeline, model.validate(self.timeline))
+        self.assertEqual(record["audio_analysis"]["decision"], "SKIP")
+        self.assertEqual(record["audio_encoder_invocations"], 1)
+        inspection = delivery_verify._inspect_master(
+            self.output, record["output_sha256"], None)
+        mastering = delivery_verify._mastering_result(record["audio_analysis"],
+                                                       inspection["loudness"])
+        self.assertEqual(mastering["status"], "SKIP")
 
     def test_advertised_transition_adapters_render(self):
         for method in model.JOIN_TRANSITIONS:

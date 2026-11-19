@@ -112,6 +112,20 @@ class TimelineModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "report changed"):
             model.validate(self.timeline)
 
+    def test_final_mix_loudness_requires_one_full_span(self):
+        self.timeline["operations"] = [{"id": "master", "method": "loudnorm",
+                                        "start": 1, "end": 4,
+                                        "review_status": "approved"}]
+        with self.assertRaisesRegex(ValueError, "spanning the whole timeline"):
+            model.validate(self.timeline)
+        self.timeline["operations"][0]["start"] = 0
+        model.validate(self.timeline)
+        self.timeline["operations"].append({"id": "second", "method": "loudnorm",
+                                            "start": 0, "end": 4,
+                                            "review_status": "approved"})
+        with self.assertRaisesRegex(ValueError, "one operation"):
+            model.validate(self.timeline)
+
     def test_revision_needs_new_timeline_approval(self):
         old_fingerprint = approval.fingerprint(self.path, self.timeline)
         changed = model.revise(self.timeline, {"operations": [{

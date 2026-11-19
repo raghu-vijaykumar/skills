@@ -267,6 +267,10 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         end = _number(item.get("end"), f"{op_id}.end")
         if not start < end <= duration + 1e-6:
             raise ValueError(f"Operation {op_id} is outside the resolved timeline")
+        if kind == "loudnorm" and (abs(start) > 1e-6 or abs(end - duration) > 1e-6
+                                    or sum(other.get("method") == "loudnorm"
+                                           for other in operations) != 1):
+            raise ValueError("Final-mix loudnorm must be one operation spanning the whole timeline")
         if kind in POINT_TRANSITIONS and not .15 <= end - start <= 3:
             raise ValueError(f"Point transition {op_id} must last 0.15-3 seconds")
         if kind in PICTURE_METHODS:
@@ -529,7 +533,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     if video_policy == "copy_source":
         # An audio-only HDR/Dolby Vision route must never reconstruct picture frames.
         if (len(resolved) != 1 or resolved[0]["source_in"] != 0 or
-                by_after or operations or audio_policy != "mix" or
+                by_after or any(item["method"] not in AUDIO_METHODS
+                                for item in operations) or audio_policy != "mix" or
                 float(resolved[0].get("audio_gain", 1)) != 1):
             raise ValueError("copy_source video needs one uncut picture and audio-only changes")
     if audio_policy == "copy_source":

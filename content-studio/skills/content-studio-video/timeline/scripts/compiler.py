@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import math
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -101,8 +103,6 @@ def _audio_filters(active: list[dict]) -> list[str]:
             filters.append("afftdn=nf=-25")
         elif method == "compress":
             filters.append("acompressor=threshold=0.12:ratio=2:attack=20:release=200")
-        elif method == "loudnorm":
-            filters.append("loudnorm=I=-16:TP=-1.5:LRA=11")
         else:
             raise ValueError(f"Missing audio adapter: {method}")
     return filters
@@ -121,12 +121,35 @@ def _breakpoints(start: float, end: float, operations: list[dict]) -> list[float
     return sorted(points)
 
 
+def _normalization_filter(operations: list[dict], mode: str,
+                          measured: dict | None) -> str | None:
+    if not any(item["method"] == "loudnorm" for item in operations) or mode == "omit":
+        return None
+    base = "loudnorm=I=-16:TP=-1.5:LRA=11"
+    if mode == "dynamic":
+        return base
+    if mode != "measured" or measured is None:
+        raise ValueError("Measured loudnorm needs a complete analysis pass")
+    keys = {"input_i": "measured_I", "input_lra": "measured_LRA",
+            "input_tp": "measured_TP", "input_thresh": "measured_thresh",
+            "target_offset": "offset"}
+    return base + ":" + ":".join(f"{option}={measured[key]}" for key, option in keys.items()) + ":linear=true"
+
+
 def _audio_graph(label: str, operations: list[dict], duration: float,
-                 graph: list[str]) -> str:
-    selected = [o for o in operations if o["method"] in AUDIO_METHODS]
+                 graph: list[str], loudnorm_mode: str = "dynamic",
+                 measured: dict | None = None) -> str:
+    # Timed cleanup happens first; final-mix loudness is measured and applied
+    # once after the whole voice/music/source mix has been resolved.
+    selected = [o for o in operations if o["method"] in AUDIO_METHODS
+                and o["method"] != "loudnorm"]
+    normalizer = _normalization_filter(operations, loudnorm_mode, measured)
+    final_filters = ["alimiter=limit=0.95"]
+    if normalizer:
+        final_filters.append(normalizer)
+    final_filters += ["aresample=48000", "aformat=sample_rates=48000:channel_layouts=stereo"]
     if not selected:
-        graph.append(f"[{label}]alimiter=limit=0.95,aresample=48000,"
-                     "aformat=sample_rates=48000:channel_layouts=stereo[afinal]")
+        graph.append(f"[{label}]" + ",".join(final_filters) + "[afinal]")
         return "afinal"
     points = {0.0, round(duration, 6)}
     for item in selected:
@@ -140,19 +163,18 @@ def _audio_graph(label: str, operations: list[dict], duration: float,
         left, right = times[i], times[i + 1]
         middle = (left + right) / 2
         active = [o for o in selected if float(o["start"]) <= middle < float(o["end"])]
-        rank = {"highpass": 1, "audio-denoise": 2, "compress": 3, "loudnorm": 4}
+        rank = {"highpass": 1, "audio-denoise": 2, "compress": 3}
         active.sort(key=lambda item: rank[item["method"]])
         chain = [f"atrim=start={_fmt(left)}:end={_fmt(right)}",
                  "asetpts=PTS-STARTPTS"] + _audio_filters(active)
         graph.append(f"[as{i}]" + ",".join(chain) + f"[ap{i}]")
     graph.append("".join(f"[ap{i}]" for i in range(count)) +
-                 f"concat=n={count}:v=0:a=1,alimiter=limit=0.95,"
-                 "aresample=48000,"
-                 "aformat=sample_rates=48000:channel_layouts=stereo[afinal]")
+                 f"concat=n={count}:v=0:a=1," + ",".join(final_filters) + "[afinal]")
     return "afinal"
 
 
-def _compile_copy_video(resolved: dict) -> tuple[list[str], str]:
+def _compile_copy_video(resolved: dict, loudnorm_mode: str = "dynamic",
+                        measured: dict | None = None) -> tuple[list[str], str]:
     """Mix audio while the supplied picture packets bypass every video filter."""
     clip = resolved["clips"][0]
     source = media_info(clip["path"])
@@ -193,9 +215,9 @@ def _compile_copy_video(resolved: dict) -> tuple[list[str], str]:
         graph.append(",".join(chain))
         labels.append(f"acue{index}")
     graph.append("".join(f"[{label}]" for label in labels) +
-                 f"amix=inputs={len(labels)}:duration=first:normalize=0,"
-                 "alimiter=limit=0.95,aresample=48000,"
-                 "aformat=sample_rates=48000:channel_layouts=stereo[afinal]")
+                 f"amix=inputs={len(labels)}:duration=first:normalize=0[amixed]")
+    _audio_graph("amixed", resolved["operations"], resolved["duration"], graph,
+                 loudnorm_mode, measured)
     return inputs, ";".join(graph)
 
 
@@ -235,10 +257,11 @@ def verify_picture_copy(source: Path, output: Path) -> dict:
             "dolby_vision": bool(source_dv)}
 
 
-def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
+def compile_graph(timeline: dict, resolved: dict, *, loudnorm_mode: str = "dynamic",
+                  measured: dict | None = None) -> tuple[list[str], str]:
     """Return input arguments and one graph; every branch stays unencoded."""
     if resolved["video_policy"] == "copy_source":
-        return _compile_copy_video(resolved)
+        return _compile_copy_video(resolved, loudnorm_mode, measured)
     clips = resolved["clips"]
     width, height, fps = resolved["width"], resolved["height"], resolved["fps"]
     duration = resolved["duration"]
@@ -536,8 +559,64 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
                      "normalize=0[amixed]")
         current_a = "amixed"
     if not copy_audio:
-        _audio_graph(current_a, resolved["operations"], duration, graph)
+        _audio_graph(current_a, resolved["operations"], duration, graph,
+                     loudnorm_mode, measured)
     return inputs, ";".join(graph)
+
+
+def _audio_only_graph(graph: str) -> str:
+    """Trace the final audio label backwards so analysis never decodes video."""
+    needed = {"afinal"}
+    selected = []
+    for node in reversed(graph.split(";")):
+        end = re.search(r"((?:\[[\w]+\])+)$", node)
+        if not end:
+            continue
+        outputs = set(re.findall(r"\[([\w]+)\]", end.group(1)))
+        if not outputs & needed:
+            continue
+        selected.append(node)
+        needed.difference_update(outputs)
+        head = re.match(r"((?:\[[\w:]+\])*)", node)
+        needed.update(re.findall(r"\[([\w:]+)\]", head.group(1)))
+    if not selected or any(not re.fullmatch(r"\d+:a:\d+", label) for label in needed):
+        raise ValueError("Could not isolate the resolved final-mix audio graph")
+    return ";".join(reversed(selected))
+
+
+def _measure_final_mix(timeline: dict, resolved: dict, scratch: Path) -> dict:
+    inputs, full_graph = compile_graph(timeline, resolved, loudnorm_mode="omit")
+    audio_graph = _audio_only_graph(full_graph)
+    graph_path = scratch / "audio-analysis.graph"
+    graph_path.write_text(audio_graph + ";[afinal]"
+                          "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json[measured]",
+                          encoding="utf-8")
+    # This pass decodes only the resolved audio branches and writes no master.
+    result = subprocess.run([
+        "ffmpeg", "-hide_banner", "-nostats", "-loglevel", "info", "-nostdin",
+        *inputs, "-/filter_complex", str(graph_path), "-map", "[measured]",
+        "-f", "null", "-"], capture_output=True, text=True,
+        cwd=resolved["root"])
+    if result.returncode:
+        raise RuntimeError("Final-mix analysis failed: " + result.stderr[-1200:])
+    matches = re.findall(r'\{\s*"input_i".*?\}', result.stderr, flags=re.DOTALL)
+    if not matches:
+        raise RuntimeError("Final-mix analysis returned no loudness values")
+    measured = json.loads(matches[-1])
+    values = [float(measured[key]) for key in
+              ("input_i", "input_tp", "input_lra", "input_thresh", "target_offset")]
+    if not all(math.isfinite(value) for value in values):
+        decision = "REVIEW"
+        reason = "Silent or unmeasurable final mix"
+    elif abs(values[0] + 16) <= 1 and values[1] <= -1.5:
+        decision = "SKIP"
+        reason = "Resolved final mix already meets loudness and true-peak targets"
+    else:
+        decision = "FIX"
+        reason = "Resolved final mix needs measured normalization"
+    return {"decision": decision, "reason": reason,
+            "target_lufs": -16, "target_true_peak_dbtp": -1.5,
+            "measurement": measured, "audio_encoder_invocations": 0}
 
 
 def _export(timeline: dict, resolved: dict, output: Path,
@@ -557,7 +636,6 @@ def _export(timeline: dict, resolved: dict, output: Path,
                   for op in resolved["operations"]
                   if op["method"] in {"text-behind-subject", "object-blur"}]:
         raise ValueError("Output cannot overwrite a mask")
-    inputs, graph = compile_graph(timeline, resolved)
     expected = resolved["duration"]
     seek_args: list[str] = []
     if preview_range is not None:
@@ -568,6 +646,15 @@ def _export(timeline: dict, resolved: dict, output: Path,
         seek_args = ["-ss", _fmt(start)]
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="timeline-render-", dir=output.parent) as scratch:
+        analysis = None
+        mode, measured = "dynamic", None
+        if (preview_range is None and resolved["audio_policy"] != "copy_source"
+                and any(item["method"] == "loudnorm" for item in resolved["operations"])):
+            analysis = _measure_final_mix(timeline, resolved, Path(scratch))
+            mode = "measured" if analysis["decision"] == "FIX" else "omit"
+            measured = analysis["measurement"] if mode == "measured" else None
+        inputs, graph = compile_graph(timeline, resolved,
+                                      loudnorm_mode=mode, measured=measured)
         graph_path = Path(scratch) / "graph.txt"
         graph_path.write_text(graph, encoding="utf-8")
         temporary = Path(scratch) / "delivery.mp4"
@@ -598,7 +685,7 @@ def _export(timeline: dict, resolved: dict, output: Path,
             verify_picture_copy(resolved["clips"][0]["path"], temporary)
         os.replace(temporary, output)
     return {"output": str(output), "output_sha256": sha256_file(output),
-            "duration": delivered["duration"]}
+            "duration": delivered["duration"], "audio_analysis": analysis}
 
 
 def render(timeline: dict, resolved: dict) -> dict:

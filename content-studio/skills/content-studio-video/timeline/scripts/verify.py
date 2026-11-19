@@ -24,6 +24,29 @@ def _inspect_master(output: Path, digest: str, evidence_dir: Path | None) -> dic
                                  evidence_dir / "safe-zones" if evidence_dir else None)
 
 
+def _mastering_result(analysis: dict | None, delivered: dict | None) -> dict:
+    """Compare the exact encoded audio with the approved measured decision."""
+    if not analysis or not delivered:
+        return {"status": "REVIEW", "reason": "Final-mix analysis or output measurement missing"}
+    integrated = delivered.get("integrated_lufs")
+    peak = delivered.get("true_peak_dbtp")
+    decision = analysis.get("decision")
+    if integrated is None or peak is None:
+        status = "REVIEW"
+        reason = "Delivered audio is silent or unmeasurable"
+    elif decision == "FIX":
+        status = "FIX" if abs(integrated + 16) <= 1 and peak <= -1.5 else "REVIEW"
+        reason = "Measured correction met target" if status == "FIX" else "Measured correction missed final output gate"
+    elif decision == "SKIP":
+        status = "SKIP" if abs(integrated + 16) <= 1 and peak <= -1.5 else "REVIEW"
+        reason = "Acceptable mix was preserved" if status == "SKIP" else "Previously acceptable mix missed output gate"
+    else:
+        status, reason = "REVIEW", analysis.get("reason", "Analysis needs review")
+    return {**delivered, "status": status, "reason": reason,
+            "decision": decision, "baseline": analysis.get("measurement"),
+            "target_lufs": -16, "target_true_peak_dbtp": -1.5}
+
+
 def _run(command: list[str]) -> None:
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode:
@@ -74,13 +97,7 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
     inspection = _inspect_master(output, record["output_sha256"], evidence_dir)
     mastering = None
     if any(item["method"] == "loudnorm" for item in resolved["operations"]):
-        measured = inspection["loudness"]
-        if (measured is None or measured["integrated_lufs"] is None
-                or measured["true_peak_dbtp"] is None):
-            raise RuntimeError("Exact master loudness could not be measured")
-        mastering = {**measured,
-                     "status": "FIX" if abs(measured["integrated_lufs"] + 16) <= 1
-                     and measured["true_peak_dbtp"] <= -1.5 else "REVIEW"}
+        mastering = _mastering_result(record.get("audio_analysis"), inspection["loudness"])
     evidence: list[dict] = []
     if evidence_dir is not None:
         evidence_dir = evidence_dir.resolve()
