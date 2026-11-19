@@ -126,7 +126,7 @@ The [vehicle and vegetation modeling review](modeling-reuse-review.md) reuses sc
 The [detective archetype review](archetype-review.md) reuses the selected noir GIF for one audited role silhouette and walk; other character families remain unproven.
 The [QA review](qa-review.md) records a screenshot-backed, budgeted verdict for the scored lookdev output and documents the reusable Blender QA script.
 The [archviz review](archviz-review.md) records two scored full interior walkthroughs, a measured window and level camera audit, and the selected GIF.
-The [game asset pipeline review](game-asset-review.md) scores two full crate shots and audits packed UVs, textures, LOD budgets, collision, and GLB/FBX Blender round trips. Unity, Unreal, and Godot editor imports remain pending.
+The [game asset pipeline review](game-asset-review.md) scores two full crate shots and audits packed UVs, textures, LOD budgets, collision, and 26-check GLB/FBX Blender round trips with hierarchy, materials, and animation. Unity, Unreal, and Godot editor imports remain pending.
 The [reed beetle creature and rig review](beetle-rig-review.md) compares a static blockout with a scored, 18-bone, rigid-shell FK animation and audits all 27 weighted creature meshes.
 The [guardian craft review](guardian-craft-review.md) compares two scored outputs and audits a code-authored multires surface, static quad cage, and packed, animated hair-card groom.
 The [banner impact review](banner-impact-review.md) compares two scored outputs and audits a pre-rolled cloth shape-key bake, rigid-body transform bake, and timed mesh FX.
