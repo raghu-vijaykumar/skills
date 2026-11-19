@@ -25,3 +25,4 @@
 
 - [x] T010 Run focused tests and `npm run check:docs`, review generated report evidence, and mark tasks complete in `specs/035-script-rhythm/tasks.md`.
 - [x] T011 Stage only this feature, inspect the staged diff, commit, push, and verify the remote head.
+- [x] T012 Record unconfirmed prompt specifics as `unknown` in vlog and code-driven narration guidance, with ticket status as an example.

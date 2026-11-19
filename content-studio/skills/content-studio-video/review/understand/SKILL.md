@@ -32,6 +32,8 @@ Open the contact sheets first, then individual frames for ambiguous moments. Wri
 
 Use `context.json` for human-supplied names, itinerary, language, tone, pronunciation, and personal experiences. Treat it as the source of truth for facts the footage cannot prove.
 
+Before drafting the script prompt, list any needed specifics that neither the footage nor creator context establishes as literal `unknown` values, for example `specifics.ticket_status: unknown`. Do not infer a booking or admission outcome from arrival footage. If a proposed line depends on an unknown, omit that claim or mark the draft cue `needs_review: true` with the missing field in `notes`; resolve or remove it before voice generation.
+
 ## 2. Draft and review every cue against picture
 
 Write `voiceover.json` with `{id,start,end,text,evidence_frame_ids,needs_review,direction,notes}` segments. Keep the text in the requested language mix; read [voiceover guidance](references/voiceover.md) before writing.

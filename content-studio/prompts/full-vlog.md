@@ -31,9 +31,12 @@ Fill the brackets and change **No** to **Yes** for the options you want.
    - **Mute fillers in audio** — No. [Ranges, with picture timing kept]
    - **Draft voice script** — No
    - **Provide voice context** — No. [If Yes, places, events, personal observations, facts to include or avoid]
+   - **Specifics needed for narration** — [e.g. ticket_status: unknown; give confirmed values and their source]
    - **Generate and mix narration** — No. [Recorded file | generated voice | consented clone]
    - **Language and tone** — [e.g. Kannada-English, conversational]
    - **Music** — No. [Track or mood]
+
+   Keep an unconfirmed specific as `unknown` in the prompt. Ask for it or omit the dependent claim from the spoken script; do not infer ticket purchase, admission, or price from footage alone.
 
 5. **Correct picture, then assess upscale** — Use the completed edit with the requested audio. **Human review** — Compare bounded previews before choosing corrections or upscale.
 

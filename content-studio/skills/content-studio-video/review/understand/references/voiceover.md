@@ -17,6 +17,19 @@
   check. Distinguish a general fact about a place from something the travelers
   personally saw, bought, said, or did.
 
+## Script-generation prompt inputs
+
+- Separate confirmed specifics from missing ones before writing narration.
+  Put each needed but unconfirmed detail in the creator context as the literal
+  value `"unknown"`; for example, `"ticket_status": "unknown"`. Arrival at a
+  venue does not establish ticket purchase, booking, admission, or price.
+- In the prompt, tell the script author to use only confirmed footage, creator
+  context, or sourced facts. If a line needs an unknown specific, omit the
+  claim or set `needs_review: true` and name the missing field in `notes`.
+  Resolve it with the creator or remove the claim before voice generation.
+- Keep `unknown` in the prompt and review notes, not in spoken narration,
+  unless the creator specifically wants to say that they did not know.
+
 ## Scene variety pass
 
 - Map the edited master into locations and meaningful beats before drafting.
@@ -67,6 +80,7 @@ frames cannot prove:
   "language": "Kannada-English",
   "tone": "warm, excited, conversational",
   "itinerary": ["Cab from the hotel", "Dubai Frame", "Desert safari"],
+  "specifics": {"ticket_status": "unknown"},
   "facts_to_verify": ["Exact timestamps", "Museum exhibit names"],
   "pronunciation": {"Al Jaddaf": "al jad-daf"},
   "notes": "Silent master; voiceover can cover the full timeline."

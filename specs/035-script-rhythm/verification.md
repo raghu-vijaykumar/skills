@@ -7,3 +7,5 @@
 - `npm run check:docs`: passed, 174 maintained files and 893 local links checked.
 
 No user draft was supplied for creative listening review. Existing production precheck, exact script approval, and performed-audio review remain required when this workflow is used on a video.
+
+2026-11-19 follow-up: script-generation guidance now records needed unconfirmed details as `unknown`, including ticket status, and prevents dependent claims from being spoken until verified or removed.

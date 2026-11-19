@@ -22,6 +22,7 @@ An author checks Remotion narration before synthesis and sees phrase-specific su
 - FR4: Preserve source text, timing, evidence IDs, natural-sound gaps, and existing cue approval semantics.
 - FR5: Apply the same analysis to vlog voiceover and authored code-driven narration before synthesis. A preview-only route must not invoke speech generation.
 - FR6: Update drafting and performance-review guidance for short, vlog, and long-form work. The suggested five-word pivot is optional and must carry a narrative purpose.
+- FR7: Script-generation prompts explicitly label needed but unconfirmed specifics as `unknown` (including ticket status), and dependent claims are omitted or flagged for review until resolved.
 
 ## Success criteria
 
