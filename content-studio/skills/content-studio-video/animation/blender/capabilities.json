@@ -204,9 +204,18 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/guardian-craft.gif",
+      "review": "guardian-craft-review.md",
+      "builder": "examples/guardian_craft.py",
+      "spec": "examples/guardian_craft.json",
+      "compatible_subjects": ["creature-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["guardian multires sculpt"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "guardian-craft"
     },
     {
       "id": "retopology",
@@ -216,9 +225,18 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/guardian-craft.gif",
+      "review": "guardian-craft-review.md",
+      "builder": "examples/guardian_craft.py",
+      "spec": "examples/guardian_craft.json",
+      "compatible_subjects": ["creature-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["guardian shrinkwrap retopo"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "guardian-craft"
     },
     {
       "id": "uv-workflow",
@@ -286,9 +304,18 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/guardian-craft.gif",
+      "review": "guardian-craft-review.md",
+      "builder": "examples/guardian_craft.py",
+      "spec": "examples/guardian_craft.json",
+      "compatible_subjects": ["creature-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["guardian hair card groom"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "guardian-craft"
     },
     {
       "id": "cloth-sim",

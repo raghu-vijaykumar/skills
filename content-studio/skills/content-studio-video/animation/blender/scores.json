@@ -2759,6 +2759,50 @@
           "gif_path": "previews/cyberpunk-composite.gif"
         }
       ]
+    },
+    "guardian-craft": {
+      "selected": "guardian-craft-v2",
+      "candidates": [
+        {
+          "id": "guardian-craft-v1",
+          "video_sha256": "8835bca3c7e83e2a01ba5e09be566f6de6fb90cb042c29b30fa3c6910a36dbdd",
+          "gif_sha256": "ff498b180cd4da2c17e7cd76153772f962ceeaca56a704f297685a8063bfc34a",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 2,
+            "motion_readability": 1,
+            "composition": 3,
+            "finish": 1,
+            "evidence_integrity": 5
+          },
+          "score_total": 41,
+          "reviewer": "Content Studio encoded-frame and production craft review",
+          "review_date": "2026-11-19",
+          "review_note": "The complete static greyblock provides two comparable head masses but no sculpt detail, retopology cue, groom, or camera motion. Its encoded frames, 24-frame GIF, and saved scene passed their technical checks."
+        },
+        {
+          "id": "guardian-craft-v2",
+          "video_sha256": "1690fd560c4ee345bafc85dffabb87ab4713035e268b2ad0ab196b9a6b168570",
+          "gif_sha256": "89fc348bdda5b080b312ae924a55b14fcfb424c0deddc0eeec88ca5c13d0ae4f",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 73,
+          "reviewer": "Content Studio encoded-frame and production craft review",
+          "review_date": "2026-11-19",
+          "review_note": "The left code-sculpted multires surface contrasts with a right quad cage and 32 packed hair cards. Camera push and tip breeze are visible, though the groom is deliberately stylized and the facial form is simple. Encoded frames, complete GIF, and 21 saved-scene checks passed.",
+          "gif_path": "previews/guardian-craft.gif"
+        }
+      ]
     }
   }
 }

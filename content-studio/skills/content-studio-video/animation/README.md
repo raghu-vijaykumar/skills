@@ -63,4 +63,5 @@ The [Blender QA evidence](blender/qa-review.md) records exact-output hash, mesh,
 The [measured studio archviz evidence](blender/archviz-review.md) compares a greybox and furnished walkthrough with audited dimensions and camera motion.
 The [game asset pipeline evidence](blender/game-asset-review.md) scores two complete animations and checks UVs, textures, LODs, collision, and GLB/FBX round trips. Engine editor imports remain pending.
 The [reed beetle evidence](blender/beetle-rig-review.md) scores a static and animated insectoid and checks its named FK hierarchy, rigid weights, wing reveal, and leg poses.
+The [guardian craft evidence](blender/guardian-craft-review.md) scores a static blockout and a finished bust, then audits multires surface detail, a shrinkwrapped quad cage, and packed animated hair cards.
 The [neon beauty compositor evidence](blender/cyberpunk-composite-review.md) scores raw and treated alley renders and audits a reversible Blender 5 exposure, saturation, and fog-glow graph.

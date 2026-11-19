@@ -19,6 +19,7 @@
   - [x] T007d Audit the existing scored circuit cars and kelp stands as narrow vehicle and vegetation modeling lanes, reusing their best inline GIFs.
   - [x] T007e Audit the scored noir detective as one role archetype, reusing its best inline GIF while leaving other character families unclaimed.
   - [x] T007f Render and score one six-legged stylized insectoid with separate anatomy and an audited paired-wing reveal for a bounded creature craft lane.
+  - [x] T007g Render and score a code-sculpted guardian with a shrinkwrapped quad cage and atlased, animated hair cards; document static-bust and sculpt-mode limits.
   - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
 - [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
   - [x] T008a Render a Geometry Nodes repeated-post walkway with two scored outputs, isolated kit and drone previews, and collection and traversal audits for procedural modeling and scene assembly.

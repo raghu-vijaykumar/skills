@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "id": "guardian-craft-comparison",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Guardian craft comparison camera",
+  "variant": 2,
+  "objects": [
+    {"id": "sculpt", "name": "SM_Guardian_High_Sculpt"},
+    {"id": "retopo", "name": "SM_Guardian_Low_Retopo"},
+    {"id": "hair", "name": "SM_HairCard_Guardian_00"},
+    {"id": "left-stage", "name": "Guardian sculpt pedestal"},
+    {"id": "right-stage", "name": "Guardian retopo pedestal"},
+    {"id": "camera", "name": "Guardian craft comparison camera"}
+  ],
+  "beats": [
+    {"id": "compare", "frame": 1, "label": "High-poly sculpt and lower-density retopology share one guardian silhouette", "object_ids": ["sculpt", "retopo", "left-stage", "right-stage"]},
+    {"id": "inspect", "frame": 36, "label": "The camera approaches a groom of tapered, UV-atlased hair cards", "object_ids": ["retopo", "hair", "camera"]},
+    {"id": "settle", "frame": 72, "label": "Hair-card tips settle while the high and low forms remain comparable", "object_ids": ["sculpt", "retopo", "hair"]}
+  ],
+  "review_states": ["compare", "inspect", "settle"],
+  "assets": [
+    {"id": "guardian-craft", "origin": "procedural", "license": "Original Content Studio surface forms, retopology cage, packed hair atlas, and animation"}
+  ]
+}

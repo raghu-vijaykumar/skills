@@ -174,7 +174,8 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
         (r"\bdetective.archetype\b", "character-archetypes"),
         (r"\bkelp.frond.vegetation\b", "vegetation-artist"),
         (r"\b(vehicle|car|truck|aircraft|spaceship|rocket|boat|sailboat|longship)\b", "vehicle-artist"),
-        (r"\b(creature|monster|dragon|animal|butterfly|fox|beetle)\b", "creature-artist"),
+        # The demonstrated guardian bust is an animal-like creature subject.
+        (r"\b(creature|monster|dragon|animal|butterfly|fox|beetle|guardian)\b", "creature-artist"),
         (r"(?=.*\b(?:alley|cyberpunk)\b)(?=.*\bdrone\b)", "environment-artist"),
         # A first-person camera cue does not make its environment a character shot.
         (r"\b(character|human|mascot|puppet|courier|heroine|detective|fedora|face|eye|hand|finger|digit|traveler|wanderer)\b|(?<!first[- ])\bperson\b", "character-artist"),
@@ -428,9 +429,9 @@ def route(prompt, style=None, subject=None, world=None, genre=None, era=None,
                          re.search(r"\bball\b", text) else
                          "stylized-style" if subject == "environment-artist" and
                          re.search(r"\bwindmill\b", text) else
-                         # The insectoid rig is a bounded stylized creature lane.
+                         # Both creature craft examples have bounded stylized lanes.
                          "stylized-style" if subject == "creature-artist" and
-                         re.search(r"\bbeetle\b", text) else
+                         re.search(r"\b(beetle|guardian)\b", text) else
                          "stylized-style" if subject in {"character-artist", "prop-artist"}
                          or (subject == "blender-modeler" and "lamp" in text) else
                          "realistic-style")
