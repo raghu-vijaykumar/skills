@@ -2,7 +2,7 @@
 
 **Feature Branch**: `main`
 **Created**: 2026-11-19
-**Status**: Planning
+**Status**: Implemented
 **Input**: Create a Content Studio clipping skill that selects a particular section of a long-form video where the scene's hero is present and turns it into a short-form Reel.
 
 ## User Scenarios & Testing

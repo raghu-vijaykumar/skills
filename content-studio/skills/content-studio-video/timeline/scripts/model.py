@@ -291,6 +291,27 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                     or coordinates["x"] + coordinates["w"] > 1
                     or coordinates["y"] + coordinates["h"] > 1):
                 raise ValueError(f"{op_id} crop must fit within normalized source bounds")
+            # Hero crops keep their selection, crop proposal, and source
+            # evidence together so later edits cannot reuse stale approval.
+            bindings = (("clip_selection", "selection"),
+                        ("clip_proposal", "proposal"),
+                        ("clip_manifest", "manifest"))
+            present = [item.get(f"{prefix}_file") is not None
+                       or item.get(f"{prefix}_sha256") is not None
+                       for prefix, _ in bindings]
+            if any(present) and not all(present):
+                raise ValueError(f"Hero crop needs all evidence bindings: {op_id}")
+            for prefix, label in bindings:
+                path_value = item.get(f"{prefix}_file")
+                digest = item.get(f"{prefix}_sha256")
+                if path_value is None and digest is None:
+                    continue
+                if not isinstance(path_value, str) or not Path(path_value).is_absolute():
+                    raise ValueError(f"Clip {label} path must be absolute: {op_id}")
+                evidence_path = Path(path_value).resolve()
+                if (not evidence_path.is_file() or not isinstance(digest, str)
+                        or sha256_file(evidence_path) != digest):
+                    raise ValueError(f"Clip {label} changed or is missing: {op_id}")
         if kind == "lens-correction":
             for field in ("k1", "k2"):
                 value = _number(item.get(field, 0), f"{op_id}.{field}", minimum=-.5)
@@ -476,6 +497,11 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                     for key in ("mask_source", "analysis_source")]
     input_paths += [asset_path(root, o["coverage_review_source"]) for o in operations
                     if o["method"] == "object-blur" and o.get("coverage_review_source")]
+    input_paths += [Path(o[key]).resolve() for o in operations
+                    if o["method"] == "crop"
+                    for key in ("clip_selection_file", "clip_proposal_file",
+                                "clip_manifest_file")
+                    if o.get(key)]
     if output in input_paths or output == plan:
         raise ValueError("Output cannot overwrite an input")
     return {"clips": resolved, "transitions": by_after, "operations": operations,

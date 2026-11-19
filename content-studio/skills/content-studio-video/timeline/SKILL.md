@@ -11,6 +11,8 @@ Use this skill after the mandatory `content-studio-workflow` precheck and explic
 
 Current delivery adapters are deliberately narrower than the specialist catalog. A specialist preview or separate render is not evidence that a method works in this single-export route. See `methods.json` for current timeline-ready methods.
 
+Hero-led long-form [clipping](../edit/clipping/SKILL.md) hands reviewed source intervals and stable crop proposals to this renderer as pending operations. Its crop entries bind the selection, source evidence, and proposal files by hash. A changed review file invalidates timeline validation before render; the editor still approves the exact timeline revision separately.
+
 `text-behind-subject` is a supported SDR graphic operation. It draws a rising title behind a hashed foreground matte generated locally for each shot; see the [motion graphics preset](../edit/motion-graphics/references/text-behind-subject.md). The cue must stay within one picture shot and outside join overlaps. Review the matte and moving composite before human timeline approval.
 
 `object-blur` is a supported SDR concealment operation for one uncut finished edit. The [object blur skill](../edit/object-blur/SKILL.md) detects the named target on each frame and supplies a hashed lossless mask. The timeline requires a matching human full-frame coverage record before approval and composites blur in the final encode.

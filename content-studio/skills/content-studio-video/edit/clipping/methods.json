@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "reviewed-hero-range",
+      "script": "scripts/clipping.py",
+      "status": "supported",
+      "review": "Approve source range and hero crop evidence, then verify the exact portrait output"
+    }
+  ]
+}

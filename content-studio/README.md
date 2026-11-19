@@ -19,4 +19,6 @@ An agent can start with an idea and no channel analytics, then author a [Core Ex
 
 [Object blur](skills/content-studio-video/edit/object-blur/SKILL.md) detects a named object in every frame of a finished SDR edit, writes a reviewable moving mask, and enters a concealment blur on the delivery timeline only after full-frame human coverage review.
 
+[Hero-led clipping](skills/content-studio-video/edit/clipping/SKILL.md) selects one reviewed moment from a finished long-form video, proposes 9:16 framing that keeps the hero readable, and carries the approved range and crop into the delivery timeline with source audio. The first route is SDR and uses stable crops per reviewed interval.
+
 Copy the [vlog](prompts/full-vlog.md), [animated video](prompts/animated-video.md), or [social post](prompts/social-post.md) form into your Content Studio chat. Fill the inputs and choose which operations to run. The numbered workflow shows the order, parallel steps, and what to review before continuing. Keep drafts, source media, generated audio, model weights, analytics, and secrets outside this bundle.

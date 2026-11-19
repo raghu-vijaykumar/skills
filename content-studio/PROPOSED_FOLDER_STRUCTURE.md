@@ -36,6 +36,7 @@ content-studio/skills/
       preprocess/                    individual-clip preparation
     edit/
       clip-edit/                     shared edit backend and manual-edit tools
+      clipping/                      hero-led long-form range to portrait Reel
       fastpan-cuts/                  rapid sweep scan, bounded cut preview, timeline handoff
       autocut/                       experimental; explicit request only
       reframe/                       subjects, saliency, center
