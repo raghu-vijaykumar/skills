@@ -20,8 +20,9 @@ Fill the brackets and change **No** to **Yes** for the options you want.
    - **CTA or offer** — No. [Action, offer terms, destination]
    - **New illustration or graphic** — No. [Subject and real-world or brand references]
    - **Motion or video excerpt** — No. [Scene, time range, and planned action. Select Yes for GIF or MP4.]
+   - **Portrait Reel or Short from a finished video** — No. [Story range, visible hero and action, supplied hero boxes if available, source-audio treatment; use the [clipping subskill](../skills/content-studio-video/edit/clipping/SKILL.md)]
    - **Alt text** — No. [Accessibility notes for media posts]
 
    **Human review · Draft package** — Check the copy and any card sequence or motion plan before export.
-3. **Build and verify** — Preview assets at final size. Check the full motion or carousel order when selected, and verify copy, links, and attribution.
-4. **Human review · Final package** — Review the exact exports, copy, and any alt text. Return editable sources and approved files. Publishing requires a separate explicit request.
+3. **Build and verify** — Preview assets at final size. Check the full motion or carousel order when selected, and verify copy, links, and attribution. For a portrait excerpt, compare source and crop at phone size, review hero coverage, safe zones, cut boundaries, and sound before approving its delivery timeline.
+4. **Human review · Final package** — Review the exact exports, copy, and any alt text. Record each observed issue, bounded fix or reviewed `SKIP`, and the result in the exact new export; leave unresolved issues as `REVIEW`. Return editable sources and approved files. Publishing requires a separate explicit request.
