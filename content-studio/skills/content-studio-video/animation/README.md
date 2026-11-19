@@ -64,4 +64,5 @@ The [measured studio archviz evidence](blender/archviz-review.md) compares a gre
 The [game asset pipeline evidence](blender/game-asset-review.md) scores two complete animations and checks UVs, textures, LODs, collision, and GLB/FBX round trips. Engine editor imports remain pending.
 The [reed beetle evidence](blender/beetle-rig-review.md) scores a static and animated insectoid and checks its named FK hierarchy, rigid weights, wing reveal, and leg poses.
 The [guardian craft evidence](blender/guardian-craft-review.md) scores a static blockout and a finished bust, then audits multires surface detail, a shrinkwrapped quad cage, and packed animated hair cards.
+The [banner impact evidence](blender/banner-impact-review.md) scores a static baseline and simulated shot, then checks pinned cloth, rigid-body collision and baked playback, and a bounded mesh FX burst.
 The [neon beauty compositor evidence](blender/cyberpunk-composite-review.md) scores raw and treated alley renders and audits a reversible Blender 5 exposure, saturation, and fog-glow graph.

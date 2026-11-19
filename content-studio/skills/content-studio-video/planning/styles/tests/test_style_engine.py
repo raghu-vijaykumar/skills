@@ -50,6 +50,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(scene["style"], "cinematic-3d")
         self.assertEqual(scene["blender"]["builder"], "examples/clamp.py")
         self.assertEqual(scene["status"], "planned_not_rendered")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            banner = engine.plan({"scenes": [{"id": "banner", "duration_seconds": 3,
+                "visual_intent": "A wind banner cloth sim"}]})
+        self.assertEqual(banner["scenes"][0]["style"], "cinematic-3d")
+        self.assertEqual(banner["scenes"][0]["blender"]["builder"],
+                         "examples/banner_impact.py")
 
     def test_blender_style_override_and_unsupported_combination(self):
         with patch.object(engine, "renderer_executable", return_value=sys.executable):

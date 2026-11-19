@@ -8,6 +8,7 @@ The [video animation skill](../SKILL.md) indexes 94 upstream subject and style n
 | Cel character | [Source](examples/character.py) | [Inputs](examples/character.json) | [GIF](previews/character.gif) |
 | Reed beetle creature and rig | [Source](examples/beetle_rig.py) | [Inputs](examples/beetle_rig.json) | [GIF](previews/beetle-rig.gif) |
 | Guardian sculpt, retopology, and groom | [Source](examples/guardian_craft.py) | [Inputs](examples/guardian_craft.json) | [GIF](previews/guardian-craft.gif) |
+| Banner cloth, rigid impact, and energy FX | [Source](examples/banner_impact.py) | [Inputs](examples/banner_impact.json) | [GIF](previews/banner-impact.gif) |
 | Atmospheric corridor | [Source](examples/corridor.py) | [Inputs](examples/corridor.json) | [GIF](previews/corridor.gif) |
 | Measured desk lamp | [Source](examples/lamp.py) | [Inputs](examples/lamp.json) | [GIF](previews/lamp.gif) |
 | Low-poly lamp treatment | [Source](examples/lowpoly_lamp.py) | [Inputs](examples/lowpoly_lamp.json) | [GIF](previews/lowpoly-lamp.gif) |
@@ -128,6 +129,7 @@ The [archviz review](archviz-review.md) records two scored full interior walkthr
 The [game asset pipeline review](game-asset-review.md) scores two full crate shots and audits packed UVs, textures, LOD budgets, collision, and GLB/FBX Blender round trips. Unity, Unreal, and Godot editor imports remain pending.
 The [reed beetle creature and rig review](beetle-rig-review.md) compares a static blockout with a scored, 18-bone, rigid-shell FK animation and audits all 27 weighted creature meshes.
 The [guardian craft review](guardian-craft-review.md) compares two scored outputs and audits a code-authored multires surface, static quad cage, and packed, animated hair-card groom.
+The [banner impact review](banner-impact-review.md) compares two scored outputs and audits a pre-rolled cloth shape-key bake, rigid-body transform bake, and timed mesh FX.
 The [neon beauty compositor review](cyberpunk-composite-review.md) compares identical raw and graded alley shots, audits Blender 5's editable node graph, and scores the visible fog-glow GIF.
 
 Treat every full MP4 intended for this gallery as a candidate. Inspect its first, action, and held frames and its complete motion; verify frame count, dimensions, required objects, source hashes, and GIF decode. Record **every candidate**, including rejected ones, in [scores.json](scores.json) with its MP4/GIF hashes, technical result, five 0–5 editorial scores, reviewer, and reason. The weighted score covers subject fidelity (25%), motion readability (25%), composition (20%), finish (20%), and evidence integrity (10%). These are editorial review scores, not audience metrics or production approval.

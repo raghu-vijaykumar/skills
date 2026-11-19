@@ -325,9 +325,18 @@
         "blender-modeler"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/banner-impact.gif",
+      "review": "banner-impact-review.md",
+      "builder": "examples/banner_impact.py",
+      "spec": "examples/banner_impact.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["wind banner cloth sim"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "banner-impact"
     },
     {
       "id": "lookdev",
@@ -513,9 +522,18 @@
         "compositing"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/banner-impact.gif",
+      "review": "banner-impact-review.md",
+      "builder": "examples/banner_impact.py",
+      "spec": "examples/banner_impact.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["orb impact energy ribbon"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "banner-impact"
     },
     {
       "id": "physics-sim",
@@ -525,9 +543,18 @@
         "animation"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/banner-impact.gif",
+      "review": "banner-impact-review.md",
+      "builder": "examples/banner_impact.py",
+      "spec": "examples/banner_impact.json",
+      "compatible_subjects": ["prop-artist"],
+      "compatible_styles": ["stylized-style"],
+      "intent_cues": ["charged orb rigid impact"],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "banner-impact"
     },
     {
       "id": "procedural-modeling",

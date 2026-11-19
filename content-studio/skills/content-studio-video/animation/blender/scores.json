@@ -2803,6 +2803,50 @@
           "gif_path": "previews/guardian-craft.gif"
         }
       ]
+    },
+    "banner-impact": {
+      "selected": "banner-impact-v2",
+      "candidates": [
+        {
+          "id": "banner-impact-v1",
+          "video_sha256": "4be842a3c28602f3a2859e14fae665568e1528236b4fd29f1bc3e69c929abd72",
+          "gif_sha256": "3f3862a67f300e1973968e6160983f0afe057c86cd18bf8fd127a0f1a71941d2",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 2,
+            "motion_readability": 1,
+            "composition": 3,
+            "finish": 1,
+            "evidence_integrity": 5
+          },
+          "score_total": 41,
+          "reviewer": "Content Studio encoded-frame and simulation craft review",
+          "review_date": "2026-11-19",
+          "review_note": "The static baseline keeps the banner, orb, plate, and camera in view but has no cloth deformation, rigid-body fall, or visible burst. Its exact MP4, 24-frame GIF, and saved-scene baseline audit passed."
+        },
+        {
+          "id": "banner-impact-v2",
+          "video_sha256": "77d03cfac6edd2c9d91ed1bf927105acedf5369541cdb48538895f66c3c5095f",
+          "gif_sha256": "a5d535f80e334eb39f8a254f3fe2ecbc06329b40fec3945f12981ea79bc4d092",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [960, 540],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 4,
+            "composition": 4,
+            "finish": 2,
+            "evidence_integrity": 5
+          },
+          "score_total": 74,
+          "reviewer": "Content Studio encoded-frame and simulation craft review",
+          "review_date": "2026-11-19",
+          "review_note": "A pre-rolled pinned cloth folds around its mast while a baked rigid orb hits the passive plate at frame 17 and twelve emissive ribbons burst briefly. Both heroes were inspected alone and in encoded frames. The cloth folds edge-on by the end and the graphic FX lacks volume, limiting finish to 2. The full GIF and 22 scene checks passed.",
+          "gif_path": "previews/banner-impact.gif"
+        }
+      ]
     }
   }
 }

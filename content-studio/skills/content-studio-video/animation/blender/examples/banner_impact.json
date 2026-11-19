@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "banner-impact-lab",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Banner impact camera",
+  "variant": 2,
+  "objects": [
+    {"id": "banner", "name": "SM_Baked_Wind_Banner"},
+    {"id": "orb", "name": "SM_Baked_Impact_Orb"},
+    {"id": "plate", "name": "SM_Conductive_Impact_Plate"},
+    {"id": "fx", "name": "FX_Impact_Ring"},
+    {"id": "camera", "name": "Banner impact camera"}
+  ],
+  "beats": [
+    {"id": "wind", "frame": 1, "label": "Pinned banner already drapes after simulation pre-roll as the orb begins to fall", "object_ids": ["banner", "orb", "plate"]},
+    {"id": "impact", "frame": 18, "label": "Rigid orb strikes the passive plate and authored energy ribbons peak", "object_ids": ["orb", "plate", "fx"]},
+    {"id": "settle", "frame": 72, "label": "The baked cloth keeps moving while the orb and impact effect settle", "object_ids": ["banner", "orb", "plate"]}
+  ],
+  "review_states": ["wind", "impact", "settle"],
+  "assets": [
+    {"id": "banner-impact", "origin": "procedural", "license": "Original Content Studio cloth simulation, rigid body bake, mesh VFX, and stage"}
+  ]
+}

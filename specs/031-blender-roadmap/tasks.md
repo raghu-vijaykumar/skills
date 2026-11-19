@@ -20,6 +20,7 @@
   - [x] T007e Audit the scored noir detective as one role archetype, reusing its best inline GIF while leaving other character families unclaimed.
   - [x] T007f Render and score one six-legged stylized insectoid with separate anatomy and an audited paired-wing reveal for a bounded creature craft lane.
   - [x] T007g Render and score a code-sculpted guardian with a shrinkwrapped quad cage and atlased, animated hair cards; document static-bust and sculpt-mode limits.
+  - [x] T007h Render and score a wind-blown pinned banner with 20-frame pre-roll and 72 baked cloth keys; document garment and cache-export limits.
   - [ ] T007b Complete the remaining modeling, topology, UV, material, texture, groom, cloth, and lookdev examples.
 - [ ] T008 [P4] Complete procedural modeling, scene assembly, set dressing, and archviz examples and record route-specific evidence.
   - [x] T008a Render a Geometry Nodes repeated-post walkway with two scored outputs, isolated kit and drone previews, and collection and traversal audits for procedural modeling and scene assembly.
@@ -33,6 +34,7 @@
   - [x] T009b Audit the repeated post node graph, four versus ten instances per row, and the scored gate traversal as a Geometry Nodes lane.
   - [x] T009c Audit an 18-bone rigid-shell FK rig and 27 weighted meshes across two full scored beetle outputs; organic deformation and IK remain open.
   - [x] T009d Compare two complete neon-alley renders, audit a Blender 5 beauty compositor chain, and select its scored glow GIF without claiming pass recombination.
+  - [x] T009e Score and audit one active/passive rigid-body impact baked to transform keys and one timed emissive mesh-ribbon FX burst; leave fracture and volumetric simulation unclaimed.
 
 ## Wave 4: Visual treatments
 
