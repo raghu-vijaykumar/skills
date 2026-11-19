@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Consented voice enrollment and local IndicF5 narration synthesis."""
+"""Consented voice enrollment and local narration synthesis by profile backend."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -116,13 +117,59 @@ def require_consent(profile_root):
     return data
 
 
+def profile_backend(profile_data):
+    """Keep older profiles on IndicF5 while rejecting unknown backend labels."""
+    backend = profile_data.get("backend", {}).get("name", "IndicF5").lower()
+    if backend not in {"indicf5", "chatterboxturbo"}:
+        raise SystemExit("Unsupported voice backend: " + backend)
+    return backend
+
+
+def select_chatterbox_reference(profile_root, profile_data, variant):
+    """Bind a named, hash-checked profile clip before loading the model."""
+    references = profile_data.get("references") or {}
+    if not isinstance(references, dict) or not references:
+        _fail("Chatterbox Turbo profile has no reference variants")
+    if not variant:
+        if len(references) != 1:
+            _fail("Choose --reference-variant from: " + ", ".join(sorted(references)))
+        variant = next(iter(references))
+    if variant not in references:
+        _fail("Unknown reference variant: " + variant)
+    entry = references[variant]
+    filename = entry.get("file", "") if isinstance(entry, dict) else ""
+    reference = (profile_root / filename).resolve()
+    if not filename or not reference.is_relative_to(profile_root.resolve()):
+        _fail("Reference variant must point inside its profile folder")
+    if not reference.is_file():
+        _fail("Reference audio not found: " + str(reference))
+    expected = str(entry.get("sha256", "")).lower()
+    if not expected or sha(reference) != expected:
+        _fail("Reference audio hash does not match profile: " + variant)
+    return reference, variant
+
+
+def non_latin_script_ids(segments):
+    """Reject scripts the English-only checkpoint was not trained to speak."""
+    return [
+        segment["id"]
+        for segment in segments
+        if any(
+            char.isalpha() and "LATIN" not in unicodedata.name(char, "")
+            for char in segment["text"]
+        )
+    ]
+
+
 def _fail(message):
     raise SystemExit(message)
 
 
 def cmd_synthesize(workspace, args):
     voice_root = Path(workspace).expanduser().resolve() / ".content-studio" / "voice"
-    profile_data = require_consent(profile_dir(workspace, args.profile))
+    profile_root = profile_dir(workspace, args.profile)
+    profile_data = require_consent(profile_root)
+    backend = profile_backend(profile_data)
 
     script_path = Path(args.script).expanduser().resolve()
     if not script_path.is_file():
@@ -137,7 +184,7 @@ def cmd_synthesize(workspace, args):
 
     # IndicF5 can skip Latin tokens inside Kannada cues. Require a deliberate
     # pronunciation sample before an editor opts into this risky script form.
-    if profile_data.get("language", "").lower().startswith("kn") and not args.allow_mixed_script:
+    if backend == "indicf5" and profile_data.get("language", "").lower().startswith("kn") and not args.allow_mixed_script:
         risky = narration.mixed_kannada_latin_ids(segments)
         if risky:
             _fail(
@@ -148,20 +195,53 @@ def cmd_synthesize(workspace, args):
                 "round-trip-reviewed pronunciation sample."
             )
 
-    reference = Path(args.reference).expanduser().resolve()
-    if not reference.is_file():
-        _fail("Reference audio not found: " + str(reference))
-    if not args.reference_text.strip():
-        _fail("--reference-text must match the reference clip exactly")
-
-    params = {
-        "backend": "indicf5",
-        "nfe_step": args.nfe_step,
-        "cfg_strength": args.cfg_strength,
-        "speed": args.speed,
-        "seed_base": 20261107,
-        "reference_sha256": narration.sha256_file(reference),
-    }
+    if backend == "indicf5":
+        if args.reference_variant:
+            _fail("--reference-variant is only for Chatterbox Turbo profiles")
+        if not args.reference:
+            _fail("IndicF5 requires --reference")
+        reference = Path(args.reference).expanduser().resolve()
+        if not reference.is_file():
+            _fail("Reference audio not found: " + str(reference))
+        if not args.reference_text.strip():
+            _fail("--reference-text must match the reference clip exactly")
+        params = {
+            "backend": "indicf5",
+            "nfe_step": args.nfe_step,
+            "cfg_strength": args.cfg_strength,
+            "speed": args.speed,
+            "seed_base": 20261107,
+            "reference_sha256": narration.sha256_file(reference),
+        }
+    else:
+        if profile_data.get("language") != "en":
+            _fail("Chatterbox Turbo profile must declare language en")
+        if args.reference:
+            _fail("Use --reference-variant for the profile's consented English clips")
+        if args.reference_text.strip():
+            _fail("Chatterbox Turbo does not use --reference-text")
+        indic_options_changed = (
+            (args.nfe_step, args.cfg_strength, args.speed) != (32, 2.0, 1.0)
+            or getattr(args, "allow_partial_weights", False)
+            or args.allow_mixed_script
+        )
+        if indic_options_changed:
+            _fail("IndicF5 synthesis options are unsupported for Chatterbox Turbo")
+        non_latin = non_latin_script_ids(segments)
+        if non_latin:
+            _fail("English voice script contains non-Latin text: " + ", ".join(non_latin))
+        reference, variant = select_chatterbox_reference(
+            profile_root, profile_data, args.reference_variant
+        )
+        model = profile_data.get("backend", {})
+        params = {
+            "backend": "chatterbox-turbo",
+            "model_id": model.get("model_id"),
+            "model_revision": model.get("revision"),
+            "seed_base": model.get("defaults", {}).get("seed_base", 20261119),
+            "reference_variant": variant,
+            "reference_sha256": narration.sha256_file(reference),
+        }
     narration_root = voice_root / "narration"
     segments_dir = narration_root / "segments"
     manifest_path = narration_root / "manifest.json"
@@ -192,18 +272,24 @@ def cmd_synthesize(workspace, args):
         print(json.dumps({"params": params, "segments": plan}, indent=2))
         return
 
-    import indicf5_backend
+    if backend == "indicf5":
+        import indicf5_backend
 
-    indicf5_backend.keep_system_awake()
-    print("Loading IndicF5...", flush=True)
-    model, vocoder = indicf5_backend.load_backend(
-        Path(args.model_dir),
-        device=args.device,
-        allow_partial_weights=args.allow_partial_weights,
-    )
-    reference_audio, reference_text = indicf5_backend.prepare_reference(
-        reference, args.reference_text
-    )
+        indicf5_backend.keep_system_awake()
+        print("Loading IndicF5...", flush=True)
+        model, vocoder = indicf5_backend.load_backend(
+            Path(args.model_dir),
+            device=args.device,
+            allow_partial_weights=args.allow_partial_weights,
+        )
+        reference_audio, reference_text = indicf5_backend.prepare_reference(
+            reference, args.reference_text
+        )
+    else:
+        import chatterbox_backend
+
+        print("Loading Chatterbox Turbo...", flush=True)
+        model = chatterbox_backend.load_backend(Path(args.model_dir), args.device)
     segments_dir.mkdir(parents=True, exist_ok=True)
 
     failures = []
@@ -235,18 +321,23 @@ def cmd_synthesize(workspace, args):
             import soundfile as sf
             import torch
 
-            audio, sample_rate = indicf5_backend.synthesize(
-                model,
-                vocoder,
-                reference_audio,
-                reference_text,
-                segment["text"],
-                nfe_step=args.nfe_step,
-                cfg_strength=args.cfg_strength,
-                speed=args.speed,
-                device=args.device,
-                seed=params["seed_base"] + index,
-            )
+            if backend == "indicf5":
+                audio, sample_rate = indicf5_backend.synthesize(
+                    model,
+                    vocoder,
+                    reference_audio,
+                    reference_text,
+                    segment["text"],
+                    nfe_step=args.nfe_step,
+                    cfg_strength=args.cfg_strength,
+                    speed=args.speed,
+                    device=args.device,
+                    seed=params["seed_base"] + index,
+                )
+            else:
+                audio, sample_rate = chatterbox_backend.synthesize(
+                    model, reference, segment["text"], params["seed_base"] + index
+                )
             peak = float(np.max(np.abs(audio))) if audio.size else 0.0
             if peak > 0.99:
                 audio = audio / peak * 0.99
@@ -339,6 +430,17 @@ def cmd_assemble(workspace, args):
              if manifest["segments"][segment["id"]].get("text_hash") != narration.sha256_text(segment["text"])]
     if stale:
         _fail("Audio was generated for older text; resynthesize: " + ", ".join(stale))
+    # A partial rerender with a different voice reference must not silently mix
+    # incompatible takes in the final assembled narration.
+    active_params = manifest.get("params")
+    if active_params:
+        mixed = [
+            segment["id"]
+            for segment in segments
+            if manifest["segments"][segment["id"]].get("params") != active_params
+        ]
+        if mixed:
+            _fail("Audio was generated with different voice settings; resynthesize: " + ", ".join(mixed))
 
     video, video_seconds = assembly_target(args.video, args.duration, args.preview)
     review_path = Path(args.scene_review).expanduser().resolve()
@@ -520,8 +622,9 @@ def main():
     synth.add_argument("--profile", default="my-voice")
     synth.add_argument("--script", required=True)
     synth.add_argument("--model-dir", required=True)
-    synth.add_argument("--reference", required=True)
-    synth.add_argument("--reference-text", required=True)
+    synth.add_argument("--reference")
+    synth.add_argument("--reference-text", default="")
+    synth.add_argument("--reference-variant", default="")
     synth.add_argument("--nfe-step", type=int, default=32)
     synth.add_argument("--cfg-strength", type=float, default=2.0)
     synth.add_argument("--speed", type=float, default=1.0)
@@ -566,6 +669,8 @@ def main():
                 {
                     "profile": args.profile,
                     "path": str(root),
+                    "backend": data.get("backend", {}).get("name", "IndicF5"),
+                    "reference_variants": sorted(data.get("references", {})),
                     "samples": len(data["samples"]),
                     "duration_seconds": data["total_duration_seconds"],
                     "consent": data["consent"],

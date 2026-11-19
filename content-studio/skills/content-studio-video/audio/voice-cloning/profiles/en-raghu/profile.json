@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "name": "en-raghu",
+  "language": "en",
+  "samples": [
+    {
+      "file": "reference-take2.wav",
+      "sha256": "9cdceaf2b339630902badb621643356f3ead10fe04a2121805544e15ff2c1437",
+      "duration_seconds": 9.7,
+      "source_name": "Recording.m4a",
+      "source_range_seconds": [10.3, 20.0]
+    },
+    {
+      "file": "reference-take3.wav",
+      "sha256": "74f7f416300dfe539dc703e2532a9d4cf3cdb22de2920cdb1c82cf78004bfb55",
+      "duration_seconds": 9.7,
+      "source_name": "Recording.m4a",
+      "source_range_seconds": [21.3, 31.0]
+    }
+  ],
+  "total_duration_seconds": 19.4,
+  "references": {
+    "take2": {
+      "file": "reference-take2.wav",
+      "sha256": "9cdceaf2b339630902badb621643356f3ead10fe04a2121805544e15ff2c1437",
+      "duration_seconds": 9.7
+    },
+    "take3": {
+      "file": "reference-take3.wav",
+      "sha256": "74f7f416300dfe539dc703e2532a9d4cf3cdb22de2920cdb1c82cf78004bfb55",
+      "duration_seconds": 9.7
+    }
+  },
+  "consent": {
+    "affirmed": true,
+    "note": "The speaker said 'I would like to clone my voice', listened to the two English previews, asked to keep both, and explicitly requested adding en-raghu to Content Studio and committing and pushing it.",
+    "recorded_at": "2026-11-19T08:23:34+00:00"
+  },
+  "backend": {
+    "name": "ChatterboxTurbo",
+    "model_id": "ResembleAI/chatterbox-turbo",
+    "revision": "749d1c1a46eb10492095d68fbcf55691ccf137cd",
+    "configured": true,
+    "defaults": {
+      "seed_base": 2025
+    }
+  },
+  "synthesis_ready": true,
+  "repository": {
+    "path": "content-studio/skills/content-studio-video/audio/voice-cloning/profiles/en-raghu",
+    "stored_at": "2026-11-19",
+    "note": "Owner explicitly asked to commit and push this consented English profile. Model weights and generated previews remain local."
+  }
+}

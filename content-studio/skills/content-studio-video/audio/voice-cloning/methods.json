@@ -8,6 +8,12 @@
       "review": "Inspect the exact output and compare it with the approved plan"
     },
     {
+      "id": "english-voice-synthesize",
+      "script": "scripts/voice.py",
+      "status": "supported",
+      "review": "Select take2 or take3 and round-trip transcribe and listen to each generated English segment before production use"
+    },
+    {
       "id": "compare-indic-mio-emotion",
       "script": "scripts/indic_mio_compare.py",
       "status": "supported",

@@ -13,6 +13,123 @@ spec=importlib.util.spec_from_file_location("voice_bootstrap",SOURCE)
 voice=importlib.util.module_from_spec(spec);spec.loader.exec_module(voice)
 
 class VoiceBootstrapTests(unittest.TestCase):
+    def test_english_reference_requires_variant_and_valid_hash(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            second = root / "take2.wav"
+            third = root / "take3.wav"
+            second.write_bytes(b"second")
+            third.write_bytes(b"third")
+            profile = {"references": {
+                "take2": {"file": second.name, "sha256": voice.sha(second)},
+                "take3": {"file": third.name, "sha256": voice.sha(third)},
+            }}
+            with self.assertRaisesRegex(SystemExit, "Choose --reference-variant"):
+                voice.select_chatterbox_reference(root, profile, "")
+            self.assertEqual(
+                voice.select_chatterbox_reference(root, profile, "take2"),
+                (second, "take2"),
+            )
+            self.assertEqual(
+                voice.select_chatterbox_reference(root, profile, "take3"),
+                (third, "take3"),
+            )
+            second.write_bytes(b"altered")
+            with self.assertRaisesRegex(SystemExit, "hash does not match"):
+                voice.select_chatterbox_reference(root, profile, "take2")
+            third.unlink()
+            with self.assertRaisesRegex(SystemExit, "Reference audio not found"):
+                voice.select_chatterbox_reference(root, profile, "take3")
+
+    def test_unknown_voice_backend_is_rejected(self):
+        with self.assertRaisesRegex(SystemExit, "Unsupported voice backend"):
+            voice.profile_backend({"backend": {"name": "unknown"}})
+
+    def test_english_reference_cannot_escape_profile(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder) / "profile"
+            root.mkdir()
+            outside = Path(folder) / "outside.wav"
+            outside.write_bytes(b"outside")
+            profile = {"references": {
+                "outside": {"file": "../outside.wav", "sha256": voice.sha(outside)}
+            }}
+            with self.assertRaisesRegex(SystemExit, "inside its profile folder"):
+                voice.select_chatterbox_reference(root, profile, "outside")
+
+    def test_english_profile_dry_run_binds_selected_reference(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            profile = root / "profile"
+            profile.mkdir()
+            reference = profile / "take2.wav"
+            reference.write_bytes(b"consented voice")
+            (profile / "profile.json").write_text(json.dumps({
+                "language": "en",
+                "backend": {"name": "ChatterboxTurbo", "model_id": "test/model",
+                            "revision": "test-revision", "defaults": {"seed_base": 4}},
+                "consent": {"affirmed": True},
+                "samples": [{"file": reference.name}],
+                "references": {"take2": {"file": reference.name, "sha256": voice.sha(reference)}},
+            }), encoding="utf-8")
+            script = root / "script.json"
+            script.write_text(json.dumps({"segments": [
+                {"id": "en01", "start": 0, "end": 4, "text": "Hello there."}
+            ]}), encoding="utf-8")
+            args = SimpleNamespace(profile="en-raghu", script=str(script), only="",
+                                   allow_mixed_script=False, reference=None,
+                                   reference_text="", reference_variant="take2",
+                                   dry_run=True, nfe_step=32, cfg_strength=2.0,
+                                   speed=1.0)
+            with patch.object(voice, "profile_dir", return_value=profile), \
+                 patch("builtins.print") as output:
+                voice.cmd_synthesize(root, args)
+            plan = json.loads(output.call_args.args[0])
+            self.assertEqual(plan["params"]["backend"], "chatterbox-turbo")
+            self.assertEqual(plan["params"]["reference_variant"], "take2")
+            self.assertEqual(plan["params"]["reference_sha256"], voice.sha(reference))
+            self.assertFalse((root / ".content-studio" / "voice" / "narration").exists())
+            args.speed = 1.2
+            with patch.object(voice, "profile_dir", return_value=profile):
+                with self.assertRaisesRegex(SystemExit, "IndicF5 synthesis options"):
+                    voice.cmd_synthesize(root, args)
+
+    def test_english_script_rejects_non_latin_letters(self):
+        self.assertEqual(
+            voice.non_latin_script_ids([
+                {"id": "one", "text": "Hello there."},
+                {"id": "two", "text": "ನಮಸ್ಕಾರ"},
+            ]),
+            ["two"],
+        )
+
+    def test_assembly_rejects_mixed_voice_settings(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            script = root / "script.json"
+            script.write_text(json.dumps({"segments": [
+                {"id": "a", "start": 0, "end": 2, "text": "First."},
+                {"id": "b", "start": 3, "end": 5, "text": "Second."},
+            ]}), encoding="utf-8")
+            narration_root = root / ".content-studio" / "voice" / "narration"
+            segments_dir = narration_root / "segments"
+            segments_dir.mkdir(parents=True)
+            for segment_id in ("a", "b"):
+                (segments_dir / f"{segment_id}.wav").write_bytes(b"audio")
+            (narration_root / "manifest.json").write_text(json.dumps({
+                "params": {"reference_variant": "take3"},
+                "segments": {
+                    "a": {"text_hash": voice.narration.sha256_text("First."),
+                          "params": {"reference_variant": "take2"}},
+                    "b": {"text_hash": voice.narration.sha256_text("Second."),
+                          "params": {"reference_variant": "take3"}},
+                },
+            }), encoding="utf-8")
+            args = SimpleNamespace(script=str(script))
+            with patch.object(voice.shutil, "which", return_value="tool"):
+                with self.assertRaisesRegex(SystemExit, "different voice settings.*a"):
+                    voice.cmd_assemble(root, args)
+
     def test_assembly_rejects_actual_silent_gap_before_mixing(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

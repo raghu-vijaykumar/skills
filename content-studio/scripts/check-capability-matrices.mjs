@@ -18,7 +18,8 @@ const expectedUnsupported = new Set([
 // Reference critique adds a leaf with mapped evidence for independently timed cuts.
 // Captions, recorder sync, and retime add canonical leaves; clip-edit and the
 // timeline now expose their reviewed candidate/delivery methods explicitly.
-const expectedMethodCount = 164;
+// The English voice backend adds one independently callable synthesis method.
+const expectedMethodCount = 165;
 const expectedMatrixCount = 53;
 
 const skills = discoverSkills(path.join(root, 'content-studio', 'skills'))

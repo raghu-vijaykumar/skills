@@ -1,12 +1,12 @@
 ---
 name: content-studio-video-voice-cloning
-description: Enroll a consented voice profile and synthesize cloned Kannada/English narration with local IndicF5.
+description: Use consented voice profiles for local English Chatterbox Turbo or Indian-language IndicF5 narration.
 ---
 # Content Studio Voice
 
 Before changing production material, complete the mandatory human-reviewed precheck in `content-studio-workflow` and follow its approved step checklist.
 
-This skill enrolls a consented voice profile and synthesizes cloned narration locally with IndicF5. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. The repo already tracks consented bundled profiles; a short synthetic gallery sample is also tracked. Settings, loader caveats, and quality gates are in [references/indicf5.md](references/indicf5.md).
+This skill uses a consented profile's declared backend: Chatterbox Turbo for the bundled English-only `en-raghu` profile, or IndicF5 for existing Indian-language profiles. It does not write scripts; use `content-studio-video-understand` for evidence-linked narration, then return here after the script and timing are approved. Weights, virtual environments, workspace reference audio, and production renders stay outside Git. The repo also tracks consented bundled profile references at their owners' explicit request. Backend setup and quality gates are in [Chatterbox Turbo](references/chatterbox-turbo.md) and [IndicF5](references/indicf5.md).
 
 ## Enroll (after the user supplies samples)
 
@@ -22,7 +22,7 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
 
 Requires FFmpeg and FFprobe. Each sample must have at least 3 seconds of audio and all samples together at least 20 seconds. The tool rejects missing, invalid and non-audio files. It never overwrites an existing profile. Workspace profiles live at `<workspace>/.content-studio/voice/profiles/<profile>/` and are normally kept outside Git. Bundled profiles under this skill's `profiles/<name>/` (for example `rakshitha`) are read-only fallbacks: `--profile` resolves the workspace copy first, then the bundled copy. A bundled profile contains consented biometric audio and is committed only at the owner's explicit request.
 
-## Synthesize
+## Synthesize with IndicF5
 
 Write the approved narration as a JSON script with ordered sections:
 
@@ -54,6 +54,27 @@ python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/vo
   that is round-trip transcribed and heard. A matching text hash or words/sec
   report proves timing and provenance, not intelligible speech.
 
+## Synthesize English with en-raghu
+
+The owner reviewed and retained both English reference takes. Choose one per
+render; the CLI rejects an omitted choice so it cannot silently choose a voice
+style. The same approved script and timeline format applies:
+
+```powershell
+python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "<draft>" status --profile en-raghu
+python content-studio/skills/content-studio-video/audio/voice-cloning/scripts/voice.py --workspace "<draft>" synthesize --profile en-raghu --script "<approved-script.json>" --model-dir "<local-chatterbox-turbo-checkpoint>" --reference-variant take2 --device cpu
+```
+
+Use `--reference-variant take3` for the other approved clip. The profile binds
+each choice to its committed SHA-256; a missing or changed clip stops before
+model load. Chatterbox uses the audio reference directly, so English renders
+do not take `--reference-text`. It needs an optional local Python 3.11
+environment and official checkpoint outside Git; see
+[setup and model requirements](references/chatterbox-turbo.md). Keep an English
+script in Latin text. `--dry-run` validates the selection and reports reuse
+without loading model weights. Chatterbox output is stored in the same
+resumable segment manifest and uses the same review and assembly gates below.
+
 ## Assemble
 
 Place the rendered sections on the frame-reviewed video timeline at their natural speed:
@@ -74,7 +95,7 @@ for the final picture and audio export.
 - Requires a completed `scene-review.json` for the exact script and picture. The review covers the meaning of the line as well as its start and end. A duration-only assembly validates the script review but needs later exact-picture verification.
 - Writes `narration-24k.wav`, loudness-normalized `narration.wav` (`-16 LUFS`, true peak `-1.5 dBTP`), `timeline.json`, and an optional 1080p `preview.mp4`.
 - With `--video`, the assembled WAV ends at the picture duration after checking that the last spoken cue ends inside it. The duration-only route retains its short voice-only tail for review.
-- Assembly needs only FFmpeg; synthesis needs the IndicF5 environment.
+- Assembly needs only FFmpeg; synthesis needs the selected backend environment.
 - An overlong cue fails before preview encoding. Change the script and regenerate that cue at the accepted pace.
 
 ## Compare Indic-Mio emotions with a script
