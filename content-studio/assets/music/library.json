@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "YouTube Audio Library and Pixabay Music",
-  "updated": "2026-11-18",
+  "updated": "2026-11-19",
   "local_root": "local",
   "categories": [
     {
@@ -75,6 +75,22 @@
   ],
   "tracks": [
     {
+      "status": "candidate",
+      "file": null,
+      "title": "Away",
+      "artist": "Patrick Patrikios",
+      "category": "ambient",
+      "mood": "dark, atmospheric",
+      "duration_seconds": null,
+      "license": null,
+      "attribution_required": null,
+      "attribution_text": "",
+      "source_url": "https://www.youtube.com/audiolibrary",
+      "preview_url": "https://www.youtube.com/watch?v=6UJ1l_vlQyg",
+      "downloaded": null,
+      "sha256": null
+    },
+    {
       "file": "ambient/Pulsar - The Grey Room _ Density & Time.mp3",
       "title": "Pulsar",
       "artist": "The Grey Room / Density & Time",
@@ -107,6 +123,54 @@
     {
       "status": "candidate",
       "file": null,
+      "title": "Far Away",
+      "artist": "MK2",
+      "category": "dance-electronic",
+      "mood": "happy, upbeat",
+      "duration_seconds": null,
+      "license": null,
+      "attribution_required": null,
+      "attribution_text": "",
+      "source_url": "https://www.youtube.com/audiolibrary",
+      "preview_url": "https://www.youtube.com/watch?v=ADRpz3AhOXU",
+      "downloaded": null,
+      "sha256": null
+    },
+    {
+      "status": "candidate",
+      "file": null,
+      "title": "Sunshine Samba",
+      "artist": "Chris Haugen",
+      "category": "jazz-blues",
+      "mood": "happy, sunny",
+      "duration_seconds": null,
+      "license": null,
+      "attribution_required": null,
+      "attribution_text": "",
+      "source_url": "https://www.youtube.com/audiolibrary",
+      "preview_url": "https://www.youtube.com/watch?v=WqIrtdUVHcY",
+      "downloaded": null,
+      "sha256": null
+    },
+    {
+      "status": "candidate",
+      "file": null,
+      "title": "Walk Through the Park",
+      "artist": "TrackTribe",
+      "category": "jazz-blues",
+      "mood": "calm, strolling",
+      "duration_seconds": null,
+      "license": null,
+      "attribution_required": null,
+      "attribution_text": "",
+      "source_url": "https://www.youtube.com/audiolibrary",
+      "preview_url": "https://www.youtube.com/watch?v=ybNHMrHvCLo",
+      "downloaded": null,
+      "sha256": null
+    },
+    {
+      "status": "candidate",
+      "file": null,
       "title": "Crimson Fly",
       "artist": "Huma-Huma",
       "category": "pop",
@@ -117,6 +181,22 @@
       "attribution_text": "",
       "source_url": "https://www.youtube.com/audiolibrary",
       "preview_url": "https://www.youtube.com/watch?v=Sn6z_5NcPnA",
+      "downloaded": null,
+      "sha256": null
+    },
+    {
+      "status": "candidate",
+      "file": null,
+      "title": "Spring In My Step",
+      "artist": "Silent Partner",
+      "category": "pop",
+      "mood": "happy, bright",
+      "duration_seconds": null,
+      "license": null,
+      "attribution_required": null,
+      "attribution_text": "",
+      "source_url": "https://www.youtube.com/audiolibrary",
+      "preview_url": "https://www.youtube.com/watch?v=i1jOvVfNwDQ",
       "downloaded": null,
       "sha256": null
     }
