@@ -39,6 +39,14 @@ class PreflightTest(unittest.TestCase):
             ("encoder", "libx264"), ("encoder", "aac"),
         ])
 
+    def test_long_cut_methods_are_profileable_without_claiming_an_encode(self):
+        self.assertEqual(preflight._method_components("fastpan-scan"), [
+            ("filter", "fps"), ("filter", "scale"), ("filter", "format")])
+        self.assertEqual(preflight._method_components("tilt-scan"),
+                         preflight._method_components("fastpan-scan"))
+        self.assertEqual(preflight._method_components("long-cut-propose"), [])
+        self.assertEqual(preflight._method_components("long-cut-build"), [])
+
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg tools unavailable")
     def test_profile_reports_all_audio_streams_and_hash(self):
         with tempfile.TemporaryDirectory() as scratch:

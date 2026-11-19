@@ -38,6 +38,7 @@ content-studio/skills/
       clip-edit/                     shared edit backend and manual-edit tools
       clipping/                      hero-led long-form range to portrait Reel
       fastpan-cuts/                  rapid sweep scan, bounded cut preview, timeline handoff
+      long-cut/                      ordered full-footage assembly with reviewed technical removals
       autocut/                       experimental; explicit request only
       reframe/                       subjects, saliency, center
       color/                         correction and range presets
@@ -82,14 +83,14 @@ The Social publishing leaves use the existing YouTube/Instagram video publisher 
 
 | When | Action | Output and stop |
 | --- | --- | --- |
-| Raw video folder arrives | Precheck; inspect originals and machine; determine order and duplicates; diagnose blur, sound, motion, and HDR/DV; compare only justified cleanup; prepare and verify **individual clips**. | `.content-studio/_timeline.csv` and `.content-studio/processed-clips/` for the user's manual edit. No automatic join, rough cut, voice, or upscale. |
+| Raw video folder arrives | Precheck; inspect originals and machine; determine order and duplicates; diagnose blur, sound, motion, and HDR/DV; compare only justified cleanup; prepare and verify **individual clips**. | `.content-studio/_timeline.csv` and `.content-studio/processed-clips/` for the user's manual edit by default. An explicit long-cut request instead uses reviewed technical cuts and one ordered assembly. |
 | User supplies a manually rendered edit | Start a new edited-render precheck. Inspect the exact video and its scene times. | A method-specific plan for only requested work. |
 | User requests narration | Generate an evidence-linked timed script from the render; audit long scenes for repetition and use relevant sourced facts or original ambience; obtain script review; record or synthesize approved voice; listen; mix onto the render without changing its picture stream. | A separate voiced master and mix report. Cloning needs consent. |
 | Completed edit needs higher resolution | Compare untouched, Lanczos, and applicable AI samples on that **one edited video**; gate detail, noise, flicker, timing, color, and HDR/DV; render only an approved method. | One upscaled edit or a documented SKIP/REVIEW. |
 | User requests overlays for named scenes | Cue and render code-generated graphics **after any upscale**, at delivery resolution. | Final candidate with reviewed cues and transitions. |
 | Final candidate exists | Review exact picture and audio, metadata, thumbnail, and rights; separately authorize publication. | Approved master/package. Archive runs independently. |
 
-AutoCut is experimental and requires the user's explicit request and its own approved plan. It does not replace the raw-folder handoff. A blur flag is review evidence, never automatic permission to remove footage. Camera originals and project edits stay intact.
+AutoCut is experimental and requires the user's explicit request and its own approved plan. Long cut is a separate explicit full-footage assembly route. A blur flag is review evidence, never automatic permission to remove footage. Camera originals and project edits stay intact.
 
 ## Precheck and iterative review
 

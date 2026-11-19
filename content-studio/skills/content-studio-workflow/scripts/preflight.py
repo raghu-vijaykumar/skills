@@ -143,6 +143,12 @@ def _sample_frame_timing(sample: Path, duration: float) -> dict:
 
 def _method_components(method: str) -> list[tuple[str, str]] | None:
     """Bind known timeline method IDs to the FFmpeg components their adapter actually uses."""
+    # The source scanners decode sampled frames; the long-cut planner only
+    # inspects existing reports and FFprobe metadata, with no FFmpeg filter.
+    if method in {"prepare-clips", "fastpan-scan", "tilt-scan"}:
+        return [("filter", "fps"), ("filter", "scale"), ("filter", "format")]
+    if method in {"long-cut-propose", "long-cut-build"}:
+        return []
     picture = {"crop": "crop", "lens-correction": "lenscorrection",
                "denoise-light": "hqdn3d", "denoise-medium": "hqdn3d",
                "deflicker": "deflicker", "upscale-lanczos": "scale",

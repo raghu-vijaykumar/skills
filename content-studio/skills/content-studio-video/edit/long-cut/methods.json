@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "long-cut-propose", "script": "scripts/long_cut.py", "status": "supported", "review": "Inspect every source-linked blur, pan, and tilt candidate; no cuts are approved"},
+    {"id": "long-cut-build", "script": "scripts/long_cut.py", "status": "supported", "review": "Requires complete human decisions and a separately approved delivery timeline"}
+  ]
+}

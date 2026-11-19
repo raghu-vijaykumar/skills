@@ -27,7 +27,7 @@ Before any production edit, run the [workflow precheck](content-studio/skills/co
 
 | Starting point | Next step |
 | --- | --- |
-| Raw camera folder | Order and diagnose originals, then hand them to the user for a manual edit. Preserve source media. |
+| Raw camera folder | Order and diagnose originals, then hand them to the user for a manual edit. On explicit request, [long cut](content-studio/skills/content-studio-video/edit/long-cut/SKILL.md) instead assembles all usable footage in order after reviewed technical cuts. Preserve source media. |
 | Supplied edited render | Inspect the actual edit, plan requested audio, picture, or graphics work, and review the final output. |
 | Code-driven idea | Plan scenes, render bounded hero previews, then verify them in the narrated video. |
 
