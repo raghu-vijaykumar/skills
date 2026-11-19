@@ -70,7 +70,9 @@ def paths(draft: Path) -> tuple[Path, Path, Path, Path]:
 
 
 def run_quiet(argv: list[str], timeout: int = 20) -> subprocess.CompletedProcess:
-    return subprocess.run(argv, text=True, capture_output=True, timeout=timeout, check=False)
+    # FFprobe can echo UTF-8 metadata even when Windows defaults to a legacy code page.
+    return subprocess.run(argv, text=True, capture_output=True, timeout=timeout,
+                          check=False, encoding="utf-8", errors="replace")
 
 
 def memory_gib() -> float | None:
@@ -160,6 +162,10 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
                 ("filter", "overlay"), ("encoder", "libx264")]
     if method == "timeline-delivery":
         return [("filter", "concat"), ("encoder", "libx264"), ("encoder", "aac")]
+    if method == "reviewed-hero-range":
+        # Clipping hands selected picture/audio ranges and crop windows to one export.
+        return ([("filter", name) for name in ("trim", "atrim", "crop", "scale", "concat")]
+                + [("encoder", "libx264"), ("encoder", "aac")])
     if method == "hdr-audio-only":
         return [("encoder", "aac")]
     if method == "inspect-exact-master":

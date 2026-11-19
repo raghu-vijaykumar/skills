@@ -11,10 +11,34 @@ from unittest.mock import patch
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] /
+                       "content-studio-video" / "timeline" / "scripts"))
 import preflight
+import compiler
 
 
 class PreflightTest(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
+                         "FFmpeg tools unavailable")
+    def test_real_media_probe_accepts_utf8_metadata_on_windows(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            sample = Path(scratch) / "dolphin-🐬.mp4"
+            made = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                "testsrc2=size=160x90:rate=5:duration=1", "-metadata", "title=Dolphin 🐬",
+                "-c:v", "mpeg4", str(sample),
+            ], capture_output=True, text=True, encoding="utf-8", errors="replace")
+            self.assertEqual(made.returncode, 0, made.stderr[-500:])
+            self.assertEqual(preflight.probe(sample)["width"], 160)
+            self.assertEqual(compiler.media_info(sample)["video"]["width"], 160)
+
+    def test_clipping_method_has_preflight_components(self):
+        self.assertEqual(preflight._method_components("reviewed-hero-range"), [
+            ("filter", "trim"), ("filter", "atrim"), ("filter", "crop"),
+            ("filter", "scale"), ("filter", "concat"),
+            ("encoder", "libx264"), ("encoder", "aac"),
+        ])
+
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg tools unavailable")
     def test_profile_reports_all_audio_streams_and_hash(self):
         with tempfile.TemporaryDirectory() as scratch:

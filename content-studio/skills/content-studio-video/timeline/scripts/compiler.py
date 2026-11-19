@@ -20,7 +20,8 @@ from xfade_effects import CUSTOM_JOIN_IDS, xfade_options  # noqa: E402
 def probe(path: Path) -> dict:
     result = subprocess.run(
         ["ffprobe", "-v", "error", "-show_streams", "-show_format",
-         "-of", "json", str(path)], capture_output=True, text=True)
+         "-of", "json", str(path)], capture_output=True, text=True,
+        encoding="utf-8", errors="replace")
     if result.returncode:
         raise ValueError(f"Cannot probe media {path}: {result.stderr[-400:]}")
     return json.loads(result.stdout)
