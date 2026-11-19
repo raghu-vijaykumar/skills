@@ -171,6 +171,21 @@ def _relative_evidence(selection_path: Path, name: object, label: str) -> Path:
     return path
 
 
+def _crop_boundaries(intervals: list[dict]) -> list[dict]:
+    """Measure a hard crop-centre jump in destination crop widths."""
+    boundaries = []
+    for previous, following in zip(intervals, intervals[1:]):
+        if abs(previous["source_out"] - following["source_in"]) > EPSILON:
+            continue
+        old_center = previous["x"] + previous["w"] / 2
+        new_center = following["x"] + following["w"] / 2
+        jump = abs(new_center - old_center) / min(previous["w"], following["w"])
+        boundaries.append({"at_seconds": round(following["source_in"], 3),
+                           "screen_jump_fraction": round(jump, 4),
+                           "candidate_status": "REVIEW" if jump > .12 else "SKIP"})
+    return boundaries
+
+
 def validate_selection(selection_path: Path, *, source_override: Path | None = None,
                        ready: bool = False) -> dict:
     """Check current source/evidence bytes and all selected crop intervals."""
@@ -264,10 +279,48 @@ def validate_selection(selection_path: Path, *, source_override: Path | None = N
                 or any(abs(float(proposal_data.get("crop", {}).get(key, -10)) - float(crop[key]))
                        > 0.000001 for key in ("x", "y", "w", "h"))):
             raise ValueError("Crop geometry differs from the reviewed proposal")
+        if crop.get("framing_required") and not crop.get("framing_file"):
+            raise ValueError("Framing evidence is required for this crop revision")
+        if crop.get("framing_file"):
+            framing = _relative_evidence(selection_path, crop["framing_file"],
+                                         "Framing evidence")
+            if sha256_file(framing) != crop.get("framing_sha256"):
+                raise ValueError("Framing evidence changed")
+            report = _read(framing)
+            if (report.get("source_sha256") != record["source"]["sha256"]
+                    or report.get("proposal_sha256") != crop["proposal_sha256"]
+                    or not report.get("guide_frames")):
+                raise ValueError("Framing evidence belongs to another source or crop")
+            if crop.get("subjects_file"):
+                boxes = _relative_evidence(selection_path, crop["subjects_file"],
+                                           "Subject boxes")
+                if (sha256_file(boxes) != crop.get("subjects_sha256")
+                        or report.get("subjects_sha256") != crop["subjects_sha256"]):
+                    raise ValueError("Subject boxes changed after framing review")
+            for guide in report.get("guide_frames", []):
+                still = Path(guide["path"]).resolve()
+                if (not still.is_relative_to(proposal.parent)
+                        or not still.is_file() or sha256_file(still) != guide["sha256"]):
+                    raise ValueError("Framing safe-zone guide changed")
+        elif ready and crop.get("framing_sha256"):
+            raise ValueError("Framing evidence path is missing")
         _relative_evidence(selection_path, crop.get("preview_file"), "Crop preview")
         if ready and (crop.get("review_status") != "approved"
                       or not str(crop.get("review_note", "")).strip()):
             raise ValueError("Every crop interval needs human review")
+    if "crop_boundaries" in record:
+        expected = _crop_boundaries(intervals)
+        actual = record["crop_boundaries"]
+        if (not isinstance(actual, list) or len(actual) != len(expected)
+                or any(item.get("at_seconds") != reference["at_seconds"]
+                       or item.get("screen_jump_fraction") != reference["screen_jump_fraction"]
+                       or item.get("candidate_status") != reference["candidate_status"]
+                       for item, reference in zip(actual, expected))):
+            raise ValueError("Crop-boundary evidence changed")
+        if ready and any(item.get("review_status") != "approved"
+                         or not str(item.get("review_note", "")).strip()
+                         for item in actual):
+            raise ValueError("Every adjacent crop boundary needs human review")
     if ready and intervals and selected and abs(previous_end - selected[1]) > EPSILON:
         raise ValueError("Crop intervals must cover the entire selected range")
     if ready:
@@ -328,17 +381,36 @@ def propose_crop(selection_path: Path, out_selection: Path, output: Path, *,
     if (proposal.get("mode") != method or proposal.get("source") != Path(checked["source"]).name
             or proposal.get("range") != [round(start, 3), round(end, 3)]):
         raise ValueError("Crop proposal does not match the requested source and method")
+    framing_file = output / "framing-evidence.json"
+    framing_command = [sys.executable, str(VIDEO_ROOT / "edit" / "reframe" / "scripts" /
+                                         "framing_evidence.py"),
+                       "--source", checked["source"], "--proposal", str(proposal_file),
+                       "--output", str(framing_file)]
+    if subjects:
+        framing_command.extend(["--subjects", str(subjects.resolve())])
+    evidence_result = subprocess.run(framing_command, capture_output=True, text=True)
+    if evidence_result.returncode:
+        raise ValueError(f"Framing evidence failed: {evidence_result.stderr[-700:]}")
     crop = {
         "source_in": start, "source_out": end,
         "target_width": width, "target_height": height,
         "method": method, **proposal["crop"],
         "proposal_file": _relative_path(proposal_file, out_selection.parent),
         "proposal_sha256": sha256_file(proposal_file),
+        "framing_file": _relative_path(framing_file, out_selection.parent),
+        "framing_sha256": sha256_file(framing_file),
+        "framing_required": True,
         "preview_file": _relative_path(output / "reframe-review.html", out_selection.parent),
         "review_status": "pending_review", "review_note": "",
     }
+    if subjects:
+        crop["subjects_file"] = _relative_path(subjects, out_selection.parent)
+        crop["subjects_sha256"] = sha256_file(subjects)
     record["crop_intervals"] = sorted([*record["crop_intervals"], crop],
                                       key=lambda item: item["source_in"])
+    record["crop_boundaries"] = [
+        {**item, "review_status": "pending_review", "review_note": ""}
+        for item in _crop_boundaries(record["crop_intervals"])]
     record["editorial_review"] = {"status": "pending_review", "reviewer": "", "note": ""}
     record["status"] = "pending_review"
     _write_new(out_selection, record)
@@ -392,7 +464,7 @@ def emit_changes(selection_path: Path, timeline_path: Path, out: Path) -> dict:
                         "source_out": item["source_out"], "audio_gain": 1})
         proposal = _relative_evidence(selection_path, item["proposal_file"],
                                       "Crop proposal")
-        operations.append({
+        operation = {
             "id": f"hero-crop{index:04d}", "method": "crop",
             "start": round(cursor, 6), "end": round(cursor + length, 6),
             **{key: item[key] for key in ("x", "y", "w", "h")},
@@ -403,7 +475,12 @@ def emit_changes(selection_path: Path, timeline_path: Path, out: Path) -> dict:
             "clip_proposal_sha256": item["proposal_sha256"],
             "clip_manifest_file": str(manifest),
             "clip_manifest_sha256": manifest_hash,
-        })
+        }
+        if item.get("framing_file"):
+            operation["clip_framing_file"] = str(_relative_evidence(
+                selection_path, item["framing_file"], "Framing evidence"))
+            operation["clip_framing_sha256"] = item["framing_sha256"]
+        operations.append(operation)
         cursor += length
     changes = {"picture": picture, "operations": operations}
     candidate = revise(timeline, changes, new_output=timeline["output"])

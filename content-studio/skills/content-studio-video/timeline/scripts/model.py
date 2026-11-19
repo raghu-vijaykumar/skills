@@ -312,6 +312,14 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
                 if (not evidence_path.is_file() or not isinstance(digest, str)
                         or sha256_file(evidence_path) != digest):
                     raise ValueError(f"Clip {label} changed or is missing: {op_id}")
+            if item.get("clip_framing_file") or item.get("clip_framing_sha256"):
+                raw_path = item.get("clip_framing_file")
+                if not isinstance(raw_path, str) or not Path(raw_path).is_absolute():
+                    raise ValueError(f"Clip framing path must be absolute: {op_id}")
+                evidence_path = Path(raw_path).resolve()
+                if (not evidence_path.is_file()
+                        or sha256_file(evidence_path) != item.get("clip_framing_sha256")):
+                    raise ValueError(f"Clip framing evidence changed or is missing: {op_id}")
         if kind == "lens-correction":
             for field in ("k1", "k2"):
                 value = _number(item.get(field, 0), f"{op_id}.{field}", minimum=-.5)
@@ -551,7 +559,7 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     input_paths += [Path(o[key]).resolve() for o in operations
                     if o["method"] == "crop"
                     for key in ("clip_selection_file", "clip_proposal_file",
-                                "clip_manifest_file")
+                                "clip_manifest_file", "clip_framing_file")
                     if o.get(key)]
     if output in input_paths or output == plan:
         raise ValueError("Output cannot overwrite an input")

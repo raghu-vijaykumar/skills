@@ -16,6 +16,8 @@ delivered portrait video. Both original videos are untouched.
 | `saliency` | Supported | Landscape video → crop preview + reframe.json | Specialist only | [Animated fountain saliency crop](previews/saliency-crop.gif) | Heuristic selected the high-detail building and cut off most of the fountain: a review failure, not object understanding. |
 | `center` | Supported | Landscape video → crop preview + reframe.json | Specialist only | [Animated center crop](previews/center-crop.gif) | Deliberate center crop; may cut the subject. |
 
+After any proposal, `scripts/framing_evidence.py` measures crop context loss and, when operator-supplied boxes exist, sampled hero coverage, safe-area clearance, and screen-centre movement. It also draws destination guide frames over the proposal's cropped previews. No box means hero coverage is `UNSUPPORTED`; the report never claims subject detection. The clipping workflow binds this report and any adjacent crop-jump review to the timeline handoff.
+
 ## Review the crop proposals
 
 ![Operator-supplied pot box and proposed crop](previews/subjects-crop.gif)

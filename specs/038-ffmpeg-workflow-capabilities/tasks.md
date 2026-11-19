@@ -37,9 +37,9 @@
 
 ## Phase 6: User Story 5 - Portrait framing evidence
 
-- [ ] T018 [US5] Add subject coverage, motion-centre, crop-boundary, and destination guide evidence in `content-studio/skills/content-studio-video/edit/reframe/` and `edit/clipping/scripts/clipping.py`.
-- [ ] T019 [US5] Cover lost hero and crop jump fixtures in `content-studio/skills/content-studio-video/edit/clipping/tests/test_clipping.py`.
-- [ ] T020 [US5] Update framing review instructions in `content-studio/skills/content-studio-video/edit/clipping/SKILL.md` and `edit/reframe/SKILL.md`.
+- [x] T018 [US5] Add subject coverage, motion-centre, crop-boundary, and destination guide evidence in `content-studio/skills/content-studio-video/edit/reframe/` and `edit/clipping/scripts/clipping.py`.
+- [x] T019 [US5] Cover lost hero and crop jump fixtures in `content-studio/skills/content-studio-video/edit/clipping/tests/test_clipping.py`.
+- [x] T020 [US5] Update framing review instructions in `content-studio/skills/content-studio-video/edit/clipping/SKILL.md` and `edit/reframe/SKILL.md`.
 
 ## Phase 7: User Story 6 - Measured final-mix loudness
 

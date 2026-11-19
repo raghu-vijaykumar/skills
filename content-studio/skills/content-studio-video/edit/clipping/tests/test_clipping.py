@@ -108,11 +108,32 @@ class ClippingTests(unittest.TestCase):
         interval = record["crop_intervals"][0]
         self.assertEqual(interval["method"], "subjects")
         self.assertTrue((self.crop_selection.parent / interval["proposal_file"]).is_file())
+        framing = json.loads((self.crop_selection.parent / interval["framing_file"]).read_text())
+        self.assertEqual(framing["source_sha256"], source_hash)
+        self.assertTrue(framing["guide_frames"])
+        self.assertIsNotNone(framing["minimum_hero_coverage"])
         self.assertEqual(clipping.validate_selection(self.crop_selection)["status"],
                          "pending_review")
         with self.assertRaisesRegex(ValueError, "review"):
             clipping.validate_selection(self.crop_selection, ready=True)
         self.assertEqual(model.sha256_file(self.source), source_hash)
+
+    def test_wide_hero_box_reports_crop_loss_for_review(self):
+        self.boxes.write_text(json.dumps({"subjects": [{
+            "source": self.source.name, "start": 1, "end": 3,
+            "box": {"x": .2, "y": .2, "w": .6, "h": .6},
+            "confidence": .99, "label": "wide hero"}]}), encoding="utf-8")
+        record = self._inspect_and_crop()
+        interval = record["crop_intervals"][0]
+        framing_path = self.crop_selection.parent / interval["framing_file"]
+        framing = json.loads(framing_path.read_text(encoding="utf-8"))
+        self.assertEqual(framing["hero_coverage_status"], "REVIEW")
+        self.assertLess(framing["minimum_hero_coverage"], .98)
+        self.assertGreater(framing["context_lost_fraction"], .5)
+        guide = Path(framing["guide_frames"][0]["path"])
+        guide.write_bytes(b"changed guide")
+        with self.assertRaisesRegex(ValueError, "guide changed"):
+            clipping.validate_selection(self.crop_selection)
 
     def test_full_source_discovery_leaves_range_for_editor(self):
         record = clipping.inspect_source(self.source, self.selection,
@@ -209,6 +230,15 @@ class ClippingTests(unittest.TestCase):
         for item in record["crop_intervals"]:
             item["review_status"] = "approved"
             item["review_note"] = "Hero and cut point reviewed"
+        self.assertEqual(len(record["crop_boundaries"]), 1)
+        self.assertEqual(record["crop_boundaries"][0]["candidate_status"], "REVIEW")
+        self.assertGreater(record["crop_boundaries"][0]["screen_jump_fraction"], .5)
+        third.write_text(json.dumps(record), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "boundary needs human review"):
+            clipping.validate_selection(third, ready=True)
+        for boundary in record["crop_boundaries"]:
+            boundary["review_status"] = "approved"
+            boundary["review_note"] = "Visible hard reframing reviewed"
         third.write_text(json.dumps(record), encoding="utf-8")
         timeline_path, base = self._timeline()
         changes = clipping.emit_changes(third, timeline_path,
@@ -273,6 +303,12 @@ class ClippingTests(unittest.TestCase):
         revision = model.revise(base, changes,
                                 new_output=str(self.root / "review.mp4"))
         self.assertAlmostEqual(model.validate(revision, require_review=False)["duration"], 2)
+        framing_path = Path(revision["operations"][0]["clip_framing_file"])
+        original_framing = framing_path.read_bytes()
+        framing_path.write_bytes(original_framing + b"changed")
+        with self.assertRaisesRegex(ValueError, "framing evidence changed"):
+            model.validate(revision, require_review=False)
+        framing_path.write_bytes(original_framing)
         incomplete = json.loads(json.dumps(revision))
         del incomplete["operations"][0]["clip_manifest_file"]
         del incomplete["operations"][0]["clip_manifest_sha256"]
