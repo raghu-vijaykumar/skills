@@ -17,10 +17,10 @@
 
 ## Phase 3: User Story 2 - Check the exact master
 
-- [ ] T007 [US2] Implement hash-bound format, loudness, content-candidate, and guide inspection in `content-studio/skills/content-studio-video/review/final-render/scripts/inspect.py`.
-- [ ] T008 [US2] Bind inspection to timeline output review in `content-studio/skills/content-studio-video/timeline/scripts/verify.py` and `review/final-render/methods.json`.
-- [ ] T009 [US2] Test known-defect, clean, intentional-content, and stale-output fixtures in `content-studio/skills/content-studio-video/review/final-render/tests/test_inspect.py`.
-- [ ] T010 [US2] Document exact-master findings and review ownership in `content-studio/skills/content-studio-video/review/final-render/SKILL.md`.
+- [x] T007 [US2] Implement hash-bound format, loudness, content-candidate, and guide inspection in `content-studio/skills/content-studio-video/review/final-render/scripts/inspect.py`.
+- [x] T008 [US2] Bind inspection to timeline output review in `content-studio/skills/content-studio-video/timeline/scripts/verify.py` and `review/final-render/methods.json`.
+- [x] T009 [US2] Test known-defect, clean, intentional-content, and stale-output fixtures in `content-studio/skills/content-studio-video/review/final-render/tests/test_inspect.py`.
+- [x] T010 [US2] Document exact-master findings and review ownership in `content-studio/skills/content-studio-video/review/final-render/SKILL.md`.
 
 ## Phase 4: User Story 3 - Requested captions
 

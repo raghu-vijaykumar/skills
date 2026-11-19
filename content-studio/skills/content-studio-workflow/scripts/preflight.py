@@ -162,6 +162,10 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
         return [("filter", "concat"), ("encoder", "libx264"), ("encoder", "aac")]
     if method == "hdr-audio-only":
         return [("encoder", "aac")]
+    if method == "inspect-exact-master":
+        return [("filter", name) for name in
+                ("blackdetect", "freezedetect", "scale", "signalstats", "metadata",
+                 "silencedetect", "loudnorm", "drawbox")] + [("encoder", "png")]
     if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
                   "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
                   "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",

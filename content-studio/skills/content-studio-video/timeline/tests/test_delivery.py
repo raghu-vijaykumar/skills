@@ -429,6 +429,10 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
                                        "--evidence-dir", str(evidence_dir)]), 0)
         manifest = json.loads((evidence_dir / "review-manifest.json").read_text())
         self.assertTrue(manifest["human_review_required"])
+        self.assertEqual(manifest["master_inspection"]["output_sha256"],
+                         record["output_sha256"])
+        self.assertTrue(all(Path(guide["path"]).is_file()
+                            for guide in manifest["master_inspection"]["safe_zone_guides"]))
         self.assertEqual(len(manifest["evidence"]), len(self.timeline["operations"]) + 1)
         denoise_samples = next(item["samples"] for item in manifest["evidence"]
                                if item["id"] == "denoise")

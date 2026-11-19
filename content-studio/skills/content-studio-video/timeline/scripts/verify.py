@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import subprocess
 from fractions import Fraction
 from pathlib import Path
@@ -11,36 +12,22 @@ from compiler import media_info, verify_picture_copy
 from model import AUDIO_METHODS, load, sha256_file, validate
 
 
+def _inspect_master(output: Path, digest: str, evidence_dir: Path | None) -> dict:
+    """Run the canonical final-render review against the hash-bound master."""
+    script = Path(__file__).resolve().parents[2] / "review" / "final-render" / "scripts" / "inspect.py"
+    spec = importlib.util.spec_from_file_location("content_studio_final_inspect", script)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Final-render inspector is unavailable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.inspect_master(output, digest,
+                                 evidence_dir / "safe-zones" if evidence_dir else None)
+
+
 def _run(command: list[str]) -> None:
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode:
         raise RuntimeError((result.stderr or result.stdout)[-1200:])
-
-
-def _loudness(path: Path) -> dict:
-    """Measure the delivered audio without writing another media master."""
-    result = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-nostats", "-loglevel", "info",
-         "-i", str(path), "-vn",
-         "-af", "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json",
-         "-f", "null", "-"],
-        capture_output=True, text=True)
-    if result.returncode:
-        raise RuntimeError(f"Loudness measurement failed: {result.stderr[-1200:]}")
-    marker = result.stderr.rfind('"input_i"')
-    opening = result.stderr.rfind("{", 0, marker)
-    closing = result.stderr.find("}", marker)
-    if marker < 0 or opening < 0 or closing < 0:
-        raise RuntimeError("Loudness measurement did not return input metrics")
-    measured = json.loads(result.stderr[opening:closing + 1])
-    integrated = float(measured["input_i"])
-    true_peak = float(measured["input_tp"])
-    return {
-        "integrated_lufs": integrated,
-        "true_peak_dbtp": true_peak,
-        "status": "FIX" if abs(integrated + 16) <= 1
-        and true_peak <= -1.5 else "REVIEW",
-    }
 
 
 def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
@@ -84,9 +71,16 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
             f"{resolved['width']}x{resolved['height']} "
             f"fps={resolved['fps']:.3f} audio_rate=48000 "
             f"duration={resolved['duration']:.3f}")
+    inspection = _inspect_master(output, record["output_sha256"], evidence_dir)
     mastering = None
     if any(item["method"] == "loudnorm" for item in resolved["operations"]):
-        mastering = _loudness(output)
+        measured = inspection["loudness"]
+        if (measured is None or measured["integrated_lufs"] is None
+                or measured["true_peak_dbtp"] is None):
+            raise RuntimeError("Exact master loudness could not be measured")
+        mastering = {**measured,
+                     "status": "FIX" if abs(measured["integrated_lufs"] + 16) <= 1
+                     and measured["true_peak_dbtp"] <= -1.5 else "REVIEW"}
     evidence: list[dict] = []
     if evidence_dir is not None:
         evidence_dir = evidence_dir.resolve()
@@ -140,7 +134,8 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
         manifest.write_text(json.dumps({
             "timeline_sha256": record["timeline_sha256"],
             "output_sha256": record["output_sha256"],
-            "evidence": evidence, "human_review_required": True,
+            "evidence": evidence, "master_inspection": inspection,
+            "human_review_required": True,
         }, indent=2) + "\n", encoding="utf-8")
     return {
         "verified": True,
@@ -151,6 +146,7 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
         "audio_sample_rate": 48000,
         "picture_copy": picture_copy,
         "mastering": mastering,
+        "master_inspection": inspection,
         "evidence": evidence,
         "human_review_required": True,
     }

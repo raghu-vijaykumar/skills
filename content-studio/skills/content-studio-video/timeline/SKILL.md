@@ -90,7 +90,9 @@ python content-studio/skills/content-studio-video/timeline/scripts/timeline.py v
 ```
 
 `render` encodes one final video and audio file. `verify` checks the
-exact output and creates bounded frames and audio samples for human review;
+exact output, runs the [hash-bound final-render inspector](../review/final-render/SKILL.md)
+for format, loudness, timecoded content candidates and safe-zone guide frames,
+and creates bounded frames and audio samples for human review;
 it does not approve subjective quality or package publication. A changed
 timeline, source, voice, font, sidecar, plan, or renderer capability invalidates
 the prior timeline approval. Do not silently fall back to the specialist

@@ -1,4 +1,6 @@
 {
   "schema_version": 1,
-  "methods": []
+  "methods": [
+    {"id": "inspect-exact-master", "script": "scripts/inspect.py", "status": "supported", "review": "Hash-bound format, loudness and timecoded defect candidates; human reviews intent and safe-zone guides"}
+  ]
 }
