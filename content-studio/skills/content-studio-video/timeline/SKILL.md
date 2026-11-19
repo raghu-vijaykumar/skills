@@ -21,6 +21,8 @@ Explicitly requested [captions](../edit/captions/SKILL.md) arrive as a `pending_
 
 For a separately recorded microphone, [sync](../source/sync/SKILL.md) first creates a hashed analysis and bounded camera-left/recorder-right audition. Reanalyze against the exact supplied manual render after any manual cuts. A reviewed `external_sync` audio cue then binds the report and recorder bytes, exact offset/drift, muted camera audio, and one uncut SDR picture. The native renderer applies alignment within the final audio mix; verify early and late lip/event sync in the exact master.
 
+The [retime skill](../edit/retime/SKILL.md) proposes frame-aligned speed, freeze, reverse, or finite loop picture spans with explicit source-audio behavior. Its report resolves the duration change and shifts later cues before an immutable revision is reviewed. The native renderer applies the chosen mode in the same final picture/audio graph; preview and exact-master review remain required.
+
 ## Draft and review a timeline
 
 The production plan at `.content-studio/preflight/plan.json` must already have

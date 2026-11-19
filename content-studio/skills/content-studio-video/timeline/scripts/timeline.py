@@ -20,7 +20,10 @@ def summary(resolved: dict) -> dict:
             {"id": clip["id"], "source": clip["source"],
              "timeline_start": round(clip["start"], 3),
              "timeline_end": round(clip["end"], 3),
-             "source_in": clip["source_in"], "source_out": clip["source_out"]}
+             "source_in": clip["source_in"], "source_out": clip["source_out"],
+             **({"retime": clip["retime_resolved"],
+                 "retime_review_status": clip.get("retime_review_status")}
+                if clip.get("retime_resolved") else {})}
             for clip in resolved["clips"]
         ],
         "operations": resolved["operations"],

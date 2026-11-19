@@ -21,4 +21,6 @@ An agent can start with an idea and no channel analytics, then author a [Core Ex
 
 [Hero-led clipping](skills/content-studio-video/edit/clipping/SKILL.md) selects one reviewed moment from a finished long-form video, proposes 9:16 framing that keeps the hero readable, and carries the approved range and crop into the delivery timeline with source audio. The first route is SDR and uses stable crops per reviewed interval.
 
+[Retime](skills/content-studio-video/edit/retime/SKILL.md) proposes finite speed, freeze, reverse, or loop spans on an approved SDR edit. It resolves source audio and later cue timing in a new timeline revision, requires bounded human review, and verifies the exact master after one final export.
+
 Copy the [vlog](prompts/full-vlog.md), [animated video](prompts/animated-video.md), or [social post](prompts/social-post.md) form into your Content Studio chat. Fill the inputs and choose which operations to run. The numbered workflow shows the order, parallel steps, and what to review before continuing. Keep drafts, source media, generated audio, model weights, analytics, and secrets outside this bundle.

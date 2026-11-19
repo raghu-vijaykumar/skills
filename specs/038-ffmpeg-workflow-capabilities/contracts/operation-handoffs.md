@@ -30,4 +30,4 @@ An approved `loudnorm` operation has a measured target. The renderer computes th
 
 ## Retiming
 
-`edit/retime` creates pending finite operations and bounded previews. `timeline.py validate` resolves output times and rejects unsupported input, unbounded repeat, or missing audio policy before approval. The final renderer consumes every approved retime operation in one export.
+`edit/retime` proposes finite retimed picture spans, shifts later cues in a new timeline revision, and creates bounded previews. `timeline.py validate` resolves output times and rejects unsupported input, unbounded repeat, missing audio policy, or missing retime review before approval. The final renderer consumes each approved retimed picture span in one export.

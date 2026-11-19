@@ -30,4 +30,4 @@ Source hash, keep ranges, codec and VFR/HDR checks, candidate/fallback status, e
 
 ## RetimeOperation
 
-Source range, finite method (`speed | freeze | reverse | loop`), parameters, audio policy, resolved output range, reviewed evidence, and approval state. All following timeline cues resolve from the resulting output duration.
+One picture entry contains a frame-aligned source range, finite `retime.method` (`speed | freeze | reverse | loop`), method parameters, explicit `retime.audio`, and `retime_review_status`. Validation adds input/output frame counts, effective speed, and resolved output duration. The proposal shifts following timeline cues by the output-duration delta and requires human preview review before a new revision can be fingerprinted. ASS sidecars and full-video masks after the retime require regeneration.

@@ -12,7 +12,8 @@ from pathlib import Path
 
 SCHEMA = "content-studio.delivery-timeline.v1"
 # Delivery modes are capabilities even though they are not timed operations.
-DELIVERY_METHODS = {"timeline-delivery", "hdr-audio-only", "external-sync"}
+DELIVERY_METHODS = {"timeline-delivery", "hdr-audio-only", "external-sync",
+                    "retime-speed", "retime-freeze", "retime-reverse", "retime-loop"}
 PICTURE_METHODS = {
     "crop", "lens-correction",
     "denoise-light", "denoise-medium", "deflicker",
@@ -42,6 +43,7 @@ POINT_TRANSITIONS = {
     "cross-blur", "glitch", "glitch-reveal",
 }
 VIDEO_PRESETS = {"medium", "fast", "veryfast"}
+RETIME_METHODS = {"speed", "freeze", "reverse", "loop"}
 
 
 def sha256_file(path: Path) -> str:
@@ -112,6 +114,101 @@ def _number(value: object, name: str, *, minimum: float = 0.0) -> float:
     if not math.isfinite(number) or number < minimum:
         raise ValueError(f"{name} must be finite and >= {minimum}")
     return number
+
+
+def _retime_source(path: Path, fps: float) -> dict:
+    """Reject uncertain picture timing before a retime enters final export."""
+    def probe(*options: str) -> dict:
+        result = subprocess.run(["ffprobe", "-v", "error", *options,
+                                 "-of", "json", str(path)], capture_output=True,
+                                text=True, encoding="utf-8", errors="replace")
+        if result.returncode:
+            raise ValueError("Cannot probe retime source: " + result.stderr[-300:])
+        return json.loads(result.stdout)
+    data = probe("-show_streams", "-show_format")
+    streams = [item for item in data.get("streams", []) if item.get("codec_type") == "video"]
+    if len(streams) != 1:
+        raise ValueError("Retime needs one video stream")
+    video = streams[0]
+    if (video.get("codec_name") != "h264" or video.get("pix_fmt") != "yuv420p"
+            or video.get("color_primaries") == "bt2020"
+            or video.get("color_transfer") not in {"bt709", "smpte170m", "bt470bg",
+                                                   "iec61966-2-1", "gamma22", "gamma28"}
+            or any("dovi" in json.dumps(side).lower() or
+                   "dolby vision" in json.dumps(side).lower()
+                   for side in video.get("side_data_list", []))
+            or any(int(side.get("rotation", 0)) for side in video.get("side_data_list", []))):
+        raise ValueError("Retime needs zero-rotation, explicitly tagged SDR H.264 8-bit source")
+    rate = Fraction(video.get("avg_frame_rate", "0/1"))
+    if not rate or abs(float(rate) - fps) > .001 or rate != Fraction(video.get("r_frame_rate", "0/1")):
+        raise ValueError("Retime needs source CFR matching output frame rate")
+    frames = probe("-select_streams", "v:0", "-show_frames", "-show_entries",
+                   "frame=best_effort_timestamp_time").get("frames", [])
+    if not frames or len(frames) > 2_000_000:
+        raise ValueError("Retime source frame count is unavailable or excessive")
+    for index, frame in enumerate(frames):
+        if abs(float(frame["best_effort_timestamp_time"]) - index / fps) > .002:
+            raise ValueError("Retime source has variable frame timing")
+    return {"frames": len(frames), "duration": len(frames) / fps,
+            "width": int(video["width"]), "height": int(video["height"]),
+            "has_audio": any(s.get("codec_type") == "audio"
+                             for s in data.get("streams", []))}
+
+
+def _resolve_retime(clip: dict, fps: float, source: dict) -> dict:
+    """Convert one finite source span into frame-aligned output timing."""
+    retime = clip.get("retime")
+    if not isinstance(retime, dict) or retime.get("method") not in RETIME_METHODS:
+        raise ValueError(f"Unsupported retime on {clip['id']}")
+    method = retime["method"]
+    allowed = {"method", "audio"} | {
+        "speed": {"factor"}, "freeze": {"hold_seconds"},
+        "reverse": set(), "loop": {"count"}}[method]
+    if set(retime) - allowed:
+        raise ValueError(f"Unknown retime parameters on {clip['id']}")
+    first = round(clip["source_in"] * fps)
+    last = round(clip["source_out"] * fps)
+    if (abs(clip["source_in"] - first / fps) > .002
+            or abs(clip["source_out"] - last / fps) > .002
+            or first < 0 or last > source["frames"] or last <= first):
+        raise ValueError(f"Retime source span must align with existing frames: {clip['id']}")
+    input_frames = last - first
+    audio = retime.get("audio")
+    if method == "speed":
+        factor = _number(retime.get("factor"), "retime.factor", minimum=.25)
+        if factor > 4 or abs(factor - 1) < .01 or audio not in {"tempo", "mute"}:
+            raise ValueError("Speed needs factor 0.25-4 away from 1 and tempo or mute audio")
+        output_frames = round(input_frames / factor)
+        if output_frames < 2 or output_frames > fps * 60:
+            raise ValueError("Speed output must span 2 frames to 60 seconds")
+        effective_factor = input_frames / output_frames
+    elif method == "freeze":
+        hold = _number(retime.get("hold_seconds"), "retime.hold_seconds", minimum=.1)
+        if input_frames != 1 or hold > 10 or audio != "mute":
+            raise ValueError("Freeze needs one source frame, hold <= 10 seconds, and mute audio")
+        output_frames = round(hold * fps)
+        if abs(output_frames / fps - hold) > .002:
+            raise ValueError("Freeze hold must align with output frames")
+        effective_factor = None
+    elif method == "reverse":
+        if input_frames > fps * 15 or audio not in {"reverse", "mute"}:
+            raise ValueError("Reverse needs <= 15 seconds and reverse or mute audio")
+        if input_frames * source["width"] * source["height"] * 3 // 2 > 512 * 1024 * 1024:
+            raise ValueError("Reverse frame buffer exceeds the 512 MiB method limit")
+        output_frames, effective_factor = input_frames, None
+    else:
+        count = retime.get("count")
+        if (not isinstance(count, int) or isinstance(count, bool) or not 2 <= count <= 8
+                or input_frames > fps * 10 or input_frames * count > fps * 60
+                or audio not in {"repeat", "mute"}):
+            raise ValueError("Loop needs count 2-8, <=10-second input, <=60-second output and repeat or mute audio")
+        if input_frames * source["width"] * source["height"] * 3 // 2 > 256 * 1024 * 1024:
+            raise ValueError("Loop frame buffer exceeds the 256 MiB method limit")
+        output_frames, effective_factor = input_frames * count, None
+    if audio != "mute" and not source["has_audio"]:
+        raise ValueError("Retime requested source audio but the source is silent")
+    return {**retime, "input_frames": input_frames, "output_frames": output_frames,
+            "effective_factor": effective_factor, "duration": output_frames / fps}
 
 
 def make_initial(plan: Path, source: Path, output: Path, *, fps: int,
@@ -197,6 +294,7 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
     ids: set[str] = set()
     resolved: list[dict] = []
     verified_sources: dict[Path, str] = {}
+    retime_sources: dict[Path, dict] = {}
     for clip in picture:
         clip_id = clip.get("id")
         if not isinstance(clip_id, str) or not clip_id or clip_id in ids:
@@ -219,8 +317,19 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         source_out = _number(source_out, f"{clip_id}.source_out")
         if source_out <= source_in:
             raise ValueError(f"Invalid source range: {clip_id}")
-        resolved.append({**clip, "path": source, "duration": source_out - source_in,
-                         "source_in": source_in, "source_out": source_out})
+        result = {**clip, "path": source, "duration": source_out - source_in,
+                  "source_duration": source_out - source_in,
+                  "source_in": source_in, "source_out": source_out}
+        if "retime" in clip:
+            if require_review and clip.get("retime_review_status") != "approved":
+                raise ValueError(f"Retime {clip_id} lacks human motion and sound review")
+            if video_policy != "encode" or audio_policy != "mix":
+                raise ValueError("Retime needs SDR picture encode and mixed audio")
+            if source not in retime_sources:
+                retime_sources[source] = _retime_source(source, fps)
+            result["retime_resolved"] = _resolve_retime(result, fps, retime_sources[source])
+            result["duration"] = result["retime_resolved"]["duration"]
+        resolved.append(result)
     transitions = timeline.get("transitions", [])
     if not isinstance(transitions, list):
         raise ValueError("transitions must be a list")
@@ -250,6 +359,12 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         overlap = by_after.get(resolved[index]["id"], {}).get("duration", 0.0)
         if overlap and overlap >= resolved[index + 1]["duration"]:
             raise ValueError("Transition overlap must be shorter than the next clip")
+    if any("retime_resolved" in clip for clip in resolved):
+        for index, clip in enumerate(resolved):
+            if "retime_resolved" in clip and (
+                    clip["id"] in by_after or
+                    (index and resolved[index - 1]["id"] in by_after)):
+                raise ValueError("Retime with adjacent join transition is unsupported")
     operations = timeline.get("operations", [])
     if not isinstance(operations, list):
         raise ValueError("operations must be a list")
@@ -277,6 +392,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             affected = [c for c in resolved if start < c["end"] and end > c["start"]]
             if not affected:
                 raise ValueError(f"Picture operation {op_id} affects no surviving frames")
+            if any("retime_resolved" in c for c in affected):
+                raise ValueError(f"Picture operation {op_id} overlaps a retimed clip")
         if kind == "color-eq":
             for field, low, high, default in (
                     ("brightness", -.3, .3, 0),
@@ -473,6 +590,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         if at >= duration:
             raise ValueError(f"Audio cue {cue_id} starts outside the timeline")
         if cue["kind"] == "external_sync":
+            if any("retime_resolved" in clip for clip in resolved):
+                raise ValueError("External recorder sync cannot cross a retime")
             # A raw-camera sync cannot be transferred across unknown manual cuts.
             # The analysis must be rerun against the one supplied edited picture.
             if (len(resolved) != 1 or resolved[0]["source_in"] != 0

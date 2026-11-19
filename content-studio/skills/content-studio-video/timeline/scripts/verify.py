@@ -94,6 +94,30 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
             f"{resolved['width']}x{resolved['height']} "
             f"fps={resolved['fps']:.3f} audio_rate=48000 "
             f"duration={resolved['duration']:.3f}")
+    retimed = [clip for clip in resolved["clips"] if clip.get("retime_resolved")]
+    retime_verification = None
+    if retimed:
+        # A retime changes frame count. Check the exact coded output rather
+        # than treating a plausible container duration as delivery proof.
+        result = subprocess.run([
+            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            "-count_frames", "-show_entries", "stream=nb_read_frames",
+            "-of", "json", str(output)], capture_output=True, text=True)
+        if result.returncode:
+            raise ValueError("Cannot count exact-master retime frames")
+        delivered = int(json.loads(result.stdout)["streams"][0]["nb_read_frames"])
+        expected = round(resolved["duration"] * resolved["fps"])
+        if delivered != expected:
+            raise ValueError(f"Retime frame count differs: {delivered} != {expected}")
+        retime_verification = {
+            "status": "REVIEW", "expected_master_frames": expected,
+            "delivered_master_frames": delivered,
+            "spans": [{"id": clip["id"], "method": clip["retime_resolved"]["method"],
+                       "start": clip["start"], "end": clip["end"],
+                       "source_audio": clip["retime_resolved"]["audio"]}
+                      for clip in retimed],
+            "human_motion_and_sound_review": "pending",
+        }
     inspection = _inspect_master(output, record["output_sha256"], evidence_dir)
     mastering = None
     if any(item["method"] == "loudnorm" for item in resolved["operations"]):
@@ -138,6 +162,26 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
                                     "frame": str(still)})
             evidence.append({"id": item["id"], "range": [start, end],
                              "samples": samples})
+        for index, clip in enumerate(retimed):
+            positions = {"first": clip["start"] + .5 / resolved["fps"],
+                         "middle": (clip["start"] + clip["end"]) / 2,
+                         "last": clip["end"] - .5 / resolved["fps"]}
+            samples = []
+            for label, at in positions.items():
+                frame = evidence_dir / f"retime-{index:03d}-{label}.png"
+                audio_sample = evidence_dir / f"retime-{index:03d}-{label}.wav"
+                if not frame.exists():
+                    _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
+                          "-ss", f"{at:.6f}", "-i", str(output), "-frames:v", "1",
+                          "-c:v", "png", str(frame)])
+                if not audio_sample.exists():
+                    _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
+                          "-ss", f"{max(0, at - .1):.6f}", "-t", "0.2", "-i", str(output),
+                          "-vn", "-c:a", "pcm_s16le", str(audio_sample)])
+                samples.append({"position": label, "at": round(at, 3),
+                                "frame": str(frame), "audio": str(audio_sample)})
+            evidence.append({"id": clip["id"], "method": clip["retime_resolved"]["method"],
+                             "range": [clip["start"], clip["end"]], "samples": samples})
         for index, cue in enumerate(resolved["audio"]):
             # Recorder drift needs an early and a late listen on the exact
             # master; one start sample cannot establish end-of-edit sync.
@@ -157,6 +201,7 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
             "timeline_sha256": record["timeline_sha256"],
             "output_sha256": record["output_sha256"],
             "evidence": evidence, "master_inspection": inspection,
+            "retime_verification": retime_verification,
             "human_review_required": True,
         }, indent=2) + "\n", encoding="utf-8")
     return {
@@ -168,6 +213,7 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
         "audio_sample_rate": 48000,
         "picture_copy": picture_copy,
         "mastering": mastering,
+        "retime_verification": retime_verification,
         "master_inspection": inspection,
         "evidence": evidence,
         "human_review_required": True,

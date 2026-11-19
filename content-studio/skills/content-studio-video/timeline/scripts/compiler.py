@@ -304,7 +304,7 @@ def compile_graph(timeline: dict, resolved: dict, *, loudnorm_mode: str = "dynam
             inputs.extend(["-i", str(clip["path"])])
         else:
             inputs.extend(["-ss", _fmt(clip["source_in"]),
-                           "-t", _fmt(clip["duration"]), "-i", str(clip["path"])])
+                           "-t", _fmt(clip["source_duration"]), "-i", str(clip["path"])])
     if copy_audio:
         # Preserve source packets only for a full length, unshifted source.
         source_info = info[0]
@@ -342,6 +342,56 @@ def compile_graph(timeline: dict, resolved: dict, *, loudnorm_mode: str = "dynam
             inputs.extend(["-loop", "1", "-framerate", _fmt(fps)])
         inputs.extend(["-i", str(matte)])
     for i, clip in enumerate(clips):
+        retime = clip.get("retime_resolved")
+        if retime:
+            method = retime["method"]
+            video_chain = [f"trim=start=0:end={_fmt(clip['source_duration'])}",
+                           "setpts=PTS-STARTPTS"]
+            if method == "speed":
+                video_chain.append(f"setpts=PTS/{retime['effective_factor']:.9f}")
+            elif method == "freeze":
+                video_chain.extend(["trim=start_frame=0:end_frame=1",
+                                    f"tpad=stop_mode=clone:stop_duration={_fmt(clip['duration'] - 1 / fps)}"])
+            elif method == "reverse":
+                video_chain.extend(["reverse", "setpts=PTS-STARTPTS"])
+            elif method == "loop":
+                video_chain.extend([
+                    f"loop=loop={retime['count'] - 1}:size={retime['input_frames']}:start=0",
+                    f"setpts=N/({_fmt(fps)}*TB)"])
+            else:
+                raise ValueError(f"Missing retime picture adapter: {method}")
+            video_chain += _picture_filters([], width, height, fps, join_format)
+            video_chain += [f"trim=end_frame={retime['output_frames']}",
+                            "setpts=PTS-STARTPTS"]
+            graph.append(f"[{i}:v:0]" + ",".join(video_chain) + f"[vc{i}]")
+            audio_mode = retime["audio"]
+            if audio_mode == "mute":
+                graph.append(f"anullsrc=r=48000:cl=stereo,"
+                             f"atrim=duration={_fmt(clip['duration'])}[ac{i}]")
+            else:
+                audio_chain = [f"atrim=start=0:end={_fmt(clip['source_duration'])}",
+                               "asetpts=PTS-STARTPTS", "aresample=48000",
+                               "aformat=channel_layouts=stereo"]
+                if audio_mode == "tempo":
+                    factor = retime["effective_factor"]
+                    while factor < .5:
+                        audio_chain.append("atempo=0.5")
+                        factor /= .5
+                    while factor > 2:
+                        audio_chain.append("atempo=2")
+                        factor /= 2
+                    audio_chain.append(f"atempo={factor:.9f}")
+                elif audio_mode == "reverse":
+                    audio_chain.append("areverse")
+                elif audio_mode == "repeat":
+                    audio_chain.append(
+                        f"aloop=loop={retime['count'] - 1}:"
+                        f"size={round(clip['source_duration'] * 48000)}")
+                audio_chain += ["asetpts=PTS-STARTPTS", "apad",
+                                f"atrim=duration={_fmt(clip['duration'])}",
+                                f"volume={float(clip.get('audio_gain', 1)):g}"]
+                graph.append(f"[{i}:a:0]" + ",".join(audio_chain) + f"[ac{i}]")
+            continue
         points = _breakpoints(clip["start"], clip["end"], resolved["operations"])
         segment_labels: list[str] = []
         count = len(points) - 1

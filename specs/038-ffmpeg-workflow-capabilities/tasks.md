@@ -5,7 +5,7 @@
 
 ## Phase 1: Shared setup
 
-- [ ] T001 Confirm current owning skills, references, method registries, and tests for all eight stories in `content-studio/skills/content-studio-video/` and `content-studio/skills/content-studio-workflow/`.
+- [x] T001 Confirm current owning skills, references, method registries, and tests for all eight stories in `content-studio/skills/content-studio-video/` and `content-studio/skills/content-studio-workflow/`.
 - [ ] T002 Record focused synthetic media commands and expected outcomes in `specs/038-ffmpeg-workflow-capabilities/quickstart.md`.
 
 ## Phase 2: User Story 1 - Diagnose media and machine
@@ -56,11 +56,11 @@
 
 ## Phase 9: User Story 8 - Timeline retiming
 
-- [ ] T028 [US8] Create canonical proposal and preview commands in `content-studio/skills/content-studio-video/edit/retime/scripts/retime.py` and its skill/registry.
-- [ ] T029 [US8] Add finite speed, freeze, reverse, and loop validation and timing resolution in `content-studio/skills/content-studio-video/timeline/scripts/model.py`.
-- [ ] T030 [US8] Compile all approved retime modes with explicit audio treatment into one export in `content-studio/skills/content-studio-video/timeline/scripts/compiler.py`.
-- [ ] T031 [US8] Test frame order, durations, audio policies, downstream cue timing, and approval invalidation in `content-studio/skills/content-studio-video/timeline/tests/` and `edit/retime/tests/`.
-- [ ] T032 [US8] Update routers and method documentation in `content-studio/skills/content-studio-video/edit/SKILL.md`, `content-studio/skills/content-studio-video/SKILL.md`, and `timeline/methods.json`.
+- [x] T028 [US8] Create canonical proposal and preview commands in `content-studio/skills/content-studio-video/edit/retime/scripts/retime.py` and its skill/registry.
+- [x] T029 [US8] Add finite speed, freeze, reverse, and loop validation and timing resolution in `content-studio/skills/content-studio-video/timeline/scripts/model.py`.
+- [x] T030 [US8] Compile all approved retime modes with explicit audio treatment into one export in `content-studio/skills/content-studio-video/timeline/scripts/compiler.py`.
+- [x] T031 [US8] Test frame order, durations, audio policies, downstream cue timing, and approval invalidation in `content-studio/skills/content-studio-video/timeline/tests/`.
+- [x] T032 [US8] Update routers and method documentation in `content-studio/skills/content-studio-video/edit/SKILL.md`, `content-studio/skills/content-studio-video/SKILL.md`, and `timeline/methods.json`.
 
 ## Phase 10: Cross-skill completion
 

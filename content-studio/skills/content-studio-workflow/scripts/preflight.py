@@ -179,6 +179,13 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
         # one final retained-source audio track.
         return ([("filter", name) for name in ("trim", "atrim", "concat")]
                 + [("encoder", "libx264"), ("encoder", "aac")])
+    if method in {"retime-speed", "retime-freeze", "retime-reverse", "retime-loop"}:
+        filters = {"retime-speed": ("setpts", "atempo"),
+                   "retime-freeze": ("tpad", "anullsrc"),
+                   "retime-reverse": ("reverse", "areverse"),
+                   "retime-loop": ("loop", "aloop")}[method]
+        return ([("filter", name) for name in (*filters, "trim", "concat")]
+                + [("encoder", "libx264"), ("encoder", "aac")])
     if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
                   "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
                   "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",

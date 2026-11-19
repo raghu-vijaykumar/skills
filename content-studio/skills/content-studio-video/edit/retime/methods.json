@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "speed", "script": "scripts/retime.py", "status": "supported", "review": "Compare cadence, source audio tempo or mute, duration and shifted cues"},
+    {"id": "freeze", "script": "scripts/retime.py", "status": "supported", "review": "Inspect exact held frame, finite duration, muted source audio and shifted cues"},
+    {"id": "reverse", "script": "scripts/retime.py", "status": "supported", "review": "Inspect reverse frame order, reversed or muted sound and shifted cues"},
+    {"id": "loop", "script": "scripts/retime.py", "status": "supported", "review": "Inspect repeat boundaries, finite count, repeated or muted sound and shifted cues"}
+  ]
+}
