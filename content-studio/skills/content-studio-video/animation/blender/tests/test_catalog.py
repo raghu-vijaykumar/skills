@@ -19,7 +19,7 @@ class CatalogTests(unittest.TestCase):
         entries = catalog_module.catalog()
         self.assertEqual(len(entries), 94)
         self.assertEqual(len({entry["id"] for entry in entries}), 94)
-        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 83)
+        self.assertEqual(sum(entry["status"] == "Rendered" for entry in entries), 84)
         self.assertEqual(sum(entry["status"] == "Prototype" for entry in entries), 3)
         for entry in entries:
             self.assertTrue(entry["source"].startswith(catalog_module.UPSTREAM + "/"))
@@ -438,6 +438,11 @@ class CatalogTests(unittest.TestCase):
                          ("creature-artist", "rigging", "examples/beetle_rig.py"))
         self.assertIsNone(catalog_module.route("An octopus needs a rig",
                                                 capability="rigging")["builder"])
+        composite = catalog_module.route("A cyberpunk neon beauty composite")
+        self.assertEqual((composite["capability"], composite["builder"]),
+                         ("compositing", "examples/cyberpunk_composite.py"))
+        self.assertIsNone(catalog_module.route("A portrait beauty composite",
+                                                capability="compositing")["builder"])
         for cue, capability in (("crate UV atlas lightmap", "uv-workflow"),
                                 ("crate packed ORM atlas", "texture-workflow"),
                                 ("crate LOD budget audit", "asset-optimization"),
@@ -489,7 +494,10 @@ class CatalogTests(unittest.TestCase):
 
     def test_gallery_requires_scores_for_every_candidate_and_selects_best(self):
         book = json.loads((catalog_module.BLENDER / "scores.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(catalog_module.scorebook(book)), 66)
+        self.assertEqual(len(catalog_module.scorebook(book)), 67)
+        self.assertEqual([candidate["score_total"] for candidate in
+                          book["routes"]["cyberpunk-composite"]["candidates"]],
+                         [68, 77])
         self.assertEqual([candidate["score_total"] for candidate in
                           book["routes"]["beetle-rig"]["candidates"]], [54, 78])
         self.assertEqual([candidate["score_total"] for candidate in
@@ -730,7 +738,7 @@ class CatalogTests(unittest.TestCase):
                      "dream-playground", "indie-cabin", "fantasy-gate",
                      "cyberpunk-alley", "viking-longship", "wasteland-station",
                      "kelp-forest", "archviz-studio", "game-asset-pipeline",
-                     "beetle-rig"):
+                     "beetle-rig", "cyberpunk-composite"):
             path = catalog_module.BLENDER / "previews" / f"{name}.gif"
             self.assertTrue(path.is_file(), path)
             self.assertIn(f"animation/blender/previews/{name}.gif", readme)

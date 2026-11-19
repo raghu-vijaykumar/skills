@@ -412,9 +412,24 @@
         "rendering"
       ],
       "route": "content-studio-video-animation",
-      "method": null,
-      "status": "Catalogued",
-      "evidence": null
+      "method": "blender-shot",
+      "status": "Rendered",
+      "evidence": "previews/cyberpunk-composite.gif",
+      "review": "cyberpunk-composite-review.md",
+      "builder": "examples/cyberpunk_composite.py",
+      "spec": "examples/cyberpunk_composite.json",
+      "compatible_subjects": [
+        "environment-artist"
+      ],
+      "compatible_styles": [
+        "stylized-style"
+      ],
+      "intent_cues": [
+        "cyberpunk neon beauty composite"
+      ],
+      "narrow_cue_required": true,
+      "score_record": "scores.json",
+      "score_route": "cyberpunk-composite"
     },
     {
       "id": "animation",

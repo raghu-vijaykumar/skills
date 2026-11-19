@@ -490,6 +490,12 @@ class StyleEngineTests(unittest.TestCase):
         self.assertEqual(beetle["scenes"][0]["blender"]["capability"], "rigging")
         self.assertEqual(beetle["scenes"][0]["blender"]["builder"],
                          "examples/beetle_rig.py")
+        with patch.object(engine, "renderer_executable", return_value=sys.executable):
+            comp = engine.plan({"scenes": [{"id": "comp", "duration_seconds": 3,
+                "visual_intent": "A cyberpunk neon beauty composite"}]})
+        self.assertEqual(comp["scenes"][0]["blender"]["capability"], "compositing")
+        self.assertEqual(comp["scenes"][0]["blender"]["builder"],
+                         "examples/cyberpunk_composite.py")
 
     def test_blender_overrides_require_compatible_editorial_style(self):
         with self.assertRaisesRegex(ValueError, "Blender overrides require"):

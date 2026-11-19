@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "id": "cyberpunk-beauty-composite",
+  "width": 960,
+  "height": 540,
+  "fps": 24,
+  "frames": 72,
+  "render_engine": "BLENDER_EEVEE",
+  "color_transform": "AgX",
+  "codec": "H264",
+  "camera_object": "Cyberpunk alley inspection camera",
+  "variant": 2,
+  "objects": [
+    {"id": "street", "name": "SM_Cyber_Street"},
+    {"id": "tower", "name": "SM_Cyber_Tower_-1_0"},
+    {"id": "sign", "name": "SM_Cyber_Suspended_Sign"},
+    {"id": "drone", "name": "SM_Cyber_Courier_Drone_Rig"},
+    {"id": "camera", "name": "Cyberpunk alley inspection camera"}
+  ],
+  "beats": [
+    {"id": "baseline", "frame": 1, "label": "A wet neon alley has the same lights and geometry in both composite candidates", "object_ids": ["street", "tower", "sign"]},
+    {"id": "crossing", "frame": 48, "label": "The parcel drone crosses the graded cyan and magenta practicals", "object_ids": ["drone", "sign"]},
+    {"id": "result", "frame": 72, "label": "The original motion finishes under a restrained reversible glow", "object_ids": ["drone", "camera"]}
+  ],
+  "review_states": ["baseline", "crossing", "result"],
+  "assets": [
+    {"id": "cyberpunk-lane", "origin": "procedural", "license": "Original Content Studio alley geometry, neon materials, drone, and compositor graph"}
+  ]
+}

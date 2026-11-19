@@ -31,6 +31,7 @@
   - [x] T009a Audit the scored station shot as a bounded camera push, keyed prop animation, and exact headless EEVEE render; reuse its selected GIF without duplicating media.
   - [x] T009b Audit the repeated post node graph, four versus ten instances per row, and the scored gate traversal as a Geometry Nodes lane.
   - [x] T009c Audit an 18-bone rigid-shell FK rig and 27 weighted meshes across two full scored beetle outputs; organic deformation and IK remain open.
+  - [x] T009d Compare two complete neon-alley renders, audit a Blender 5 beauty compositor chain, and select its scored glow GIF without claiming pass recombination.
 
 ## Wave 4: Visual treatments
 

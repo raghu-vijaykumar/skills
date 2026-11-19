@@ -2709,6 +2709,56 @@
           "gif_path": "previews/beetle-rig.gif"
         }
       ]
+    },
+    "cyberpunk-composite": {
+      "selected": "cyberpunk-composite-v2",
+      "candidates": [
+        {
+          "id": "cyberpunk-composite-v1",
+          "video_sha256": "9bc3e2cf4afa641204d8a70741dfbac177884d1cf6e4968279a659df9cfefbec",
+          "gif_sha256": "b8a39bcaf7fb52b1ad58ce8be670e152f80722797f16f5816c50335a4d634d0e",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 3,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 3,
+            "evidence_integrity": 5
+          },
+          "score_total": 68,
+          "reviewer": "Content Studio encoded-frame and compositor review",
+          "review_date": "2026-11-19",
+          "review_note": "The unchanged alley and courier remain readable, but the raw combined beauty has hard neon edges and no authored grade or glow. Exact output, GIF, and raw compositor graph passed review."
+        },
+        {
+          "id": "cyberpunk-composite-v2",
+          "video_sha256": "5104b0a53eca3c370d5021f4dd282c9d293721f54ae9411448d962a8eddcfb8c",
+          "gif_sha256": "1db02e0b7f1b5cc4a777181d80b4283865a56c61f4c6c55a31d6be55cdf148a2",
+          "technical_pass": true,
+          "video_frames": 72,
+          "video_resolution": [
+            960,
+            540
+          ],
+          "scores": {
+            "subject_fidelity": 4,
+            "motion_readability": 3,
+            "composition": 4,
+            "finish": 4,
+            "evidence_integrity": 5
+          },
+          "score_total": 77,
+          "reviewer": "Content Studio encoded-frame and compositor review",
+          "review_date": "2026-11-19",
+          "review_note": "A reversible exposure/saturation/fog-glow chain gives the cyan and magenta practicals visible halos while retaining the courier and dark street structure. Same base scene and action as v1; exact encoded and GIF frames, node graph, and delivery checks passed.",
+          "gif_path": "previews/cyberpunk-composite.gif"
+        }
+      ]
     }
   }
 }
