@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {
+      "id": "accurate-cut",
+      "script": "scripts/content.py",
+      "status": "supported",
+      "review": "Inspect every removed boundary and synchronized audio in the rendered edit"
+    },
+    {
+      "id": "smart-cut-candidate",
+      "script": "scripts/smart_cut.py",
+      "status": "supported",
+      "review": "Require copied interior packet evidence, decoded frame correlation, audio boundary correlation, and human review before selecting the candidate"
+    }
+  ]
+}

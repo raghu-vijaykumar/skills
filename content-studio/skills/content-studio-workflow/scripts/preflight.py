@@ -174,6 +174,11 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
         return ([("filter", name) for name in
                  ("atrim", "asetpts", "atempo", "adelay", "amix")]
                 + [("encoder", "aac")])
+    if method == "smart-cut-candidate":
+        # The comparison copies complete GOPs and encodes picture edges plus
+        # one final retained-source audio track.
+        return ([("filter", name) for name in ("trim", "atrim", "concat")]
+                + [("encoder", "libx264"), ("encoder", "aac")])
     if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
                   "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
                   "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",

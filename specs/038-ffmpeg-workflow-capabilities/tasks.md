@@ -50,9 +50,9 @@
 
 ## Phase 8: User Story 7 - Guarded smart cut
 
-- [ ] T025 [US7] Implement cuts-only H.264 candidate with explicit source guards and boundary evidence in `content-studio/skills/content-studio-video/edit/clip-edit/scripts/`.
-- [ ] T026 [US7] Test packet-copy, frame, and audio checks plus VFR/HDR/incompatible refusal in `content-studio/skills/content-studio-video/edit/clip-edit/tests/`.
-- [ ] T027 [US7] Document comparison and accurate fallback in `content-studio/skills/content-studio-video/edit/clip-edit/SKILL.md` and its references.
+- [x] T025 [US7] Implement cuts-only H.264 candidate with explicit source guards and boundary evidence in `content-studio/skills/content-studio-video/edit/clip-edit/scripts/`.
+- [x] T026 [US7] Test packet-copy, frame, and audio checks plus VFR/HDR/incompatible refusal in `content-studio/skills/content-studio-video/edit/clip-edit/tests/`.
+- [x] T027 [US7] Document comparison and accurate fallback in `content-studio/skills/content-studio-video/edit/clip-edit/SKILL.md` and its references.
 
 ## Phase 9: User Story 8 - Timeline retiming
 
