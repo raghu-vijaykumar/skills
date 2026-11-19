@@ -55,6 +55,19 @@ class ExactMasterInspectionTests(unittest.TestCase):
         self.assertEqual(report["findings"], [])
         self.assertIsNotNone(report["loudness"]["integrated_lufs"])
 
+    def test_utf8_media_tags_and_filename_are_inspected(self):
+        target = self.root / "dolphin-🐬.mp4"
+        result = subprocess.run([
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-f", "lavfi", "-i", "testsrc2=size=64x64:rate=10:duration=1",
+            "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
+            "-metadata", "title=Dolphin 🐬", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-shortest", str(target),
+        ], capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertEqual(result.returncode, 0, result.stderr[-500:])
+        report = inspector.inspect_master(target, inspector.sha256_file(target))
+        self.assertEqual(report["format"]["width"], 64)
+
     def test_stale_master_hash_fails_before_inspection(self):
         target = self.fixture("stale.mp4", "testsrc2=size=64x64:rate=10:duration=1",
                               "sine=frequency=440:duration=1")

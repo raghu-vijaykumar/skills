@@ -20,7 +20,9 @@ def sha256_file(path: Path) -> str:
 
 
 def _run(command: list[str]) -> subprocess.CompletedProcess:
-    result = subprocess.run(command, capture_output=True, text=True)
+    # FFprobe returns UTF-8 tags even when Windows uses a legacy console code page.
+    result = subprocess.run(command, capture_output=True, text=True,
+                            encoding="utf-8", errors="replace")
     if result.returncode:
         raise RuntimeError((result.stderr or result.stdout)[-1200:])
     return result

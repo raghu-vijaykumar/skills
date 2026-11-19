@@ -6,7 +6,17 @@ The first version selects one contiguous passage from one finished SDR video and
 
 | Capability | Status | Input → Output | Delivery timeline | Evidence | Limits |
 | --- | --- | --- | --- | --- | --- |
-| `reviewed-hero-range` | Supported | Finished SDR video + hero cue + reviewed source range and crop → source-linked selection and pending portrait timeline changes | Yes, after separate plan and timeline approval | [Rendered synthetic test](tests/test_clipping.py) and [evidence notes](previews/evidence.md) | One contiguous range; stable crop per interval; human story/framing review; no automatic hero recognition, smooth tracking, or HDR/Dolby Vision picture processing. |
+| `reviewed-hero-range` | Supported | Finished SDR video + hero cue + reviewed source range and crop → source-linked selection and pending portrait timeline changes | Yes, after separate plan and timeline approval | [Real source versus Reel GIF](previews/real-source-vs-reel.gif), [clipped GIF](previews/real-clipped-reel.gif), [regression tests](tests/test_clipping.py), and [evidence notes](previews/evidence.md) | One contiguous range; stable crop per interval; human story/framing review; no automatic hero recognition, smooth tracking, or HDR/Dolby Vision picture processing. |
+
+## Real multi-hero proof
+
+The source is the owned, publicly archived [SeaWorld Dolphin Show](https://www.youtube.com/watch?v=Fm6Wh4U_2Kw) video: 11:54.874, 3840×2160, SDR BT.709. The reviewed excerpt is **09:00–09:06**. Its hero group is a trainer with dolphins; separately labelled boxes check the trainer and each dolphin while one group box guides the stable crop. In the later frames, the trainer and a dolphin approach opposite sides of the crop, so full-motion review matters. The source panel's yellow rectangle shows the selected 9:16 window at the same source time as the Reel panel.
+
+![Time-aligned wide source and approved portrait clip, 09:00–09:06](previews/real-source-vs-reel.gif)
+
+![Exact six-second portrait clip from the real master](previews/real-clipped-reel.gif)
+
+The GIFs are silent; the verified 360×640, 30 fps MP4 retains the original audio. The approved timeline encoded picture and audio once. The exact master matched the previously reviewed preview hash, and `timeline.py verify` found no black, frozen, flash, or silence candidates. These GIFs demonstrate the reviewed real footage; the [tests](tests/test_clipping.py) cover missing subjects, lost multi-hero coverage, crop jumps, changed evidence, unsupported HDR, and audio timing. The source and full MP4 remain in the local Content Studio archive and disposable review workspace, respectively; only the requested GIF proof is kept here.
 
 ## 1. Inspect the long-form source
 
