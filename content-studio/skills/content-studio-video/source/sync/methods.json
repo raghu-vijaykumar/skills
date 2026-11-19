@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "sync-recorder", "script": "scripts/sync.py", "status": "supported", "review": "Listen to bounded camera-left/recorder-right audition and inspect early/late alignment before a timeline decision"}
+  ]
+}

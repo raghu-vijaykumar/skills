@@ -30,10 +30,10 @@
 
 ## Phase 5: User Story 4 - Separate recorder sync
 
-- [ ] T014 [US4] Implement offset/drift/confidence analysis and bounded audition in `content-studio/skills/content-studio-video/source/sync/scripts/sync.py`.
-- [ ] T015 [US4] Add canonical `content-studio-video-sync` skill, registry, and source router handoff in `content-studio/skills/content-studio-video/source/sync/` and `source/SKILL.md`.
-- [ ] T016 [US4] Test delayed, drifting, silent, and ambiguous audio in `content-studio/skills/content-studio-video/source/sync/tests/test_sync.py`.
-- [ ] T017 [US4] Add and validate a permanent manual-edit audio alignment adapter in `content-studio/skills/content-studio-video/timeline/scripts/model.py` and `compiler.py`.
+- [x] T014 [US4] Implement offset/drift/confidence analysis and bounded audition in `content-studio/skills/content-studio-video/source/sync/scripts/sync.py`.
+- [x] T015 [US4] Add canonical `content-studio-video-sync` skill, registry, and source router handoff in `content-studio/skills/content-studio-video/source/sync/` and `source/SKILL.md`.
+- [x] T016 [US4] Test delayed, drifting, silent, and ambiguous audio in `content-studio/skills/content-studio-video/source/sync/tests/test_sync.py`.
+- [x] T017 [US4] Add and validate a permanent manual-edit audio alignment adapter in `content-studio/skills/content-studio-video/timeline/scripts/model.py` and `compiler.py`.
 
 ## Phase 6: User Story 5 - Portrait framing evidence
 

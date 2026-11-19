@@ -19,6 +19,8 @@ Hero-led long-form [clipping](../edit/clipping/SKILL.md) hands reviewed source i
 
 Explicitly requested [captions](../edit/captions/SKILL.md) arrive as a `pending_review` `motion-graphics-ass` operation. Validate the sidecar and font hashes, inspect the cue/font/safe-zone preview, then approve a new timeline revision for the single final encode. No caption operation is added to ordinary vlog drafts.
 
+For a separately recorded microphone, [sync](../source/sync/SKILL.md) first creates a hashed analysis and bounded camera-left/recorder-right audition. Reanalyze against the exact supplied manual render after any manual cuts. A reviewed `external_sync` audio cue then binds the report and recorder bytes, exact offset/drift, muted camera audio, and one uncut SDR picture. The native renderer applies alignment within the final audio mix; verify early and late lip/event sync in the exact master.
+
 ## Draft and review a timeline
 
 The production plan at `.content-studio/preflight/plan.json` must already have

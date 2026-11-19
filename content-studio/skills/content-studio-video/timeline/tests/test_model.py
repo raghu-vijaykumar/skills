@@ -86,6 +86,32 @@ class TimelineModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "ASS font changed"):
             approval.fingerprint(self.path, self.timeline)
 
+    def test_external_sync_requires_matching_edit_report_and_muted_camera(self):
+        report = self.root / "sync-report.json"
+        report.write_text(json.dumps({
+            "status": "REVIEW", "confidence": .9,
+            "method": "rms-envelope-correlation-v1",
+            "reference_sha256": model.sha256_file(self.source),
+            "external_sha256": model.sha256_file(self.voice),
+            "reference_duration_seconds": 4,
+            "offset_seconds": .4, "drift_ppm": None}), encoding="utf-8")
+        self.timeline["picture"][0]["audio_gain"] = 0
+        self.timeline["audio"] = [{
+            "id": "recorder", "kind": "external_sync", "source": self.voice.name,
+            "sha256": model.sha256_file(self.voice), "sync_report_source": report.name,
+            "sync_report_sha256": model.sha256_file(report), "start": 0,
+            "offset_seconds": .4, "drift_ppm": 0,
+            "drift_assumption": "zero_for_short_clip", "review_status": "approved"}]
+        model.validate(self.timeline)
+        self.timeline["picture"][0]["audio_gain"] = 1
+        with self.assertRaisesRegex(ValueError, "muted source audio"):
+            model.validate(self.timeline)
+        self.timeline["picture"][0]["audio_gain"] = 0
+        report.write_text(report.read_text().replace('"offset_seconds": 0.4',
+                                                     '"offset_seconds": 0.5'))
+        with self.assertRaisesRegex(ValueError, "report changed"):
+            model.validate(self.timeline)
+
     def test_revision_needs_new_timeline_approval(self):
         old_fingerprint = approval.fingerprint(self.path, self.timeline)
         changed = model.revise(self.timeline, {"operations": [{

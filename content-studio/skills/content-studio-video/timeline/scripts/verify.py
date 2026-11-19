@@ -122,14 +122,19 @@ def verify_output(record_path: Path, evidence_dir: Path | None = None) -> dict:
             evidence.append({"id": item["id"], "range": [start, end],
                              "samples": samples})
         for index, cue in enumerate(resolved["audio"]):
-            at = float(cue["start"])
-            sample = evidence_dir / f"audio-{index:03d}.wav"
-            if not sample.exists():
-                _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
-                      "-ss", f"{at:.6f}", "-t", "1", "-i", str(output),
-                      "-vn", "-c:a", "pcm_s16le", str(sample)])
-            evidence.append({"id": cue["id"], "at": round(at, 3),
-                             "audio": str(sample)})
+            # Recorder drift needs an early and a late listen on the exact
+            # master; one start sample cannot establish end-of-edit sync.
+            positions = ([max(.1, resolved["duration"] * .1),
+                          max(.1, resolved["duration"] - 1.1)]
+                         if cue["kind"] == "external_sync" else [float(cue["start"])])
+            for sample_index, at in enumerate(dict.fromkeys(positions)):
+                sample = evidence_dir / f"audio-{index:03d}-{sample_index:02d}.wav"
+                if not sample.exists():
+                    _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
+                          "-ss", f"{at:.6f}", "-t", "1", "-i", str(output),
+                          "-vn", "-c:a", "pcm_s16le", str(sample)])
+                evidence.append({"id": cue["id"], "at": round(at, 3),
+                                 "audio": str(sample)})
         manifest = evidence_dir / "review-manifest.json"
         manifest.write_text(json.dumps({
             "timeline_sha256": record["timeline_sha256"],

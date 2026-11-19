@@ -533,6 +533,48 @@ Dialogue: 0,0:00:00.20,0:00:00.60,Default,,0,0,0,,Reviewed graphic
         self.assertGreater(luma(.4), luma(.1) + .2)
         self.assertAlmostEqual(luma(.9), luma(.1), delta=1)
 
+    def test_external_recorder_offset_is_mixed_once_on_manual_edit(self):
+        self.timeline["picture"] = [{"id": "manual", "source": self.source.name,
+                                     "sha256": model.sha256_file(self.source),
+                                     "source_in": 0, "source_out": 3,
+                                     "audio_gain": 0}]
+        self.timeline["transitions"] = []
+        self.timeline["operations"] = []
+        report = self.root / "sync-report.json"
+        report.write_text(json.dumps({
+            "status": "REVIEW", "confidence": .9,
+            "method": "rms-envelope-correlation-v1",
+            "reference_sha256": model.sha256_file(self.source),
+            "external_sha256": model.sha256_file(self.voice),
+            "reference_duration_seconds": 3, "offset_seconds": .8,
+            "drift_ppm": 1200}), encoding="utf-8")
+        self.timeline["audio"] = [{
+            "id": "mic", "kind": "external_sync", "source": self.voice.name,
+            "sha256": model.sha256_file(self.voice), "sync_report_source": report.name,
+            "sync_report_sha256": model.sha256_file(report), "start": 0,
+            "offset_seconds": .8, "drift_ppm": 1200,
+            "review_status": "approved"}]
+        resolved = model.validate(self.timeline)
+        _, graph = compiler.compile_graph(self.timeline, resolved)
+        self.assertIn("atempo=0.99880000", graph)
+        record = compiler.render(self.timeline, resolved)
+        self.assertEqual(record["audio_encoder_invocations"], 1)
+
+        def tone_at(start):
+            decoded = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", str(start),
+                "-t", "0.2", "-i", str(self.output), "-vn", "-ac", "1",
+                "-ar", "8000", "-f", "f32le", "-"],
+                capture_output=True)
+            self.assertEqual(decoded.returncode, 0, decoded.stderr[-500:])
+            data = decoded.stdout
+            samples = [item[0] for item in struct.iter_unpack("<f", data)]
+            return abs(sum(value * complex(math.cos(2 * math.pi * 880 * n / 8000),
+                                           math.sin(2 * math.pi * 880 * n / 8000))
+                           for n, value in enumerate(samples))) / len(samples)
+
+        self.assertGreater(tone_at(.9), tone_at(.2) * 8)
+
     def test_timed_audio_processing_stays_in_final_export(self):
         self.timeline["operations"].extend([
             {"id": "highpass", "method": "highpass", "hz": 80,

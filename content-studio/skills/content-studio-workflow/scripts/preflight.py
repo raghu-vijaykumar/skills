@@ -168,6 +168,12 @@ def _method_components(method: str) -> list[tuple[str, str]] | None:
                  "silencedetect", "loudnorm", "drawbox")] + [("encoder", "png")]
     if method == "captions-ass":
         return [("filter", "ass"), ("encoder", "libx264")]
+    if method == "sync-recorder":
+        return [("filter", "aresample"), ("encoder", "pcm_s16le")]
+    if method == "external-sync":
+        return ([("filter", name) for name in
+                 ("atrim", "asetpts", "atempo", "adelay", "amix")]
+                + [("encoder", "aac")])
     if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
                   "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
                   "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",

@@ -498,8 +498,23 @@ def compile_graph(timeline: dict, resolved: dict) -> tuple[list[str], str]:
     for i, cue in enumerate(resolved["audio"]):
         index = len(clips) + i
         metadata = media_info(asset_path(resolved["root"], cue["source"]))
-        delay = int(round(float(cue["start"]) * 1000))
         target = f"cue{i}"
+        if cue["kind"] == "external_sync":
+            offset = float(cue["offset_seconds"])
+            # A drifting recorder is resampled before placement. The external
+            # clock runs at (1 - drift) picture seconds per input second.
+            speed = 1 - float(cue.get("drift_ppm", 0)) / 1_000_000
+            skip = max(0.0, -offset * speed)
+            delay = round(max(0.0, offset) * 1000)
+            graph.append(
+                f"[{index}:a:0]atrim=start={_fmt(skip)},asetpts=PTS-STARTPTS,"
+                f"atempo={speed:.8f},aresample=48000,"
+                "aformat=channel_layouts=stereo,"
+                f"volume={float(cue.get('gain', 1)):g},adelay={delay}|{delay},"
+                f"apad,atrim=duration={_fmt(duration)}[{target}]")
+            audio_labels.append(target)
+            continue
+        delay = int(round(float(cue["start"]) * 1000))
         filters = [f"[{index}:a:0]aresample=48000",
                    "aformat=channel_layouts=stereo",
                    f"volume={float(cue.get('gain', 1)):g}"]

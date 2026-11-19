@@ -49,6 +49,10 @@ def fingerprint(timeline_path: Path, timeline: dict) -> str:
         path = asset_path(result["root"], cue["source"])
         parts.append(path.as_posix().encode())
         parts.append(bytes.fromhex(sha256_file(path)))
+        if cue["kind"] == "external_sync":
+            report = asset_path(result["root"], cue["sync_report_source"])
+            parts.append(report.as_posix().encode())
+            parts.append(bytes.fromhex(sha256_file(report)))
     for item in result["operations"]:
         if item["method"] == "title":
             font = asset_path(result["root"], item["font_source"])

@@ -12,7 +12,7 @@ from pathlib import Path
 
 SCHEMA = "content-studio.delivery-timeline.v1"
 # Delivery modes are capabilities even though they are not timed operations.
-DELIVERY_METHODS = {"timeline-delivery", "hdr-audio-only"}
+DELIVERY_METHODS = {"timeline-delivery", "hdr-audio-only", "external-sync"}
 PICTURE_METHODS = {
     "crop", "lens-correction",
     "denoise-light", "denoise-medium", "deflicker",
@@ -446,7 +446,7 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         if not isinstance(cue_id, str) or not cue_id or cue_id in ids:
             raise ValueError("Duplicate or missing audio cue ID")
         ids.add(cue_id)
-        if cue.get("kind") not in {"voice", "music", "sfx"}:
+        if cue.get("kind") not in {"voice", "music", "sfx", "external_sync"}:
             raise ValueError(f"Unsupported audio cue: {cue.get('kind')}")
         source = asset_path(root, cue.get("source"))
         if sha256_file(source) != cue.get("sha256"):
@@ -460,6 +460,48 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
         at = _number(cue.get("start"), f"{cue_id}.start")
         if at >= duration:
             raise ValueError(f"Audio cue {cue_id} starts outside the timeline")
+        if cue["kind"] == "external_sync":
+            # A raw-camera sync cannot be transferred across unknown manual cuts.
+            # The analysis must be rerun against the one supplied edited picture.
+            if (len(resolved) != 1 or resolved[0]["source_in"] != 0
+                    or by_after or video_policy != "encode"
+                    or timeline["color_policy"] != "sdr"
+                    or audio_policy != "mix"
+                    or float(resolved[0].get("audio_gain", 1)) != 0
+                    or sum(item.get("kind") == "external_sync" for item in audio) != 1
+                    or at != 0 or cue.get("loop")):
+                raise ValueError("External sync needs one uncut SDR manual edit, muted source audio, and start zero")
+            report_path = asset_path(root, cue.get("sync_report_source"))
+            if sha256_file(report_path) != cue.get("sync_report_sha256"):
+                raise ValueError(f"External sync report changed: {cue_id}")
+            report = load(report_path)
+            confidence = _number(report.get("confidence"), "sync report confidence")
+            if (report.get("status") != "REVIEW"
+                    or report.get("method") != "rms-envelope-correlation-v1"
+                    or not .4 <= confidence <= 1
+                    or report.get("reference_sha256") != resolved[0]["sha256"]
+                    or report.get("external_sha256") != cue["sha256"]
+                    or abs(resolved[0]["source_out"] -
+                           _number(report.get("reference_duration_seconds"),
+                                   "sync report duration")) > .1):
+                raise ValueError(f"External sync report does not match the approved sources: {cue_id}")
+            offset = _number(cue.get("offset_seconds"), f"{cue_id}.offset_seconds",
+                             minimum=-180)
+            report_offset = _number(report.get("offset_seconds"), "sync report offset",
+                                    minimum=-180)
+            if offset > 180 or abs(offset - report_offset) > .0001:
+                raise ValueError(f"External sync offset differs from analysis: {cue_id}")
+            drift = _number(cue.get("drift_ppm", 0), f"{cue_id}.drift_ppm",
+                            minimum=-5000)
+            if drift > 5000:
+                raise ValueError(f"External sync drift exceeds adapter limit: {cue_id}")
+            measured_drift = report.get("drift_ppm")
+            if measured_drift is None:
+                if (drift != 0 or cue.get("drift_assumption") != "zero_for_short_clip"
+                        or report["reference_duration_seconds"] >= 30):
+                    raise ValueError(f"External sync needs explicit short-clip drift assumption: {cue_id}")
+            elif abs(drift - _number(measured_drift, "sync report drift", minimum=-5000)) > .1:
+                raise ValueError(f"External sync drift differs from analysis: {cue_id}")
         gain = _number(cue.get("gain", 1), f"{cue_id}.gain")
         if gain > 2:
             raise ValueError("Audio cue gain must be <= 2")
@@ -491,6 +533,8 @@ def validate(timeline: dict, *, require_review: bool = True) -> dict:
             raise ValueError("copy_source requires one uncut clip and no audio edits")
     input_paths = [c["path"] for c in resolved]
     input_paths += [asset_path(root, c["source"]) for c in audio]
+    input_paths += [asset_path(root, c["sync_report_source"]) for c in audio
+                    if c["kind"] == "external_sync"]
     input_paths += [asset_path(root, o["font_source"]) for o in operations if o["method"] == "title"]
     input_paths += [asset_path(root, o["source"]) for o in operations if o["method"] == "motion-graphics-ass"]
     input_paths += [asset_path(root, o["font_source"]) for o in operations
