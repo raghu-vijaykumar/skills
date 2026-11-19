@@ -16,6 +16,82 @@ import preflight
 
 class PreflightTest(unittest.TestCase):
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg tools unavailable")
+    def test_profile_reports_all_audio_streams_and_hash(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            draft = Path(scratch)
+            sample = draft / "two-mics.mp4"
+            made = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                "testsrc2=size=160x90:rate=5:duration=1", "-f", "lavfi", "-i",
+                "sine=frequency=440:duration=1", "-f", "lavfi", "-i",
+                "sine=frequency=880:duration=1", "-map", "0:v:0", "-map", "1:a:0",
+                "-map", "2:a:0", "-c:v", "mpeg4", "-c:a", "aac", str(sample)],
+                capture_output=True, text=True)
+            self.assertEqual(made.returncode, 0, made.stderr[-500:])
+            report = preflight.profile(draft, sample, None, None, methods=["loudnorm"])
+            media = report["sample"]
+            self.assertEqual(media["sha256"], preflight._hash_file(sample))
+            self.assertEqual([stream["index"] for stream in media["audio_streams"]], [1, 2])
+            self.assertEqual(media["display"], {"width": 160, "height": 90, "rotation": 0})
+            self.assertEqual(media["frame_timing"]["status"], "sampled")
+            self.assertEqual(report["capabilities"]["methods"]["loudnorm"]["status"], "available")
+
+    def test_sampled_frame_timing_distinguishes_variable_windows(self):
+        def rows(interval, start):
+            return subprocess.CompletedProcess([], 0, json.dumps({"frames": [
+                {"best_effort_timestamp_time": str(start + i * interval)} for i in range(7)]}), "")
+        with patch.object(preflight, "run_quiet", side_effect=[rows(.2, 0), rows(.1, 4)]):
+            timing = preflight._sample_frame_timing(Path("unused.mp4"), 10)
+        self.assertEqual(timing["status"], "sampled")
+        self.assertTrue(timing["variable_frame_rate_suspected"])
+        self.assertEqual(len(timing["windows"]), 2)
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg tools unavailable")
+    def test_actual_variable_rate_fixture_is_flagged(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            sample = Path(scratch) / "variable.mkv"
+            made = subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                "testsrc2=size=160x90:rate=5:duration=1", "-f", "lavfi", "-i",
+                "testsrc2=size=160x90:rate=10:duration=1", "-filter_complex",
+                "[0:v][1:v]concat=n=2:v=1:a=0[v]", "-map", "[v]", "-fps_mode", "vfr",
+                "-c:v", "ffv1", str(sample)], capture_output=True, text=True)
+            self.assertEqual(made.returncode, 0, made.stderr[-500:])
+            timing = preflight.probe(sample)["frame_timing"]
+            self.assertEqual(timing["status"], "sampled")
+            self.assertTrue(timing["variable_frame_rate_suspected"])
+
+    def test_component_detection_keeps_missing_and_unknown_distinct(self):
+        filters = subprocess.CompletedProcess([], 0, "Filters:\n .. loudnorm A->A\n", "")
+        encoders = subprocess.CompletedProcess([], 1, "", "encoder listing failed")
+        version = subprocess.CompletedProcess([], 0, "ffmpeg version 9.0\n", "")
+        with patch.object(preflight.shutil, "which", return_value="ffmpeg"), patch.object(
+                preflight, "run_quiet", side_effect=[version, filters, encoders]):
+            report = preflight.capability_report(["loudnorm", "crop", "new-method"])
+        self.assertEqual(report["methods"]["loudnorm"]["status"], "unknown")
+        self.assertEqual(report["methods"]["crop"]["requirements"][0]["status"], "missing")
+        self.assertEqual(report["methods"]["new-method"]["status"], "unknown")
+        self.assertEqual(report["detection"]["encoder"]["status"], "unknown")
+
+    def test_named_plan_method_requires_available_profile_capability(self):
+        plan = {"schema_version": 1, "kind": "edited", "stage": "edited-render",
+                "goal": "Render reviewed crop", "inputs": ["manual.mp4"],
+                "deliverables": ["final.mp4"], "steps": preflight.default_steps("edited", "edited-render"),
+                "system_profile": {"capabilities": {"methods": {"crop": {"status": "missing"}}}}}
+        plan["steps"][1]["method_id"] = "crop"
+        with self.assertRaisesRegex(ValueError, "capability is missing"):
+            preflight.validate_plan(plan)
+        plan["system_profile"]["capabilities"]["methods"]["crop"]["status"] = "available"
+        preflight.validate_plan(plan)
+
+    def test_every_supported_timeline_method_has_capability_mapping(self):
+        registry = (Path(__file__).resolve().parents[2] / "content-studio-video" /
+                    "timeline" / "methods.json")
+        methods = json.loads(registry.read_text(encoding="utf-8"))["methods"]
+        self.assertEqual([item["id"] for item in methods if item["status"] == "supported"
+                          and preflight._method_components(item["id"]) is None], [])
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg tools unavailable")
     def test_short_media_profile_reports_measured_and_unknown_times(self):
         with tempfile.TemporaryDirectory() as scratch:
             draft = Path(scratch)

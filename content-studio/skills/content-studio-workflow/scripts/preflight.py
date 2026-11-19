@@ -9,10 +9,13 @@ import importlib.util
 import json
 import os
 import platform
+import re
 import shutil
+import statistics
 import subprocess
 import time
 from datetime import datetime, timezone
+from fractions import Fraction
 from pathlib import Path
 
 PLAN_DIR = Path(".content-studio/preflight")
@@ -91,9 +94,145 @@ def memory_gib() -> float | None:
     return None
 
 
+def _rate(value: object) -> float | None:
+    """Keep absent or malformed frame rates unknown instead of inventing 30 fps."""
+    try:
+        rate = float(Fraction(str(value)))
+    except (ValueError, ZeroDivisionError):
+        return None
+    return round(rate, 3) if 0 < rate < 1000 else None
+
+
+def _sample_frame_timing(sample: Path, duration: float) -> dict:
+    """Sample displayed PTS in bounded source windows; this is VFR evidence, not a full scan."""
+    windows = [0.0]
+    if duration > 6:
+        windows.append(max(0.0, duration / 2 - 1))
+    observations = []
+    for start in windows:
+        result = run_quiet(["ffprobe", "-v", "error", "-select_streams", "v:0",
+                            "-read_intervals", f"{start:.3f}%+2", "-show_entries",
+                            "frame=best_effort_timestamp_time", "-of", "json", str(sample)], timeout=20)
+        if result.returncode:
+            return {"status": "unknown", "reason": result.stderr.strip()[-300:] or "frame probe failed"}
+        try:
+            frames = json.loads(result.stdout).get("frames", [])
+            stamps = sorted({float(frame["best_effort_timestamp_time"]) for frame in frames
+                             if frame.get("best_effort_timestamp_time") not in (None, "N/A")})
+        except (ValueError, TypeError, KeyError):
+            return {"status": "unknown", "reason": "frame timestamps were unreadable"}
+        deltas = [right - left for left, right in zip(stamps, stamps[1:]) if right > left]
+        if deltas:
+            median = statistics.median(deltas)
+            observations.append({"start_seconds": round(start, 3), "frames": len(stamps),
+                                 "median_interval_seconds": round(median, 6),
+                                 "min_interval_seconds": round(min(deltas), 6),
+                                 "max_interval_seconds": round(max(deltas), 6),
+                                 "variable_suspected": any(abs(delta - median) > max(.002, median * .1)
+                                                           for delta in deltas)})
+    if not observations:
+        return {"status": "unknown", "reason": "too few sampled frames"}
+    medians = [item["median_interval_seconds"] for item in observations]
+    between_windows = len(medians) > 1 and max(medians) - min(medians) > max(.002, statistics.median(medians) * .1)
+    return {"status": "sampled", "variable_frame_rate_suspected":
+            between_windows or any(item["variable_suspected"] for item in observations),
+            "windows": observations}
+
+
+def _method_components(method: str) -> list[tuple[str, str]] | None:
+    """Bind known timeline method IDs to the FFmpeg components their adapter actually uses."""
+    picture = {"crop": "crop", "lens-correction": "lenscorrection",
+               "denoise-light": "hqdn3d", "denoise-medium": "hqdn3d",
+               "deflicker": "deflicker", "upscale-lanczos": "scale",
+               "color-eq": "eq", "sharpen-light": "cas", "sharpen-medium": "cas"}
+    audio = {"highpass": "highpass", "audio-denoise": "afftdn",
+             "compress": "acompressor", "loudnorm": "loudnorm"}
+    if method in picture:
+        return [("filter", picture[method]), ("encoder", "libx264")]
+    if method in audio:
+        return [("filter", audio[method]), ("encoder", "aac")]
+    if method in {"title", "text-behind-subject"}:
+        return [("filter", "drawtext"), ("filter", "overlay"), ("encoder", "libx264")]
+    if method == "motion-graphics-ass":
+        return [("filter", "ass"), ("encoder", "libx264")]
+    if method == "object-blur":
+        return [("filter", "gblur"), ("filter", "alphamerge"),
+                ("filter", "overlay"), ("encoder", "libx264")]
+    if method == "timeline-delivery":
+        return [("filter", "concat"), ("encoder", "libx264"), ("encoder", "aac")]
+    if method == "hdr-audio-only":
+        return [("encoder", "aac")]
+    if method in {"cross-fade", "wipe-left", "wipe-right", "push-left", "push-right",
+                  "push-up", "push-down", "zoom-in", "zoom-out", "pixelate", "reveal",
+                  "exchange", "horizontal-banding", "diagonal-soft-wipe", "blinds",
+                  "bloom", "collage", "page-turn", "liquid-streaks", "liquid-drops",
+                  "fire", "spin", "heart", "cross-blur", "fade-through-black",
+                  "fade-through-white"}:
+        return [("filter", "xfade"), ("filter", "acrossfade"), ("encoder", "libx264")]
+    if method == "burn":
+        return [("filter", "color"), ("filter", "fade"),
+                ("filter", "overlay"), ("encoder", "libx264")]
+    if method == "glitch":
+        return [("filter", "rgbashift"), ("filter", "noise"), ("encoder", "libx264")]
+    if method == "glitch-reveal":
+        return [("filter", "rgbashift"), ("filter", "noise"),
+                ("filter", "eq"), ("encoder", "libx264")]
+    return None
+
+
+def capability_report(methods: list[str]) -> dict:
+    """Distinguish unavailable components from listings that could not be inspected."""
+    if not methods:
+        return {"methods": {}}
+    ffmpeg = shutil.which("ffmpeg")
+    version = None
+    if ffmpeg is not None:
+        try:
+            result = run_quiet([ffmpeg, "-version"], timeout=10)
+            if result.returncode == 0:
+                version = result.stdout.splitlines()[0] if result.stdout else None
+        except subprocess.TimeoutExpired:
+            pass
+    listings = {}
+    for kind, flag in (("filter", "-filters"), ("encoder", "-encoders")):
+        if ffmpeg is None:
+            listings[kind] = {"status": "missing", "names": set(), "reason": "ffmpeg not found"}
+            continue
+        try:
+            result = run_quiet([ffmpeg, "-hide_banner", flag], timeout=10)
+        except subprocess.TimeoutExpired:
+            listings[kind] = {"status": "unknown", "names": set(), "reason": "listing timed out"}
+            continue
+        if result.returncode:
+            listings[kind] = {"status": "unknown", "names": set(),
+                              "reason": result.stderr.strip()[-300:] or "listing failed"}
+            continue
+        # FFmpeg tables prefix each component with capability flags; the next token is its name.
+        names = set(re.findall(r"(?m)^\s*[.A-Z|]{2,9}\s+([\w-]+)\s", result.stdout))
+        listings[kind] = ({"status": "available", "names": names} if names else
+                          {"status": "unknown", "names": set(), "reason": "listing format unrecognized"})
+    answer = {}
+    for method in dict.fromkeys(methods):
+        requirements = _method_components(method)
+        if requirements is None:
+            answer[method] = {"status": "unknown", "requirements": [],
+                              "reason": "no declared FFmpeg requirements for this method"}
+            continue
+        checked = []
+        for kind, name in requirements:
+            listing = listings[kind]
+            status = ("available" if name in listing["names"] else "missing") if listing["status"] == "available" else listing["status"]
+            checked.append({"kind": kind, "name": name, "status": status})
+        overall = ("missing" if any(item["status"] == "missing" for item in checked) else
+                   "unknown" if any(item["status"] == "unknown" for item in checked) else "available")
+        answer[method] = {"status": overall, "requirements": checked}
+    return {"ffmpeg": ffmpeg, "version": version, "methods": answer,
+            "detection": {kind: {key: value for key, value in listing.items() if key != "names"}
+                          for kind, listing in listings.items()}}
+
+
 def probe(sample: Path) -> dict:
-    result = run_quiet(["ffprobe", "-v", "error", "-show_entries",
-                        "format=duration:stream=index,codec_type,width,height,avg_frame_rate,pix_fmt,color_transfer,color_primaries,color_space,side_data_list",
+    result = run_quiet(["ffprobe", "-v", "error", "-show_streams", "-show_format",
                         "-of", "json", str(sample)])
     if result.returncode:
         raise ValueError(f"ffprobe failed: {result.stderr.strip()[-500:]}")
@@ -101,16 +240,39 @@ def probe(sample: Path) -> dict:
     video = next((stream for stream in data.get("streams", []) if stream.get("codec_type") == "video"), None)
     if video is None:
         raise ValueError("Sample has no video stream")
-    fps_text = video.get("avg_frame_rate", "0/1")
-    numerator, denominator = (float(part) for part in fps_text.split("/"))
+    duration = float(data.get("format", {}).get("duration") or 0)
+    side_items = video.get("side_data_list") or []
+    rotation = next((item.get("rotation") for item in side_items if item.get("rotation") is not None),
+                    (video.get("tags") or {}).get("rotate", 0))
+    try:
+        rotation = int(round(float(rotation))) % 360
+    except (ValueError, TypeError):
+        rotation = 0
+    width, height = video.get("width"), video.get("height")
     transfer = video.get("color_transfer", "unknown")
-    side_data = json.dumps(video.get("side_data_list", []))
-    return {"path": str(sample), "duration_seconds": round(float(data.get("format", {}).get("duration", 0)), 2),
-            "width": video.get("width"), "height": video.get("height"),
-            "fps": round(numerator / denominator, 3) if denominator else None,
+    side_data = json.dumps(side_items)
+    audio_streams = [{key: stream.get(key) for key in
+                      ("index", "codec_name", "channels", "channel_layout", "sample_rate", "start_time", "duration")}
+                     for stream in data.get("streams", []) if stream.get("codec_type") == "audio"]
+    return {"path": str(sample), "sha256": _hash_file(sample),
+            "duration_seconds": round(duration, 2), "width": width, "height": height,
+            "display": {"width": height if rotation in {90, 270} else width,
+                        "height": width if rotation in {90, 270} else height, "rotation": rotation},
+            "fps": _rate(video.get("avg_frame_rate")),
+            "nominal_fps": _rate(video.get("r_frame_rate")),
+            "frame_timing": _sample_frame_timing(sample, duration),
+            "audio_streams": audio_streams,
             "pixel_format": video.get("pix_fmt"), "color_transfer": transfer,
             "color_primaries": video.get("color_primaries"), "color_space": video.get("color_space"),
             "hdr_or_dv": transfer in {"arib-std-b67", "smpte2084"} or "DOVI" in side_data.upper()}
+
+
+def _hash_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as media:
+        for block in iter(lambda: media.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def timed_ffmpeg(sample: Path, filter_graph: str | None, seconds: float = 2.0) -> dict:
@@ -129,14 +291,16 @@ def timed_ffmpeg(sample: Path, filter_graph: str | None, seconds: float = 2.0) -
 
 
 def profile(draft: Path, sample: Path | None, planned_minutes: float | None,
-            ai_seconds_per_frame: float | None, social: bool = False) -> dict:
+            ai_seconds_per_frame: float | None, social: bool = False,
+            methods: list[str] | None = None) -> dict:
     # The bounded FFmpeg runs characterize this machine; AI inference needs its own representative pilot.
     tools = {name: shutil.which(name) for name in ("ffmpeg", "ffprobe", "nvidia-smi", "realesrgan-ncnn-vulkan")}
     disk = shutil.disk_usage(draft)
     report = {"captured_at": timestamp(), "machine": {"os": platform.platform(),
               "cpu_logical": os.cpu_count(), "memory_gib": memory_gib(),
               "free_disk_gib": round(disk.free / 2**30, 1)}, "tools": tools,
-              "sample": None, "benchmarks": {}, "estimates": {}, "recommendations": []}
+              "sample": None, "benchmarks": {}, "estimates": {}, "recommendations": [],
+              "capabilities": capability_report(methods or [])}
     if tools["nvidia-smi"]:
         gpu = run_quiet([tools["nvidia-smi"], "--query-gpu=name,memory.total", "--format=csv,noheader"], timeout=10)
         if gpu.returncode == 0:
@@ -229,7 +393,10 @@ def validate_plan(plan: dict) -> None:
             raise ValueError(f"Plan needs {field}")
     if not isinstance(plan["steps"], list):
         raise ValueError("Plan steps must be a list")
+    if not isinstance(plan["system_profile"], dict):
+        raise ValueError("Plan system_profile must be an object")
     ids = set()
+    capabilities = plan["system_profile"].get("capabilities", {}).get("methods", {})
     for step in plan["steps"]:
         if not isinstance(step, dict) or any(not str(step.get(key, "")).strip() for key in ("id", "title", "route", "estimated_time", "output", "acceptance")):
             raise ValueError("Every step needs id, title, route, estimated_time, output and acceptance")
@@ -238,6 +405,14 @@ def validate_plan(plan: dict) -> None:
         if "command" in step and (not isinstance(step["command"], list) or not step["command"] or
                                   not all(isinstance(arg, str) and arg for arg in step["command"])):
             raise ValueError(f"Step {step['id']} command must be a nonempty argv array")
+        if step.get("method_id"):
+            if not isinstance(step["method_id"], str):
+                raise ValueError(f"Step {step['id']} method_id must be a string")
+            # A named production method must match the selected profile; a route string alone is not capability proof.
+            state = capabilities.get(step["method_id"], {}).get("status", "unknown")
+            if state != "available":
+                raise ValueError(f"Step {step['id']} method {step['method_id']} capability is {state}; "
+                                 "profile it or choose a supported fallback before plan approval")
         ids.add(step["id"])
     required_review = ("Review exact LinkedIn package" if plan.get("kind") == "linkedin" else
                        "Review source handoff" if plan.get("stage") == "source-prep" else "Review exact final render")
@@ -271,6 +446,8 @@ def main(argv: list[str] | None = None) -> int:
     profile_parser.add_argument("--planned-minutes", type=float)
     profile_parser.add_argument("--ai-seconds-per-frame", type=float)
     profile_parser.add_argument("--social", action="store_true", help="skip video-only advice for text-first plans")
+    profile_parser.add_argument("--method", action="append", default=[],
+                                help="selected method ID to check against this FFmpeg build; repeatable")
     init = sub.add_parser("init")
     init.add_argument("--kind", required=True, choices=("edited", "remotion", "linkedin"))
     init.add_argument("--stage", choices=("source-prep", "edited-render"),
@@ -301,7 +478,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.ai_seconds_per_frame is not None and args.ai_seconds_per_frame <= 0:
             raise ValueError("--ai-seconds-per-frame must be positive")
         report = profile(draft, args.sample.expanduser().resolve() if args.sample else None,
-                         args.planned_minutes, args.ai_seconds_per_frame, args.social)
+                          args.planned_minutes, args.ai_seconds_per_frame, args.social, args.method)
         write_json(system_file, report)
         print(json.dumps(report, indent=2))
         return 0

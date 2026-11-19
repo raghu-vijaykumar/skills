@@ -1,5 +1,7 @@
 # Workflow precheck plan and benchmarks
 
+Repeat `--method <timeline-method-id>` on `profile` for the current method choices. `system.json` records selected filters and encoders as `available`, `missing`, or `unknown`, along with audio streams, display rotation, sampled frame timing, and a full sample SHA-256. Set `method_id` on each production plan step that runs a selected method; plan validation refuses missing or unknown capability. Short timing windows can suggest VFR but do not prove constant timing over the whole file. Copy the current system report into a revised plan and obtain fresh review when method choices change.
+
 The draft stores `.content-studio/preflight/system.json`, `plan.json`, `approval.json`, and `checklist.json`. `plan.json` is editable before review. Its `steps` array determines the checklist after approval; each step has an ID, title, route, output, acceptance criterion, and `required` flag. Keep source review and the stage's required final review step. Add, reorder or change other steps to match the user's workflow. Do not include passwords or unpublished personal data in the plan.
 
 ```powershell
