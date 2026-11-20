@@ -59,6 +59,22 @@ def confirmed_preferences(scope: str, project: str) -> dict:
     return {"database": str(database), "database_exists": True, **result}
 
 
+def published_video_insights(draft: Path) -> dict:
+    """Expose archived insight notes to a plan without copying them into the draft."""
+    if draft.parent.name != "drafts":
+        return {"available": False, "reason": "draft is outside a configured channel layout"}
+    channel = draft.parent.parent
+    candidates = [channel / "analysis" / "analytics", channel / "analytics"]
+    store = next((path for path in candidates if (path / "video-insights.md").is_file()), None)
+    if store is None:
+        return {"available": False, "reason": "published Video Insights have not been prepared for this channel"}
+    note = store / "video-insights.md"
+    index = store / "published-index.json"
+    return {"available": True, "channel_note": str(note), "channel_note_sha256": _hash_file(note),
+            "published_index": str(index) if index.is_file() else None,
+            "guidance": "Review relevant per-video notes by published ID; cite evidence in the editable plan"}
+
+
 def plan_hash(plan_file: Path) -> str:
     # Hash the actual review file, so even formatting or numeric JSON changes make approval stale.
     return hashlib.sha256(plan_file.read_bytes()).hexdigest()
@@ -536,6 +552,7 @@ def main(argv: list[str] | None = None) -> int:
                 "inputs": args.inputs, "deliverables": args.deliverables,
                 "system_profile": system,
                 "editing_memory": confirmed_preferences(args.category, args.project),
+                "published_video_insights": published_video_insights(draft),
                 "steps": default_steps(args.kind, args.stage),
                 "notes": "Edit routes, steps, estimates and review criteria before asking for approval."}
         validate_plan(plan)

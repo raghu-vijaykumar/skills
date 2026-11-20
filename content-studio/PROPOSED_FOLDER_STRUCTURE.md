@@ -22,6 +22,7 @@ content-studio/skills/
     SKILL.md                         stage router
     shared/dispatch.py              method-to-backend dispatch
     planning/
+      video-insights/                channel and published-video agent notes from owned reports
       ideagen/                       research and draft planning
       styles/                        merged catalogue and style engine
         core-explainer/              style guidance

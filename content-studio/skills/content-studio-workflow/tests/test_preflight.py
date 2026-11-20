@@ -265,6 +265,24 @@ class PreflightTest(unittest.TestCase):
                 found = preflight.confirmed_preferences("travel", "trip")
                 self.assertEqual(found["preferences"]["meme_intensity"]["value"], "low")
 
+    def test_new_plan_can_read_published_video_insights_without_draft_copy(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            root = Path(scratch) / "channel"
+            draft = root / "drafts" / "next-video"
+            draft.mkdir(parents=True)
+            store = root / "analytics"
+            store.mkdir()
+            note = store / "video-insights.md"
+            note.write_text("# Channel observations\n", encoding="utf-8")
+            index = store / "published-index.json"
+            index.write_text('{"videos": {}}', encoding="utf-8")
+            result = preflight.published_video_insights(draft)
+            self.assertTrue(result["available"])
+            self.assertEqual(result["channel_note"], str(note))
+            self.assertEqual(result["channel_note_sha256"], preflight._hash_file(note))
+            self.assertEqual(result["published_index"], str(index))
+            self.assertFalse((draft / "video-insights.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

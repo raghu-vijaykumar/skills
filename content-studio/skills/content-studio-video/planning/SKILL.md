@@ -5,4 +5,4 @@ description: Route video ideas and visual treatments to independently callable p
 
 # content-studio-video-planning
 
-Use [ideagen](ideagen/SKILL.md) for researched ideas and [styles](styles/SKILL.md) for the current catalogue, treatment, and storyboard. Identify the available style and format before promising an output. Planning may inform the precheck; production changes follow its approved plan.
+Use [video insights](video-insights/SKILL.md) to read the channel and relevant published-video findings before proposing a new video or edit. Use [ideagen](ideagen/SKILL.md) for researched ideas and [styles](styles/SKILL.md) for the current catalogue, treatment, and storyboard. Identify the available style and format before promising an output. Planning may inform the precheck; production changes follow its approved plan.

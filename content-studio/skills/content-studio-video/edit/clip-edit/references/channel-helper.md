@@ -63,6 +63,8 @@ out-of-office/
   assets/intro.mp4                        the intro clip used by `intro`
   archive.txt                             yt-dlp ledger, so pruned videos never re-download
   analytics/<videoId>/                    metrics.json, retention.csv, retention.svg
+  analytics/video-insights.md             channel-level agent findings from published videos
+  analytics/<videoId>/video-insights.md   per-published-video agent findings
   .snapshots/*.bundle                     git snapshots already uploaded to Drive
   backup-report.json                      last run summary (never uploaded)
 ```
@@ -71,6 +73,8 @@ For a compact channel workspace, create `analysis/` first. Analytics,
 source cache, staging, and Git bundle snapshots then live beneath it; existing
 channels without `analysis/` keep the layout above. Channel-authored code and
 shared assets can remain in `code/` and `assets/`.
+
+Run [Published Video Insights](../../../planning/video-insights/SKILL.md) against the existing archive and analytics location. Do not create `analysis/` just to add insights to a legacy workspace: that folder changes where the helper looks for analytics. The insight notes stay outside drafts and are keyed by verified published video IDs.
 
 ## Config
 

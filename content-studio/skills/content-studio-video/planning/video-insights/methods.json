@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "methods": [
+    {"id": "prepare", "script": "scripts/video_insights.py", "status": "supported", "review": "Inspect measured evidence and author interpretations separately"},
+    {"id": "refresh", "script": "scripts/video_insights.py", "status": "supported", "review": "Check each source status and stale or missing metrics"},
+    {"id": "paths", "script": "scripts/video_insights.py", "status": "supported", "review": "Use only verified published IDs"}
+  ]
+}

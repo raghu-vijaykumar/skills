@@ -17,6 +17,8 @@ When the user supplies a rendered manual edit, record its path and hash. Run onl
 
 For code-driven video, route through [styles](../content-studio-video/planning/styles/SKILL.md) and [videogen](../content-studio-video/animation/videogen/SKILL.md). [Ideagen](../content-studio-video/planning/ideagen/SKILL.md), [music](../content-studio-video/audio/music/SKILL.md), [memory](../content-studio-video/memory/SKILL.md), and other nested operation skills are independently callable when relevant.
 
+For a channel with a published archive, use [Video Insights](../content-studio-video/planning/video-insights/SKILL.md) to review channel and per-video findings before planning a new video or revising an edit. The insight history stays with published videos; the new production follows the normal precheck and review gates.
+
 When asked to judge a new cut against a creative reference, use [video critique](../content-studio-video/review/critique/SKILL.md). Map equivalent moments even when the cuts have different durations. Hand timecoded findings and rerender criteria to the relevant production skill.
 
 Create or resume the lifecycle checklist with `python <this-skill>/scripts/checklist.py --channel <slug> --draft <id> --kind edited init` (use `remotion` for code-driven work). Record evidence per item, run `verify --phase pre_publish` before package approval and `verify --phase all` before closing. A direct specialist call follows the precheck but need not initialize the full lifecycle checklist. Read [the fixed lifecycle items](references/lifecycle-checklist.md).

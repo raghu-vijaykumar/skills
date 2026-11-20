@@ -4,6 +4,8 @@
 
 The [video skill tree](skills/content-studio-video/SKILL.md) holds the working video sources and independently callable operation skills. [The folder map](PROPOSED_FOLDER_STRUCTURE.md) gives the full layout and method status. Only canonical skill entrypoints are exposed; backend scripts remain available where existing commands use them.
 
+[Video Insights](skills/content-studio-video/planning/video-insights/SKILL.md) refreshes owned reports for the verified published archive and keeps one agent-written channel note plus one note per published video. Future drafts read those findings during planning and review; report history stays with the published archive.
+
 ## Stage routes
 
 1. Run the [workflow precheck](skills/content-studio-workflow/SKILL.md) before a production edit, including a direct leaf call. Review an editable plan with exact method, script command and arguments, inputs, outputs, estimate, fallback, and acceptance criterion. Approval binds to the plan bytes; record checklist evidence.
