@@ -61,6 +61,11 @@ class ApiClient:
 
     def _credentials(self) -> dict:
         if not self.credentials.exists():
+            if self.token_path.exists():
+                # The token cache retains the original client pair for grant recovery.
+                cached = read_json(self.token_path)
+                if cached.get("client_id") and cached.get("client_secret"):
+                    return cached
             raise OAuthError(
                 f"missing OAuth client file: {self.credentials}\n"
                 "Google Cloud -> APIs & Services -> Credentials -> Create OAuth client ID "

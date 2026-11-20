@@ -163,7 +163,9 @@ per video.
 
 - `api` needs an OAuth **Desktop app** client with the YouTube Analytics API enabled,
   saved at `analytics.credentials`. First run opens a browser for consent and caches a
-  refresh token at `~/.config/content-helper/token-<slug>.json`.
+  refresh token at `~/.config/content-helper/token-<slug>.json`. If that client file
+  was later moved, reauthorization can use the client pair already in the token
+  cache; keep that cache private.
 - `studio` reuses the browser debug session and harvests the JSON Studio loads for the
   Content tab: retention values, views, average view duration and
   `shortsFeedImpressionsVtr`. No OAuth setup, but undocumented and it may break.
