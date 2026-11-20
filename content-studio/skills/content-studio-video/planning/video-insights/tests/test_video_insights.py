@@ -130,6 +130,16 @@ class VideoInsightsTest(unittest.TestCase):
         self.assertTrue((self.store / self.video_id / "metrics.json").exists())
         self.assertTrue((self.store / "video-insights-source-status.json").exists())
 
+    def test_reauthorization_attempt_is_single_and_stops_dependent_collectors(self):
+        with patch.object(insights, "run_collector", return_value={"status": "failed", "detail": "consent cancelled"}) as run, patch.object(
+                insights, "collect_comments") as comments:
+            status = insights.refresh(self.root, "sample", self.config, 2, 0, 100,
+                                      {"slug": "sample"}, reauthorize=True)
+        self.assertEqual(run.call_count, 1)
+        self.assertIn("--reauthorize", run.call_args.args[0])
+        comments.assert_not_called()
+        self.assertEqual(status["dataset"]["status"], "skipped")
+
 
 if __name__ == "__main__":
     unittest.main()

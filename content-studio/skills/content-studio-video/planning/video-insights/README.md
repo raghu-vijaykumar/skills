@@ -19,10 +19,11 @@ From the repository root:
 ```powershell
 python content-studio/skills/content-studio-video/planning/video-insights/scripts/video_insights.py prepare --channel out-of-office
 python content-studio/skills/content-studio-video/planning/video-insights/scripts/video_insights.py refresh --channel out-of-office --last 10 --comments-limit 100 --vtr-count 0
+python content-studio/skills/content-studio-video/planning/video-insights/scripts/video_insights.py refresh --channel out-of-office --last 10 --comments-limit 100 --vtr-count 0 --reauthorize
 python content-studio/skills/content-studio-video/planning/video-insights/scripts/video_insights.py paths --channel out-of-office --video VIDEOID
 ```
 
-`--config` selects another channel-helper config. `refresh` invokes the existing `content.py analytics` and `content.py insights` commands. It uses their configured Google OAuth token for comments; first use may require the account's normal read-only consent. A report failure returns a nonzero exit code and writes `video-insights-source-status.json`; `prepare` still updates notes from whatever evidence is available. The comment collection stores text, ID, timestamp, likes and comment URL, without author names or profile IDs. It samples at most 500 top-level comments per video and does not claim to represent all feedback.
+`--config` selects another channel-helper config. `refresh` invokes the existing `content.py analytics` and `content.py insights` commands. It uses their configured Google OAuth token for comments; an expired grant requires `--reauthorize` and the account owner's read-only consent in the browser. The wrapper attempts that consent once. A report failure returns a nonzero exit code and writes `video-insights-source-status.json`; `prepare` still updates notes from whatever evidence is available. The comment collection stores text, ID, timestamp, likes and comment URL, without author names or profile IDs. It samples at most 500 top-level comments per video and does not claim to represent all feedback.
 
 The wrapper expires its collected raw comment files after 30 days on `prepare` or `refresh`, in line with [YouTube's API data storage rules](https://developers.google.com/youtube/terms/developer-policies/). Refresh them before reusing older audience interpretations. Agent notes should paraphrase recurring themes, not retain comment text or commenter identities.
 

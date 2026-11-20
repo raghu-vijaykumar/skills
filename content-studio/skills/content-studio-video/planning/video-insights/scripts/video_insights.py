@@ -254,14 +254,22 @@ def run_collector(command: list[str]) -> dict:
 
 
 def refresh(root: Path, channel: str, config: Path, last: int, vtr_count: int,
-            comments_limit: int, settings: dict) -> dict:
+            comments_limit: int, settings: dict, reauthorize: bool = False) -> dict:
     helper = HELPER / "content.py"
     base = [sys.executable, str(helper)]
     select = ["--channel", channel, "--config", str(config)]
-    status = {
-        "analytics": run_collector(base + ["analytics", *select, "--last", str(last)]),
-        "dataset": run_collector(base + ["insights", *select, "--vtr-count", str(vtr_count)]),
-    }
+    analytics_command = base + ["analytics", *select, "--last", str(last)]
+    if reauthorize:
+        analytics_command.append("--reauthorize")
+    status = {"analytics": run_collector(analytics_command)}
+    if reauthorize and status["analytics"]["status"] != "ok":
+        # One consent attempt is enough; avoid launching a second browser flow.
+        status["dataset"] = {"status": "skipped", "detail": "reauthorization did not complete"}
+        status["comments"] = {"status": "skipped", "detail": "reauthorization did not complete"}
+        write_json(analytics_root(root) / "video-insights-source-status.json",
+                   {"collected_at": utc_now(), "sources": status})
+        return status
+    status["dataset"] = run_collector(base + ["insights", *select, "--vtr-count", str(vtr_count)])
     rows = published_index(root)
     videos = sorted(rows.values(), key=lambda row: row.get("published_at") or "", reverse=True)[:last]
     try:
@@ -282,6 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--last", type=int, default=10, help="recent videos to refresh")
     parser.add_argument("--vtr-count", type=int, default=0, help="owned Studio Shorts reach reads")
     parser.add_argument("--comments-limit", type=int, default=100, help="top-level comments per video; 0 skips")
+    parser.add_argument("--reauthorize", action="store_true", help="renew owned-channel Google read-only consent once before refreshing reports")
     args = parser.parse_args(argv)
     if args.last < 1 or not 0 <= args.comments_limit <= 500 or args.vtr_count < 0:
         parser.error("--last must be positive, --comments-limit 0..500, and --vtr-count nonnegative")
@@ -289,6 +298,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--video must be an eleven-character YouTube ID")
     if args.video and args.action != "paths":
         parser.error("--video applies only to paths")
+    if args.reauthorize and args.action != "refresh":
+        parser.error("--reauthorize applies only to refresh")
     config = args.config.expanduser().resolve()
     cfg = load_config(config)
     raw = (cfg.get("channels") or {}).get(args.channel)
@@ -310,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.action == "refresh":
         from common import channel_settings  # noqa: E402
         status = refresh(root, args.channel, config, args.last, args.vtr_count,
-                         args.comments_limit, channel_settings(cfg, args.channel, raw))
+                         args.comments_limit, channel_settings(cfg, args.channel, raw), args.reauthorize)
     result = prepare(root, str(raw.get("name") or args.channel))
     if status is not None:
         result["sources"] = status
